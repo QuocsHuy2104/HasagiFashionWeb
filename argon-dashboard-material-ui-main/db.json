@@ -1,0 +1,25 @@
+{
+    "orders": [
+      {
+        "id": 1,
+        "addressId": 1,
+        "amount": 100.50,
+        "shippingFree": 5,
+        "orderDate": "2023-07-23T18:25:43.511Z",
+        "statusId": 1,
+        "payMethod": "Credit Card",
+        "payStatus": "Paid"
+      },
+      {
+        "id": 2,
+        "addressId": 1,
+        "amount": 100.50,
+        "shippingFree": 5,
+        "orderDate": "2023-07-23T18:25:43.511Z",
+        "statusId": 1,
+        "payMethod": "Credit Card",
+        "payStatus": "Paid"
+      }
+    ]
+  }
+  

@@ -1,0 +1,14 @@
+#demo-multiple-chip,
+#demo-multiple-checkbox {
+    width: 720px !important;
+    height: 30px !important;
+}
+
+#demo-multiple-chip-label,
+#demo-multiple-checkbox-label {
+    font-size: 1rem !important;
+}
+
+.css-k2w9po-MuiTypography-root {
+    font-size: 1rem !important;
+}

@@ -1,0 +1,167 @@
+/* .banner-wrapper để sử dụng flexbox và đảm bảo các banner hiển thị ngang */
+.banner-wrapper {
+    display: flex;
+    flex-wrap: wrap; /* Cho phép các banner xuống dòng khi cần */
+    justify-content: space-between; /* Khoảng cách đều giữa các banner */
+    align-items: stretch; /* Đảm bảo các banner có cùng chiều cao */
+}
+
+/* Mỗi banner-container sẽ chiếm 48% chiều rộng, để có khoảng cách giữa hai banner */
+.banner-container {
+    width: 49%;
+    box-sizing: border-box;
+    margin-bottom: 40px;
+}
+
+/* Đảm bảo slider trong .banner-container không bị tràn */
+.banner-carousel {
+    width: 100%;
+}
+
+/* Điều chỉnh kích thước hình ảnh */
+.banner-image-container {
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+}
+
+.banner-image {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+
+
+/* Ẩn nội dung khi không có hover */
+.banner-hover-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0; /* Mặc định ẩn */
+    transition: opacity 0.3s ease-in-out; /* Hiệu ứng chuyển tiếp */
+    background-color: rgba(0, 0, 0, 0.5); /* Nền mờ */
+}
+
+/* Hiển thị nội dung khi hover vào .banner-image-container */
+.banner-image-container:hover .banner-hover-content {
+    opacity: 1; /* Hiển thị nội dung khi hover */
+}
+
+/* Tiêu đề */
+.banner-hover-content h5 {
+    color: white;
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+    background-color: rgba(0, 0, 0, 0.5); /* Làm nổi bật tiêu đề */
+    padding: 5px 10px; /* Khoảng cách bên trong cho tiêu đề */
+    border-radius: 5px;
+    position: absolute;
+    bottom: 10px; /* Căn dưới */
+    left: 10px; /* Căn trái */
+}
+
+/* Style cho các nút */
+.banner-hover-content button {
+    margin: 5px;
+    font-size: 1.2rem;
+    color: white;
+    background-color: transparent;
+    border: 1px solid white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s ease;
+}
+
+/* Hiệu ứng hover cho nút */
+.banner-hover-content button:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Vị trí của các nút edit và delete ở góc trên bên trái */
+.banner-hover-content div {
+    display: flex;
+    gap: 8px;
+    position: absolute;
+    top: 10px; /* Căn trên */
+    left: 10px; /* Căn trái */
+}
+
+/* Nút điều hướng tùy chỉnh */
+.carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 24px;
+    line-height: 30px;
+    text-align: center;
+    cursor: pointer;
+    z-index: 1;
+}
+
+.carousel-arrow-left {
+    left: 10px;
+}
+
+.carousel-arrow-right {
+    right: 10px;
+}
+
+/* Đảm bảo rằng các nút điều hướng không bị che bởi các phần tử khác */
+.slick-prev, .slick-next {
+    display: none;
+ 
+}
+
+
+
+
+
+
+
+.image-preview-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.image-preview-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.image-preview {
+    max-width: 150px;
+    height: auto;
+}
+
+.remove-image-btn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    line-height: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    z-index: 10;
+}
+
+.remove-image-btn:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
