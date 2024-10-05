@@ -10,6 +10,9 @@ import ArgonButton from "components/ArgonButton";
 import HasagiNav from "components/client/HasagiHeader";
 import cartService from "../../../services/ProductDetail";
 import Cookies from "js-cookie";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import useCartQuantity from "../HasagiQuantity/useCartQuantity";
 const mockReviews = [
     { id: 1, username: 'User1', rating: 5, comment: 'Excellent product!' },
     { id: 2, username: 'User2', rating: 4, comment: 'Very good, but could be improved.' },
@@ -29,41 +32,44 @@ const ShopDetail = () => {
     const query = new URLSearchParams(location.search);
     const productId = query.get('id');
     const [favoriteCount, setFavoriteCount] = useState(0);
+    const { totalQuantity, fetchTotalQuantity } = useCartQuantity();
+
     const handleAddToCart = async () => {
-       
-        const accountId =Cookies.get('accountId');
-      
+
+        const accountId = Cookies.get('accountId');
         if (!accountId) {
-          alert("You need to log in before adding products to the cart.");
-          return;
+            toast.error("Bạn cần đăng nhập trước khi thêm sản phẩm vào giỏ hàng.");
+            return;
         }
-    
+
         if (!product || !selectedColor || !selectedSize) {
-          alert('Please select color and size');
-          return;
+            toast.error('Vui lòng chọn màu sắc và kích thước.');
+            return;
         }
-      
+
         try {
-          const response = await cartService.addToCart({
-            accountId,
-            colorId: selectedColor,
-            sizeId: selectedSize,
-            quantity,
-            productId,
-            price: product.importPrice,
-          });
-      
-          if (response.status === 201 || response.status === 200) {
-            console.log('Cart updated:', response.data);
-          } else {
-            alert('Failed to add product to cart. Please try again.');
-          }
-        } catch (error) {
-          console.error('Error adding to cart:', error);
-          alert('An error occurred while adding the product to the cart. Please try again later.');
+            const response = await cartService.addToCart({
+                accountId,
+                colorId: selectedColor,
+                sizeId: selectedSize,
+                quantity,
+                productId,
+                price: product.importPrice,
+            });
+
+            if (response.status === 201 || response.status === 200) {
+                fetchTotalQuantity();
+                toast.success('Sản phẩm đã được thêm vào giỏ hàng thành công!');
+                console.log('Cart updated:', response.data);
+            } else {
+                toast.error('Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại.');
+            }
+} catch (error) {
+            console.error('Error adding to cart:', error);
+            toast.error('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.');
         }
-      };
-      
+    };
+
 
     const fetchProductDetail = async () => {
         try {
@@ -103,6 +109,7 @@ const ShopDetail = () => {
     return (
         <>
             <HasagiNav />
+            <ToastContainer />
             <div className="container-fluid page-header py-5">
                 <h1 className="text-center text-white display-6">Shop Detail</h1>
                 <ol className="breadcrumb justify-content-center mb-0">
@@ -126,9 +133,9 @@ const ShopDetail = () => {
                                     <div className="border rounded p-4">
                                         <h4 className="fw-bold mb-3">Name: {product.name}</h4>
                                         <p className="mb-3">Id: {product.id || "N/A"}</p>
-                                        <p className="mb-3">Category: {product.category?.name || "N/A"}</p>
+                                        <p className="mb-3">Category: {product.category || "N/A"}</p>
                                         <p className="mb-3">Brand: {product.trademark || "N/A"}</p>
-                                        <p className="mb-3">Price: {product.importPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</p>
+<p className="mb-3">Price: {product.importPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</p>
                                         <p className="mb-3">Available Quantity: {product.importQuantity || "N/A"}</p>
 
                                         <p className="mb-3">
@@ -138,7 +145,7 @@ const ShopDetail = () => {
                                                     <option value="">Select color</option>
                                                     {product.colors.map((color) => (
                                                         <option key={color.id} value={color.id}>
-                                                            {color.color}
+                                                            {color.name}
                                                         </option>
                                                     ))}
                                                 </select>
@@ -153,7 +160,7 @@ const ShopDetail = () => {
                                                     <option value="">Select size</option>
                                                     {product.sizes.map((size) => (
                                                         <option key={size.id} value={size.id}>
-                                                            {size.size}
+                                                            {size.name}
                                                         </option>
                                                     ))}
                                                 </select>
@@ -170,7 +177,7 @@ const ShopDetail = () => {
                                             >
                                                 <AiOutlineMinus size={16} />
                                             </button>
-                                            <span className="mx-2" style={{ minWidth: '2.5rem', textAlign: 'center' }}>{quantity}</span>
+<span className="mx-2" style={{ minWidth: '2.5rem', textAlign: 'center' }}>{quantity}</span>
                                             <button
                                                 className="btn btn-outline-primary ms-2"
                                                 onClick={() => setQuantity(quantity + 1)}
@@ -182,10 +189,13 @@ const ShopDetail = () => {
                                         <ArgonButton color="primary" onClick={handleAddToCart}>
                                             Add to Cart
                                         </ArgonButton>
-                                        <Link to={'/Cart'} className="btn moderate-btn moderate-btn-orange">
+                                        <Link onClick={handleAddToCart}
+                                            to={`/Cart`}
+                                            className="btn moderate-btn moderate-btn-orange"
+                                        >
                                             Buy Now
                                         </Link>
-                                      
+
                                     </div>
                                 </div>
                             </div>
@@ -219,7 +229,7 @@ const ShopDetail = () => {
                                         value={newReview}
                                         onChange={(e) => setNewReview(e.target.value)}
                                         placeholder="Write your review here..."
-                                    />
+/>
                                 </div>
                                 <ArgonButton type="submit" color="primary">Submit</ArgonButton>
                             </form>

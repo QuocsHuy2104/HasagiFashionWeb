@@ -6,6 +6,8 @@ import ArgonTypography from "components/ArgonTypography";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import Cookies from "js-cookie";
+import HasagiNav from "components/client/HasagiHeader";
+import Footer from "components/client/HasagiFooter";
 const History = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,13 +16,12 @@ const History = () => {
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
 
-  // Fetch orders
   useEffect(() => {
     const fetchOrderHistory = async () => {
-      const accountId = Cookies.get('accountId'); 
+      const accountId = Cookies.get('accountId');
       try {
         const response = await axios.get(`http://localhost:3000/api/history-order?accountId=${accountId}`);
-        setOrders(response.data); 
+        setOrders(response.data);
       } catch (error) {
         setError("Failed to fetch order history.");
       } finally {
@@ -31,7 +32,6 @@ const History = () => {
     fetchOrderHistory();
   }, []);
 
-  // Fetch provinces
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
@@ -47,7 +47,6 @@ const History = () => {
     fetchProvinces();
   }, []);
 
-  // Fetch districts when provinces are fetched
   useEffect(() => {
     if (orders.length > 0) {
       const uniqueProvinceIDs = [...new Set(orders.map(order => order.provinceID))];
@@ -55,7 +54,6 @@ const History = () => {
     }
   }, [orders]);
 
-  // Fetch wards when districts are fetched
   useEffect(() => {
     if (districts.length > 0) {
       const uniqueDistrictCodes = [...new Set(orders.map(order => order.districtCode))];
@@ -63,7 +61,6 @@ const History = () => {
     }
   }, [districts]);
 
-  // Fetch districts
   const fetchDistricts = async (provinceId) => {
     try {
       const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/district', {
@@ -76,7 +73,6 @@ const History = () => {
     }
   };
 
-  // Fetch wards
   const fetchWards = async (districtId) => {
     try {
       const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/ward', {
@@ -88,8 +84,6 @@ const History = () => {
       console.error("Error fetching wards:", error);
     }
   };
-
-  // Get address names by ID
   const getAddressNameById = (id, list, type) => {
     const addressItem = list.find(item => {
       if (type === 'province' && item.ProvinceID === Number(id)) return true;
@@ -106,7 +100,6 @@ const History = () => {
     return 'Unknown';
   };
 
-  // Handle loading state
   if (loading) {
     return (
       <ArgonBox display="flex" justifyContent="center" p={3}>
@@ -134,7 +127,7 @@ const History = () => {
 
       setOrders(prevOrders =>
         prevOrders.map(order =>
-          order.id === orderId ? { ...order, statusSlug: 'complete' } : order
+          order.id === orderId ? { ...order, slug: 'complete' } : order
         )
       );
       const response1 = await axios.get(`http://localhost:3000/api/history-order?accountId=${accountId}`);;
@@ -149,13 +142,13 @@ const History = () => {
 
   // Handle order cancellation
   const handleCancelOrder = async (orderId) => {
-    const accountId = Cookies.get('accountId'); 
+    const accountId = Cookies.get('accountId');
     try {
       await axios.put(`http://localhost:3000/api/history-order/${orderId}/cancel`, {});
       // Adjust API URL if needed
       setOrders(prevOrders =>
         prevOrders.map(order =>
-          order.id === orderId ? { ...order, statusSlug: 'cancel-order' } : order
+          order.id === orderId ? { ...order, slug: 'cancel-order' } : order
         )
       );
       const response1 = await axios.get(`http://localhost:3000/api/history-order?accountId=${accountId}`);;
@@ -196,85 +189,70 @@ const History = () => {
   };
 
   return (
-    <ArgonBox p={3}>
-      <ArgonTypography variant="h4" color="textPrimary" fontWeight="bold" mb={3}>
-        Lịch Sử Đơn Hàng
-      </ArgonTypography>
-      <div style={styles.orderHistory}>
-        <table style={styles.table}>
-          <thead>
-            <tr>
-              <th style={styles.th}>Mã đơn hàng</th>
-              <th style={styles.th}>Tên Người Đặt</th>
-              <th style={styles.th}>Ngày đặt</th>
-              <th style={styles.th}>Trạng thái</th>
-              <th style={styles.th}>Tổng tiền</th>
-              <th style={styles.th}>Địa chỉ</th>
-              <th style={styles.th}>Thao tác</th>
-              <th style={styles.th}>Chi tiết</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((order) => (
-              <tr key={order.id}>
-                <td style={styles.td}>{order.id || 'null'}</td>
-                <td style={styles.td}>{order.fullNameAddress || 'null'}</td>
-                <td style={styles.td}>{new Date(order.orderDate).toLocaleDateString() || 'null'}</td>
-                <td style={styles.td}>
-                  <span style={{ color: order.statusSlug === "cancel-order" ? "red" : "#1d8cf8" }}>
-                    {order.statusName || 'null'}
-                  </span>
-                </td>
-                <td style={styles.td}>
-                  {(order.amount ? order.amount.toLocaleString() : 'null') + ' VND'}
-                </td>
-                <td style={styles.td}>
-                  {order.address || 'null'},
-                  {getAddressNameById(order.provinceID, provinces, 'province') || 'null'},
-                  {getAddressNameById(order.districtCode, districts, 'district') || 'null'},
-                  {getAddressNameById(order.wardCode, wards, 'ward') || 'null'}
-                </td>
-                <td style={styles.td}>
-                  <ArgonButton
-                    variant="contained"
-                    style={order.statusSlug === 'cancel-order' ? styles.disabledButton : { backgroundColor: 'red', color: 'white' }}
-                    size="small"
-                    onClick={() => handleCancelOrder(order.id)}
-                    disabled={order.statusSlug === 'cancel-order' || order.statusSlug === 'delivered' || order.statusSlug === 'complete'}
-                  >
-                    Cancel Order
-                  </ArgonButton>
-                  &nbsp;
-                  <ArgonButton
-                    variant="contained"
-                    style={order.statusSlug === 'cancel-order' ? styles.disabledButton : { backgroundColor: '#1d8cf8', color: 'white' }}
-                    size="small"
-                    onClick={() => handleStatusComplete(order.id)}
-                    disabled={order.statusSlug !== 'delivered' || order.statusSlug === 'cancel-order'}
-                  >
-                    Complete
-                  </ArgonButton>
-
-                </td>
-                <td style={styles.td}>
-                  <Link to={`/history-order/${order.id}`}>
-                    <ArgonButton
-                      variant="contained"
-                      style={{ backgroundColor: 'green', color: 'white' }}
-                      size="small"
-                    >
-                      Chi tiết
-                    </ArgonButton>
-                  </Link>
-                </td>
-
+    <>
+      <HasagiNav />
+      <ArgonBox p={3}>
+        <ArgonTypography variant="h4" color="textPrimary" fontWeight="bold" mb={3}>
+          Lịch Sử Đơn Hàng
+        </ArgonTypography>
+        <div style={styles.orderHistory}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', borderRadius: '10px', overflowX: 'auto', marginBottom: '20px' }}>
+            <thead>
+              <tr>
+                <th style={{ backgroundColor: '#1d8cf8', color: 'white', padding: '12px 15px', textAlign: 'left', fontWeight: 'bold', borderBottom: '2px solid #ddd', minWidth: '150px' }}>Mã đơn hàng</th>
+                <th style={{ backgroundColor: '#1d8cf8', color: 'white', padding: '12px 15px', textAlign: 'left', fontWeight: 'bold', borderBottom: '2px solid #ddd', minWidth: '200px' }}>Tên Người Đặt</th>
+                <th style={{ backgroundColor: '#1d8cf8', color: 'white', padding: '12px 15px', textAlign: 'left', fontWeight: 'bold', borderBottom: '2px solid #ddd', minWidth: '150px' }}>Ngày đặt</th>
+                <th style={{ backgroundColor: '#1d8cf8', color: 'white', padding: '12px 15px', textAlign: 'left', fontWeight: 'bold', borderBottom: '2px solid #ddd', minWidth: '150px' }}>Trạng thái</th>
+                <th style={{ backgroundColor: '#1d8cf8', color: 'white', padding: '12px 15px', textAlign: 'left', fontWeight: 'bold', borderBottom: '2px solid #ddd', minWidth: '150px' }}>Tổng tiền</th>
+                <th style={{ backgroundColor: '#1d8cf8', color: 'white', padding: '12px 15px', textAlign: 'left', fontWeight: 'bold', borderBottom: '2px solid #ddd', minWidth: '250px' }}>Địa chỉ</th>
+                <th style={{ backgroundColor: '#1d8cf8', color: 'white', padding: '12px 15px', textAlign: 'left', fontWeight: 'bold', borderBottom: '2px solid #ddd', minWidth: '150px' }}>Thao tác</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </ArgonBox>
+            </thead>
+            <tbody>
+              {orders.map((order) => (
+                <tr key={order.id} style={{ backgroundColor: '#f9f9f9', textAlign: 'left', transition: 'background-color 0.2s ease' }}>
+                  <td style={{ padding: '12px 15px', borderBottom: '1px solid #ddd', wordWrap: 'break-word' }}>
+                    <Link to={`/history-order/${order.id}`} style={{ textDecoration: 'none', color: 'inherit', fontWeight: 'bold' }}>{order.id || 'null'}</Link>
+                  </td>
+                  <td style={{ padding: '12px 15px', borderBottom: '1px solid #ddd', wordWrap: 'break-word' }}>{order.fullNameAddress || 'null'}</td>
+                  <td style={{ padding: '12px 15px', borderBottom: '1px solid #ddd', wordWrap: 'break-word' }}>{new Date(order.orderDate).toLocaleDateString() || 'null'}</td>
+                  <td style={{ padding: '12px 15px', borderBottom: '1px solid #ddd', wordWrap: 'break-word' }}>
+                    <span style={{ color: order.slug === "huy-don-hang" ? "red" : "#1d8cf8" }}>{order.statusName || 'null'}</span>
+                  </td>
+                  <td style={{ padding: '12px 15px', borderBottom: '1px solid #ddd', wordWrap: 'break-word' }}>{(order.amount ? order.amount.toLocaleString() : 'null') + ' VND'}</td>
+                  <td style={{ padding: '12px 15px', borderBottom: '1px solid #ddd', wordWrap: 'break-word' }}>
+                    {order.address || 'null'},{getAddressNameById(order.provinceID, provinces, 'province') || 'null'},{getAddressNameById(order.districtCode, districts, 'district') || 'null'},{getAddressNameById(order.wardCode, wards, 'ward') || 'null'}
+                  </td>
+                  <td style={{ padding: '12px 15px', borderBottom: '1px solid #ddd' }}>
+                    <ArgonButton variant="contained" style={order.slug === 'huy-don-hang' ? { backgroundColor: '#ddd', color: '#999', padding: '5px 10px', borderRadius: '5px', cursor: 'not-allowed' } : { backgroundColor: 'red', color: 'white', padding: '5px 10px', borderRadius: '5px', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)', cursor: 'pointer', transition: 'background-color 0.3s ease' }} size="small" onClick={() => handleCancelOrder(order.id)} disabled={order.slug === 'huy-don-hang' || order.slug === 'da-giao' || order.slug === 'hoan-thanh'}>Hủy</ArgonButton>
+                    &nbsp;
+                    <ArgonButton variant="contained" style={order.slug === 'huy-don-hang' ? { backgroundColor: '#ddd', color: '#999', padding: '5px 10px', borderRadius: '5px', cursor: 'not-allowed' } : { backgroundColor: '#1d8cf8', color: 'white', padding: '5px 10px', borderRadius: '5px', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)', cursor: 'pointer', transition: 'background-color 0.3s ease' }} size="small" onClick={() => handleStatusComplete(order.id)} disabled={order.slug !== 'da-giao' || order.slug === 'huy-don-hang'}>Hoàn Thành</ArgonButton>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+
+        </div>
+      </ArgonBox>
+      <Footer />
+    </>
   );
 };
 
 export default History;
+
+
+
+{/* <td style={styles.td}>
+                    <Link to={`/history-order/${order.id}`}>
+                      <ArgonButton
+                        variant="contained"
+                        style={{ backgroundColor: 'green', color: 'white' }}
+                        size="small"
+                      >
+                        Chi tiết
+                      </ArgonButton>
+                    </Link>
+                  </td> */}

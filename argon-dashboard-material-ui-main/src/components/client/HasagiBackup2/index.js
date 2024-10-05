@@ -178,7 +178,7 @@ const Backup2 = ({ show, onClose, onAddressUpdated }) => {
                         </div>
                         <div className="d-flex justify-content-between mt-4">
                             <ArgonButton className="btn btn-light" onClick={onClose}>Trở Lại</ArgonButton>
-                            <ArgonButton className="btn btn-primary" onClick={handleComplete}>Hoàn thành</ArgonButton>
+                            <ArgonButton onClick={handleComplete}>Hoàn thành</ArgonButton>
                         </div>
                     </div>
                 </div>

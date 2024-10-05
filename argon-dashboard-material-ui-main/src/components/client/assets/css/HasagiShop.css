@@ -1,0 +1,65 @@
+.sort-bar {
+    border: 1px solid #e0e0e0;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    width: 104.38%;
+  }
+  
+  .sticky {
+    position: fixed; /* Đặt vị trí cố định */
+    top: 182px; /* Chiều cao của thanh nav */
+    border: 1px solid #e0e0e0;
+    padding: 10px;
+    border-radius:5px;
+    width: 64.22%;
+    z-index: 100; /* Đảm bảo nó nằm trên các phần tử khác */
+    background-color: white;
+  }
+  
+  .title {
+    font-size: 20px;
+    font-weight: bold;
+  }
+  
+  .sort-options {
+    display: flex;
+    align-items: center;
+  }
+  
+  .label {
+    margin-right: 10px;
+    font-size: 14px;
+  }
+  
+  label {
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+  }
+  
+
+  .category-carousel {
+    overflow: hidden; /* Ẩn các phần không cần thiết */
+  }
+  
+  .swiper-wrapper {
+    display: flex; /* Sử dụng flexbox để căn chỉnh */
+  }
+  
+  .category-item {
+    flex: 0 0 auto; /* Đảm bảo các mục không bị co giãn */
+    margin-right: 10px; /* Thêm khoảng cách giữa các mục */
+  }
+  
+  .swiper-slide {
+    display: flex; /* Đảm bảo mỗi slide có thể chứa nội dung flex */
+    flex-direction: column; /* Căn chỉnh nội dung theo chiều dọc */
+    align-items: center; /* Căn giữa nội dung */
+  }
+  
+  

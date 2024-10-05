@@ -273,6 +273,7 @@ const Checkout = () => {
             );
 
             if (response.status === 200) {
+                console.log("Order placed successfully!")
                 toast.success("Đặt hàng thành công!");
                 await handleRemoveItems();
                 navigate('/Complete', {
@@ -283,15 +284,17 @@ const Checkout = () => {
                 });
             } else {
                 console.error('Failed to place order:', response.data);
+                // window.alert("Có lỗi xảy ra khi đặt hàng.");
                 toast.error("Có lỗi xảy ra khi đặt hàng.");
             }
         } catch (error) {
             console.error('Error placing order:', error.response ? error.response.data : error.message);
+            window.alert("Có lỗi xảy ra khi đặt hàng.");
         }
     };
     return (
         <>
-         <ToastContainer />
+            <ToastContainer />
             {isLoading && (
                 <div className="loader">
                     <div className="loader-inner">
@@ -313,7 +316,7 @@ const Checkout = () => {
                     <div className="bg-light p-3 mb-4" style={{ border: '1px solid #ddd', borderRadius: '8px' }}>
                         <div className="d-flex justify-content-between align-items-center">
                             <h5 className="text-uppercase mb-0 d-flex align-items-center" style={{ color: '#e63946', fontWeight: 'bold' }}>
-                                <i className="fa fa-map-marker-alt mr-2" style={{ color: 'red', fontSize: '1.2rem' }}></i>
+                                <i className="fa fa-map-marker-alt mr-2" style={{ color: 'red', fontSize: '1.2rem', marginRight: '5px' }}></i>
                                 Địa Chỉ Nhận Hàng
                             </h5>
                         </div>
@@ -322,22 +325,23 @@ const Checkout = () => {
                         <div className="d-flex align-items-center justify-content-between mt-2" style={{ flexWrap: 'wrap', lineHeight: '1.5' }}>
                             {address ? (
                                 <>
-                                    <div className="d-flex">
-                                        <span style={{ fontWeight: 'bold', marginRight: '10px' }}>
+                                    <div className="d-flex" style={{ alignItems: 'center' }}>
+                                        <span style={{ fontWeight: 'bold', marginRight: '20px' }}>
                                             {address.fullNameAddress} (+84) {address.numberPhone}
                                         </span>
-                                    </div>
-
-                                    {/* Address Details */}
-                                    <div className="d-flex align-items-center">
-                                        <span>
-                                            {address.address}, {getAddressNameById(address.wardCode, wards, 'ward')},
-                                            {getAddressNameById(address.districtCode, districts, 'district')},
+                                        <span style={{ whiteSpace: 'nowrap' }}>
+                                            {address.address},{" "}
+                                            {getAddressNameById(address.wardCode, wards, 'ward')},{" "}
+                                            {getAddressNameById(address.districtCode, districts, 'district')},{" "}
                                             {getAddressNameById(address.provinceID, provinces, 'province')}
                                         </span>
                                         {address.status && (
-                                            <span className="badge bg-danger ml-2" style={{ fontSize: '0.75rem', marginLeft: '10px' }}>Mặc định</span>
+                                            <span className="badge bg-danger" style={{ fontSize: '0.75rem', marginLeft: '10px' }}>Mặc định</span>
                                         )}
+                                    </div>
+
+                                    {/* Change Button */}
+                                    <div className="d-flex align-items-center">
                                         <button
                                             className="btn btn-outline-primary btn-sm ml-2"
                                             style={{ fontWeight: 'bold', fontSize: '0.9rem', marginLeft: '15px' }}
@@ -348,10 +352,11 @@ const Checkout = () => {
                                     </div>
                                 </>
                             ) : (
-                                <strong>No address information available</strong>
+                                <strong>Không có thông tin địa chỉ nào có sẵn.</strong>
                             )}
                         </div>
                     </div>
+
 
 
                     <div className="col-lg-12">
@@ -371,7 +376,7 @@ const Checkout = () => {
                                         <tr key={index} style={{ verticalAlign: 'middle' }}>
                                             <td>
                                                 <div className="d-flex align-items-center">
-                                                    <img src={aboutImage} style={{ width: 60, marginRight: '10px', borderRadius: '5px' }} alt="Product" />
+                                                    <img src={item.image} style={{ width: 60, marginRight: '10px', borderRadius: '5px' }} alt="Product" />
                                                     <span style={{ fontWeight: 'bold' }}>{item.name}</span>
                                                 </div>
                                             </td>
@@ -424,7 +429,8 @@ const Checkout = () => {
 
                                 {selectedPayment === 'Direct Check' && (
                                     <div className="payment-description mb-3">
-                                        <p>Direct Check là phương thức thanh toán bằng cách gửi tiền trực tiếp từ tài khoản ngân hàng của bạn.</p>
+                                        <p>Thanh toán COD (Cash on Delivery) là một dịch vụ giao hàng thu tiền hộ được sử dụng phổ biến trong giao dịch mua bán hàng hóa. Trong đó,
+                                            người mua sẽ thanh toán tiền mặt (tiền đặt hàng) cho người giao hàng ngay tại thời điểm nhận hàng.</p>
                                     </div>
                                 )}
                                 {selectedPayment === 'Bank Transfer' && (
@@ -478,14 +484,14 @@ const Checkout = () => {
                                 )}
                                 <div className="border-bottom pt-4" style={{ padding: '0 20px' }}>
                                     <div className="d-flex justify-content-between mb-3">
-                                        <h6 className="font-weight-bold">Tổng tiền hàng</h6>
-                                        <h6 className="font-weight-bold">
+                                        <h6 className="font-weight-bold" style={{ fontSize: '1.2rem' }}>Tổng tiền hàng</h6>
+                                        <h6 className="font-weight-bold" style={{ fontSize: '1.2rem' }}>
                                             {cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                                         </h6>
                                     </div>
                                     <div className="d-flex justify-content-between">
-                                        <h6 className="font-weight-medium">Phí vận chuyển</h6>
-                                        <h6>
+                                        <h6 className="font-weight-medium" style={{ fontSize: '1.2rem' }}>Phí vận chuyển</h6>
+                                        <h6 style={{ fontSize: '1.2rem' }}>
                                             {shipFee?.total ? shipFee.total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) : 'Đang tính...'}
                                         </h6>
                                     </div>
@@ -509,12 +515,10 @@ const Checkout = () => {
                                         padding: '12px 0',
                                         fontSize: '20px',
                                         cursor: 'pointer',
-                                        transition: 'background-color 0.3s, transform 0.3s' // Transition for hover
+                                        transition: 'background-color 0.3s, transform 0.3s'
                                     }}
-                                >
-                                    Đặt hàng
+                                > Đặt hàng
                                 </button>
-
                                 <p className="mt-3 text-center">
                                     Nhấn &quot;Đặt hàng&quot; đồng nghĩa với việc bạn đồng ý tuân theo <a href=''>Điều khoản HasagiFashion</a>
                                 </p>
