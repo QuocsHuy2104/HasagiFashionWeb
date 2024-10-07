@@ -1,8 +1,8 @@
 import apiClient from "config/axiosConfig";
 
 const ProductService = {
-  getAllProducts: () => apiClient.get('/admin/product'),
-  getProductID: () => apiClient.get('/admin/product/${id}')
+  getAllProducts: () => apiClient.get('/product'),
+  getProductID: () => apiClient.get('/product/${id}')
 }
 
 export default ProductService;

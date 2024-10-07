@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import axios from 'axios'; // Ensure axios is imported
+import axios from 'axios';
 import ArgonButton from "components/ArgonButton";
 import { FaCheckCircle } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
+
 const Complete = () => {
     const location = useLocation();
     const { state } = location;
     const address = state?.address || {};
     const orderDetails = state?.orderDetails || [];
-    
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
     const navigate = useNavigate();
+
     useEffect(() => {
         fetchProvinces();
     }, []);
@@ -30,12 +31,13 @@ const Complete = () => {
         }
     }, [address.districtCode]);
 
+    const handleViewOrder = async () => {
+        navigate('/History');
+    };
 
-
-    const click = async ()=>{
-
-        navigate('/History')
-    }
+    const handleGoHome = async () => {
+        navigate('/feature-section');
+    };
 
     const fetchProvinces = async () => {
         try {
@@ -101,11 +103,11 @@ const Complete = () => {
                 {getAddressNameById(address.wardCode, wards, 'ward')}
             </p>
             <div style={styles.buttonContainer}>
-                <ArgonButton color="secondary" style={styles.button}>
-                    Thay đổi địa chỉ
+                <ArgonButton onClick={handleGoHome} color="secondary" style={styles.button}>
+                    Quay về trang chủ
                 </ArgonButton>
-                <ArgonButton onClick={click} color="primary" style={styles.button} >
-                    <i  className="fas fa-lock"></i> View order
+                <ArgonButton onClick={handleViewOrder} color="primary" style={styles.button}>
+                    <i className="fas fa-lock"></i> View order
                 </ArgonButton>
             </div>
         </div>

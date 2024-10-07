@@ -11,28 +11,30 @@ import ArgonTypography from "components/ArgonTypography";
 import { format } from "date-fns";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import * as XLSX from "xlsx"; // Import library xlsx
-import { saveAs } from "file-saver"; // Import library file-saver
-import { DataGrid } from "@mui/x-data-grid"; // Import DataGrid
-import Paper from "@mui/material/Paper"; // Import Paper
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { DataGrid } from "@mui/x-data-grid";
+import Paper from "@mui/material/Paper";
+import Modal from "react-bootstrap/Modal";
 function Order() {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [statuses, setStatuses] = useState([]);
-  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 }); // Pagination state
+  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
   const [provinces, setProvinces] = useState([]);
   const [districtsByProvince, setDistrictsByProvince] = useState({});
   const [wardsByDistrict, setWardsByDistrict] = useState({});
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get("http://localhost:3000/api/order");
-        if (response.data && response.data.orders) {  
-          console.log(response.data); 
+        if (response.data && response.data.orders) {
+          console.log(response.data);
           const orders = response.data.orders.map(order => ({
             ...order,
             orderDate: order.orderDate ? format(new Date(order.orderDate), "dd-MM-yyyy") : "Date not available"
-            
           }));
           setOrders(orders);
           setFilteredOrders(orders);
@@ -48,85 +50,11 @@ function Order() {
     fetchData();
   }, []);
 
-  const fetchProvinces = async () => {
-    try {
-      const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/province', {
-        headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' }
-      });
-      setProvinces(response.data.data);
-    } catch (error) {
-      console.error("Error fetching provinces:", error);
-    }
-  };
-
-  const fetchDistricts = async (provinceId) => {
-    try {
-      const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/district', {
-        headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' },
-        params: { province_id: provinceId }
-      });
-      setDistrictsByProvince(prev => ({ ...prev, [provinceId]: response.data.data }));
-    } catch (error) {
-      console.error("Error fetching districts:", error);
-    }
-  };
-
-  const fetchWards = async (districtId) => {
-    try {
-      const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/ward', {
-        headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' },
-        params: { district_id: districtId }
-      });
-      setWardsByDistrict(prev => ({ ...prev, [districtId]: response.data.data }));
-    } catch (error) {
-      console.error("Error fetching wards:", error);
-    }
-  };
-
-  const getAddressNameById = (id, list, type) => {
-    const addressItem = list.find(item => {
-      if (type === 'province' && item.ProvinceID === Number(id)) return true;
-      if (type === 'district' && item.DistrictID === Number(id)) return true;
-      if (type === 'ward' && item.WardCode === String(id)) return true;
-      return false;
-    });
-
-    if (addressItem) {
-      if (type === 'province') return addressItem.ProvinceName;
-      if (type === 'district') return addressItem.DistrictName;
-      if (type === 'ward') return addressItem.WardName;
-    }
-    return 'Unknown';
-  };
-
-  useEffect(() => {
-    fetchProvinces();
-  }, []);
-
-  useEffect(() => {
-    const uniqueProvinceIds = new Set(filteredOrders.map(order => order.provinceID));
-    uniqueProvinceIds.forEach(provinceId => {
-      if (provinceId) {
-        fetchDistricts(provinceId);
-      }
-    });
-  }, [filteredOrders]);
-
-  useEffect(() => {
-    const uniqueDistrictIds = new Set(filteredOrders.map(order => order.districtCode));
-    uniqueDistrictIds.forEach(districtId => {
-      if (districtId) {
-        fetchWards(districtId);
-      }
-    });
-  }, [filteredOrders]);
-
-
   const handleSearch = (event) => {
     event.preventDefault();
 
-    const status = event.target.status.value;
-    const endDate = event.target.endDate.value
+    const statusSlug = event.target.status.value; // Get the selected status slug
+    const endDateInput = event.target.endDate.value
       ? new Date(event.target.endDate.value)
       : null;
     const phoneNumber = event.target.phoneNumber.value;
@@ -134,9 +62,11 @@ function Order() {
     const filteredOrders = orders.filter((order) => {
       const orderDate = new Date(order.orderDate);
 
-      const isStatusMatch =
-        status === "all" ? true : order.statusId === parseInt(status);
-      const isDateMatch = endDate ? orderDate <= endDate : true;
+      // Match the slug with order.slug
+      const isStatusMatch = statusSlug === "all" ? true : order.slug === statusSlug;
+
+      const isDateMatch = endDateInput ? orderDate <= endDateInput : true;
+
       const isPhoneMatch = phoneNumber
         ? order.numberPhone.includes(phoneNumber)
         : true;
@@ -145,6 +75,16 @@ function Order() {
     });
 
     setFilteredOrders(filteredOrders);
+  };
+  const handleRowClick = async (params) => {
+    const orderId = params.row.id;
+    try {
+      const response = await axios.get(`http://localhost:3000/api/orderdetails/${orderId}`);
+      setSelectedOrder(response.data);
+      setShowDetailsModal(true);
+    } catch (error) {
+      console.error("Error fetching order details", error);
+    }
   };
 
   const exportToExcel = () => {
@@ -160,8 +100,7 @@ function Order() {
         "Shipping Fee": order.shippingFree,
         Amount: order.amount,
         Status:
-          statuses.find((status) => status.id === order.statusId)?.statusName ||
-          "Unknown",
+          statuses.find((status) => status.slug === order.slug)?.status || "Unknown",
       }))
     );
 
@@ -178,125 +117,90 @@ function Order() {
     saveAs(blob, "orders_summary.xlsx");
   };
 
-  const handleStatusChange = async (orderId, newStatusSlug) => {
-    try {
-      await axios.put(`http://localhost:3000/api/order/${orderId}`, { statusSlug: newStatusSlug });
-
-      setOrders(prevOrders =>
-        prevOrders.map(order =>
-          order.id === orderId ? { ...order, statusSlug: newStatusSlug } : order
-        )
-      );
-
-      setFilteredOrders(prevFilteredOrders =>
-        prevFilteredOrders.map(order =>
-          order.id === orderId ? { ...order, statusSlug: newStatusSlug } : order
-        )
-      );
-    } catch (error) {
-      console.error("There was an error updating the status!", error);
-    }
-  };
-
   const handleReset = () => {
     setFilteredOrders(orders);
-    setPaginationModel({ page: 0, pageSize: 5 }); // Reset pagination to default
+    setPaginationModel({ page: 0, pageSize: 5 });
   };
-  
+
   const columns = [
-    {
-      field: "id",
-      headerName: "Action",
-      renderCell: (params) => (
-        <Link to={`/api/orderdetails/${params.row.id}`}>
-          <ArgonButton size="small" color="primary">
-            Details
-          </ArgonButton>
-        </Link>
-      ),
-      width: 100,
-    },
-    
-    { field: "fullNameAddress", headerName: "Full Name", width: 200 }, // Moved Address column here
-    {
-      field: "fullAddress", 
-      headerName: "Full Address", 
-      width: 300,
-      renderCell: (params) => {
-        const order = params.row;
-  
-        // Construct the full address
-        const address = [
-          order.address1 || 'No Name', // Use fullNameAddress directly from the order
-          getAddressNameById(order.provinceID, provinces, 'province') || 'Unknown Province',
-          getAddressNameById(order.districtCode, districtsByProvince[order.provinceID] || [], 'district'),
-          getAddressNameById(order.wardCode, wardsByDistrict[order.districtCode] || [], 'ward')
-        ].join(', ');
-  
-        return (
-          <div>
-            {address}
-          </div>
-        );
-      }
-    },  
-    { field: "orderDate", headerName: "Order Date", width: 150 },
-    { field: "numberPhone", headerName: "Phone Number", width: 150 },
-    { field: "payMethod", headerName: "Pay Method", width: 150 },
-    { field: "payStatus", headerName: "Pay Status", width: 150 },
-    { field: "shippingFree", headerName: "Shipping Fee", width: 120 },
-    { field: "amount", headerName: "Amount", width: 120 },
+    { field: "fullNameAddress", headerName: "Full Name", flex: 1 },
+    { field: "orderDate", headerName: "Order Date", flex: 1 },
+    { field: "numberPhone", headerName: "Phone Number", flex: 1 },
+    { field: "amount", headerName: "Amount", flex: 1 },
     {
       field: "status",
       headerName: "Status",
-      width: 150,
+      flex: 1,
       renderCell: (params) => {
         const order = params.row;
+        const currentStatus = order.slug;
+        const getNextStatus = (currentStatus) => {
+          const availableStatuses = ['dang-xu-ly', 'dang-giao'];
+          const currentIndex = availableStatuses.indexOf(currentStatus);
+
+          if (currentIndex >= 0 && currentIndex < availableStatuses.length - 1) {
+            return availableStatuses[currentIndex + 1];
+          } else if (currentStatus === 'dang-giao') {
+            return 'da-giao';
+          }
+          return null;
+        };
+
+        const nextStatus = getNextStatus(currentStatus);
+
         return (
-          <Form.Select
-                      
-          size="large"
-          value={order.statusSlug}
-          onChange={(e) => handleStatusChange(order.id, e.target.value)}
-        >
-          {/* If the order is canceled, only show the "Cancelled" option */}
-          {order.statusSlug === 'cancel-order' ? (
-            <option value="cancel-order">Cancelled</option>
-          ) : order.statusSlug === 'complete' ? (
-            <option value="complete">Complete</option>
-          ) : (
-            <>
-             
-              {statuses
-                .filter(status =>
-                  ['confirming', 'confirmed', 'delivering', 'delivered'].includes(status.statusSlug)
-                )
-                .sort((a, b) => a.id - b.id)
-                .map((status, index, array) => {
-                  const currentIndex = array.findIndex(s => s.statusSlug === order.statusSlug);
-                  const nextStatus = array[currentIndex + 1] || null;
-        if (status.statusSlug === order.statusSlug || status === nextStatus) {
-                    return (
-                      <option key={status.statusSlug} value={status.statusSlug}>
-                        {status.statusName}
-                      </option>
-                    );
-                  }
-                  return null;
-                })}
-        
-              {/* Allow cancellation if the status is 'confirming', 'confirmed', or 'delivering' */}
-              {['confirming', 'confirmed', 'delivering'].includes(order.statusSlug) && (
-                <option value="cancel-order">Cancelled</option>
-              )}
-            </>
-          )}
-        </Form.Select>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <span style={{ marginRight: '10px' }}>
+              {statuses.find(status => status.slug === currentStatus)?.status || 'Unknown'}
+            </span>
+            {currentStatus !== 'hoan-thanh' && currentStatus !== 'da-giao' && (
+              <>
+                {currentStatus !== 'huy' && (
+                  <ArgonButton
+                    size="small"
+                    color="primary"
+                    onClick={() => handleNextStatus(order.id, currentStatus, getNextStatus)}
+                  >
+                    {statuses.find(status => status.slug === nextStatus)?.status || 'Unknown'}
+                  </ArgonButton>
+                )}
+                {['dang-xu-ly'].includes(currentStatus) && (
+                  <ArgonButton
+                    size="small"
+                    color="error"
+                    onClick={() => handleStatusChange(order.id, 'huy')}
+                    style={{ marginLeft: '10px' }}
+                  >
+                    Hủy Đơn Hàng
+                  </ArgonButton>
+                )}
+              </>
+            )}
+          </div>
         );
       },
-    },
+    }
+
   ];
-  
+
+  const handleNextStatus = async (orderId, currentStatus, getNextStatus) => {
+    const nextStatusSlug = getNextStatus(currentStatus);
+
+    if (nextStatusSlug) {
+      try {
+        await axios.put(`http://localhost:3000/api/order/${orderId}`, { slug: nextStatusSlug });
+
+        setOrders(prevOrders =>
+          prevOrders.map(order => (order.id === orderId ? { ...order, slug: nextStatusSlug } : order))
+        );
+        setFilteredOrders(prevFilteredOrders =>
+          prevFilteredOrders.map(order => (order.id === orderId ? { ...order, slug: nextStatusSlug } : order))
+        );
+      } catch (error) {
+        console.error("There was an error updating the status!", error);
+      }
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -315,44 +219,23 @@ function Order() {
                 mt={2}
               >
                 <ArgonBox mb={3} mx={3} width="100%" sm={6} md={4}>
-                  <select
-                    name="status"
-                    defaultValue="all"
-                    size="large"
-                    className="form-select"
-                  >
-                    <option value="" disabled>
-                      Select Status
-                    </option>
+                  <select name="status" defaultValue="all" size="large" className="form-select">
+                    <option value="" disabled>Select Status</option>
                     <option value="all">All</option>
                     {statuses.map((status) => (
-                      <option key={status.id} value={status.id}>
-                        {status.statusName}
+                      <option key={status.slug} value={status.slug}>
+                        {status.status}
                       </option>
                     ))}
                   </select>
                 </ArgonBox>
 
                 <ArgonBox mb={3} mx={3} width="100%" sm={6} md={4}>
-                  <ArgonInput
-                    name="endDate"
-                    type="date"
-                    placeholder="Select End Date"
-                    size="large"
-                    error={false}
-                    className="form-control"
-                  />
+                  <ArgonInput name="endDate" type="date" placeholder="Select End Date" size="large" />
                 </ArgonBox>
 
                 <ArgonBox mb={3} mx={3} width="100%" sm={6} md={4}>
-                  <ArgonInput
-                    name="phoneNumber"
-                    type="text"
-                    placeholder="Enter Phone Number"
-                    size="large"
-                    error={false}
-                    className="form-control"
-                  />
+                  <ArgonInput name="phoneNumber" type="text" placeholder="Enter Phone Number" size="large" />
                 </ArgonBox>
 
                 <ArgonBox
@@ -379,21 +262,78 @@ function Order() {
             </ArgonBox>
           </Card>
         </ArgonBox>
-
         <ArgonBox>
           <Paper style={{ width: "100%", height: 400 }}>
             <DataGrid
               rows={filteredOrders}
               columns={columns}
               paginationModel={paginationModel}
-              onPaginationModelChange={setPaginationModel} // Handle pagination change
-              pageSizeOptions={[5, 10, 20]} // Options for number of rows per page
+              onPaginationModelChange={setPaginationModel}
+              pageSizeOptions={[5, 10, 20]}
               disableSelectionOnClick
-              isRowSelectable={() => false}
+              onRowClick={handleRowClick}
+              sx={{
+                "& .MuiDataGrid-footerContainer": {
+                  justifyContent: "space-between",
+                },
+                "& .MuiTablePagination-selectLabel": {
+                  marginRight: 0,
+                },
+                "& .MuiTablePagination-root": {
+                  width: "400px",
+                },
+                "& .MuiInputBase-root": {
+                  maxWidth: "60px",
+                },
+              }}
             />
           </Paper>
         </ArgonBox>
       </ArgonBox>
+      <Modal show={showDetailsModal} onHide={() => setShowDetailsModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Order Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedOrder ? (
+            <ul style={{ listStyleType: 'none', padding: 0 }}>
+              {selectedOrder.map(detail => (
+                <li key={detail.id} style={{ padding: '10px 0', borderBottom: '1px solid #ddd' }}>
+                  <div>
+                    <strong>Product ID:</strong> {detail.productDetailId}
+                  </div>
+                  <div>
+                    <strong>Quantity:</strong> {detail.quantity}
+                  </div>
+                  <div>
+                    <strong>Price:</strong> ${detail.price.toFixed(2)}
+                  </div>
+                  <div>
+                    <strong>Name:</strong> {detail.nameOrder}
+                  </div>
+                  <div>
+                    <strong>Size:</strong> {detail.sizeName}
+                  </div>
+                  <div>
+                    <strong>Color:</strong> {detail.colorName}
+                  </div>
+                  <div>
+                    <strong>Status:</strong> {detail.statusName}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>Loading...</p>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <ArgonButton variant="secondary" onClick={() => setShowDetailsModal(false)}>
+            Close
+          </ArgonButton>
+        </Modal.Footer>
+      </Modal>
+
     </DashboardLayout>
   );
 }

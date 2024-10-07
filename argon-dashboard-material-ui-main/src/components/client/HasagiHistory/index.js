@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import ArgonButton from "components/ArgonButton";
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import Cookies from "js-cookie";
+import HasagiNav from "components/client/HasagiHeader";
+import Footer from "components/client/HasagiFooter";
+
 const History = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,13 +17,26 @@ const History = () => {
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
 
-  // Fetch orders
+  useEffect(() => {
+    if (orders.length > 0) {
+      const uniqueProvinceIDs = [...new Set(orders.map(order => order.provinceID))];
+      uniqueProvinceIDs.forEach(provinceID => fetchDistricts(provinceID));
+    }
+  }, [orders]);
+
+  useEffect(() => {
+    if (districts.length > 0) {
+      const uniqueDistrictCodes = [...new Set(orders.map(order => order.districtCode))];
+      uniqueDistrictCodes.forEach(districtCode => fetchWards(districtCode));
+    }
+  }, [districts]);
+
   useEffect(() => {
     const fetchOrderHistory = async () => {
-      const accountId = Cookies.get('accountId'); 
+      const accountId = Cookies.get('accountId');
       try {
         const response = await axios.get(`http://localhost:3000/api/history-order?accountId=${accountId}`);
-        setOrders(response.data); 
+        setOrders(response.data);
       } catch (error) {
         setError("Failed to fetch order history.");
       } finally {
@@ -31,7 +47,6 @@ const History = () => {
     fetchOrderHistory();
   }, []);
 
-  // Fetch provinces
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
@@ -47,23 +62,6 @@ const History = () => {
     fetchProvinces();
   }, []);
 
-  // Fetch districts when provinces are fetched
-  useEffect(() => {
-    if (orders.length > 0) {
-      const uniqueProvinceIDs = [...new Set(orders.map(order => order.provinceID))];
-      uniqueProvinceIDs.forEach(provinceID => fetchDistricts(provinceID));
-    }
-  }, [orders]);
-
-  // Fetch wards when districts are fetched
-  useEffect(() => {
-    if (districts.length > 0) {
-      const uniqueDistrictCodes = [...new Set(orders.map(order => order.districtCode))];
-      uniqueDistrictCodes.forEach(districtCode => fetchWards(districtCode));
-    }
-  }, [districts]);
-
-  // Fetch districts
   const fetchDistricts = async (provinceId) => {
     try {
       const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/district', {
@@ -76,7 +74,6 @@ const History = () => {
     }
   };
 
-  // Fetch wards
   const fetchWards = async (districtId) => {
     try {
       const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/ward', {
@@ -89,7 +86,6 @@ const History = () => {
     }
   };
 
-  // Get address names by ID
   const getAddressNameById = (id, list, type) => {
     const addressItem = list.find(item => {
       if (type === 'province' && item.ProvinceID === Number(id)) return true;
@@ -106,7 +102,6 @@ const History = () => {
     return 'Unknown';
   };
 
-  // Handle loading state
   if (loading) {
     return (
       <ArgonBox display="flex" justifyContent="center" p={3}>
@@ -115,7 +110,6 @@ const History = () => {
     );
   }
 
-  // Handle error state
   if (error) {
     return (
       <ArgonBox p={3}>
@@ -126,15 +120,31 @@ const History = () => {
     );
   }
 
-  // Handle status changes
+  const handleCancelOrder = async (orderId) => {
+    const accountId = Cookies.get('accountId');
+    try {
+      await axios.put(`http://localhost:3000/api/history-order/${orderId}/cancel`, {});
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          order.id === orderId ? { ...order, slug: 'huy' } : order
+        )
+      );
+      const response1 = await axios.get(`http://localhost:3000/api/history-order?accountId=${accountId}`);
+      setOrders(response1.data);
+    } catch (error) {
+      console.error("There was an error canceling the order!", error);
+    }
+  };
+
   const handleStatusComplete = async (orderId) => {
+    const accountId = Cookies.get('accountId');
     try {
       const response = await axios.put(`http://localhost:3000/api/history-order/${orderId}/complete`);
       console.log("Complete Order Response:", response.data); // Log the response
 
       setOrders(prevOrders =>
         prevOrders.map(order =>
-          order.id === orderId ? { ...order, statusSlug: 'complete' } : order
+          order.id === orderId ? { ...order, slug: 'hoan-thanh' } : order
         )
       );
       const response1 = await axios.get(`http://localhost:3000/api/history-order?accountId=${accountId}`);;
@@ -143,29 +153,7 @@ const History = () => {
       console.error("There was an error updating the status to complete!", error);
     }
   };
-
-
-
-
-  // Handle order cancellation
-  const handleCancelOrder = async (orderId) => {
-    const accountId = Cookies.get('accountId'); 
-    try {
-      await axios.put(`http://localhost:3000/api/history-order/${orderId}/cancel`, {});
-      // Adjust API URL if needed
-      setOrders(prevOrders =>
-        prevOrders.map(order =>
-          order.id === orderId ? { ...order, statusSlug: 'cancel-order' } : order
-        )
-      );
-      const response1 = await axios.get(`http://localhost:3000/api/history-order?accountId=${accountId}`);;
-      setOrders(response1.data);
-    } catch (error) {
-      console.error("There was an error canceling the order!", error);
-    }
-  };
-
-  // Styling
+  
   const styles = {
     orderHistory: {
       width: '100%',
@@ -178,102 +166,178 @@ const History = () => {
     },
     th: {
       padding: '10px',
-      border: '1px solid #ddd',
-      backgroundColor: '#212529',
-      color: 'white',
+      borderBottom: '2px solid #ddd',
+      fontWeight: 'bold',
+      backgroundColor: '#f5f5f5',
     },
     td: {
       padding: '10px',
-      border: '1px solid #ddd',
+      borderBottom: '1px solid #ddd',
     },
     button: {
       width: '80px',
+      padding: '5px 10px',
+      borderRadius: '5px',
     },
     disabledButton: {
-      backgroundColor: 'black',
-      color: 'white',
+      backgroundColor: '#ddd',
+      color: '#999',
+      cursor: 'not-allowed',
     },
   };
+  const navbarStyle = {
+    backgroundColor: '#3D464D',
+    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+    borderBottom: 'white solid 1px',
+    borderTop: 'white solid 1px',
+};
+
+const navMenuStyle = {
+    listStyle: 'none',
+    padding: 0,
+    margin: '0 auto',  // Căn giữa
+    display: 'flex',
+    justifyContent: 'center', // Căn giữa các danh mục
+};
+
+const navItemStyle = {
+    marginRight: '20px',
+};
+
+const menuLinkStyle = {
+    color: 'white',
+    padding: '10px 15px',
+    textDecoration: 'none',
+    transition: 'color 0.3s ease, background-color 0.3s ease',
+};
+
+const dropdownMenuStyle = {
+    backgroundColor: '#ffffff',
+    border: '1px solid #dee2e6',
+    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+};
 
   return (
-    <ArgonBox p={3}>
-      <ArgonTypography variant="h4" color="textPrimary" fontWeight="bold" mb={3}>
-        Lịch Sử Đơn Hàng
-      </ArgonTypography>
-      <div style={styles.orderHistory}>
-        <table style={styles.table}>
-          <thead>
-            <tr>
-              <th style={styles.th}>Mã đơn hàng</th>
-              <th style={styles.th}>Tên Người Đặt</th>
-              <th style={styles.th}>Ngày đặt</th>
-              <th style={styles.th}>Trạng thái</th>
-              <th style={styles.th}>Tổng tiền</th>
-              <th style={styles.th}>Địa chỉ</th>
-              <th style={styles.th}>Thao tác</th>
-              <th style={styles.th}>Chi tiết</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((order) => (
-              <tr key={order.id}>
-                <td style={styles.td}>{order.id || 'null'}</td>
-                <td style={styles.td}>{order.fullNameAddress || 'null'}</td>
-                <td style={styles.td}>{new Date(order.orderDate).toLocaleDateString() || 'null'}</td>
-                <td style={styles.td}>
-                  <span style={{ color: order.statusSlug === "cancel-order" ? "red" : "#1d8cf8" }}>
-                    {order.statusName || 'null'}
-                  </span>
-                </td>
-                <td style={styles.td}>
-                  {(order.amount ? order.amount.toLocaleString() : 'null') + ' VND'}
-                </td>
-                <td style={styles.td}>
-                  {order.address || 'null'},
-                  {getAddressNameById(order.provinceID, provinces, 'province') || 'null'},
-                  {getAddressNameById(order.districtCode, districts, 'district') || 'null'},
-                  {getAddressNameById(order.wardCode, wards, 'ward') || 'null'}
-                </td>
-                <td style={styles.td}>
-                  <ArgonButton
-                    variant="contained"
-                    style={order.statusSlug === 'cancel-order' ? styles.disabledButton : { backgroundColor: 'red', color: 'white' }}
-                    size="small"
-                    onClick={() => handleCancelOrder(order.id)}
-                    disabled={order.statusSlug === 'cancel-order' || order.statusSlug === 'delivered' || order.statusSlug === 'complete'}
-                  >
-                    Cancel Order
-                  </ArgonButton>
-                  &nbsp;
-                  <ArgonButton
-                    variant="contained"
-                    style={order.statusSlug === 'cancel-order' ? styles.disabledButton : { backgroundColor: '#1d8cf8', color: 'white' }}
-                    size="small"
-                    onClick={() => handleStatusComplete(order.id)}
-                    disabled={order.statusSlug !== 'delivered' || order.statusSlug === 'cancel-order'}
-                  >
-                    Complete
-                  </ArgonButton>
-
-                </td>
-                <td style={styles.td}>
-                  <Link to={`/history-order/${order.id}`}>
-                    <ArgonButton
-                      variant="contained"
-                      style={{ backgroundColor: 'green', color: 'white' }}
-                      size="small"
-                    >
-                      Chi tiết
-                    </ArgonButton>
-                  </Link>
-                </td>
-
+    <>
+      <HasagiNav />
+      <nav className="navbar navbar-expand-lg p-0" style={navbarStyle}>
+            <div className="container-fluid d-flex justify-content-between align-items-center p-0">
+                <div className="collapse navbar-collapse">
+                    <ul className="nav-menu" style={navMenuStyle}>
+                        <li className="nav-item dropdown" style={navItemStyle}>
+                            <a className="nav-link dropdown-toggle menuLink" style={menuLinkStyle} role="button" id="categories" data-bs-toggle="dropdown" aria-expanded="false">
+                                Trạng thái
+                            </a>
+                            <ul className="dropdown-menu" style={dropdownMenuStyle} aria-labelledby="categories">
+                                {/* {categories.map((category) => (
+                                    <li key={category.id}>
+                                        <a href="/#" className="dropdown-item" style={dropdownItemStyle}>
+                                            {category.name}
+                                        </a>
+                                    </li>
+                                ))} */}
+                            </ul>
+                        </li>
+                        <li className="nav-item dropdown" style={navItemStyle}>
+                            <a className="nav-link dropdown-toggle menuLink" style={menuLinkStyle} role="button" id="brands" data-bs-toggle="dropdown" aria-expanded="false">
+                                Ngày
+                            </a>
+                            <ul className="dropdown-menu" style={dropdownMenuStyle} aria-labelledby="brands">
+                                {/* {brands.map((brand) => (
+                                    <li key={brand.id}>
+                                        <a href="/#" className="dropdown-item" style={dropdownItemStyle}>
+                                            {brand.name}
+                                        </a>
+                                    </li>
+                                ))} */}
+                            </ul>
+                        </li>
+                        <li className="nav-item dropdown" style={navItemStyle}>
+                            <a className="nav-link dropdown-toggle menuLink" style={menuLinkStyle} role="button" id="pages" data-bs-toggle="dropdown" aria-expanded="false">
+                                Số điện thoại
+                            </a>
+                            <ul className="dropdown-menu" style={dropdownMenuStyle} aria-labelledby="colors">
+                                {/* {colors.map((color) => (
+                                    <li key={color.id}>
+                                        <a href="/#" className="dropdown-item" style={dropdownItemStyle}>
+                                            {color.name}
+                                        </a>
+                                    </li>
+                                ))} */}
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+      <ArgonBox p={3}>
+      <div className="header">
+          <button className="back-button" onClick={() => goBack()}>
+            <i className="ni ni-bold-left" />
+          </button>
+          <h5 className="mb-1" style={{ fontWeight: "bold", fontSize: "24px", color: "#343a40", marginLeft: '-15px' }}>Lịch sử đơn hàng</h5>
+        </div>
+        <div style={styles.orderHistory}>
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                <th style={styles.th}>Mã đơn hàng</th>
+                <th style={styles.th}>Tên Người Đặt</th>
+                <th style={styles.th}>Ngày đặt</th>
+                <th style={styles.th}>Trạng thái</th>
+                <th style={styles.th}>Tổng tiền</th>
+                <th style={styles.th}>Địa chỉ</th>
+                <th style={styles.th}>Thao tác</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </ArgonBox>
+            </thead>
+            <tbody>
+              {orders.map((order) => (
+                <tr key={order.id}>
+                  <td style={styles.td}>
+                    <Link to={`/history-order/${order.id}`} style={{ textDecoration: 'none', color: '#333' }}>
+                      {order.id || 'null'}
+                    </Link>
+                  </td>
+                  <td style={styles.td}>{order.fullNameAddress || 'null'}</td>
+                  <td style={styles.td}>{new Date(order.orderDate).toLocaleDateString() || 'null'}</td>
+                  <td style={styles.td}>
+                    <span style={{ color: order.slug === "huy-don-hang" ? "red" : "#1d8cf8" }}>
+                      {order.statusName || 'null'}
+                    </span>
+                  </td>
+                  <td style={styles.td}>{(order.amount ? order.amount.toLocaleString() : 'null') + ' VND'}</td>
+                  <td style={styles.td}>
+                    {order.address || 'null'},{getAddressNameById(order.provinceID, provinces, 'province') || 'null'},{getAddressNameById(order.districtCode, districts, 'district') || 'null'},{getAddressNameById(order.wardCode, wards, 'ward') || 'null'}
+                  </td>
+                  <td style={styles.td}>
+                    {order.statusSlug === 'dang-xu-ly' ? (
+                      <ArgonButton
+                        variant="contained"
+                        style={{ backgroundColor: 'red', color: 'white' }}
+                        size="small"
+                        onClick={() => handleCancelOrder(order.id)}
+                      >
+                        Hủy
+                      </ArgonButton>
+                    ) : order.statusSlug === 'da-giao' ? (
+                      <ArgonButton
+                        variant="contained"
+                        style={{ backgroundColor: 'green', color: 'white' }}
+                        size="small"
+                        onClick={() => handleStatusComplete(order.id)}
+                      >
+                        Hoàn Thành
+                      </ArgonButton>
+                    ) : null}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </ArgonBox>
+      <Footer />
+    </>
   );
 };
 

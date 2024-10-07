@@ -126,14 +126,14 @@
     font-weight: normal;
 }
 
-.btn.btn-primary {
+/* .btn.btn-primary {
     color: var(--bs-white);
 }
 
 .btn.btn-primary:hover {
     background: var(--bs-secondary);
     border: 1px solid var(--bs-secondary);
-}
+} */
 
 .btn.btn-secondary {
     color: var(--bs-white);
