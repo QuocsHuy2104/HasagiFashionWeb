@@ -2,7 +2,6 @@ import React from 'react';
 import { AiOutlineShoppingCart, AiFillStar,AiOutlineClose  } from 'react-icons/ai';
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
-import "components/client/assets/css/ShopDetail.css";
 import "components/client/assets/css/style.css";
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";

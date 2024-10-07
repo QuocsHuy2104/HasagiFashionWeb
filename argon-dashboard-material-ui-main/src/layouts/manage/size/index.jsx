@@ -15,13 +15,13 @@ import DashboardNavbar from "../../../examples/Navbars/DashboardNavbar";
 function Size() {
   const [formData, setFormData] = useState({
     id: "",
-    size: "",
+    name: "", // Đổi từ 'size' thành 'name'
     price: "",
   });
 
   const [sizes, setSizes] = useState([]);
   const [errors, setErrors] = useState({
-    size: false,
+    name: false, // Đổi từ 'size' thành 'name'
     price: false,
   });
 
@@ -47,10 +47,10 @@ function Size() {
 
   const validateForm = () => {
     let isValid = true;
-    const newErrors = { size: false, price: false };
+    const newErrors = { name: false, price: false };
 
-    if (!formData.size.trim()) {
-      newErrors.size = "Size name is required.";
+    if (!formData.name.trim()) {
+      newErrors.name = "Size name is required.";
       isValid = false;
     }
 
@@ -71,7 +71,7 @@ function Size() {
     }
 
     const data = {
-      size: formData.size,
+      name: formData.name, // Sử dụng 'name' thay vì 'size'
       price: parseFloat(formData.price),
     };
 
@@ -94,16 +94,16 @@ function Size() {
   const resetForm = () => {
     setFormData({
       id: "",
-      size: "",
+      name: "", // Đổi từ 'size' thành 'name'
       price: "",
     });
-    setErrors({ size: false, price: false });
+    setErrors({ name: false, price: false }); // Đổi từ 'size' thành 'name'
   };
 
   const handleEditClick = (size) => {
     setFormData({
       id: size.id,
-      size: size.size,
+      name: size.name, // Sử dụng 'name' thay vì 'size.name'
       price: size.price,
     });
   };
@@ -136,14 +136,14 @@ function Size() {
                     type="text"
                     placeholder="Size Name"
                     size="large"
-                    name="size"
-                    value={formData.size}
+                    name="name" // Đổi từ 'size' thành 'name'
+                    value={formData.name} // Đổi từ 'size' thành 'name'
                     onChange={handleChange}
-                    error={!!errors.size} // Apply error state
+                    error={!!errors.name} // Đổi từ 'size' thành 'name'
                   />
-                  {errors.size && (
+                  {errors.name && (
                     <ArgonTypography variant="caption" color="error">
-                      {errors.size}
+                      {errors.name} {/* Đổi từ 'size' thành 'name' */}
                     </ArgonTypography>
                   )}
                 </ArgonBox>

@@ -3,8 +3,8 @@ import PropTypes from "prop-types";
 import { Button, Form, FormGroup, Label } from "reactstrap";
 import "components/client/assets/css/phanloai1.css";
 import Cookies from "js-cookie";
-const ColorSelectionModal = ({ show, onClose, onColorSelect, onSizeSelect, productId, cartDetailId}) => {
 
+const ColorSelectionModal = ({ show, onClose, onColorSelect, onSizeSelect, productId, cartDetailId }) => {
     const [colors, setColors] = useState([]);
     const [selectedColor, setSelectedColor] = useState(null);
     const [sizes, setSizes] = useState([]);
@@ -65,7 +65,7 @@ const ColorSelectionModal = ({ show, onClose, onColorSelect, onSizeSelect, produ
                 onClose();
             } catch (error) {
                 setError(error.message || "Failed to update product option");
-                console.log("Error fetching product options:", error)
+                console.log("Error fetching product options:", error);
                 setSuccess(null);
             }
         } else {
@@ -79,11 +79,26 @@ const ColorSelectionModal = ({ show, onClose, onColorSelect, onSizeSelect, produ
         <div className="modal1">
             <div className="modal1-dialog">
                 <div className="modal1-content">
-                    <div className="modal1-header">
-                        <h5 className="modal1-title">Chọn Màu Sắc:</h5>
-                        <Button onClick={onClose} close />
+                    <div className="modal1-header" style={{ position: 'relative' }}>
+                        <h5 className="modal1-title">Phân loại:</h5>
+                        <button
+                            onClick={onClose}
+                            style={{
+                                position: 'absolute',
+                                top: '-20px',
+                                right: '10px',
+                                border: 'none',
+                                background: 'none',
+                                fontSize: '2.5rem',
+                                color: 'black',
+                                cursor: 'pointer'
+                            }}
+                            aria-label="Close"
+                        >
+                            &times;
+                        </button>
                     </div>
-                    <div className="modal-body">
+                    <div className="modal1-body">
                         {error && <p className="text-danger">{error}</p>}
                         {success && <p className="text-success">{success}</p>}
                         <Form onSubmit={handleFormSubmit}>
@@ -96,10 +111,12 @@ const ColorSelectionModal = ({ show, onClose, onColorSelect, onSizeSelect, produ
                                             className={`color-box ${selectedColor?.id === color.id ? 'selected' : ''}`}
                                             onClick={() => setSelectedColor(color)}
                                         >
-                                            {color.color}
+                                            {color.name}
                                         </Button>
                                     ))}
                                 </div>
+                            </FormGroup>
+                            <FormGroup>
                                 <Label>Chọn Size:</Label>
                                 <div className="color-options">
                                     {sizes.map((size) => (
@@ -108,15 +125,12 @@ const ColorSelectionModal = ({ show, onClose, onColorSelect, onSizeSelect, produ
                                             className={`color-box ${selectedSize?.id === size.id ? 'selected' : ''}`}
                                             onClick={() => setSelectedSize(size)}
                                         >
-                                            {size.size}
+                                            {size.name}
                                         </Button>
                                     ))}
                                 </div>
                             </FormGroup>
                             <div className="modal-footer">
-                                <Button color="secondary" onClick={onClose}>
-                                    Trở Lại
-                                </Button>
                                 <Button color="primary" type="submit">
                                     Xác Nhận
                                 </Button>
@@ -126,6 +140,7 @@ const ColorSelectionModal = ({ show, onClose, onColorSelect, onSizeSelect, produ
                 </div>
             </div>
         </div>
+
     );
 };
 

@@ -3,10 +3,10 @@ import PropTypes from 'prop-types';
 import { DataGrid } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
 import ColorService from '../../../services/ColorServices';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
 import IconButton from '@mui/material/IconButton';
 import Box from '@mui/material/Box';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
 
 const columns = [
     { field: 'id', headerName: 'ID', width: 70 },
@@ -47,27 +47,46 @@ export default function DataTable({ onEditClick, onDeleteClick }) {
         }
     };
 
-
     return (
-        <Paper sx={{ height: 400, width: '100%', position: 'relative' }}>
+        <Paper style={{ height: 420, width: "100%" }}>
             <DataGrid
                 rows={rows}
                 columns={columns}
-                paginationModel={paginationModel}
-                onPaginationModelChange={setPaginationModel}
-                pageSizeOptions={[5, 10]}
+                pageSize={5}
+                rowsPerPageOptions={[5, 10]}
                 checkboxSelection
-                onRowSelectionModelChange={handleSelectionModelChange}
-                sx={{ border: 0 }}
+                disableSelectionOnClick
+                onSelectionModelChange={handleSelectionModelChange}
+                sx={{
+                    "& .MuiDataGrid-cell": {
+                        fontSize: "0.75rem",
+                        padding: "4px",
+                    },
+                    "& .MuiDataGrid-columnHeaders": {
+                        fontSize: "0.8rem",
+                    },
+                    "& .MuiTablePagination-root": {
+                        fontSize: "0.75rem",
+                        minHeight: "30px",
+                    },
+                    "& .MuiTablePagination-select": {
+                        fontSize: "0.75rem",
+                        padding: "4px",
+                    },
+                    "& .MuiTablePagination-displayedRows": {
+                        fontSize: "0.75rem",
+                    },
+                }}
+                rowHeight={40}
             />
-
-            {selectedRows.length > 0 && (
-                <Box sx={{ position: 'absolute', top: 10, right: 10 }}>
-                    <IconButton onClick={handleDelete}>
-                        <DeleteIcon color="error" />
-                    </IconButton>
-                </Box>
-            )}
+            <Box display="flex" justifyContent="flex-end" marginTop={2}>
+                <IconButton onClick={handleDelete}>
+                    <DeleteIcon color="error" />
+                </IconButton>
+                <IconButton onClick={onEditClick}>
+                    <AddIcon color="primary" />
+                </IconButton>
+            </Box>
         </Paper>
     );
 }

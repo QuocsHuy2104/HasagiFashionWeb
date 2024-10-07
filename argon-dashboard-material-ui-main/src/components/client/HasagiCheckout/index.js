@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
-import "components/client/assets/css/ShopDetail.css";
 import "components/client/assets/css/style.css";
-import aboutImage from "components/client/assets/images/single-item.jpg";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCcVisa, faCcMastercard, faCcAmex } from '@fortawesome/free-brands-svg-icons';
 import ArgonButton from "components/ArgonButton";
@@ -13,6 +11,7 @@ import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
 import { ToastContainer, toast } from 'react-toastify';
+import Navbar from '../HasagiNavbar';
 
 const Checkout = () => {
     const [selectedPayment, setSelectedPayment] = useState('');
@@ -36,7 +35,12 @@ const Checkout = () => {
         setTimeout(() => {
             setIsLoading(false);
         }, 700);
-
+        
+        const accountId = Cookies.get('accountId');
+        if (!accountId) {
+            navigate(`/authentication/sign-in`);
+            return;
+        }
         const fetchAddress = async () => {
             try {
                 const addressesId = new URLSearchParams(window.location.search).get('id');
@@ -273,6 +277,7 @@ const Checkout = () => {
             );
 
             if (response.status === 200) {
+                console.log("Order placed successfully!")
                 toast.success("Đặt hàng thành công!");
                 await handleRemoveItems();
                 navigate('/Complete', {
@@ -283,15 +288,22 @@ const Checkout = () => {
                 });
             } else {
                 console.error('Failed to place order:', response.data);
+                // window.alert("Có lỗi xảy ra khi đặt hàng.");
                 toast.error("Có lỗi xảy ra khi đặt hàng.");
             }
         } catch (error) {
             console.error('Error placing order:', error.response ? error.response.data : error.message);
+            window.alert("Có lỗi xảy ra khi đặt hàng.");
         }
     };
+
+    const goBack = () => {
+        navigate('/Cart');
+    };
+
     return (
         <>
-         <ToastContainer />
+            <ToastContainer />
             {isLoading && (
                 <div className="loader">
                     <div className="loader-inner">
@@ -300,67 +312,63 @@ const Checkout = () => {
                 </div>
             )}
             <HasagiNav />
-            <div className="container-fluid page-header py-5">
-                <h1 className="text-center text-white display-6">Checkout</h1>
-                <ol className="breadcrumb justify-content-center mb-0">
-                    <li className="breadcrumb-item"><a href="/">Home</a></li>
-                    <li className="breadcrumb-item"><a href="/Cart">Cart</a></li>
-                    <li className="breadcrumb-item active text-white">Checkout</li>
-                </ol>
-            </div>
-            <div className="container-fluid py-5">
+            <Navbar/>
+            <div className="container-fluid">
                 <div className="row px-xl-5">
-                    <div className="bg-light p-3 mb-4" style={{ border: '1px solid #ddd', borderRadius: '8px' }}>
-                        <div className="d-flex justify-content-between align-items-center">
-                            <h5 className="text-uppercase mb-0 d-flex align-items-center" style={{ color: '#e63946', fontWeight: 'bold' }}>
-                                <i className="fa fa-map-marker-alt mr-2" style={{ color: 'red', fontSize: '1.2rem' }}></i>
-                                Địa Chỉ Nhận Hàng
-                            </h5>
-                        </div>
-
-                        {/* Single Row for All Information */}
-                        <div className="d-flex align-items-center justify-content-between mt-2" style={{ flexWrap: 'wrap', lineHeight: '1.5' }}>
-                            {address ? (
-                                <>
-                                    <div className="d-flex">
-                                        <span style={{ fontWeight: 'bold', marginRight: '10px' }}>
-                                            {address.fullNameAddress} (+84) {address.numberPhone}
-                                        </span>
-                                    </div>
-
-                                    {/* Address Details */}
-                                    <div className="d-flex align-items-center">
-                                        <span>
-                                            {address.address}, {getAddressNameById(address.wardCode, wards, 'ward')},
-                                            {getAddressNameById(address.districtCode, districts, 'district')},
-                                            {getAddressNameById(address.provinceID, provinces, 'province')}
-                                        </span>
-                                        {address.status && (
-                                            <span className="badge bg-danger ml-2" style={{ fontSize: '0.75rem', marginLeft: '10px' }}>Mặc định</span>
-                                        )}
-                                        <button
-                                            className="btn btn-outline-primary btn-sm ml-2"
-                                            style={{ fontWeight: 'bold', fontSize: '0.9rem', marginLeft: '15px' }}
-                                            onClick={() => setShowModal(true)}
-                                        >
-                                            Thay Đổi
-                                        </button>
-                                    </div>
-                                </>
-                            ) : (
-                                <strong>No address information available</strong>
-                            )}
+                    <div className="header py-3">
+                        <button className="back-button" onClick={() => goBack()}>
+                            <i className="ni ni-bold-left" />
+                        </button>
+                        <h5 className="mb-1" style={{ fontWeight: "bold", fontSize: "24px", color: "#343a40", marginLeft: '-15px' }}>Thanh toán</h5>
+                    </div>
+                    <div className="col-lg-12">
+                        <div className="bg-light p-3 mb-4" style={{ border: '1px solid #ddd', padding: '20px', borderRadius: '5px', marginLeft: "-10px", marginRight: "-10px" }}>
+                            <div className="d-flex justify-content-between align-items-center">
+                                <h5 className="mb-0 d-flex align-items-center" style={{ color: '#e63946', fontWeight: 'bold', marginLeft: "15px" }}>
+                                    <i className="fa fa-map-marker-alt mr-2" style={{ color: 'red', fontSize: '1.2rem', marginRight: '5px' }}></i>
+                                    Địa Chỉ Nhận Hàng
+                                </h5>
+                            </div>
+                            <div className="d-flex align-items-center justify-content-between mt-2" style={{ flexWrap: 'wrap', lineHeight: '1.5', marginLeft: "15px" }}>
+                                {address ? (
+                                    <>
+                                        <div className="d-flex" style={{ alignItems: 'center' }}>
+                                            <span style={{ fontWeight: 'bold', marginRight: '20px' }}>
+                                                {address.fullNameAddress} (+84) {address.numberPhone.startsWith('0') ? address.numberPhone.substring(1) : address.numberPhone}
+                                            </span>
+                                            <span style={{ whiteSpace: 'nowrap' }}>
+                                                {address.address},{" "}
+                                                {getAddressNameById(address.wardCode, wards, 'ward')},{" "}
+                                                {getAddressNameById(address.districtCode, districts, 'district')},{" "}
+                                                {getAddressNameById(address.provinceID, provinces, 'province')}
+                                            </span>
+                                            {address.status && (
+                                                <span className="badge bg-danger" style={{ fontSize: '0.75rem', marginLeft: '10px' }}>Mặc định</span>
+                                            )}
+                                        </div>
+                                        <div className="d-flex align-items-center">
+                                            <button
+                                                className="btn btn-outline-primary btn-sm ml-2"
+                                                style={{ fontWeight: 'bold', fontSize: '0.9rem', marginRight: '15px' }}
+                                                onClick={() => setShowModal(true)}
+                                            >
+                                                Thay Đổi
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <strong>Không có thông tin địa chỉ nào có sẵn.</strong>
+                                )}
+                            </div>
                         </div>
                     </div>
-
-
                     <div className="col-lg-12">
                         <div className="bg-light p-30 mb-5" style={{ border: '1px solid #ddd', padding: '20px', borderRadius: '5px', marginLeft: "-10px", marginRight: "-10px" }}>
-                            <table className="table table-bordered table-hover border-bottom mb-4" style={{ backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
-                                <thead className="thead-light" style={{ fontWeight: 'bold', color: '#fff' }}>
+                            <table className="table table-bordered table-hover border-bottom mb-2" style={{ backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+                                <thead className="thead-light " style={{ fontWeight: 'bold', color: '#fff' }}>
                                     <tr>
-                                        <th scope="col" className="text-center">Sản phẩm</th>
-                                        <th scope="col" className="text-center">Loại</th>
+                                        <th scope="col" className="text-left" style={{ width: "350px" }}>Sản phẩm</th>
+                                        <th scope="col" className="text-center" style={{ width: "250px" }}></th>
                                         <th scope="col" className="text-center">Đơn giá</th>
                                         <th scope="col" className="text-center">Số lượng</th>
                                         <th scope="col" className="text-center">Thành tiền</th>
@@ -371,18 +379,18 @@ const Checkout = () => {
                                         <tr key={index} style={{ verticalAlign: 'middle' }}>
                                             <td>
                                                 <div className="d-flex align-items-center">
-                                                    <img src={aboutImage} style={{ width: 60, marginRight: '10px', borderRadius: '5px' }} alt="Product" />
-                                                    <span style={{ fontWeight: 'bold' }}>{item.name}</span>
+                                                    <img src={item.image} style={{ width: 60, marginRight: '15px', borderRadius: '5px' }} alt="Product" />
+                                                    <span style={{ fontWeight: 'medium' }}>{item.name}</span>
                                                 </div>
                                             </td>
-                                            <td>
-                                                <div>Loại: <span style={{ fontWeight: 'bold' }}>{item.color}</span>, <span style={{ fontWeight: 'bold' }}>{item.size}</span></div>
+                                            <td className='py-4'>
+                                                <div>Loại: <span style={{ fontWeight: 'medium' }}>{item.color}</span>, <span style={{ fontWeight: 'medium' }}>{item.size}</span></div>
                                             </td>
-                                            <td style={{ fontWeight: 'bold' }} className="text-center">{item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
-                                            <td className="text-center">
-                                                <span style={{ fontWeight: 'bold' }}>{item.quantity}</span>
+                                            <td style={{ fontWeight: 'medium' }} className="text-center py-4">{item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
+                                            <td className="text-center py-4">
+                                                <span style={{ fontWeight: 'medium' }}>{item.quantity}</span>
                                             </td>
-                                            <td style={{ fontWeight: 'bold' }} className="text-center">{item.total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
+                                            <td style={{ fontWeight: 'medium' }} className="text-center py-4">{item.total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -390,139 +398,133 @@ const Checkout = () => {
 
                         </div>
                     </div>
-                    <div className="bg-light p-4 mb-5" style={{ border: '1px solid #ddd', borderRadius: '8px' }}>
-                        <div className="d-flex justify-content-between flex-wrap">
-                            <div className="col-lg-7 mb-4">
-                                <h5 className="section-title position-relative mb-3 d-flex align-items-center" style={{ color: '#e63946', fontWeight: 'bold' }}>
-                                    <span>Phương thức thanh toán</span>
-                                    <div className="payment-options d-flex ml-3">
-                                        {showPaymentButtons && (
-                                            <>
-                                                <ArgonButton
-                                                    className={`custom-btn payment-btn ${selectedPayment === 'Direct Check' ? 'active' : ''}`}
-                                                    onClick={() => handleButtonClick('Direct Check')}
-                                                >
-                                                    Thanh toán khi nhận hàng
-                                                </ArgonButton>
-                                                <ArgonButton
-                                                    className={`custom-btn payment-btn ${selectedPayment === 'Bank Transfer' ? 'active' : ''}`}
-                                                    onClick={() => handleButtonClick('Bank Transfer')}
-                                                >
-                                                    Bank Transfer
-                                                </ArgonButton>
-                                            </>
-                                        )}
-                                    </div>
-                                </h5>
-
-                                {/* Display error message if no payment method is selected */}
-                                {!selectedPayment && (
-                                    <div className="alert alert-danger" role="alert">
-                                        Vui lòng chọn phương thức thanh toán.
-                                    </div>
-                                )}
-
-                                {selectedPayment === 'Direct Check' && (
-                                    <div className="payment-description mb-3">
-                                        <p>Direct Check là phương thức thanh toán bằng cách gửi tiền trực tiếp từ tài khoản ngân hàng của bạn.</p>
-                                    </div>
-                                )}
-                                {selectedPayment === 'Bank Transfer' && (
-                                    <div className="payment-description mb-3">
-                                        <p>Chọn phương thức chuyển khoản:</p>
-                                        <div className="payment-buttons d-flex flex-wrap">
-                                            <button className="payment-btn1 mr-2 mb-2">
-                                                <div className="icon-container">
-                                                    <FontAwesomeIcon icon={faCcVisa} />
-                                                </div>
-                                                <span>Giảm 50000đ</span>
-                                                <span>Đơn từ 250.000đ với thẻ VISA</span>
-                                            </button>
-                                            <button className="payment-btn1 mr-2 mb-2">
-                                                <div className="icon-container">
-                                                    <FontAwesomeIcon icon={faCcMastercard} />
-                                                </div>
-                                                <span>Giảm 50000đ</span>
-                                                <span>Đơn từ 250.000đ với ví VNPAY</span>
-                                            </button>
-                                            <button className="payment-btn1 mb-2">
-                                                <div className="icon-container">
-                                                    <FontAwesomeIcon icon={faCcAmex} />
-                                                </div>
-                                                <span>Giảm 50000đ</span>
-                                                <span>Đơn từ 250.000đ với thẻ TPBANK</span>
-                                            </button>
+                    <div className="col-lg-12">
+                        <div className="bg-light p-4 mb-4" style={{ border: '1px solid #ddd', padding: '20px', borderRadius: '5px', marginLeft: "-10px", marginRight: "-10px" }}>
+                            <div className="d-flex justify-content-between flex-wrap">
+                                <div className="col-lg-7 mb-4">
+                                    <h5 className="mb-3 d-flex align-items-center" style={{ color: '#e63946', fontWeight: 'bold' }}>
+                                        <span>Phương thức thanh toán</span>
+                                        <div className="payment-options d-flex ml-3">
+                                            {showPaymentButtons && (
+                                                <>
+                                                    <ArgonButton
+                                                        className={`custom-btn payment-btn ${selectedPayment === 'Direct Check' ? 'active' : ''}`}
+                                                        onClick={() => handleButtonClick('Direct Check')}
+                                                    >
+                                                        Thanh toán khi nhận hàng
+                                                    </ArgonButton>
+                                                    <ArgonButton
+                                                        className={`custom-btn payment-btn ${selectedPayment === 'Bank Transfer' ? 'active' : ''}`}
+                                                        onClick={() => handleButtonClick('Bank Transfer')}
+                                                    >
+                                                        Bank Transfer
+                                                    </ArgonButton>
+                                                </>
+                                            )}
+                                        </div>
+                                    </h5>
+                                    {!selectedPayment && (
+                                        <div className="alert alert-danger" role="alert">
+                                            Vui lòng chọn phương thức thanh toán.
+                                        </div>
+                                    )}
+                                    {selectedPayment === 'Direct Check' && (
+                                        <div className="payment-description mb-3">
+                                            <p>Thanh toán COD (Cash on Delivery) là một dịch vụ giao hàng thu tiền hộ được sử dụng phổ biến trong giao dịch mua bán hàng hóa. Trong đó,
+                                                người mua sẽ thanh toán tiền mặt (tiền đặt hàng) cho người giao hàng ngay tại thời điểm nhận hàng.</p>
+                                        </div>
+                                    )}
+                                    {selectedPayment === 'Bank Transfer' && (
+                                        <div className="payment-description mb-3">
+                                            <p>Chọn phương thức chuyển khoản:</p>
+                                            <div className="payment-buttons d-flex flex-wrap">
+                                                <button className="payment-btn1 mr-2 mb-2">
+                                                    <div className="icon-container">
+                                                        <FontAwesomeIcon icon={faCcVisa} />
+                                                    </div>
+                                                    <span>Giảm 50000đ</span>
+                                                    <span>Đơn từ 250.000đ với thẻ VISA</span>
+                                                </button>
+                                                <button className="payment-btn1 mr-2 mb-2">
+                                                    <div className="icon-container">
+                                                        <FontAwesomeIcon icon={faCcMastercard} />
+                                                    </div>
+                                                    <span>Giảm 50000đ</span>
+                                                    <span>Đơn từ 250.000đ với ví VNPAY</span>
+                                                </button>
+                                                <button className="payment-btn1 mb-2">
+                                                    <div className="icon-container">
+                                                        <FontAwesomeIcon icon={faCcAmex} />
+                                                    </div>
+                                                    <span>Giảm 50000đ</span>
+                                                    <span>Đơn từ 250.000đ với thẻ TPBANK</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="col-lg-5">
+                                    {selectedPayment === 'Direct Check' && (
+                                        <div className="form-group mb-3 d-flex align-items-center" style={{ justifyContent: 'flex-start', marginBottom: '20px' }}>
+                                            <label
+                                                htmlFor="payment-input"
+                                                style={{
+                                                    marginRight: '10px',
+                                                    fontWeight: '500',
+                                                    color: '#333'
+                                                }}
+                                            >
+                                                Thanh toán khi nhận hàng
+                                            </label>
+                                            <ArgonButton className="change-payment-btn btn-custom" onClick={handleChangePaymentMethod}>
+                                                Thay đổi
+                                            </ArgonButton>
+                                        </div>
+                                    )}
+                                    <div className="border-bottom pt-4" style={{ padding: '0 20px' }}>
+                                        <div className="d-flex justify-content-between mb-3">
+                                            <h6 className="font-weight-medium" style={{ fontSize: '1.2rem' }}>Tổng tiền hàng</h6>
+                                            <h6 className="font-weight-medium" style={{ fontSize: '1.2rem' }}>
+                                                {cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                                            </h6>
+                                        </div>
+                                        <div className="d-flex justify-content-between">
+                                            <h6 className="font-weight-medium" style={{ fontSize: '1.2rem' }}>Phí vận chuyển</h6>
+                                            <h6 style={{ fontSize: '1.2rem' }}>
+                                                {shipFee?.total ? shipFee.total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) : 'Đang tính...'}
+                                            </h6>
                                         </div>
                                     </div>
-                                )}
-                            </div>
-
-
-                            <div className="col-lg-5">
-                                {selectedPayment === 'Direct Check' && (
-                                    <div className="form-group mb-3 d-flex align-items-center" style={{ justifyContent: 'flex-start', marginBottom: '20px' }}>
-                                        <label
-                                            htmlFor="payment-input"
-                                            style={{
-                                                marginRight: '10px',
-                                                fontWeight: '500',
-                                                color: '#333'
-                                            }}
-                                        >
-                                            Thanh toán khi nhận hàng
-                                        </label>
-                                        <ArgonButton className="change-payment-btn btn-custom" onClick={handleChangePaymentMethod}>
-                                            Thay đổi
-                                        </ArgonButton>
+                                    <div className="pt-3" style={{ padding: '0 20px' }}>
+                                        <div className="d-flex justify-content-between mt-2">
+                                            <h5 className="font-weight-bold">Tổng thanh toán</h5>
+                                            <h5 className="font-weight-bold" style={{ color: '#ee4d2d' }}>
+                                                {(cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) + (shipFee?.total || 0)).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                                            </h5>
+                                        </div>
                                     </div>
-                                )}
-                                <div className="border-bottom pt-4" style={{ padding: '0 20px' }}>
-                                    <div className="d-flex justify-content-between mb-3">
-                                        <h6 className="font-weight-bold">Tổng tiền hàng</h6>
-                                        <h6 className="font-weight-bold">
-                                            {cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-                                        </h6>
-                                    </div>
-                                    <div className="d-flex justify-content-between">
-                                        <h6 className="font-weight-medium">Phí vận chuyển</h6>
-                                        <h6>
-                                            {shipFee?.total ? shipFee.total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) : 'Đang tính...'}
-                                        </h6>
-                                    </div>
+                                    <button
+                                        onClick={handleClick}
+                                        style={{
+                                            width: '100%',
+                                            backgroundColor: '#ee4d2d',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '5px',
+                                            padding: '12px 0',
+                                            fontSize: '20px',
+                                            cursor: 'pointer',
+                                            transition: 'background-color 0.3s, transform 0.3s'
+                                        }}
+                                    > Đặt hàng
+                                    </button>
+                                    <p className="mt-3 text-center">
+                                        Nhấn &quot;Đặt hàng&quot; đồng nghĩa với việc bạn đồng ý tuân theo <a href=''>Điều khoản HasagiFashion</a>
+                                    </p>
                                 </div>
-                                <div className="pt-3" style={{ padding: '0 20px' }}>
-                                    <div className="d-flex justify-content-between mt-2">
-                                        <h5 className="font-weight-bold">Tổng thanh toán</h5>
-                                        <h5 className="font-weight-bold" style={{ color: '#ee4d2d' }}>
-                                            {(cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) + (shipFee?.total || 0)).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-                                        </h5>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={handleClick}
-                                    style={{
-                                        width: '100%',
-                                        backgroundColor: '#ee4d2d',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '5px',
-                                        padding: '12px 0',
-                                        fontSize: '20px',
-                                        cursor: 'pointer',
-                                        transition: 'background-color 0.3s, transform 0.3s' // Transition for hover
-                                    }}
-                                >
-                                    Đặt hàng
-                                </button>
-
-                                <p className="mt-3 text-center">
-                                    Nhấn &quot;Đặt hàng&quot; đồng nghĩa với việc bạn đồng ý tuân theo <a href=''>Điều khoản HasagiFashion</a>
-                                </p>
                             </div>
-
                         </div>
                     </div>
-
                 </div>
             </div>
             <Footer />

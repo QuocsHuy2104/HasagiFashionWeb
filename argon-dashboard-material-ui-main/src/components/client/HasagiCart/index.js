@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from "react";
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
-import aboutImage from "components/client/assets/images/single-item.jpg";
-import { AiOutlinePlus, AiOutlineMinus } from "react-icons/ai";
 import { FaTimes } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import Backup from "components/client/HasagiBackup";
 import ColorSelectionModal from "../HasagiPhanLoai";
 import Cookies from "js-cookie";
-import { ToastContainer, toast } from 'react-toastify'; // Import Toastify
-import 'react-toastify/dist/ReactToastify.css'; // Import Toastify CSS
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { Link } from "react-router-dom";
+import Navbar from "../HasagiNavbar";
 const Cart = () => {
     const [cartItems, setCartItems] = useState([]);
     const [address, setAddress] = useState(null);
@@ -31,7 +30,7 @@ const Cart = () => {
         const accountId = Cookies.get('accountId');
 
         if (!accountId) {
-            toast.error("Account ID is required.");
+            navigate(`/authentication/sign-in`);
             return;
         }
 
@@ -100,15 +99,19 @@ const Cart = () => {
     };
 
     const handleCheckboxChange = (itemId) => {
-        setCartItems(cartItems.map(item =>
+        const updatedCartItems = cartItems.map(item =>
             item.cartdetailid === itemId ? { ...item, selected: !item.selected } : item
-        ));
+        );
+        setCartItems(updatedCartItems);
+
+        const allSelected = updatedCartItems.every(item => item.selected);
+        setSelectAll(allSelected);
     };
 
     const handleCheckout = () => {
         const selectedItems = cartItems.filter(item => item.selected);
         if (selectedItems.length === 0) {
-            toast.warn("Vui lòng chọn sản phẩm để thanh toán."); // Toast warning
+            toast.warn("Vui lòng chọn sản phẩm để thanh toán.");
             return;
         }
         console.log("Selected Items:", selectedItems);
@@ -117,7 +120,7 @@ const Cart = () => {
             setShowBackupModal(true);
         } else {
             navigate(`/Checkout?id=${address}`);
-            toast.success("Chuyển đến trang thanh toán."); // Toast success
+            toast.success("Chuyển đến trang thanh toán.");
         }
     };
 
@@ -125,24 +128,24 @@ const Cart = () => {
         setShowBackupModal(false);
         if (accountExists) {
             navigate(`/Checkout?id=${address}`);
-            toast.success("Chuyển đến trang thanh toán."); // Toast success
+            toast.success("Chuyển đến trang thanh toán.");
         }
     };
 
     const handleDeleteSelected = async () => {
         const selectedIds = cartItems.filter(item => item.selected).map(item => item.cartdetailid);
         if (selectedIds.length === 0) {
-            toast.warn("Vui lòng chọn sản phẩm để xóa."); // Toast warning
+            toast.warn("Vui lòng chọn sản phẩm để xóa.");
             return;
         }
         try {
             await axios.delete('http://localhost:8080/api/cart/delete', { data: selectedIds });
             setCartItems(cartItems.filter(item => !selectedIds.includes(item.cartdetailid)));
             setSelectAll(false);
-            toast.success("Xóa sản phẩm thành công."); // Toast success
+            toast.success("Xóa sản phẩm thành công.");
         } catch (error) {
             console.error("Error deleting items:", error);
-            toast.error("Có lỗi xảy ra khi xóa sản phẩm."); // Toast error
+            toast.error("Có lỗi xảy ra khi xóa sản phẩm.");
         }
     };
 
@@ -187,9 +190,21 @@ const Cart = () => {
         return cartItems.filter(item => item.selected).length;
     };
 
+    const goBack = () => {
+        const productId = Cookies.get('productId');
+        
+        if (!productId) {
+            navigate('/feature-section');
+        } else {
+            navigate(`/ShopDetail?id=${productId}`);
+        }
+    };
+    
+    
+
     return (
         <>
-            <ToastContainer /> {/* Include ToastContainer */}
+            <ToastContainer />
             {isLoading && (
                 <div className="loader">
                     <div className="loader-inner">
@@ -198,18 +213,27 @@ const Cart = () => {
                 </div>
             )}
             <HasagiNav />
-            <div className="container-fluid page-header py-5">
-                <h1 className="text-center text-white display-6">Cart</h1>
-                <ol className="breadcrumb justify-content-center mb-0">
-                    <li className="breadcrumb-item"><a href="/">Home</a></li>
-                    <li className="breadcrumb-item"><a href="/ShopDetail">ShopDetail</a></li>
-                    <li className="breadcrumb-item active text-white">Cart</li>
-                </ol>
-            </div>
-            <div className="container-fluid py-5">
+            <Navbar/>
+            {/* <div className="container-fluid py-2">
+                <div className="row px-xl-5">
+                    <div className="col-12">
+                        <nav className="breadcrumb bg-light mb-30">
+                            <a className="breadcrumb-item text-dark" href="/feature-section">Home</a>
+                            <a className="breadcrumb-item text-dark" href="/ShopDetail">Shop Detail</a>
+                            <span className="breadcrumb-item active">Cart</span>
+                        </nav>
+                    </div>
+                </div>
+            </div> */}
+            <div className="container-fluid py-2">
                 <div className="row px-xl-5">
                     <div className="col-lg-12 mb-5" id="tableAddCart">
-                        <h5 className="section-title text-uppercase mb-4" style={{ fontWeight: "bold", fontSize: "24px", color: "#343a40" }}>Giỏ Hàng</h5>
+                        <div className="header">
+                            <button className="back-button" onClick={() => goBack()}>
+                                <i className="ni ni-bold-left" />
+                            </button>
+                            <h5 className="section-title mb-1" style={{ fontWeight: "bold", fontSize: "24px", color: "#343a40", marginLeft: '-15px' }}>Giỏ Hàng</h5>
+                        </div>
                         {cartItems.length === 0 ? (
                             <p className="text-center" style={{ fontSize: "18px", color: "#6c757d" }}>Giỏ hàng của bạn đang trống.</p>
                         ) : (
@@ -222,11 +246,12 @@ const Cart = () => {
                                                 checked={selectAll}
                                                 onChange={handleSelectAllChange}
                                                 aria-label="Select All"
+                                                style={{ transform: "scale(1.5)" }}
                                             />
                                         </th>
                                         <th scope="col" style={{ width: "20%", textAlign: "left", padding: "10px", fontWeight: "bold" }}>Sản Phẩm</th>
                                         <th scope="col" style={{ width: "25%", padding: "10px", fontWeight: "bold" }}>Phân loại</th>
-                                        <th scope="col" style={{ width: "10%", textAlign: "right", padding: "10px", fontWeight: "bold" }}>Đơn Giá</th>
+                                        <th scope="col" style={{ width: "10%", textAlign: "center", padding: "10px", fontWeight: "bold" }}>Đơn Giá</th>
                                         <th scope="col" style={{ width: "15%", textAlign: "center", padding: "10px", fontWeight: "bold" }}>Số Lượng</th>
                                         <th scope="col" style={{ width: "10%", textAlign: "center", padding: "10px", fontWeight: "bold" }}>Tổng</th>
                                         <th scope="col" style={{ width: "10%", textAlign: "center", padding: "10px", fontWeight: "bold" }}>Thao tác</th>
@@ -245,20 +270,38 @@ const Cart = () => {
                                                 />
                                             </td>
                                             <td className="align-middle" style={{ textAlign: "left", paddingLeft: "20px" }}>
-                                                <img src={aboutImage} style={{ width: 60 }} alt={item.name} /> {item.name}
+                                            <Link to={`/ShopDetail?id=${item.productId}`}> 
+                                                <img src={item.image} style={{ width: 60 }} alt={item.name} /> {item.name}
+                                                </Link>
                                             </td>
                                             <td className="align-middle">
-                                                <button onClick={() => toggleModal(item.cartdetailid)} className="btn btn-outline-primary">
+                                                <button
+                                                    onClick={() => toggleModal(item.cartdetailid)}
+                                                    style={{
+                                                        backgroundColor: 'transparent',
+                                                        border: 'none',
+                                                        color: 'black',
+                                                        cursor: 'pointer'
+                                                    }}>
                                                     Phân Loại Hàng: <br />
                                                     {item.color || "Chưa chọn màu"} , {item.size || "Chưa chọn kích thước"}
                                                 </button>
                                             </td>
+
                                             <td className="align-middle">{item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
                                             <td className="align-middle">
-                                                <div className="input-group quantity mx-auto" style={{ width: "140px", display: "flex", alignItems: "center" }}>
+                                                <div
+                                                    className="input-group quantity mx-auto"
+                                                    style={{
+                                                        width: "140px",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        justifyContent: "space-between",  // Ensure even spacing
+                                                    }}
+                                                >
                                                     <div className="input-group-btn">
                                                         <button
-                                                            className="btn btn-sm btn-outline-secondary"
+                                                            className="btn btn-primary btn-minus"
                                                             onClick={() => handleQuantityChange(item.cartdetailid, -1)}
                                                             aria-label={`Decrease quantity of ${item.name}`}
                                                             style={{
@@ -267,12 +310,13 @@ const Cart = () => {
                                                                 display: "flex",
                                                                 alignItems: "center",
                                                                 justifyContent: "center",
-                                                                margin: "0 5px",
+                                                                marginLeft: "5px",
                                                             }}
                                                         >
-                                                            <AiOutlineMinus />
+                                                            <i className="fa fa-minus"></i>
                                                         </button>
                                                     </div>
+
                                                     <input
                                                         type="text"
                                                         className="form-control form-control-sm text-center"
@@ -284,9 +328,10 @@ const Cart = () => {
                                                             margin: "0 5px",
                                                         }}
                                                     />
+
                                                     <div className="input-group-btn">
                                                         <button
-                                                            className="btn btn-sm btn-outline-secondary"
+                                                            className="btn btn-primary btn-plus"
                                                             onClick={() => handleQuantityChange(item.cartdetailid, 1)}
                                                             aria-label={`Increase quantity of ${item.name}`}
                                                             style={{
@@ -295,14 +340,15 @@ const Cart = () => {
                                                                 display: "flex",
                                                                 alignItems: "center",
                                                                 justifyContent: "center",
-                                                                margin: "0 5px",
+                                                                marginRight: "4px",
                                                             }}
                                                         >
-                                                            <AiOutlinePlus />
+                                                            <i className="fa fa-plus"></i>
                                                         </button>
                                                     </div>
                                                 </div>
                                             </td>
+
                                             <td className="align-middle">{(item.price * item.quantity).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
                                             <td className="align-middle">
                                                 <button
@@ -319,8 +365,8 @@ const Cart = () => {
                             </table>
 
                         )}
-                        <div className="d-flex align-items-center justify-content-between w-100">
-                            <div className="d-flex align-items-center">
+                        <div className="d-flex align-items-center justify-content-between w-100 py-2">
+                            <div className="d-flex align-items-center" style={{ marginLeft: '30px' }}>
                                 <input
                                     type="checkbox"
                                     checked={selectAll}
@@ -337,7 +383,7 @@ const Cart = () => {
                                         backgroundColor: "transparent",
                                         border: "none",
                                         color: "black",
-                                        fontSize: "16px",
+                                        fontSize: "20px",
                                         fontWeight: "normal",
                                         marginLeft: "10px",
                                     }}
@@ -346,12 +392,12 @@ const Cart = () => {
                                 </button>
                             </div>
                             <div className="d-flex align-items-center">
-                                <h5 className="font-weight-bold mb-0">
+                                <h5 className="font-weight-medium mb-0">
                                     Tổng thanh toán ({countSelectedItems()} sản phẩm): {total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                                 </h5>
                                 <button
                                     onClick={handleCheckout}
-                                    className="btn btn-primary rounded-pill d-inline-flex flex-shrink-0 py-2 px-4 ms-3"
+                                    className="btn btn-primary rounded-pill d-inline-flex flex-shrink-0 py-1.5 px-4 ms-3"
                                 >
                                     Mua ngay
                                 </button>
