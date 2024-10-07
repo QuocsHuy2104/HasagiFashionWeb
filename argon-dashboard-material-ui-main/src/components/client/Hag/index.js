@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from "prop-types";
-import "components/client/assets/css/phanloai1.css";
+import "components/client/assets/css/style.css";
 import ArgonInput from "components/ArgonInput";
 import ArgonButton from "components/ArgonButton";
 import { useNavigate } from 'react-router-dom';
@@ -9,9 +9,11 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import AddressSelection from '../HasagiBackup1';
-import Cookies from "js-cookie";
-const Backup2 = ({ show, onClose, onAddressUpdated }) => {
+import Maps from '../HasagiMap/Map';
+import SearchBox from '../HasagiMap/SearchBox';
+const Backup2 = ({ show, onClose, onAddressUpdated}) => {
     const [fullNameAddress, setFullnameAddress] = useState('');
+    const [naameOrder, setNameOrder] = useState('');
     const [numberPhone, setNumberphone] = useState('');
     const [provinceName, setProvinceName] = useState('');
     const [districtName, setDistrictName] = useState('');
@@ -19,19 +21,24 @@ const Backup2 = ({ show, onClose, onAddressUpdated }) => {
     const [selectedProvince, setSelectedProvince] = useState(null); // Thêm state này
     const [selectedDistrict, setSelectedDistrict] = useState(null); // Thêm state này
     const [selectedWard, setSelectedWard] = useState(null); // Thêm state này
+    const [cartItems, setCartItems] = useState([]);
     const [showTabs, setShowTabs] = useState(false);
     const navigate = useNavigate();
     const wrapperRef = useRef(null);
     const [status, setStatus] = useState(false);
-    const [showAddressSelection, setShowAddressSelection] = useState(false);
+    const [showAddressSelection , setshowAddressSelection] = useState(false);
+    const [selectPosition, setSelectPosition] = useState(null);
     const [isAddressAvailable, setIsAddressAvailable] = useState(true);
-    const [Address, setAddress] = useState('');
+    const [Address , setAddress] = useState('');
     // Kiểm tra địa chỉ có sẵn hay không
     useEffect(() => {
+      
         const checkUserAddresses = async () => {
             try {
                 const addressCheckResponse = await axios.get('http://localhost:3000/api/addresses/account', { withCredentials: true });
                 const userHasAddresses = addressCheckResponse.data.length > 0;
+
+                // Nếu người dùng chưa có địa chỉ, đặt status thành true (địa chỉ mặc định) và không cho phép chọn checkbox
                 if (!userHasAddresses) {
                     setStatus(true);
                     setIsAddressAvailable(false);
@@ -42,8 +49,13 @@ const Backup2 = ({ show, onClose, onAddressUpdated }) => {
                 console.error("Error checking user addresses:", error);
             }
         };
+
+   
         checkUserAddresses();
+    
+       
     }, []);
+    
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -51,14 +63,18 @@ const Backup2 = ({ show, onClose, onAddressUpdated }) => {
                 setShowTabs(false);
             }
         }
+
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [wrapperRef]);
-
+    
+    
     const handleComplete = async () => {
-        const accountId = Cookies.get('accountId'); 
+
+
+        
         const formData = {
             fullNameAddress,
             numberPhone,
@@ -67,50 +83,63 @@ const Backup2 = ({ show, onClose, onAddressUpdated }) => {
             wardCode: selectedWard,
             status,
             address: Address,
-            fullAddress: `${Address}, ${selectedWard}, ${selectedDistrict}, ${selectedProvince}`,
+            fullAddress:`${Address}, ${selectedWard}, ${selectedDistrict}, ${selectedProvince}`,
         };
+    
         try {
-            await axios.post(`http://localhost:3000/api/addresses?accountId=${accountId}`, formData, {
-                withCredentials: true
+            const response = await axios.post('http://localhost:3000/api/addresses', formData, {
+                withCredentials: true // Đặt withCredentials trong config
             });
+
+    
+          
             onClose();
-            onAddressUpdated();
-            <AddressSelection show={showAddressSelection} onClose={() => setShowAddressSelection(false)} />
+            onAddressUpdated(); 
+            <AddressSelection show={showAddressSelection} onClose={() => setshowAddressSelection(false)}/>
         } catch (error) {
             console.error("Error submitting address:", error);
         }
     };
     const handleCheckboxChange = (event) => {
-        setStatus(event.target.checked);
-    };
-
+        setStatus(event.target.checked); // Update status based on checkbox state
+      };
+    
     const handleInputClick = () => {
         setShowTabs(true);
     };
 
     const handleProvinceChange = (provinceName, provinceId) => {
-        setProvinceName(provinceName); 
-        setSelectedProvince(provinceId); 
+        setProvinceName(provinceName); // Cập nhật tên tỉnh
+        setSelectedProvince(provinceId); // Cập nhật ID tỉnh
     };
-
+    
+    
+    
     const handleDistrictChange = (name, id) => {
         setDistrictName(name);
-        setSelectedDistrict(id);
+        setSelectedDistrict(id); // Cập nhật ID quận/huyện
     };
-
+    
     const handleWardChange = (name, code) => {
         setWardName(name);
-        setSelectedWard(code);
+        setSelectedWard(code); // Cập nhật ID phường/xã
+    };
+    
+
+    const handleClearClick = () => {
+        setProvinceName('');
+        setDistrictName('');
+        setWardName('');
     };
 
     if (!show) return null;
 
     return (
-        <div className="modal1">
-            <div className="modal1-dialog">
-                <div className="modal1-content">
-                    <div className="modal1-header">
-                        <h5 className="modal1-title">Địa chỉ mới</h5>
+        <div className="modal">
+            <div className="modal-dialog">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="modal-title">Địa chỉ mới</h5>
                         <button type="button" className="btn-close" onClick={onClose}></button>
                     </div>
                     <div className="modal-body p-4" ref={wrapperRef}>
@@ -135,7 +164,7 @@ const Backup2 = ({ show, onClose, onAddressUpdated }) => {
                                     onChange={(e) => setNumberphone(e.target.value)}
                                 />
                             </div>
-                            <div className="col-md-6 form-group">
+                            <div className="col-md-12 form-group">
                                 <label>Địa chỉ cụ thể</label>
                                 <ArgonInput
                                     className="form-control"
@@ -160,12 +189,17 @@ const Backup2 = ({ show, onClose, onAddressUpdated }) => {
                                     />
                                 </div>
                                 <input
-                                    type="checkbox"
-                                    checked={status}
-                                    onChange={handleCheckboxChange}
-                                    style={{ transform: "scale(1.5)", marginBottom: "0" }}
-                                />
-                                <label style={{ marginLeft: "10px", marginBottom: "0" }}>Address default</label>
+                                type="checkbox"
+                                checked={status}
+                                onChange={handleCheckboxChange}
+                                style={{ transform: "scale(1.5)", marginBottom: "0" }}
+                            />
+
+
+                            <label style={{ marginLeft: "10px", marginBottom: "0" }}>Address default</label>
+                         
+      
+      
                                 {showTabs && (
                                     <BasicTabs
                                         onSelectProvince={handleProvinceChange}
@@ -191,10 +225,12 @@ Backup2.propTypes = {
     show: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
     onAddressUpdated: PropTypes.func.isRequired,
+
 };
 
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
+
     return (
         <div
             role="tabpanel"
@@ -237,12 +273,14 @@ export function BasicTabs({ onSelectProvince, onSelectDistrict, onSelectWard, se
                         'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f'
                     }
                 });
-                console.log(response.data.data);
+                console.log(response.data.data); // Log dữ liệu nhận được để kiểm tra
                 setProvinces(response.data.data);
             } catch (error) {
                 console.error("Error fetching provinces:", error);
             }
         };
+        
+
         fetchProvinces();
     }, []);
 
@@ -263,6 +301,7 @@ export function BasicTabs({ onSelectProvince, onSelectDistrict, onSelectWard, se
                     console.error("Error fetching districts:", error);
                 }
             };
+
             fetchDistricts();
         }
     }, [selectedProvince]);
@@ -294,24 +333,28 @@ export function BasicTabs({ onSelectProvince, onSelectDistrict, onSelectWard, se
     };
 
     const handleProvinceSelect = (provinceId, provinceName) => {
-        setSelectedProvince(provinceId); 
-        setSelectedDistrict(null); 
-        setDistricts([]);
-        setWards([]); 
-        onSelectProvince(provinceName, provinceId); 
-        setValue(1);
+        setSelectedProvince(provinceId); // Đặt ID của tỉnh đã chọn
+        setSelectedDistrict(null); // Đặt lại quận/huyện khi chọn tỉnh mới
+        setDistricts([]); // Xóa danh sách quận/huyện
+        setWards([]); // Xóa danh sách phường/xã
+        onSelectProvince(provinceName, provinceId);  // Gửi cả ID và tên tỉnh
+        setValue(1); // Chuyển sang tab "Quận/Huyện"
     };
-
+    
+    
+    
     const handleDistrictSelect = (districtId, districtName) => {
         setSelectedDistrict(districtId);
-        onSelectDistrict(districtName, districtId);
-        setValue(2); 
+        onSelectDistrict(districtName, districtId); // Gửi cả ID
+        setValue(2); // Tự động chuyển sang tab "Phường/Xã"
     };
-
+    
     const handleWardSelect = (wardCode, wardName) => {
-        onSelectWard(wardName, wardCode); 
-        setShowTabs(false);
+        onSelectWard(wardName, wardCode); // Gửi cả ID
+        setShowTabs(false); // Tắt tab sau khi chọn xong phường/xã
     };
+    
+
     return (
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">

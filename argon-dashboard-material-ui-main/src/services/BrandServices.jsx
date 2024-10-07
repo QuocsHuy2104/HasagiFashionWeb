@@ -10,9 +10,7 @@ const BrandsService = {
 
     updateBrand: (id, brand) => apiClient.put(`/admin/brand/${id}`, brand),
 
-    deleteBrand: (id) => apiClient.delete(`/admin/brand/${id}`),
-
-    getBrandHome: () => apiClient.get("/public/home/brand")
+    deleteBrand: (id) => apiClient.delete(`/admin/brand/${id}`)
 };
 
 export default BrandsService;

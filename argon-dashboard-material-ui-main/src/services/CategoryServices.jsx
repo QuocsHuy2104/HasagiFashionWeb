@@ -9,9 +9,7 @@ const CategoriesService = {
 
     updateCategory: (id, category) => apiClient.put(`/admin/category/${id}`, category),
 
-    deleteCategory: (id) => apiClient.delete(`/admin/category/${id}`),
-
-    getCateHome: () => apiClient.get("/public/home/cate")
+    deleteCategory: (id) => apiClient.delete(`/admin/category/${id}`)
 
 };
 

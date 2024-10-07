@@ -64,7 +64,7 @@ function Illustration() {
         const token = response.data.token;
   
         Cookies.set('user', token, { expires: expirationTime });
-        Cookies.set('accountId', response.data.accountId, { expires: expirationTime });
+  
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   
         navigate("/");

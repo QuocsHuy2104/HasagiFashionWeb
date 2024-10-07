@@ -659,10 +659,10 @@ img {
 
 
 .row {
-  display: flex;
   justify-content: flex-start; /* Hoặc center để căn giữa các sản phẩm */
   flex-wrap: wrap;
   padding: 0 100px; /* Thêm khoảng cách trái và phải */
+  margin-top: 2px;
 }
 
 

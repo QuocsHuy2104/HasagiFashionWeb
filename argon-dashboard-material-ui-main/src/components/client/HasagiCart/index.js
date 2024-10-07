@@ -9,8 +9,8 @@ import axios from "axios";
 import Backup from "components/client/HasagiBackup";
 import ColorSelectionModal from "../HasagiPhanLoai";
 import Cookies from "js-cookie";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from 'react-toastify'; // Import Toastify
+import 'react-toastify/dist/ReactToastify.css'; // Import Toastify CSS
 
 const Cart = () => {
     const [cartItems, setCartItems] = useState([]);
@@ -108,7 +108,7 @@ const Cart = () => {
     const handleCheckout = () => {
         const selectedItems = cartItems.filter(item => item.selected);
         if (selectedItems.length === 0) {
-            toast.warn("Vui lòng chọn sản phẩm để thanh toán.");
+            toast.warn("Vui lòng chọn sản phẩm để thanh toán."); // Toast warning
             return;
         }
         console.log("Selected Items:", selectedItems);
@@ -117,7 +117,7 @@ const Cart = () => {
             setShowBackupModal(true);
         } else {
             navigate(`/Checkout?id=${address}`);
-            toast.success("Chuyển đến trang thanh toán.");
+            toast.success("Chuyển đến trang thanh toán."); // Toast success
         }
     };
 
@@ -125,24 +125,24 @@ const Cart = () => {
         setShowBackupModal(false);
         if (accountExists) {
             navigate(`/Checkout?id=${address}`);
-            toast.success("Chuyển đến trang thanh toán.");
+            toast.success("Chuyển đến trang thanh toán."); // Toast success
         }
     };
 
     const handleDeleteSelected = async () => {
         const selectedIds = cartItems.filter(item => item.selected).map(item => item.cartdetailid);
         if (selectedIds.length === 0) {
-            toast.warn("Vui lòng chọn sản phẩm để xóa.");
+            toast.warn("Vui lòng chọn sản phẩm để xóa."); // Toast warning
             return;
         }
         try {
             await axios.delete('http://localhost:8080/api/cart/delete', { data: selectedIds });
             setCartItems(cartItems.filter(item => !selectedIds.includes(item.cartdetailid)));
             setSelectAll(false);
-            toast.success("Xóa sản phẩm thành công.");
+            toast.success("Xóa sản phẩm thành công."); // Toast success
         } catch (error) {
             console.error("Error deleting items:", error);
-            toast.error("Có lỗi xảy ra khi xóa sản phẩm.");
+            toast.error("Có lỗi xảy ra khi xóa sản phẩm."); // Toast error
         }
     };
 
@@ -189,7 +189,7 @@ const Cart = () => {
 
     return (
         <>
-            <ToastContainer />
+            <ToastContainer /> {/* Include ToastContainer */}
             {isLoading && (
                 <div className="loader">
                     <div className="loader-inner">
@@ -245,33 +245,17 @@ const Cart = () => {
                                                 />
                                             </td>
                                             <td className="align-middle" style={{ textAlign: "left", paddingLeft: "20px" }}>
-                                                <img src={item.image} style={{ width: 60 }} alt={item.name} /> {item.name}
+                                                <img src={aboutImage} style={{ width: 60 }} alt={item.name} /> {item.name}
                                             </td>
                                             <td className="align-middle">
-                                                <button
-                                                    onClick={() => toggleModal(item.cartdetailid)}
-                                                    style={{
-                                                        backgroundColor: 'transparent',
-                                                        border: 'none',
-                                                        color: 'black',
-                                                        cursor: 'pointer'
-                                                    }}>
+                                                <button onClick={() => toggleModal(item.cartdetailid)} className="btn btn-outline-primary">
                                                     Phân Loại Hàng: <br />
                                                     {item.color || "Chưa chọn màu"} , {item.size || "Chưa chọn kích thước"}
                                                 </button>
                                             </td>
-
                                             <td className="align-middle">{item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
                                             <td className="align-middle">
-                                                <div
-                                                    className="input-group quantity mx-auto"
-                                                    style={{
-                                                        width: "140px",
-                                                        display: "flex",
-                                                        alignItems: "center",
-                                                        justifyContent: "space-between",  // Ensure even spacing
-                                                    }}
-                                                >
+                                                <div className="input-group quantity mx-auto" style={{ width: "140px", display: "flex", alignItems: "center" }}>
                                                     <div className="input-group-btn">
                                                         <button
                                                             className="btn btn-sm btn-outline-secondary"
@@ -289,7 +273,6 @@ const Cart = () => {
                                                             <AiOutlineMinus />
                                                         </button>
                                                     </div>
-
                                                     <input
                                                         type="text"
                                                         className="form-control form-control-sm text-center"
@@ -301,7 +284,6 @@ const Cart = () => {
                                                             margin: "0 5px",
                                                         }}
                                                     />
-
                                                     <div className="input-group-btn">
                                                         <button
                                                             className="btn btn-sm btn-outline-secondary"
@@ -321,7 +303,6 @@ const Cart = () => {
                                                     </div>
                                                 </div>
                                             </td>
-
                                             <td className="align-middle">{(item.price * item.quantity).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
                                             <td className="align-middle">
                                                 <button

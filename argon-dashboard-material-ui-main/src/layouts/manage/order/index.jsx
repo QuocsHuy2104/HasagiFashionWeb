@@ -11,10 +11,10 @@ import ArgonTypography from "components/ArgonTypography";
 import { format } from "date-fns";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
-import { DataGrid } from "@mui/x-data-grid";
-import Paper from "@mui/material/Paper";
+import * as XLSX from "xlsx"; // Import library xlsx
+import { saveAs } from "file-saver"; // Import library file-saver
+import { DataGrid } from "@mui/x-data-grid"; // Import DataGrid
+import Paper from "@mui/material/Paper"; // Import Paper
 function Order() {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -27,12 +27,12 @@ function Order() {
     const fetchData = async () => {
       try {
         const response = await axios.get("http://localhost:3000/api/order");
-        if (response.data && response.data.orders) {
-          console.log(response.data);
+        if (response.data && response.data.orders) {  
+          console.log(response.data); 
           const orders = response.data.orders.map(order => ({
             ...order,
             orderDate: order.orderDate ? format(new Date(order.orderDate), "dd-MM-yyyy") : "Date not available"
-
+            
           }));
           setOrders(orders);
           setFilteredOrders(orders);
@@ -180,17 +180,17 @@ function Order() {
 
   const handleStatusChange = async (orderId, newStatusSlug) => {
     try {
-      await axios.put(`http://localhost:3000/api/order/${orderId}`, { slug: newStatusSlug });
+      await axios.put(`http://localhost:3000/api/order/${orderId}`, { statusSlug: newStatusSlug });
 
       setOrders(prevOrders =>
         prevOrders.map(order =>
-          order.id === orderId ? { ...order, slug: newStatusSlug } : order
+          order.id === orderId ? { ...order, statusSlug: newStatusSlug } : order
         )
       );
 
       setFilteredOrders(prevFilteredOrders =>
         prevFilteredOrders.map(order =>
-          order.id === orderId ? { ...order, slug: newStatusSlug } : order
+          order.id === orderId ? { ...order, statusSlug: newStatusSlug } : order
         )
       );
     } catch (error) {
@@ -200,9 +200,9 @@ function Order() {
 
   const handleReset = () => {
     setFilteredOrders(orders);
-    setPaginationModel({ page: 0, pageSize: 5 });
+    setPaginationModel({ page: 0, pageSize: 5 }); // Reset pagination to default
   };
-
+  
   const columns = [
     {
       field: "id",
@@ -216,29 +216,30 @@ function Order() {
       ),
       width: 100,
     },
-
-    { field: "fullNameAddress", headerName: "Full Name", width: 200 },
+    
+    { field: "fullNameAddress", headerName: "Full Name", width: 200 }, // Moved Address column here
     {
-      field: "fullAddress",
-      headerName: "Full Address",
+      field: "fullAddress", 
+      headerName: "Full Address", 
       width: 300,
       renderCell: (params) => {
         const order = params.row;
-
+  
+        // Construct the full address
         const address = [
-          order.address1 || 'No Name',
+          order.address1 || 'No Name', // Use fullNameAddress directly from the order
           getAddressNameById(order.provinceID, provinces, 'province') || 'Unknown Province',
           getAddressNameById(order.districtCode, districtsByProvince[order.provinceID] || [], 'district'),
           getAddressNameById(order.wardCode, wardsByDistrict[order.districtCode] || [], 'ward')
         ].join(', ');
-
+  
         return (
           <div>
             {address}
           </div>
         );
       }
-    },
+    },  
     { field: "orderDate", headerName: "Order Date", width: 150 },
     { field: "numberPhone", headerName: "Phone Number", width: 150 },
     { field: "payMethod", headerName: "Pay Method", width: 150 },
@@ -253,49 +254,49 @@ function Order() {
         const order = params.row;
         return (
           <Form.Select
-
-            size="large"
-            value={order.slug}
-            onChange={(e) => handleStatusChange(order.id, e.target.value)}
-          >
-            {/* If the order is canceled, only show the "Cancelled" option */}
-            {order.slug === 'huy-don-hang' ? (
-              <option value="huy-don-hang">HỦY</option>
-            ) : order.slug === 'hoan-thanh' ? (
-              <option value="hoan-thanh">HOÀN THÀNH</option>
-            ) : (
-              <>
-
-                {statuses
-                  .filter(status =>
-                    ['dang-xac-nhan', 'da-xac-nhan', 'dang-giao', 'da-giao'].includes(status.slug)
-                  )
-                  .sort((a, b) => a.id - b.id)
-                  .map((status, index, array) => {
-                    const currentIndex = array.findIndex(s => s.slug === order.slug);
-                    const nextStatus = array[currentIndex + 1] || null;
-                    if (status.slug === order.slug || status === nextStatus) {
-                      return (
-                        <option key={status.slug} value={status.slug}>
-                          {status.status}
-                        </option>
-                      );
-                    }
-                    return null;
-                  })}
-
-                {/* Allow cancellation if the status is 'confirming', 'confirmed', or 'delivering' */}
-                {['dang-xac-nhan', 'da-xac-nhan', 'dang-giao'].includes(order.slug) && (
-                  <option value="huy-don-hang">HỦY</option>
-                )}
-              </>
-            )}
-          </Form.Select>
+                      
+          size="large"
+          value={order.statusSlug}
+          onChange={(e) => handleStatusChange(order.id, e.target.value)}
+        >
+          {/* If the order is canceled, only show the "Cancelled" option */}
+          {order.statusSlug === 'cancel-order' ? (
+            <option value="cancel-order">Cancelled</option>
+          ) : order.statusSlug === 'complete' ? (
+            <option value="complete">Complete</option>
+          ) : (
+            <>
+             
+              {statuses
+                .filter(status =>
+                  ['confirming', 'confirmed', 'delivering', 'delivered'].includes(status.statusSlug)
+                )
+                .sort((a, b) => a.id - b.id)
+                .map((status, index, array) => {
+                  const currentIndex = array.findIndex(s => s.statusSlug === order.statusSlug);
+                  const nextStatus = array[currentIndex + 1] || null;
+        if (status.statusSlug === order.statusSlug || status === nextStatus) {
+                    return (
+                      <option key={status.statusSlug} value={status.statusSlug}>
+                        {status.statusName}
+                      </option>
+                    );
+                  }
+                  return null;
+                })}
+        
+              {/* Allow cancellation if the status is 'confirming', 'confirmed', or 'delivering' */}
+              {['confirming', 'confirmed', 'delivering'].includes(order.statusSlug) && (
+                <option value="cancel-order">Cancelled</option>
+              )}
+            </>
+          )}
+        </Form.Select>
         );
       },
     },
   ];
-
+  
 
   return (
     <DashboardLayout>
@@ -326,7 +327,7 @@ function Order() {
                     <option value="all">All</option>
                     {statuses.map((status) => (
                       <option key={status.id} value={status.id}>
-                        {status.status}
+                        {status.statusName}
                       </option>
                     ))}
                   </select>

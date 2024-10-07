@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import Card from "@mui/material/Card";
 import { Link, useNavigate } from 'react-router-dom';
-// Các thành phần của Argon Dashboard 2 MUI
+
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
 import ArgonButton from "components/ArgonButton";
 import ArgonInput from "components/ArgonInput";
 
-// Các thành phần của layout xác thực
 import CoverLayout from "layouts/authentication/components/CoverLayout";
 import Socials from "layouts/authentication/components/Socials";
 import Separator from "layouts/authentication/components/Separator";
 
-// Hình ảnh
+import AccountService from "services/AccountServices";
+
 const bgImage = "https://raw.githubusercontent.com/creativetimofficial/public-assets/master/argon-dashboard-pro/assets/img/signup-cover.jpg";
 
 function Cover() {
@@ -46,7 +46,6 @@ function Cover() {
     return formErrors;
   };
 
-  // Xử lý đăng ký
   const handleSignUp = async (e) => {
     e.preventDefault();
 

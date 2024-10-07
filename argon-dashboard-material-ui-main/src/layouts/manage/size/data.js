@@ -64,7 +64,7 @@ const SizeTable = ({ onEditClick }) => {
     };
 
     const rows = sizes.map(size => ({
-        size: <Size name={size.name} />,
+        size: <Size name={size.size} />,
         price: <SizePrice price={size.price} />, // Use SizePrice component here
         action: (
             <ArgonBox display="flex" justifyContent="space-between" alignItems="center">
