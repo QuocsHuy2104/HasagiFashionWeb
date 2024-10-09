@@ -202,12 +202,12 @@ function ShopDetail() {
                                                 <input
                                                     type="radio"
                                                     className="custom-control-input"
-                                                    id={`size-${size}`}
+                                                    id={`size-${size.id}`}
                                                     name="size"
                                                     value={size.id}
-                                                    onChange={(e) => setSelectedSize(e.target.value)} // Update size state
+                                                    onChange={(e) => setSelectedSize(e.target.value)}
                                                 />
-                                                <label className="custom-control-label" htmlFor={`size-${size}`}>
+                                                <label className="custom-control-label" htmlFor={`size-${size.id}`}>
                                                     {size.name}
                                                 </label>
                                             </div>
@@ -226,10 +226,10 @@ function ShopDetail() {
                                                 <input
                                                     type="radio"
                                                     className="custom-control-input"
-                                                    id={`color-${color.id}`} // Unique ID for each color
-                                                    name="color" // Grouping radio buttons
-                                                    value={color.id} // Value set to color ID
-                                                    onChange={(e) => setSelectedColor(e.target.value)} // Update selected color state
+                                                    id={`color-${color.id}`}
+                                                    name="color"
+                                                    value={color.id}
+                                                    onChange={(e) => setSelectedColor(e.target.value)}
                                                 />
                                                 <label className="custom-control-label" htmlFor={`color-${color.id}`}>
                                                     {color.name}

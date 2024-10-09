@@ -221,8 +221,8 @@ const dropdownMenuStyle = {
     <>
       <HasagiNav />
       <nav className="navbar navbar-expand-lg p-0" style={navbarStyle}>
-            <div className="container-fluid d-flex justify-content-between align-items-center p-0">
-                <div className="collapse navbar-collapse">
+            <div className="container-fluid d-flex justify-content-between align-items-center py-5">
+                <div className="collapse navbar-collapse" style={{paddingTop:'50px'}}>
                     <ul className="nav-menu" style={navMenuStyle}>
                         <li className="nav-item dropdown" style={navItemStyle}>
                             <a className="nav-link dropdown-toggle menuLink" style={menuLinkStyle} role="button" id="categories" data-bs-toggle="dropdown" aria-expanded="false">

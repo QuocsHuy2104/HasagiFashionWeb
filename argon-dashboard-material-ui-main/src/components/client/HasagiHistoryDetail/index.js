@@ -97,7 +97,7 @@ const navMenuStyle = {
             </div>
         </nav>
       <div className="history-order-detail">
-      <div className="header">
+      <div className="header" style={{paddingTop: '50px'}}>
           <button className="back-button" onClick={() => goBack()}>
             <i className="ni ni-bold-left" />
           </button>
