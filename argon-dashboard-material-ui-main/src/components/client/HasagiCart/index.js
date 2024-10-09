@@ -85,10 +85,10 @@ const Cart = () => {
         try {
             await axios.delete(`http://localhost:3000/api/cart/remove/${itemId}?accountId=${accountId}`);
             setCartItems(cartItems.filter(item => item.cartdetailid !== itemId));
-            toast.success("Item removed successfully.");
+            toast.success("Xóa thành công.");
         } catch (error) {
             console.error("Error removing item:", error);
-            toast.error("Error removing item.");
+            toast.error("Xóa thất bại");
         }
     };
 
@@ -213,18 +213,7 @@ const Cart = () => {
                 </div>
             )}
             <HasagiNav />
-            <Navbar/>
-            {/* <div className="container-fluid py-2">
-                <div className="row px-xl-5">
-                    <div className="col-12">
-                        <nav className="breadcrumb bg-light mb-30">
-                            <a className="breadcrumb-item text-dark" href="/feature-section">Home</a>
-                            <a className="breadcrumb-item text-dark" href="/ShopDetail">Shop Detail</a>
-                            <span className="breadcrumb-item active">Cart</span>
-                        </nav>
-                    </div>
-                </div>
-            </div> */}
+    
             <div className="container-fluid py-2" >
                 <div className="row px-xl-5">
                     <div className="col-lg-12 mb-5" id="tableAddCart">

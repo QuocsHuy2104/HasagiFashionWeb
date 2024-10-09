@@ -51,7 +51,7 @@ import ArgonBox from "components/ArgonBox";
 import Category from "layouts/manage/category";
 import Brand from "layouts/manage/brand";
 // import FeatureSection from "layouts/clientuser";
-import FeatureSection from "layouts/clientuser/home";
+import FeatureSection from "layouts/clientuser";
 import OrderDetail from "layouts/manage/orderdetail";
 import Role from "layouts/manage/role";
 // import ShopDetail from "components/client/HasagiShopDetail";
@@ -227,7 +227,7 @@ const routes = [
   {
     // type: "route",
     name: "Shop Detail",
-    key: "shop Detail",
+    key: "Shop Detail",
     route: "/ShopDetail",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
     component: <ShopDetail />,
@@ -235,16 +235,17 @@ const routes = [
   },
   {
     name: "Shop",
-    key: "shop",
-    route: "/shop",
+    key: "Shop",
+    route: "/Shop",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
     component: <Shop />,
+    showInSidenav: true,
   },
   {
     // type: "route",
     name: "Cart",
-    key: "cart",
-    route: "/cart",
+    key: "Cart",
+    route: "/Cart",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
     component: <Cart />,
     showInSidenav: true,
@@ -260,7 +261,7 @@ const routes = [
   },
   {
     name: "Checkout",
-    key: "checkout",
+    key: "Checkout",
     route: "/Checkout",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
     component: <Checkout />,
@@ -277,7 +278,7 @@ const routes = [
   {
     // type: "route",
     name: "Complete",
-    key: "complete",
+    key: "Complete",
     route: "/Complete",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
     component: <Complete />,
@@ -286,7 +287,7 @@ const routes = [
   {
     // type: "route",
     name: "History",
-    key: "history",
+    key: "History",
     route: "/History",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
     component: <History/>,
@@ -295,8 +296,8 @@ const routes = [
   {
     // type: "route",
     name: "HistoryOrderDetail",
-    key: "historyorderdetail",
-    route: "/history-order/:orderId",
+    key: "Historyorderdetail",
+    route: "/History-order/:orderId",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
     component: <HistoryOrderDetail/>,
     showInSidenav: true, 

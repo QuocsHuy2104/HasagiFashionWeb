@@ -35,7 +35,7 @@ const Checkout = () => {
         setTimeout(() => {
             setIsLoading(false);
         }, 700);
-        
+
         const accountId = Cookies.get('accountId');
         if (!accountId) {
             navigate(`/authentication/sign-in`);
@@ -312,7 +312,6 @@ const Checkout = () => {
                 </div>
             )}
             <HasagiNav />
-            <Navbar/>
             <div className="container-fluid">
                 <div className="row px-xl-5">
                     <div className="header py-3">
@@ -407,18 +406,22 @@ const Checkout = () => {
                                         <div className="payment-options d-flex ml-3">
                                             {showPaymentButtons && (
                                                 <>
-                                                    <ArgonButton
-                                                        className={`custom-btn payment-btn ${selectedPayment === 'Direct Check' ? 'active' : ''}`}
-                                                        onClick={() => handleButtonClick('Direct Check')}
-                                                    >
-                                                        Thanh toán khi nhận hàng
-                                                    </ArgonButton>
-                                                    <ArgonButton
-                                                        className={`custom-btn payment-btn ${selectedPayment === 'Bank Transfer' ? 'active' : ''}`}
-                                                        onClick={() => handleButtonClick('Bank Transfer')}
-                                                    >
-                                                        Bank Transfer
-                                                    </ArgonButton>
+                                                    <div className="payment-buttons">
+                                                        <ArgonButton
+                                                            className={`custom-btn payment-btn ${selectedPayment === 'Direct Check' ? 'active' : ''}`}
+
+                                                            onClick={() => handleButtonClick('Direct Check')}
+                                                        >
+                                                            Thanh toán khi nhận hàng
+                                                        </ArgonButton>
+                                                        <ArgonButton
+                                                            className={`custom-btn payment-btn ${selectedPayment === 'Bank Transfer' ? 'active' : ''}`}
+                                                            style={{ marginLeft: '10px' }}
+                                                            onClick={() => handleButtonClick('Bank Transfer')}
+                                                        >
+                                                            Chuyển khoản ngân hàng
+                                                        </ArgonButton>
+                                                    </div>
                                                 </>
                                             )}
                                         </div>
@@ -436,30 +439,9 @@ const Checkout = () => {
                                     )}
                                     {selectedPayment === 'Bank Transfer' && (
                                         <div className="payment-description mb-3">
-                                            <p>Chọn phương thức chuyển khoản:</p>
-                                            <div className="payment-buttons d-flex flex-wrap">
-                                                <button className="payment-btn1 mr-2 mb-2">
-                                                    <div className="icon-container">
-                                                        <FontAwesomeIcon icon={faCcVisa} />
-                                                    </div>
-                                                    <span>Giảm 50000đ</span>
-                                                    <span>Đơn từ 250.000đ với thẻ VISA</span>
-                                                </button>
-                                                <button className="payment-btn1 mr-2 mb-2">
-                                                    <div className="icon-container">
-                                                        <FontAwesomeIcon icon={faCcMastercard} />
-                                                    </div>
-                                                    <span>Giảm 50000đ</span>
-                                                    <span>Đơn từ 250.000đ với ví VNPAY</span>
-                                                </button>
-                                                <button className="payment-btn1 mb-2">
-                                                    <div className="icon-container">
-                                                        <FontAwesomeIcon icon={faCcAmex} />
-                                                    </div>
-                                                    <span>Giảm 50000đ</span>
-                                                    <span>Đơn từ 250.000đ với thẻ TPBANK</span>
-                                                </button>
-                                            </div>
+                                            <p>
+                                                Chuyển khoản ngân hàng là một phương thức thanh toán hoặc chuyển tiền từ tài khoản ngân hàng này sang tài khoản ngân hàng khác. Hình thức chuyển khoản này rất phổ biến trong các giao dịch tài chính và có thể được thực hiện qua nhiều cách khác nhau.
+                                            </p>
                                         </div>
                                     )}
                                 </div>

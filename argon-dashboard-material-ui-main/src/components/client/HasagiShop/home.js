@@ -3,9 +3,7 @@ import { Link } from "react-router-dom";
 import aboutImage5 from "layouts/assets/img/product-1.jpg";
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
-import ProductService from "../../../services/ProductServices";
-import CategoryService from "../../../services/CategoryServices";
-import BrandService from "../../../services/BrandServices";
+import ShopService from "services/ShopServices";
 
 function Shop() {
     const [products, setProducts] = useState([]);
@@ -49,6 +47,7 @@ function Shop() {
         } else {
             setSelectedCategory([...selectedCategory, categoryId]);
         }
+        console.log("Selected Category:", selectedCategory);
         setCurrentPage(1);
     };
 
@@ -64,9 +63,9 @@ function Shop() {
     useEffect(() => {
         const fetchProductsAndCategories = async () => {
             try {
-                const productResponse = await ProductService.getAllProducts();
-                const categoryResponse = await CategoryService.getAllCategories();
-                const brandResponse = await BrandService.getAllBrands();
+                const productResponse = await ShopService.getProductHome();
+                const categoryResponse = await ShopService.getCateHome();
+                const brandResponse = await ShopService.getBrandHome();
 
                 if (
                     Array.isArray(productResponse.data) &&
@@ -98,6 +97,7 @@ function Shop() {
         const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLowerCase());
         return matchesCategory && matchesBrand && matchesSearchTerm;
     });
+    
 
     const sortedProducts = filteredProducts.sort((a, b) => {
         if (sortOption === "price-asc") {
@@ -133,7 +133,7 @@ function Shop() {
                 </div>
             )}
             <HasagiNav onSearch={handleSearch}/>
-            <div className="container-fluid py-9" style={{paddingTop:'5.5rem'}}>
+            <div className="container-fluid py-5" style={{paddingTop:'5.5rem'}}>
                 <div className="row px-xl-5">
                     <div className="col-12">
                         <nav className="breadcrumb bg-light mb-30">
@@ -224,10 +224,9 @@ function Shop() {
                                     style={{ width: '150px' }}
                                 >
                                     <option value="default">Sắp xếp</option>
-                                    <option value="price-asc">Giá thấp nhất</option>
-                                    <option value="price-desc">Giá cao nhất</option>
-                                    <option value="popularity">Phổ biến</option>
-                                    <option value="newest">Mới nhất</option>
+                                    <option value="price-asc">Giá tâng dần</option>
+                                    <option value="price-desc">Giá giảm dần</option>
+                                    
                                 </select>
                             </div>
                         </div>
