@@ -2,7 +2,6 @@ import React from 'react';
 import { FaMapMarkerAlt, FaEnvelope, FaPhoneAlt } from 'react-icons/fa';
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
-import "components/client/assets/css/ShopDetail.css";
 import "components/client/assets/css/style.css";
 import ArgonInput from 'components/ArgonInput';
 import ArgonButton from 'components/ArgonButton';

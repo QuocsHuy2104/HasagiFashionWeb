@@ -62,7 +62,11 @@ const AuthorsTableData = ({ onEditClick, searchTerm = "", selectedRoles = [] }) 
     AccountService.getAllAccounts()
       .then((resp) => setAccounts(resp.data || []))
       .catch((err) => {
-        console.error(err);
+        if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+          window.location.href = "/authentication/sign-in";
+        } else {
+          console.error(err);
+        }
       });
   }, []);
 
@@ -72,21 +76,13 @@ const AuthorsTableData = ({ onEditClick, searchTerm = "", selectedRoles = [] }) 
       (account.email && account.email.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+
   const handleEditClick = (account) => {
     onEditClick(account);
   };
 
-  const handleDelete = accountId => {
-    AccountService.deleteAccount(accountId).then(() => {
-      AccountService.getAllAccounts()
-        .then((resp) => setAccounts(resp.data || []))
-        .catch((err) => {
-          console.error(err);
-        });
-    }).catch(err => { console.error(err) });
-  }
-
   const handleSwitchChange = (account) => {
+    // Optimistically update the account's status in the UI
     const updatedAccounts = accounts.map((acc) => {
       if (acc.id === account.id) {
         return { ...acc, delete: !acc.delete };
@@ -96,6 +92,11 @@ const AuthorsTableData = ({ onEditClick, searchTerm = "", selectedRoles = [] }) 
 
     setAccounts(updatedAccounts);
 
+    // Log account details
+    console.log("Account ID:", account.id);
+    console.log("Delete status:", account.delete);
+
+    // Make API call to update dismissal status
     AccountService.dismissalAccount(account.id)
       .then((res) => {
         console.log(`Account ${account.id} updated successfully`);
@@ -103,6 +104,7 @@ const AuthorsTableData = ({ onEditClick, searchTerm = "", selectedRoles = [] }) 
       .catch((err) => {
         console.log(`Error updating account ${account.id}`, err);
 
+        // Revert optimistic UI change in case of error
         const revertedAccounts = accounts.map((acc) => {
           if (acc.id === account.id) {
             return { ...acc, delete: !acc.delete };  // Revert the change
@@ -166,7 +168,7 @@ const AuthorsTableData = ({ onEditClick, searchTerm = "", selectedRoles = [] }) 
             variant="caption"
             color="error"
             fontWeight="medium"
-            onClick={() => handleDelete(account.id)}
+            onClick={() => deleteItem(account.id)}
           >
             <i className="bi bi-trash3"></i> Remove
           </ArgonTypography>

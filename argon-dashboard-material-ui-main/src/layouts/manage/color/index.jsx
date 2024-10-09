@@ -14,11 +14,11 @@ import { toast } from "react-toastify";
 function Color() {
     const [formData, setFormData] = useState({
         id: "",
-        color: "",
+        name: "",  // Thay đổi 'color' thành 'name'
     });
 
     const [errors, setErrors] = useState({
-        color: false,
+        name: false,  // Thay đổi 'color' thành 'name'
     });
 
     const [colors, setColors] = useState([]);
@@ -46,11 +46,11 @@ function Color() {
 
     const validateForm = () => {
         let isValid = true;
-        const newErrors = { color: false };
+        const newErrors = { name: false };  // Thay đổi 'color' thành 'name'
 
-        // Validation: Color name cannot be empty
-        if (!formData.color.trim()) {
-            newErrors.color = "Color name is required.";
+        // Validation: Name cannot be empty
+        if (!formData.name.trim()) {  // Thay đổi 'color' thành 'name'
+            newErrors.name = "Color name is required.";
             isValid = false;
         }
 
@@ -63,10 +63,10 @@ function Color() {
 
         // Validate form
         if (!validateForm()) {
-            return; 
+            return;
         }
 
-        const data = { color: formData.color };
+        const data = { name: formData.name };  // Thay đổi 'color' thành 'name'
 
         try {
             let result;
@@ -87,15 +87,15 @@ function Color() {
     const resetForm = () => {
         setFormData({
             id: "",
-            color: "",
+            name: "",  // Thay đổi 'color' thành 'name'
         });
-        setErrors({ color: false });
+        setErrors({ name: false });  // Thay đổi 'color' thành 'name'
     };
 
     const handleEditClick = (color) => {
         setFormData({
             id: color.id,
-            color: color.color,
+            name: color.name,  // Thay đổi 'color' thành 'name'
         });
     };
 
@@ -137,15 +137,15 @@ function Color() {
                                         type="text"
                                         placeholder="Color Name"
                                         size="large"
-                                        name="color"
+                                        name="name"  // Thay đổi 'color' thành 'name'
                                         fullWidth
-                                        value={formData.color}
+                                        value={formData.name}  // Thay đổi 'color' thành 'name'
                                         onChange={handleChange}
-                                        error={!!errors.color} // Show error state
+                                        error={!!errors.name}  // Thay đổi 'color' thành 'name'
                                     />
-                                    {errors.color && (
+                                    {errors.name && (
                                         <ArgonTypography variant="caption" color="error">
-                                            {errors.color}
+                                            {errors.name}
                                         </ArgonTypography>
                                     )}
                                 </ArgonBox>
