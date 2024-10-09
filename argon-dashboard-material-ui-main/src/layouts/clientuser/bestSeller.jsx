@@ -173,7 +173,7 @@ function BestSeller() {
                             </ArgonTypography>
                         ) : (
                             best_seller.map((pd) => (
-                                <div key={pd.id} >  {/* Increase padding left-right */}
+                                <div key={pd.id} >
                                     <ArgonBox mx={1}>
                                         <HasagiCard
                                             image={pd.image}
