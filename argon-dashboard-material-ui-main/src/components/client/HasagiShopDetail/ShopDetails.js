@@ -44,6 +44,11 @@ function ShopDetail() {
             return;
         }
 
+        if (product.importQuantity <= 0) {
+            toast.error("Sản phẩm đã hết hàng!");
+            return;
+        }
+
         try {
             const response = await cartService.addToCart({
                 accountId,

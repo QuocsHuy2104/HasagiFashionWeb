@@ -474,13 +474,13 @@ payStatus: payStatus,
                                                 người mua sẽ thanh toán tiền mặt (tiền đặt hàng) cho người giao hàng ngay tại thời điểm nhận hàng.</p>
                                         </div>
                                     )}
-                                    {/* {selectedPayment === 'Bank Transfer' && (
+                                    {selectedPayment === 'Bank Transfer' && (
                                         <div className="payment-description mb-3">
                                             <p>
                                                 Chuyển khoản ngân hàng là một phương thức thanh toán hoặc chuyển tiền từ tài khoản ngân hàng này sang tài khoản ngân hàng khác. Hình thức chuyển khoản này rất phổ biến trong các giao dịch tài chính và có thể được thực hiện qua nhiều cách khác nhau.
                                             </p>
                                         </div>
-                                    )} */}
+                                    )}
                                 </div>
                                 <div className="col-lg-5">
                                     {selectedPayment === 'Direct Check' && (

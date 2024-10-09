@@ -27,6 +27,7 @@ const FeaturesAndAbout = () => {
   return (
     <>
       <Header onSearch={handleSearch} />
+      
       <ArgonBox px={20}>
         <ImageCarousel/>
         <Policy />
