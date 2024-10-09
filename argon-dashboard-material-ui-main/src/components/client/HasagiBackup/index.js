@@ -9,7 +9,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import AddressSelection from '../HasagiBackup1';
-import Cookies from "js-cookie";
+
 
 const Backup = ({ show, onClose }) => {
     const [fullNameAddress, setFullnameAddress] = useState('');
@@ -32,14 +32,7 @@ const Backup = ({ show, onClose }) => {
    useEffect(() => {
        const checkUserAddresses = async () => {
            try {
-               const accountId = Cookies.get('accountId'); // Get accountId from cookies or wherever it's stored
-               if (!accountId) {
-                   console.error("Account ID is missing");
-                   return;
-               }
-
-               // Make the API request with accountId as a query parameter
-               const addressCheckResponse = await axios.get(`http://localhost:3000/api/addresses/account?accountId=${accountId}`, { withCredentials: true });
+               const addressCheckResponse = await axios.get(`http://localhost:3000/api/addresses/account`, { withCredentials: true });
 
                const userHasAddresses = addressCheckResponse.data.length > 0;
 

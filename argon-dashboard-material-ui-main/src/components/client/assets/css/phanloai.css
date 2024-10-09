@@ -4,7 +4,7 @@
     max-width: 500px; /* Kích thước tối đa */
     margin: auto; /* Căn giữa */
   }
-  
+
   .color-options {
     display: flex;
     flex-wrap: wrap;
@@ -13,7 +13,7 @@
     max-height: 300px; /* Thêm chiều cao tối đa */
     overflow-y: auto; /* Cuộn nếu nội dung quá dài */
   }
-  
+
   .color-btn {
     flex: 1 1 30%;
     margin: 5px;
@@ -23,25 +23,25 @@
     background-color: white;
     cursor: pointer;
   }
-  
+
   .color-btn.selected {
     border-color: #007bff;
     background-color: #e9ecef;
     color: black;
   }
-  
+
   .color-btn:hover {
     background-color: #f8f9fa; /* Một màu nhẹ khi hover */
   }
-  
-  
+
+
   .product-page .btn-outline-primary {
     border: none; /* Không có viền */
     color: black; /* Màu chữ đen */
     background-color: transparent; /* Nền trong suốt */
     padding-bottom: 10px;
   }
-  
+
   .product-page .btn-outline-primary:hover {
     background-color: transparent; /* Giữ nền trong suốt khi hover */
     color: black; /* Màu chữ đen khi hover */
@@ -80,3 +80,4 @@
   pointer-events: none; /* Prevents clicking */
   opacity: 0.5; /* Makes it look disabled */
 }
+

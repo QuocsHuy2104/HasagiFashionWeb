@@ -32,13 +32,12 @@ const HasagiNav = () => {
                 position == true ?
                     <a href="/dashboard" className="navbar-brand p-0">
                         <h1 className="text-primary"><i className="fas fa-hand-holding-water me-3"></i>HasagiFashion</h1>
-                        {/* <img src="img/logo.png" alt="Logo /"> */}
+                      
                     </a>
                     :
                     <a href="#" className="navbar-brand p-0">
                         <h1 className="text-primary"><i className="fas fa-hand-holding-water me-3"></i>HasagiFashion</h1>
-                        {/* <img src="img/logo.png" alt="Logo /"> */}
-                    </a>
+                                            </a>
             }
 
             <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">

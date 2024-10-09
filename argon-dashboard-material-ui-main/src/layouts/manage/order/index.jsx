@@ -11,10 +11,10 @@ import ArgonTypography from "components/ArgonTypography";
 import { format } from "date-fns";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import * as XLSX from "xlsx"; // Import library xlsx
-import { saveAs } from "file-saver"; // Import library file-saver
-import { DataGrid } from "@mui/x-data-grid"; // Import DataGrid
-import Paper from "@mui/material/Paper"; // Import Paper
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { DataGrid } from "@mui/x-data-grid";
+import Paper from "@mui/material/Paper";
 function Order() {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -180,17 +180,17 @@ function Order() {
 
   const handleStatusChange = async (orderId, newStatusSlug) => {
     try {
-      await axios.put(`http://localhost:3000/api/order/${orderId}`, { statusSlug: newStatusSlug });
+      await axios.put(`http://localhost:3000/api/order/${orderId}`, { slug: newStatusSlug });
 
       setOrders(prevOrders =>
         prevOrders.map(order =>
-          order.id === orderId ? { ...order, statusSlug: newStatusSlug } : order
+          order.id === orderId ? { ...order, slug: newStatusSlug } : order
         )
       );
 
       setFilteredOrders(prevFilteredOrders =>
         prevFilteredOrders.map(order =>
-          order.id === orderId ? { ...order, statusSlug: newStatusSlug } : order
+          order.id === orderId ? { ...order, slug: newStatusSlug } : order
         )
       );
     } catch (error) {
@@ -200,102 +200,96 @@ function Order() {
 
   const handleReset = () => {
     setFilteredOrders(orders);
-    setPaginationModel({ page: 0, pageSize: 5 }); // Reset pagination to default
+    setPaginationModel({ page: 0, pageSize: 5 });
   };
   
   const columns = [
-    {
-      field: "id",
-      headerName: "Action",
-      renderCell: (params) => (
-        <Link to={`/api/orderdetails/${params.row.id}`}>
-          <ArgonButton size="small" color="primary">
-            Details
-          </ArgonButton>
-        </Link>
-      ),
-      width: 100,
-    },
+  
     
-    { field: "fullNameAddress", headerName: "Full Name", width: 200 }, // Moved Address column here
-    {
-      field: "fullAddress", 
-      headerName: "Full Address", 
-      width: 300,
-      renderCell: (params) => {
-        const order = params.row;
-  
-        // Construct the full address
-        const address = [
-          order.address1 || 'No Name', // Use fullNameAddress directly from the order
-          getAddressNameById(order.provinceID, provinces, 'province') || 'Unknown Province',
-          getAddressNameById(order.districtCode, districtsByProvince[order.provinceID] || [], 'district'),
-          getAddressNameById(order.wardCode, wardsByDistrict[order.districtCode] || [], 'ward')
-        ].join(', ');
-  
-        return (
-          <div>
-            {address}
-          </div>
-        );
-      }
-    },  
-    { field: "orderDate", headerName: "Order Date", width: 150 },
-    { field: "numberPhone", headerName: "Phone Number", width: 150 },
-    { field: "payMethod", headerName: "Pay Method", width: 150 },
-    { field: "payStatus", headerName: "Pay Status", width: 150 },
-    { field: "shippingFree", headerName: "Shipping Fee", width: 120 },
-    { field: "amount", headerName: "Amount", width: 120 },
+    { field: "fullNameAddress", headerName: "Full Name",    flex: 1 },
+    
+    { field: "orderDate", headerName: "Order Date",    flex: 1 },
+    { field: "numberPhone", headerName: "Phone Number",    flex: 1},
+    { field: "amount", headerName: "Amount",    flex: 1 },
     {
       field: "status",
       headerName: "Status",
-      width: 150,
+      flex: 1,
       renderCell: (params) => {
         const order = params.row;
+        const currentStatus = order.slug;
+        const getNextStatus = (currentStatus) => {
+          const availableStatuses = ['dang-xac-nhan', 'da-xac-nhan', 'dang-giao'];
+          const currentIndex = availableStatuses.indexOf(currentStatus);
+  
+          if (currentIndex >= 0 && currentIndex < availableStatuses.length - 1) {
+            return availableStatuses[currentIndex + 1];
+          } else if (currentStatus === 'dang-giao') {
+            return 'da-giao'; 
+          }
+          return null;
+        };
+  
+        const nextStatus = getNextStatus(currentStatus);
+  
         return (
-          <Form.Select
-                      
-          size="large"
-          value={order.statusSlug}
-          onChange={(e) => handleStatusChange(order.id, e.target.value)}
-        >
-          {/* If the order is canceled, only show the "Cancelled" option */}
-          {order.statusSlug === 'cancel-order' ? (
-            <option value="cancel-order">Cancelled</option>
-          ) : order.statusSlug === 'complete' ? (
-            <option value="complete">Complete</option>
-          ) : (
-            <>
-             
-              {statuses
-                .filter(status =>
-                  ['confirming', 'confirmed', 'delivering', 'delivered'].includes(status.statusSlug)
-                )
-                .sort((a, b) => a.id - b.id)
-                .map((status, index, array) => {
-                  const currentIndex = array.findIndex(s => s.statusSlug === order.statusSlug);
-                  const nextStatus = array[currentIndex + 1] || null;
-        if (status.statusSlug === order.statusSlug || status === nextStatus) {
-                    return (
-                      <option key={status.statusSlug} value={status.statusSlug}>
-                        {status.statusName}
-                      </option>
-                    );
-                  }
-                  return null;
-                })}
-        
-              {/* Allow cancellation if the status is 'confirming', 'confirmed', or 'delivering' */}
-              {['confirming', 'confirmed', 'delivering'].includes(order.statusSlug) && (
-                <option value="cancel-order">Cancelled</option>
-              )}
-            </>
-          )}
-        </Form.Select>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <span style={{ marginRight: '10px' }}>
+              {statuses.find(status => status.slug === currentStatus)?.status || 'Unknown'}
+            </span>
+            {currentStatus !== 'hoan-thanh' && currentStatus !== 'da-giao' && (
+              <>
+                {currentStatus !== 'huy-don-hang' && (
+                  <ArgonButton
+                    size="small"
+                    color="primary"
+                    onClick={() => handleNextStatus(order.id, currentStatus, getNextStatus)}
+                  >
+                    {statuses.find(status => status.slug === nextStatus)?.status || 'Unknown'}
+                  </ArgonButton>
+                )}
+                {['dang-xac-nhan', 'da-xac-nhan'].includes(currentStatus) && (
+                  <ArgonButton
+                    size="small"
+                    color="error"
+                    onClick={() => handleStatusChange(order.id, 'huy-don-hang')}
+                    style={{ marginLeft: '10px' }}
+                  >
+                    Hủy Đơn Hàng
+                  </ArgonButton>
+                )}
+              </>
+            )}
+          </div>
         );
       },
-    },
+    }
   ];
+  
+  const handleNextStatus = async (orderId, currentStatus, getNextStatus) => {
+    const nextStatusSlug = getNextStatus(currentStatus); // Get the next status slug
+  
+    if (nextStatusSlug) {
+      try {
+        await axios.put(`http://localhost:3000/api/order/${orderId}`, { slug: nextStatusSlug });
+  
+        setOrders(prevOrders =>
+          prevOrders.map(order =>
+            order.id === orderId ? { ...order, slug: nextStatusSlug } : order
+          )
+        );
+  
+        setFilteredOrders(prevFilteredOrders =>
+          prevFilteredOrders.map(order =>
+            order.id === orderId ? { ...order, slug: nextStatusSlug } : order
+          )
+        );
+      } catch (error) {
+        console.error("There was an error updating the status!", error);
+      }
+    }
+  };
+  
   
 
   return (
@@ -327,7 +321,7 @@ function Order() {
                     <option value="all">All</option>
                     {statuses.map((status) => (
                       <option key={status.id} value={status.id}>
-                        {status.statusName}
+                        {status.status}
                       </option>
                     ))}
                   </select>
@@ -386,10 +380,23 @@ function Order() {
               rows={filteredOrders}
               columns={columns}
               paginationModel={paginationModel}
-              onPaginationModelChange={setPaginationModel} // Handle pagination change
-              pageSizeOptions={[5, 10, 20]} // Options for number of rows per page
+              onPaginationModelChange={setPaginationModel}
+              pageSizeOptions={[5, 10, 20]} 
               disableSelectionOnClick
-              isRowSelectable={() => false}
+              sx={{
+                "& .MuiDataGrid-footerContainer": {
+                  justifyContent: "space-between", 
+                },
+                "& .MuiTablePagination-selectLabel": {
+                  marginRight: 0,
+                },
+                "& .MuiTablePagination-root": {
+                  width: "400px", 
+                },
+                "& .MuiInputBase-root": {
+                  maxWidth: "60px", 
+                },
+              }}
             />
           </Paper>
         </ArgonBox>

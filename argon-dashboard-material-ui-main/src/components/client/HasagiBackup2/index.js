@@ -9,7 +9,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import AddressSelection from '../HasagiBackup1';
-import Cookies from "js-cookie";
+import AddressService from '../../../services/AddressService';
 const Backup2 = ({ show, onClose, onAddressUpdated }) => {
     const [fullNameAddress, setFullnameAddress] = useState('');
     const [numberPhone, setNumberphone] = useState('');
@@ -30,7 +30,7 @@ const Backup2 = ({ show, onClose, onAddressUpdated }) => {
     useEffect(() => {
         const checkUserAddresses = async () => {
             try {
-                const addressCheckResponse = await axios.get('http://localhost:3000/api/addresses/account', { withCredentials: true });
+                const addressCheckResponse = await AddressService.getAllAddress(); 
                 const userHasAddresses = addressCheckResponse.data.length > 0;
                 if (!userHasAddresses) {
                     setStatus(true);
@@ -42,8 +42,10 @@ const Backup2 = ({ show, onClose, onAddressUpdated }) => {
                 console.error("Error checking user addresses:", error);
             }
         };
+    
         checkUserAddresses();
     }, []);
+    
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -56,9 +58,7 @@ const Backup2 = ({ show, onClose, onAddressUpdated }) => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [wrapperRef]);
-
     const handleComplete = async () => {
-        const accountId = Cookies.get('accountId'); 
         const formData = {
             fullNameAddress,
             numberPhone,
@@ -69,17 +69,26 @@ const Backup2 = ({ show, onClose, onAddressUpdated }) => {
             address: Address,
             fullAddress: `${Address}, ${selectedWard}, ${selectedDistrict}, ${selectedProvince}`,
         };
+    
         try {
-            await axios.post(`http://localhost:3000/api/addresses?accountId=${accountId}`, formData, {
-                withCredentials: true
-            });
+            // Wait for the createAddress function to complete
+            await AddressService.createAddress(formData);
+            
+            await AddressService.getAllAddress(); 
+            // Close the address form/modal
             onClose();
+           
+            // Call the callback function to refresh the address list
             onAddressUpdated();
+            
+            // Optionally, display the address selection component if needed
             <AddressSelection show={showAddressSelection} onClose={() => setShowAddressSelection(false)} />
         } catch (error) {
             console.error("Error submitting address:", error);
+            alert('Failed to add address.');
         }
     };
+    
     const handleCheckboxChange = (event) => {
         setStatus(event.target.checked);
     };
@@ -178,7 +187,7 @@ const Backup2 = ({ show, onClose, onAddressUpdated }) => {
                         </div>
                         <div className="d-flex justify-content-between mt-4">
                             <ArgonButton className="btn btn-light" onClick={onClose}>Trở Lại</ArgonButton>
-                            <ArgonButton className="btn btn-primary" onClick={handleComplete}>Hoàn thành</ArgonButton>
+                            <ArgonButton onClick={handleComplete}>Hoàn thành</ArgonButton>
                         </div>
                     </div>
                 </div>

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Backup3 from '../HasagiBackup3';
 import Backup2 from '../HasagiBackup2';
-import Cookies from "js-cookie";
+import AddressService from '../../../services/AddressService';
 const AddressSelection = ({ show, onClose }) => {
     const [address, setAddress] = useState([]);
     const [selectedAddress, setSelectedAddress] = useState(null);
@@ -17,14 +17,11 @@ const AddressSelection = ({ show, onClose }) => {
     const [showBackup1, setShowBackup1] = useState(false);
     const [backupAddress, setBackupAddress] = useState(null);
     const navigate = useNavigate();
-
     const fetchAddress = async () => {
-        const accountId = Cookies.get('accountId'); 
         try {
             setLoading(true);
-            const response = await axios.get(`http://localhost:3000/api/addresses/account?accountId=${accountId}`, {
-                withCredentials: true
-            });
+            const response = await AddressService.getAllAddress(); 
+            
             let addresses = response.data;
             await fetchProvinces();
             for (const addr of addresses) {
@@ -36,6 +33,7 @@ const AddressSelection = ({ show, onClose }) => {
                 addresses = [defaultAddress, ...addresses.filter(addr => addr.id !== defaultAddress.id)];
                 setSelectedAddress(defaultAddress.id);
             }
+            
             setAddress(addresses);
         } catch (error) {
             console.error("Error fetching addresses:", error);
@@ -43,7 +41,6 @@ const AddressSelection = ({ show, onClose }) => {
             setLoading(false);
         }
     };
-
     useEffect(() => {
         if (show) {
             fetchAddress();
@@ -82,15 +79,20 @@ const AddressSelection = ({ show, onClose }) => {
         try {
             const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa địa chỉ này?");
             if (!confirmDelete) return;
-            const payload = {}; 
-            await axios.put(`http://localhost:3000/api/addresses/delete/${id}`, payload);
+    
+            console.log('Deleting address with ID:', id); // Log the ID being deleted
+    
+            await AddressService.removeAddress(id); // Call the removeAddress method
+    
             alert("Địa chỉ đã được xóa thành công");
-            fetchAddress();
+            fetchAddress(); // Refresh the address list
         } catch (error) {
-            console.error("Lỗi khi xóa địa chỉ:", error);
+            console.error("Lỗi khi xóa địa chỉ:", error.response || error.message); // Log the full error
             alert("Xóa địa chỉ thất bại");
         }
     };
+    
+    
 
     const handleComplete = () => {
         if (selectedAddress) {

@@ -9,8 +9,8 @@ import axios from "axios";
 import Backup from "components/client/HasagiBackup";
 import ColorSelectionModal from "../HasagiPhanLoai";
 import Cookies from "js-cookie";
-import { ToastContainer, toast } from 'react-toastify'; // Import Toastify
-import 'react-toastify/dist/ReactToastify.css'; // Import Toastify CSS
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Cart = () => {
     const [cartItems, setCartItems] = useState([]);
@@ -83,6 +83,13 @@ const Cart = () => {
 
     const handleRemoveItem = async (itemId) => {
         const accountId = Cookies.get('accountId');
+        console.log("Account ID:", accountId);  // Kiểm tra accountId
+    
+        if (!accountId) {
+            toast.error("User not logged in.");
+            return;
+        }
+    
         try {
             await axios.delete(`http://localhost:3000/api/cart/remove/${itemId}?accountId=${accountId}`);
             setCartItems(cartItems.filter(item => item.cartdetailid !== itemId));
@@ -92,6 +99,7 @@ const Cart = () => {
             toast.error("Error removing item.");
         }
     };
+    
 
     const handleSelectAllChange = () => {
         const newSelectAll = !selectAll;
@@ -108,7 +116,7 @@ const Cart = () => {
     const handleCheckout = () => {
         const selectedItems = cartItems.filter(item => item.selected);
         if (selectedItems.length === 0) {
-            toast.warn("Vui lòng chọn sản phẩm để thanh toán."); // Toast warning
+            toast.warn("Vui lòng chọn sản phẩm để thanh toán.");
             return;
         }
         console.log("Selected Items:", selectedItems);
@@ -117,7 +125,7 @@ const Cart = () => {
             setShowBackupModal(true);
         } else {
             navigate(`/Checkout?id=${address}`);
-            toast.success("Chuyển đến trang thanh toán."); // Toast success
+            toast.success("Chuyển đến trang thanh toán.");
         }
     };
 
@@ -125,24 +133,24 @@ const Cart = () => {
         setShowBackupModal(false);
         if (accountExists) {
             navigate(`/Checkout?id=${address}`);
-            toast.success("Chuyển đến trang thanh toán."); // Toast success
+            toast.success("Chuyển đến trang thanh toán.");
         }
     };
 
     const handleDeleteSelected = async () => {
         const selectedIds = cartItems.filter(item => item.selected).map(item => item.cartdetailid);
         if (selectedIds.length === 0) {
-            toast.warn("Vui lòng chọn sản phẩm để xóa."); // Toast warning
+            toast.warn("Vui lòng chọn sản phẩm để xóa.");
             return;
         }
         try {
             await axios.delete('http://localhost:8080/api/cart/delete', { data: selectedIds });
             setCartItems(cartItems.filter(item => !selectedIds.includes(item.cartdetailid)));
             setSelectAll(false);
-            toast.success("Xóa sản phẩm thành công."); // Toast success
+            toast.success("Xóa sản phẩm thành công.");
         } catch (error) {
             console.error("Error deleting items:", error);
-            toast.error("Có lỗi xảy ra khi xóa sản phẩm."); // Toast error
+            toast.error("Có lỗi xảy ra khi xóa sản phẩm.");
         }
     };
 
@@ -189,7 +197,7 @@ const Cart = () => {
 
     return (
         <>
-            <ToastContainer /> {/* Include ToastContainer */}
+            <ToastContainer />
             {isLoading && (
                 <div className="loader">
                     <div className="loader-inner">
@@ -255,7 +263,15 @@ const Cart = () => {
                                             </td>
                                             <td className="align-middle">{item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
                                             <td className="align-middle">
-                                                <div className="input-group quantity mx-auto" style={{ width: "140px", display: "flex", alignItems: "center" }}>
+                                                <div
+                                                    className="input-group quantity mx-auto"
+                                                    style={{
+                                                        width: "140px",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        justifyContent: "space-between",  // Ensure even spacing
+                                                    }}
+                                                >
                                                     <div className="input-group-btn">
                                                         <button
                                                             className="btn btn-sm btn-outline-secondary"
@@ -273,6 +289,7 @@ const Cart = () => {
                                                             <AiOutlineMinus />
                                                         </button>
                                                     </div>
+
                                                     <input
                                                         type="text"
                                                         className="form-control form-control-sm text-center"
@@ -284,6 +301,7 @@ const Cart = () => {
                                                             margin: "0 5px",
                                                         }}
                                                     />
+
                                                     <div className="input-group-btn">
                                                         <button
                                                             className="btn btn-sm btn-outline-secondary"
@@ -303,10 +321,11 @@ const Cart = () => {
                                                     </div>
                                                 </div>
                                             </td>
+
                                             <td className="align-middle">{(item.price * item.quantity).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
                                             <td className="align-middle">
                                                 <button
-                                                    onClick={() => handleRemoveItem(item.cartdetailid)}
+                                                    onClick={() => handleRemoveItem(item.cartDetailId)}
                                                     className="btn btn-danger"
                                                     style={{ padding: "0.5rem 1rem" }}
                                                 >

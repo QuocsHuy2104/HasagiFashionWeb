@@ -3,8 +3,8 @@ import PropTypes from "prop-types";
 import { Button, Form, FormGroup, Label } from "reactstrap";
 import "components/client/assets/css/phanloai1.css";
 import Cookies from "js-cookie";
-const ColorSelectionModal = ({ show, onClose, onColorSelect, onSizeSelect, productId, cartDetailId}) => {
 
+const ColorSelectionModal = ({ show, onClose, onColorSelect, onSizeSelect, productId, cartDetailId }) => {
     const [colors, setColors] = useState([]);
     const [selectedColor, setSelectedColor] = useState(null);
     const [sizes, setSizes] = useState([]);
@@ -65,7 +65,7 @@ const ColorSelectionModal = ({ show, onClose, onColorSelect, onSizeSelect, produ
                 onClose();
             } catch (error) {
                 setError(error.message || "Failed to update product option");
-                console.log("Error fetching product options:", error)
+                console.log("Error fetching product options:", error);
                 setSuccess(null);
             }
         } else {
@@ -83,7 +83,7 @@ const ColorSelectionModal = ({ show, onClose, onColorSelect, onSizeSelect, produ
                         <h5 className="modal1-title">Chọn Màu Sắc:</h5>
                         <Button onClick={onClose} close />
                     </div>
-                    <div className="modal-body">
+                    <div className="modal1-body">
                         {error && <p className="text-danger">{error}</p>}
                         {success && <p className="text-success">{success}</p>}
                         <Form onSubmit={handleFormSubmit}>
@@ -100,6 +100,8 @@ const ColorSelectionModal = ({ show, onClose, onColorSelect, onSizeSelect, produ
                                         </Button>
                                     ))}
                                 </div>
+                            </FormGroup>
+                            <FormGroup>
                                 <Label>Chọn Size:</Label>
                                 <div className="color-options">
                                     {sizes.map((size) => (

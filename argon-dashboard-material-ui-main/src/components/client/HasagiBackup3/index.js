@@ -7,7 +7,7 @@ import axios from 'axios';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import Cookies from "js-cookie";
+import AddressService from '../../../services/AddressService';
 const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
     const [fullNameAddress, setFullNameAddress] = useState('');
     const [numberPhone, setNumBerPhone] = useState('');
@@ -109,8 +109,7 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
         }
     }, [selectedDistrict]);
 
-    const handleComplete = async () => {
-        const accountId = Cookies.get('accountId'); 
+    const handleComplete = async () => { 
         const formData = {
             fullNameAddress,
             numberPhone,
@@ -121,9 +120,7 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
             address,
         };
         try {
-            await axios.put(`http://localhost:3000/api/addresses/update/${addressId}?accountId=${accountId}`, formData, {
-                withCredentials: true
-            });
+            await AddressService.updateAddress(addressId, formData); 
             onClose();
             onAddressUpdated();
         } catch (error) {

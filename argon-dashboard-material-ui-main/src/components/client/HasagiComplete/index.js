@@ -4,12 +4,12 @@ import axios from 'axios'; // Ensure axios is imported
 import ArgonButton from "components/ArgonButton";
 import { FaCheckCircle } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
+
 const Complete = () => {
     const location = useLocation();
     const { state } = location;
     const address = state?.address || {};
     const orderDetails = state?.orderDetails || [];
-    
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
