@@ -136,7 +136,7 @@
 } */
 
 .btn.btn-secondary {
-    color: var(--bs-white);
+    color: #212529;
 }
 
 .btn.btn-secondary:hover {
@@ -186,10 +186,9 @@
 }
 
 .dropdown .dropdown-menu a:hover {
-    background: var(--bs-primary);
-    color: var(--bs-white);
+    background: rgba(13, 110, 253, 0.2); /* Sử dụng màu primary nhẹ hơn với opacity */
+    color: rgba(255, 255, 255, 0.8); /* Màu trắng nhẹ hơn */
 }
-
 .navbar .nav-item:hover .dropdown-menu {
     transform: rotateX(0deg);
     visibility: visible;
@@ -303,13 +302,9 @@
     }
 }
 /*** Carousel Hero Header Start ***/
-.carousel-header {
+/* .carousel-header {
     position: relative;
     overflow: hidden;
-}
-
-.carousel-indicators {
-    display: none;
 }
 
 .carousel .carousel-control-prev,
@@ -462,7 +457,7 @@
 
 #searchModal .modal-content {
     background: rgba(255, 255, 255, .6);
-}
+} */
 /*** Carousel Hero Header End ***/
 
 /*** Single Page Hero Header Start ***/

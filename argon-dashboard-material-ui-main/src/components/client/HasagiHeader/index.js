@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { jwtDecode } from 'jwt-decode';
 import useCartQuantity from "../HasagiQuantity/useCartQuantity";
+import PropTypes from 'prop-types';
 import 'layouts/assets/css/style.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'components/client/assets/js/script';
@@ -12,14 +13,58 @@ import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import { faUser } from '@fortawesome/free-regular-svg-icons';
 import { faHeart } from '@fortawesome/free-regular-svg-icons';
 import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
+import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
 
 
-const Header = () => {
+const Header = ({ onSearch }) => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const { totalQuantity, fetchTotalQuantity } = useCartQuantity();
+    const [searchTerm, setSearchTerm] = useState("");
 
-    const toggleDropdown = () => {
-        setDropdownOpen(!dropdownOpen);
+    const handleSearchChange = (event) => {
+        const value = event.target.value;
+        setSearchTerm(value);
+        onSearch(value); // Gọi hàm tìm kiếm từ prop
+    };
+
+    const handleMouseEnter = () => {
+        setDropdownOpen(true);
+    };
+
+    const handleMouseLeave = () => {
+        setDropdownOpen(false);
+    };
+
+    const startVoiceSearch = (event) => {
+        event.preventDefault();
+        if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'vi-VN';
+            recognition.interimResults = false;
+    
+            recognition.onstart = () => {
+                console.log('Voice recognition started. Speak into the microphone.');
+            };
+    
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                setSearchTerm(transcript);
+                onSearch(transcript);
+                
+                // Speak the recognized text
+                const utterance = new SpeechSynthesisUtterance(transcript);
+                utterance.lang = 'vi-VN';
+                window.speechSynthesis.speak(utterance);
+            };
+    
+            recognition.onerror = (event) => {
+                console.error('Error occurred in recognition: ' + event.error);
+            };
+    
+            recognition.start();
+        } else {
+            alert('Trình duyệt của bạn không hỗ trợ tìm kiếm bằng giọng nói.');
+        }
     };
 
     useEffect(() => {
@@ -40,16 +85,16 @@ const Header = () => {
             console.error(error);
         }
 
-    const [categories, setCategories] = useState([]);
-    const [brands, setBrands] = useState([]);
-    const [colors, setColors] = useState([]);
-    const [sizes, setSizes] = useState([]);
-
     // Inline styles
     const styles = {
         header: {
-            backgroundColor: '#f8f9fa',
+            backgroundColor: '#e9ecef',
             padding: '1rem',
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1000,
         },
         logo: {
             marginLeft: "50px",
@@ -63,9 +108,6 @@ const Header = () => {
             marginLeft: '20px',
             transition: 'color 0.3s ease-in-out',
         },
-        navLinkHover: {
-            color: '#007678',
-        },
         formControl: {
             border: '1px solid #ddd',
             padding: '10px 20px',
@@ -77,25 +119,29 @@ const Header = () => {
             color: 'black',
             transition: 'background-color 0.3s, color 0.3s',
         },
-        iconButton: {
-            background: 'none',
-            border: 'none',
-            fontSize: '16px',
-            cursor: 'pointer',
-            padding: '10px',
-            transition: 'color 0.3s ease',
-        },
         icon: {
             fontSize: '20px',
-            color: '#333',
+            transition: 'transform 0.2s ease',
         },
-        iconHover: {
-            color: '#5b5b5c',
+        badge: {
+            position: 'absolute',
+            top: '-5px',
+            right: '-10px',
+            fontSize: '12px',
+            width: '20px',
+            height: '20px',
+            borderRadius: '50%',
+            backgroundColor: '#007678',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
         },
-        dropdownMenu: {
-            backgroundColor: '#343a40',
-            padding: '10px 20px',
-            borderRadius: '5px',
+        userIcon: {
+            padding: '10px',
+            borderRadius: '50%',
+            transition: 'background-color 0.3s ease, box-shadow 0.3s ease',
+            position: 'relative',
         },
     };
 
@@ -135,26 +181,38 @@ const Header = () => {
                         </div>
                     </div>
 
-                    <div className="d-flex align-items-center">
+                    <div className="d-flex align-items-center" style={{ paddingRight: '38px' }}>
                         <form className="d-flex form-search" role="search" style={{ marginRight: "20px" }}>
                             <input
                                 type="search"
                                 placeholder="Tìm kiếm"
+                                value={searchTerm}
+                                onChange={handleSearchChange}
                                 className="form-control rounded-pill me-2"
                                 aria-label="Search"
                                 style={styles.formControl}
                             />
-                            <button className="btn btn-outline-secondary rounded-pill" type="submit" style={styles.searchButton}>
-                                <FontAwesomeIcon icon={faSearch} />
+                            <button
+                                className="btn btn-outline-secondary rounded-pill"
+                                type="button"
+                                onClick={startVoiceSearch}
+                                style={styles.searchButton}
+                            >
+                                <FontAwesomeIcon icon={faMicrophone} />
                             </button>
                         </form>
 
                         <ul className="d-flex justify-content-end list-unstyled m-0">
-                            <li className="user-menu dropdown" style={{ marginRight: "10px" }}>
+                            <li className="user-menu dropdown" style={{ marginRight: "10px" }}
+                                onMouseEnter={handleMouseEnter}
+                                onMouseLeave={handleMouseLeave}
+                            >
                                 <a
-                                    className="rounded-circle bg-light p-2 mx-1"
-                                    onClick={toggleDropdown}
-                                    style={styles.iconButton}
+                                    className="rounded-circle"
+                                    style={{
+                                        ...styles.userIcon,
+                                        ...(dropdownOpen ? styles.userIconHover : {}),
+                                    }}
                                 >
                                     <FontAwesomeIcon icon={faUser} className='icon' style={styles.icon} />
                                 </a>
@@ -186,15 +244,15 @@ const Header = () => {
                             {user && (
                                 <>
                                     <li>
-                                        <a href="" className="rounded-circle bg-light p-2 mx-1" style={styles.iconButton}>
+                                        <a href="" style={{ padding: '10px', textDecoration: 'none' }}>
                                             <FontAwesomeIcon icon={faHeart} className='icon' style={styles.icon} />
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="/Cart" className="rounded-circle bg-light p-2 mx-1" style={styles.iconButton}>
+                                        <a href="/Cart" style={{ position: 'relative', padding: '10px', textDecoration: 'none' }}>
                                             <FontAwesomeIcon icon={faShoppingCart} className='icon' style={styles.icon} />
                                             {totalQuantity > 0 && (
-                                                <span className="badge bg-primary ms-2">{totalQuantity}</span>
+                                                <span className="badge" style={styles.badge}>{totalQuantity}</span>
                                             )}
                                         </a>
                                     </li>
@@ -206,6 +264,11 @@ const Header = () => {
             </div>
         </>
     );
+};
+
+// Add prop types validation
+Header.propTypes = {
+    onSearch: PropTypes.func.isRequired,
 };
 
 export default Header;
