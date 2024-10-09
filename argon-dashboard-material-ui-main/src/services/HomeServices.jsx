@@ -1,5 +1,7 @@
 import apiClient from "config/axiosConfig";
 
-export default HomeService = {
+const  HomeService = {
     getBestSeller : () => apiClient.get('/public/home/best-seller')
 }
+
+export default HomeService;

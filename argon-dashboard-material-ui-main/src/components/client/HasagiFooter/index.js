@@ -1,87 +1,165 @@
 import React from "react";
-import "components/client/assets/css/ShopDetail.css";
-import "components/client/assets/css/style.css";
-import "bootstrap";
-import aboutImage from "components/client/assets/images/payment.png";
-import { FaFacebookF, FaTwitter, FaYoutube, FaLinkedinIn,FaTiktok } from 'react-icons/fa';
+import ArgonBox from "components/ArgonBox";
+import ArgonTypography from "components/ArgonTypography";
+import MuiLink from "@mui/material/Link";
+import { FaFacebookF, FaTwitter, FaYoutube, FaLinkedinIn, FaTiktok } from 'react-icons/fa';
+import { Container } from "@mui/material";
+import ArgonInput from "components/ArgonInput";
+import ArgonButton from "components/ArgonButton";
 
 const Footer = () => {
-  return(
-    <div className="container-fluid bg-dark text-white-50 footer pt-1 mt-5">
-    <div className="container py-5">
-        <div className="pb-4 mb-4" style={{ 
-        borderBottom: '1px solid rgba(226, 175, 24, 0.5)'}}>
-            <div className="row g-4">
-                <div className="col-lg-3">
-                    <a href="#">
-                        <h2 className="text-primary mb-0">HasagiFashionShop</h2>
-                        <p className="text-secondary mb-0">Fashion products</p>
-                    </a>
-                </div>
-                <div className="col-lg-6">
-                    <div className="position-relative mx-auto">
-                        <input className="form-control border-0 w-100 py-3 px-4 rounded-pill" type="number" placeholder="Your Email"/>
-                        <button type="submit" className="btn btn-primary border-0 border-secondary py-3 px-4 position-absolute rounded-pill text-white" style={{top: 0, right: 0}}>Subscribe Now</button>
-                    </div>
-                </div>
-                <div className="col-lg-3">
-                    <div className="d-flex justify-content-end pt-2">
-                        <a className="btn  btn-outline-secondary me-2 btn-md-square rounded-circle" href=""><FaFacebookF/></a>
-                        <a className="btn btn-outline-secondary me-2 btn-md-square rounded-circle" href=""><FaTiktok /></a>
-                        <a className="btn btn-outline-secondary me-2 btn-md-square rounded-circle" href=""><FaYoutube/></a>
-                        <a className="btn btn-outline-secondary btn-md-square rounded-circle" href=""><FaLinkedinIn/></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div className="row g-5">
-            <div className="col-lg-3 col-md-6">
-                <div className="footer-item">
-                    <h4 className="text-light mb-3">Why People Like us!</h4>
-                    <p className="mb-4">Typesetting has been an essential part of the fashion industry, 
-                        influencing the presentation of fashion magazines, lookbooks, and advertisements. 
-                        While the principles of typesetting have remained largely consistent.
-                        </p>
-                    
-                </div>
-            </div>
-            <div className="col-lg-3 col-md-6">
-                <div className="d-flex flex-column text-start footer-item">
-                    <h4 className="text-light mb-3">Shop Info</h4>
-                    <a className="btn-link" href="">About Us</a>
-                    <a className="btn-link" href="">Contact Us</a>
-                    <a className="btn-link" href="">Privacy Policy</a>
-                    <a className="btn-link" href="">Terms & Condition</a>
-                    <a className="btn-link" href="">Return Policy</a>
-                    <a className="btn-link" href="">FAQs & Help</a>
-                </div>
-            </div>
-            <div className="col-lg-3 col-md-6">
-                <div className="d-flex flex-column text-start footer-item">
-                    <h4 className="text-light mb-3">Account</h4>
-                    <a className="btn-link" href="">My Account</a>
-                    <a className="btn-link" href="">Shop details</a>
-                    <a className="btn-link" href="">Shopping Cart</a>
-                    <a className="btn-link" href="">Wishlist</a>
-                    <a className="btn-link" href="">Order History</a>
-                    <a className="btn-link" href="">International Orders</a>
-                </div>
-            </div>
-            <div className="col-lg-3 col-md-6">
-                <div className="footer-item">
-                    <h4 className="text-light mb-3">Contact</h4>
-                    <p>Address: 49 Đ. 3 Tháng 2, Xuân Khánh, Ninh Kiều, Cần Thơ, Vietnam</p>
-                    <p>Email: hasagifashion@gmail.com</p>
-                    <p>Phone: 0398948675</p>
-                    <p>Payment Accepted</p>
-                    <img src={aboutImage} className="img-fluid" alt=""/>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+    return (
+        <ArgonBox
+            sx={{
+                backgroundImage: 'url("https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/footers2_background.jpg?1713464283843")',
+                backgroundSize: 'cover',
+                backgroundPosition: '100% 100%',
+            }}>
+            <ArgonBox mx={20}>
+                <ArgonBox pt='5rem'>
+                    <ArgonBox
+                        display='flex'
+                        flexWrap='wrap'
+                        justifyContent='flex-start'
+                        alignItems='flex-start'
+                        borderBottom='1px solid #ededed'
+                        pb='5rem'
+                        sx={{
+                            margin: {
+                                md: '0 -10px 0 -10px'
+                            }
+                        }}
+                    >
+                        <ArgonBox width='25%'
+                            sx={{
+                                padding: {
+                                    md: '0 10px'
+                                }
+                            }}>
+                            <MuiLink href='/' sx={{ marginBottom: '15px', maxWidth: '50%', display: 'block' }}>
+                                <ArgonBox
+                                    component='img'
+                                    src='https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/footers2_one_logo.png?1713464283843'
+                                    alt='Logo'
+                                    width='100%' />
+                            </MuiLink>
+                            <ArgonTypography variant='button' color='secondary' sx={{ maxWidth: '85%', fontSize: '15px', lineHeight: '1.7rem', margin: '0' }}>F1GENZ SHOES luôn cam kết, đảm bảo đưa sản phẩm trực tiếp từ nhà sản xuất đến tay người dùng và kiểm soát được chất lượng để đáp ứng được nhu cầu ngày càng cao của khách hàng. Tất cả các sản phẩm tại F1GENZ SHOES đều có nguồn gốc xuất xứ rõ ràng, chất lượng.</ArgonTypography>
+                        </ArgonBox>
+                        <ArgonBox width='22.5%'
+                            sx={{
+                                padding: {
+                                    md: '0 10px'
+                                }
+                            }}>
+                            <ArgonTypography variant='h4' mb='17px' display='flex' justifyContent='space-between' alignItems='center'>Liên hệ</ArgonTypography>
+                            <ArgonBox>
+                                <ArgonTypography variant='button' color='secondary' sx={{ maxWidth: '85%', fontSize: '15px', lineHeight: '1.7rem', margin: '0' }}>
+                                    CSKH: <MuiLink>0398948675</MuiLink><br />
+                                    Email: hasagifashion@gmail.com<br />
+                                    Từ 7h00 – 22h00 các ngày từ thứ 2 đến Chủ nhật<br />
+                                </ArgonTypography>
+                            </ArgonBox>
+                        </ArgonBox>
 
-  )
+                        <ArgonBox width='15%'
+                            sx={{
+                                padding: {
+                                    md: '0 10px'
+                                }
+                            }}>
+                            <ArgonTypography variant='h4' mb='17px' display='flex' justifyContent='space-between' alignItems='center'>Về chúng tôi</ArgonTypography>
+                            <ArgonTypography variant='button' color='secondary' sx={{ maxWidth: '85%', fontSize: '15px', lineHeight: '1.7rem', margin: '0' }}>
+                                <MuiLink href='/introduce'>Gioi Thieu</MuiLink><br />
+                                <MuiLink href='/policy'>Chinh sach doi tra</MuiLink><br />
+                                <MuiLink href='/security'>Chinh sach bao mat</MuiLink><br />
+                                <MuiLink href='/service'>Dieu khoan dich vu</MuiLink><br />
+                            </ArgonTypography>
+                        </ArgonBox>
+
+                        <ArgonBox width='15%'
+                            sx={{
+                                padding: {
+                                    md: '0 10px'
+                                }
+                            }}>
+                            <ArgonTypography variant='h4' mb='17px' display='flex' justifyContent='space-between' alignItems='center'>Doanh Mục</ArgonTypography>
+                            <ArgonTypography variant='button' color='secondary' sx={{ maxWidth: '85%', fontSize: '15px', lineHeight: '1.7rem', margin: '0' }}>
+                                <MuiLink href='/shop'>Sản Phẩm</MuiLink><br />
+                                <MuiLink href='/policy'>Áo Sơ Mi</MuiLink><br />
+                                <MuiLink href='/security'>Áo POLO</MuiLink><br />
+                                <MuiLink href='/service'>Thương Hiệu GUCCI</MuiLink><br />
+                            </ArgonTypography>
+                        </ArgonBox>
+
+                        <ArgonBox width='22.5%'
+                            sx={{
+                                padding: {
+                                    md: '0 10px'
+                                }
+                            }}>
+                            <ArgonTypography variant='h4' mb='17px' display='flex' justifyContent='space-between' alignItems='center'>Liên hệ với chúng tôi</ArgonTypography>
+                            <ArgonTypography variant='button' color='secondary' sx={{ maxWidth: '85%', fontSize: '15px', lineHeight: '1.7rem', margin: '0' }}>
+                                Luôn cập nhật tất cả các hành động mà chúng tôi đã lưu cho tất cả khách hàng của mình.
+                            </ArgonTypography>
+                            <ArgonBox display='flex' justifyContent='flex-start' alignItems='center'>
+                                <MuiLink href='/shop'>
+                                    <ArgonBox width={30} height={30} component='img' src='https://file.hstatic.net/200000588277/file/facebook__6__53aaa8d352524d3eb025af5203eaa437_icon.png' alt='Facebook' />
+                                </MuiLink>
+                                <MuiLink href='/shop'>
+                                    <ArgonBox width={30} height={30} mx={1} component='img' src='https://file.hstatic.net/200000588277/file/youtube__5__4f04522e10494557a651f53a33ad4d76_icon.png' alt='Facebook' />
+                                </MuiLink>
+                                <MuiLink href='/shop'>
+                                    <ArgonBox width={30} height={30} component='img' src='https://file.hstatic.net/200000588277/file/tik-tok_d85bb4e7468c43ac9ed5437649b7405c_icon.png' alt='Facebook' />
+                                </MuiLink>
+                                <MuiLink href='/shop'>
+                                    <ArgonBox width={30} height={30} mx={1} component='img' src='https://file.hstatic.net/200000588277/file/instagram__3__7de3ebbce1f24003b516ca6c1d7c24d5_icon.png' alt='Facebook' />
+                                </MuiLink>
+                            </ArgonBox>
+                        </ArgonBox>
+                    </ArgonBox>
+                </ArgonBox>
+
+                <ArgonBox display='flex' justifyContent='space-between' alignItems='center' py='2rem'>
+                    <ArgonBox>
+                        <ArgonTypography variant='button'>
+                            © 2024 - Bản quyền thuộc về
+                            <MuiLink href='/' mx={1}>HASAGHIFASHION</MuiLink>
+                        </ArgonTypography>
+                    </ArgonBox>
+                    <ArgonBox display='flex' justifyContent='space-start' alignItems='center'>
+                        <ArgonBox>
+                            <MuiLink href='/'>
+                                <ArgonBox component='img' src='https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/shop_payment_item_image_1.png?1713464283843' alt='payment' />
+                            </MuiLink>
+                        </ArgonBox>
+                        <ArgonBox mx={1}>
+                            <MuiLink href='/'>
+                                <ArgonBox component='img' src='https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/shop_payment_item_image_2.png?1713464283843' alt='payment' />
+                            </MuiLink>
+                        </ArgonBox>
+
+                        <ArgonBox>
+                            <MuiLink href='/'>
+                                <ArgonBox component='img' src='https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/shop_payment_item_image_3.png?1713464283843' alt='payment' />
+                            </MuiLink>
+                        </ArgonBox>
+
+                        <ArgonBox mx={1}>
+                            <MuiLink href='/'>
+                                <ArgonBox component='img' src='https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/shop_payment_item_image_4.png?1713464283843' alt='payment' />
+                            </MuiLink>
+                        </ArgonBox>
+                        <ArgonBox>
+                            <MuiLink href='/'>
+                                <ArgonBox component='img' src='https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/shop_payment_item_image_5.png?1713464283843' alt='payment' />
+                            </MuiLink>
+                        </ArgonBox>
+                    </ArgonBox>
+
+                </ArgonBox>
+            </ArgonBox>
+        </ArgonBox >
+    )
 }
 
 export default Footer;
