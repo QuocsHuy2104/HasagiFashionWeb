@@ -8,6 +8,7 @@ import Coupon from "./coupon";
 import Policy from "./policy";
 import Voucher from "./voucher";
 import Sanpham from "./sanpham"
+import ImageCarousel from "components/client/HasagiCarousel";
 const FeaturesAndAbout = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState([]);
@@ -27,6 +28,7 @@ const FeaturesAndAbout = () => {
     <>
       <Header onSearch={handleSearch} />
       <ArgonBox px={20}>
+        <ImageCarousel/>
         <Policy />
         <BestSeller />
         <Voucher />
