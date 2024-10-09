@@ -24,7 +24,19 @@ function Home() {
     const [productsPerPage] = useState(12);
     const pageSize = 16;
     const categoryPages = [];
+    const [searchTerm, setSearchTerm] = useState("");
 
+    // ... other state and effect hooks
+
+    const handleCategorySelect = (categoryId) => {
+        setSelectedCategory(categoryId);
+        setCurrentPage(1); // Reset to first page on category change
+    };
+    
+    const handleSearch = (term) => {
+        setSearchTerm(term);
+        setCurrentPage(1); 
+    };
     React.useEffect(() => {
         const fetchData = async () => {
             setTimeout(() => {
@@ -76,7 +88,8 @@ function Home() {
 
     const filteredProducts = products.filter(product => {
         const matchesCategory = selectedCategory === "" || product.categoryId === Number(selectedCategory);
-        return matchesCategory;
+        const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLowerCase()); // Lọc theo từ khóa
+        return matchesCategory && matchesSearchTerm;;
     });
     const indexOfLastProduct = currentPage * productsPerPage;
     const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
@@ -96,12 +109,12 @@ function Home() {
                     </div>
                 </div>
             )}
-            <Header/>
-            < Navbar/>
+            <Header onSearch={handleSearch}/>
+            < Navbar />
             <HasagiCau />
             <div
                 className="container-fluid pt-3">
-                <Typography variant="h2" className="section-title position-relative text-uppercase mx-xl-5 mb-4">
+                <Typography variant="h2" className="section-title position-relative text-uppercase mx-xl-5 mb-4" style={{fontSize:'30px'}}>
                     <span className="bg-secondary pr-3">Danh mục</span>
                 </Typography>
                 <Grid container spacing={2} className="px-xl-5 pb-3">
@@ -121,7 +134,7 @@ function Home() {
             </div>
             <div
                 className="container-fluid pt-5">
-                <Typography variant="h2" className="section-title position-relative text-uppercase mx-xl-5 mb-4">
+                <Typography variant="h2" className="section-title position-relative text-uppercase mx-xl-5 mb-4" style={{fontSize:'30px'}}>
                     <span className="bg-secondary pr-3">Thương hiệu</span>
                 </Typography>
                 <Grid container spacing={2} className="px-xl-5 pb-3">

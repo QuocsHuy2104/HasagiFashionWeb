@@ -1,4 +1,27 @@
-
+.checkbox-list {
+    max-height: 200px; /* Limit height for scroll */
+    overflow-y: auto; /* Enable vertical scroll */
+    margin-top: 10px;
+    transition: max-height 0.3s ease;
+    /* Additional styles for aesthetics */
+  }
+  
+  .checkbox-list.open {
+    max-height: 300px; /* Expand on open */
+  }
+  
+  .sort-options {
+    padding: 15px; /* Adjust padding for overall container */
+  }
+  
+  .form-label {
+    cursor: pointer; /* Change cursor to indicate collapsible section */
+  }
+  
+  h5.section-title {
+    font-weight: bold;
+    font-size: 1.2rem; /* Adjust title size */
+  }
 /*** Spinner Start ***/
 .centered-container {
     display: flex;
@@ -126,17 +149,10 @@
     font-weight: normal;
 }
 
-/* .btn.btn-primary {
-    color: var(--bs-white);
-}
 
-.btn.btn-primary:hover {
-    background: var(--bs-secondary);
-    border: 1px solid var(--bs-secondary);
-} */
 
 .btn.btn-secondary {
-    color: var(--bs-white);
+    color: #212529;
 }
 
 .btn.btn-secondary:hover {
@@ -185,9 +201,10 @@
     margin-left: 8px;
 }
 
+
 .dropdown .dropdown-menu a:hover {
-    background: var(--bs-primary);
-    color: var(--bs-white);
+    background: rgba(13, 110, 253, 0.2);
+    color: rgba(255, 255, 255, 0.8); 
 }
 
 .navbar .nav-item:hover .dropdown-menu {

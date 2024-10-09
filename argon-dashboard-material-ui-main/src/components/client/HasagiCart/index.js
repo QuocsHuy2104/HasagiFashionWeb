@@ -225,7 +225,7 @@ const Cart = () => {
                     </div>
                 </div>
             </div> */}
-            <div className="container-fluid py-2">
+            <div className="container-fluid py-2" >
                 <div className="row px-xl-5">
                     <div className="col-lg-12 mb-5" id="tableAddCart">
                         <div className="header">

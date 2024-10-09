@@ -63,14 +63,15 @@ const Navbar = () => {
         boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
         borderBottom: 'white solid 1px',
         borderTop: 'white solid 1px',
+        
     };
 
     const navMenuStyle = {
         listStyle: 'none',
         padding: 0,
-        margin: '0 auto',  // Căn giữa
+        margin: '0 auto',
         display: 'flex',
-        justifyContent: 'center', // Căn giữa các danh mục
+        justifyContent: 'center',
     };
 
     const navItemStyle = {
@@ -80,6 +81,7 @@ const Navbar = () => {
     const menuLinkStyle = {
         color: 'white',
         padding: '10px 15px',
+        fontSize: '18px',
         textDecoration: 'none',
         transition: 'color 0.3s ease, background-color 0.3s ease',
     };
@@ -88,15 +90,21 @@ const Navbar = () => {
         backgroundColor: '#ffffff',
         border: '1px solid #dee2e6',
         boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+        display: 'flex',
+        flexWrap: 'wrap',
+        width: '500px',
     };
-
+    
     const dropdownItemStyle = {
         color: '#333',
         padding: '10px 15px',
+        flexBasis: '20%',
+        textAlign: 'center',
     };
+    
 
     return (
-        <div className="container-fluid justify-content-between align-items-center p-0">
+        <div className="container-fluid justify-content-between align-items-center py-6">
             <nav className="navbar navbar-expand-lg p-0" style={navbarStyle}>
                 <div className="collapse navbar-collapse">
                     <ul className="nav-menu" style={navMenuStyle}>
@@ -161,15 +169,15 @@ const Navbar = () => {
                                 GIÁ
                             </a>
                             <ul className="dropdown-menu" style={dropdownMenuStyle} aria-labelledby="pages">
-                                <li><a href="index.html" className="dropdown-item" style={dropdownItemStyle}>Tất cả</a></li>
-                                <li><a href="index.html" className="dropdown-item" style={dropdownItemStyle}>Từ thấp đến cao</a></li>
-                                <li><a href="index.html" className="dropdown-item" style={dropdownItemStyle}>Từ cao đến thấp</a></li>
-                                <li><a href="index.html" className="dropdown-item" style={dropdownItemStyle}>50.000đ - 100.000đ</a></li>
-                                <li><a href="index.html" className="dropdown-item" style={dropdownItemStyle}>100.000đ - 200.000đ</a></li>
-                                <li><a href="index.html" className="dropdown-item" style={dropdownItemStyle}>200.000đ - 300.000đ</a></li>
-                                <li><a href="index.html" className="dropdown-item" style={dropdownItemStyle}>300.000đ - 400.000đ</a></li>
-                                <li><a href="index.html" className="dropdown-item" style={dropdownItemStyle}>400.000đ - 500.000đ</a></li>
-                                <li><a href="index.html" className="dropdown-item" style={dropdownItemStyle}>500.000đ - ...</a></li>
+                                <li><a href="/#" className="dropdown-item" style={dropdownItemStyle}>Tất cả</a></li>
+                                <li><a href="/#" className="dropdown-item" style={dropdownItemStyle}>Từ thấp đến cao</a></li>
+                                <li><a href="/#" className="dropdown-item" style={dropdownItemStyle}>Từ cao đến thấp</a></li>
+                                <li><a href="/#" className="dropdown-item" style={dropdownItemStyle}>50.000đ - 100.000đ</a></li>
+                                <li><a href="/#" className="dropdown-item" style={dropdownItemStyle}>100.000đ - 200.000đ</a></li>
+                                <li><a href="/#" className="dropdown-item" style={dropdownItemStyle}>200.000đ - 300.000đ</a></li>
+                                <li><a href="/#" className="dropdown-item" style={dropdownItemStyle}>300.000đ - 400.000đ</a></li>
+                                <li><a href="/#" className="dropdown-item" style={dropdownItemStyle}>400.000đ - 500.000đ</a></li>
+                                <li><a href="/#" className="dropdown-item" style={dropdownItemStyle}>500.000đ - ...</a></li>
                             </ul>
                         </li>
                     </ul>

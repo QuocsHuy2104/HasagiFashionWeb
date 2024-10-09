@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import 'layouts/assets/css/style.css';
 import { Link } from "react-router-dom";
 import aboutImage5 from "layouts/assets/img/product-1.jpg";
 import HasagiNav from "components/client/HasagiHeader";
@@ -15,27 +14,50 @@ function Shop() {
     const [isLoading, setIsLoading] = useState(true);
     const [sortOption, setSortOption] = useState("default");
     const [categories, setCategories] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState([]);
     const [brands, setBrands] = useState([]);
-    const [selectedBrand, setSelectedBrand] = useState("");
+    const [selectedBrands, setSelectedBrands] = useState([]);
+    const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+    const [isBrandOpen, setIsBrandOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
 
-    React.useEffect(() => {
-            setTimeout(() => {
-                setIsLoading(false);
-            }, 700);
+    const handleSearch = (term) => {
+        setSearchTerm(term);
+        setCurrentPage(1); 
+    };
+
+    const toggleCategoryOpen = () => {
+        setIsCategoryOpen((prev) => !prev);
+    };
+
+    const toggleBrandOpen = () => {
+        setIsBrandOpen((prev) => !prev);
+    };
+    useEffect(() => {
+        setTimeout(() => {
+            setIsLoading(false);
+        }, 700);
     }, []);
 
     const handleSortChange = (event) => {
         setSortOption(event.target.value);
     };
 
-    const handleCategoryChange = (event) => {
-        setSelectedCategory(event.target.value);
+    const handleCategoryChange = (categoryId) => {
+        if (selectedCategory.includes(categoryId)) {
+            setSelectedCategory(selectedCategory.filter((id) => id !== categoryId));
+        } else {
+            setSelectedCategory([...selectedCategory, categoryId]);
+        }
         setCurrentPage(1);
     };
 
-    const handleBrandChange = (event) => {
-        setSelectedBrand(event.target.value);
+    const handleBrandChange = (brandId) => {
+        if (selectedBrands.includes(brandId)) {
+            setSelectedBrands(selectedBrands.filter((id) => id !== brandId));
+        } else {
+            setSelectedBrands([...selectedBrands, brandId]);
+        }
         setCurrentPage(1);
     };
 
@@ -45,10 +67,6 @@ function Shop() {
                 const productResponse = await ProductService.getAllProducts();
                 const categoryResponse = await CategoryService.getAllCategories();
                 const brandResponse = await BrandService.getAllBrands();
-
-                console.log("Products:", productResponse.data);
-                console.log("Categories:", categoryResponse.data);
-                console.log("Brands:", brandResponse.data);
 
                 if (
                     Array.isArray(productResponse.data) &&
@@ -74,14 +92,13 @@ function Shop() {
         fetchProductsAndCategories();
     }, []);
 
-    const filteredProducts = products.filter(product => {
-        const matchesCategory = selectedCategory === "" || product.categoryId === Number(selectedCategory);
-        const matchesBrand = selectedBrand === "" || product.brandId === Number(selectedBrand);
-
-        return matchesCategory && matchesBrand;
+    const filteredProducts = products.filter((product) => {
+        const matchesCategory = selectedCategory.length === 0 || selectedCategory.includes(product.categoryId);
+        const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(product.brandId);
+        const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesCategory && matchesBrand && matchesSearchTerm;
     });
 
-    // Sort products based on the selected option
     const sortedProducts = filteredProducts.sort((a, b) => {
         if (sortOption === "price-asc") {
             return (a.importPrice || 0) - (b.importPrice || 0);
@@ -106,18 +123,17 @@ function Shop() {
             setCurrentPage(pageNumber);
         }
     };
-
     return (
         <>
-        {isLoading && (
+            {isLoading && (
                 <div className="loader">
                     <div className="loader-inner">
                         <div className="circle"></div>
                     </div>
                 </div>
             )}
-            <HasagiNav />
-            <div className="container-fluid">
+            <HasagiNav onSearch={handleSearch}/>
+            <div className="container-fluid py-9" style={{paddingTop:'5.5rem'}}>
                 <div className="row px-xl-5">
                     <div className="col-12">
                         <nav className="breadcrumb bg-light mb-30">
@@ -133,75 +149,100 @@ function Shop() {
                         <h5 className="section-title position-relative text-uppercase mb-3">
                             <span className="bg-secondary pr-3">Lọc theo:</span>
                         </h5>
-                        <div className="sort-options d-flex flex-column">
-                            <label className="mt-2">
-                                <select
-                                    className="form-select stylish-select"
-                                    aria-label="Select category"
-                                    onChange={handleCategoryChange}
-                                    value={selectedCategory}
-                                >
-                                    <option value="">Danh mục</option>
-                                    {categories.length > 0 ? (
-                                        categories.map((category) => (
-                                            <option key={category.id} value={category.id}>
+                        <div className="checkbox-group">
+                            <label className="form-label" onClick={() => toggleCategoryOpen()}>
+                                Danh mục
+                            </label>
+                            <div className={`checkbox-list ${isCategoryOpen ? 'open' : ''}`}>
+                                {categories.length > 0 ? (
+                                    categories.map((category) => (
+                                        <div key={category.id} className="form-check">
+                                            <input
+                                                type="checkbox"
+                                                className="form-check-input"
+                                                id={`category-${category.id}`}
+                                                value={category.id}
+                                                onChange={() => handleCategoryChange(category.id)}
+                                                checked={selectedCategory.includes(category.id)}
+                                            />
+                                            <label
+                                                className="form-check-label"
+                                                htmlFor={`category-${category.id}`}
+                                            >
                                                 {category.name}
-                                            </option>
-                                        ))
-                                    ) : (
-                                        <option>No categories available</option>
-                                    )}
-                                </select>
+                                            </label>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div>No categories available</div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="checkbox-group mt-3">
+                            <label className="form-label" onClick={() => toggleBrandOpen()}>
+                                Thương hiệu
                             </label>
-                            <label className="mt-2">
-                                <select
-                                    className="form-select stylish-select"
-                                    aria-label="Select brand"
-                                    onChange={handleBrandChange}
-                                    value={selectedBrand}
-                                >
-                                    <option value="">Thương hiệu</option>
-                                    {brands.length > 0 ? (
-                                        brands.map((brand) => (
-                                            <option key={brand.id} value={brand.id}>
+                            <div className={`checkbox-list ${isBrandOpen ? 'open' : ''}`}>
+                                {brands.length > 0 ? (
+                                    brands.map((brand) => (
+                                        <div key={brand.id} className="form-check">
+                                            <input
+                                                type="checkbox"
+                                                className="form-check-input"
+                                                id={`brand-${brand.id}`}
+                                                value={brand.id}
+                                                onChange={() => handleBrandChange(brand.id)}
+                                                checked={selectedBrands.includes(brand.id)}
+                                            />
+                                            <label
+                                                className="form-check-label"
+                                                htmlFor={`brand-${brand.id}`}
+                                            >
                                                 {brand.name}
-                                            </option>
-                                        ))
-                                    ) : (
-                                        <option>No brands available</option>
-                                    )}
-                                </select>
-                            </label>
-                            <label className="mt-2">
+                                            </label>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div>No brands available</div>
+                                )}
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div className="col-9">
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                            <h5>Sản phẩm</h5>
+                            <div className="sorting-group">
                                 <select
                                     id="fashion-sorting"
                                     name="sorting"
-                                    className="form-select stylish-select"
+                                    className="form-select stylish-select small-sort-dropdown"
                                     onChange={handleSortChange}
                                     value={sortOption}
+                                    style={{ width: '150px' }}
                                 >
-                                    <option value="default">-----Sắp xếp----</option>
+                                    <option value="default">Sắp xếp</option>
                                     <option value="price-asc">Giá thấp nhất</option>
                                     <option value="price-desc">Giá cao nhất</option>
                                     <option value="popularity">Phổ biến</option>
                                     <option value="newest">Mới nhất</option>
                                 </select>
-                            </label>
+                            </div>
                         </div>
-                    </div>
-
-                    <div className="col-9">
                         <div className="row pb-3">
                             {currentProducts.map((product, index) => (
                                 <div className="col-lg-3 col-md-6 col-sm-6 pb-1" key={index}>
                                     <div className="product-item bg-light mb-4">
                                         <div className="product-img position-relative overflow-hidden">
-                                        <Link to={`/ShopDetail?id=${product.id}`}> 
-                                            <img
-                                                className="img-fluid w-100"
-                                                src={product.image || aboutImage5}
-                                                alt={product.name || 'Product Name'}
-                                            />
+                                            <Link to={`/ShopDetail?id=${product.id}`}>
+                                                <img
+                                                    className="img-fluid w-100"
+                                                    src={product.image || aboutImage5}
+                                                    alt={product.name || 'Product Name'}
+                                                />
+
                                             </Link>
                                         </div>
                                         <div className="text-center py-4">
@@ -236,7 +277,7 @@ function Shop() {
                                     <ul className="pagination justify-content-center">
                                         <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
                                             <a className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
-                                            <i className="ni ni-bold-left" />
+                                                <i className="ni ni-bold-left" />
                                             </a>
                                         </li>
                                         {[...Array(totalPages)].map((_, index) => (
@@ -248,7 +289,7 @@ function Shop() {
                                         ))}
                                         <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
                                             <a className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
-                                            <i className="ni ni-bold-right" />
+                                                <i className="ni ni-bold-right" />
                                             </a>
                                         </li>
                                     </ul>

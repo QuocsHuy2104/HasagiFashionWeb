@@ -36,6 +36,7 @@
   --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
+
 *,
 *::before,
 *::after {
@@ -55,7 +56,7 @@ article, aside, figcaption, figure, footer, header, hgroup, main, nav, section {
 
 body {
   margin: 0;
-  font-family: "Roboto", sans-serif;
+  font-family: "Times New Roman", serif;
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.5;
@@ -176,7 +177,15 @@ pre,
 code,
 kbd,
 samp {
-  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  :root {
+    --font-family-mono: "Times New Roman", SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; /* Updated to include Times New Roman */
+}
+
+/* Example usage */
+body {
+    font-family: var(--font-family-mono);
+}
+
   font-size: 1em;
 }
 
@@ -601,8 +610,8 @@ pre code {
 .container-lg,
 .container-xl {
   width: 100%;
-  padding-right: 15px;
-  padding-left: 15px;
+  padding-right: 0px;
+  padding-left: 0px;
   margin-right: auto;
   margin-left: auto;
 }
@@ -2031,7 +2040,7 @@ textarea.form-control {
 .form-check {
   position: relative;
   display: block;
-  padding-left: 1.25rem;
+  /* padding-left: 1.25rem; */
 }
 
 .form-check-input {
@@ -7582,27 +7591,31 @@ button.bg-dark:focus {
 }
 
 .p-5 {
-  padding: 3rem !important;
+  padding: 10rem !important;
 }
 
 .pt-5,
 .py-5 {
   padding-top: 3rem !important;
 }
+.py-6 {
+  padding-top: 5.5rem !important;
+}
+
 
 .pr-5,
 .px-5 {
-  padding-right: 3rem !important;
+  padding-right: 10rem !important;
 }
 
 .pb-5,
 .py-5 {
-  padding-bottom: 3rem !important;
+  padding-bottom: 0rem !important;
 }
 
 .pl-5,
 .px-5 {
-  padding-left: 3rem !important;
+  padding-left: 10rem !important;
 }
 
 .m-n1 {
@@ -9012,6 +9025,7 @@ button.bg-dark:focus {
   .pl-xl-5,
   .px-xl-5 {
     padding-left: 3rem !important;
+    padding-top: 10px
   }
   .m-xl-n1 {
     margin: -0.25rem !important;
@@ -9630,8 +9644,9 @@ a.text-dark:hover, a.text-dark:focus {
 }
 
 .cat-item {
-  background: #FFFFFF;
+background: #F5F5F5; /* Xanh nhạt */
   transition: .5s;
+  width: 300px
 }
 
 /* .cat-item:hover {
@@ -9640,6 +9655,7 @@ a.text-dark:hover, a.text-dark:focus {
 
 .cat-item img {
   transition: .5s;
+  padding-top: 20px
 }
 
 .cat-item:hover img {
