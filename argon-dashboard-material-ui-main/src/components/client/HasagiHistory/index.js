@@ -4,7 +4,7 @@ import ArgonButton from "components/ArgonButton";
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
@@ -16,6 +16,7 @@ const History = () => {
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (orders.length > 0) {
@@ -153,7 +154,11 @@ const History = () => {
       console.error("There was an error updating the status to complete!", error);
     }
   };
-  
+
+  const goBack = () => {
+    navigate(`/feature-section`);
+  };
+
   const styles = {
     orderHistory: {
       width: '100%',
@@ -220,9 +225,9 @@ const dropdownMenuStyle = {
   return (
     <>
       <HasagiNav />
-      <nav className="navbar navbar-expand-lg p-0" style={navbarStyle}>
-            <div className="container-fluid d-flex justify-content-between align-items-center py-5">
-                <div className="collapse navbar-collapse" style={{paddingTop:'50px'}}>
+      <nav className="navbar navbar-expand-lg p-0 pt-5" style={navbarStyle}>
+            <div className="container-fluid d-flex justify-content-between align-items-center p-0">
+                <div className="collapse navbar-collapse">
                     <ul className="nav-menu" style={navMenuStyle}>
                         <li className="nav-item dropdown" style={navItemStyle}>
                             <a className="nav-link dropdown-toggle menuLink" style={menuLinkStyle} role="button" id="categories" data-bs-toggle="dropdown" aria-expanded="false">

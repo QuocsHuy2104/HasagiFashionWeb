@@ -87,7 +87,7 @@ const navMenuStyle = {
   return (
     <>
       <HasagiNav />
-      <nav className="navbar navbar-expand-lg p-0" style={navbarStyle}>
+      <nav className="navbar navbar-expand-lg p-0 pt-5" style={navbarStyle}>
             <div className="container-fluid d-flex justify-content-between align-items-center p-0">
                 <div className="collapse navbar-collapse">
                     <ul className="nav-menu" style={navMenuStyle}>

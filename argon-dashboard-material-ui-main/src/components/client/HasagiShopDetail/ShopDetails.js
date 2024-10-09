@@ -9,6 +9,7 @@ import cartService from "../../../services/ProductDetail";
 import Cookies from "js-cookie";
 import { toast, ToastContainer } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function ShopDetail() {
     const [product, setProduct] = useState(null);
@@ -43,11 +44,6 @@ function ShopDetail() {
             return;
         }
 
-        if (product.importQuantity <= 0) {
-            toast.error("Sản phẩm đã hết hàng!");
-            return;
-        }
-
         try {
             const response = await cartService.addToCart({
                 accountId,
@@ -61,7 +57,7 @@ function ShopDetail() {
             if (response.status === 201 || response.status === 200) {
                 Cookies.set('productId', productId);
                 fetchTotalQuantity();
-                toast.success('Thêm giỏ hàng thành công!');
+                toast.success('Sản phẩm đã được thêm vào giỏ hàng thành công!');
                 console.log('Cart updated:', response.data);
             } else {
                 toast.error('Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại.');
@@ -80,11 +76,16 @@ function ShopDetail() {
             return response.data;
         } catch (error) {
             console.error('Error fetching favorite count:', error);
-            return 0;
+            return 0; // Default value if there's an error
         }
     };
 
     const fetchProductDetail = async () => {
+        const accountId = Cookies.get('accountId');
+        if (!accountId) {
+            navigate(`/authentication/sign-in`);
+            return;
+        }
         try {
             if (!productId) throw new Error("Product ID is missing");
 
@@ -93,7 +94,13 @@ function ShopDetail() {
             console.log("Fetched Product Data:", productData);
 
             setProduct(productData);
-
+            const countRSN = await fetchFavoriteCount(productId);
+            setFavoriteCount(countRSN);
+            const favoriteResponse = await axios.get(`http://localhost:8080/api/favorites/check?accountId=${accountId}`, {
+                params: { productId },
+                withCredentials: true
+            });
+            setIsFavorite(favoriteResponse.data);
         } catch (error) {
             console.error("Error fetching product details:", error);
         }
@@ -111,15 +118,18 @@ function ShopDetail() {
 
 
     const handleAddFavorite = async () => {
+        const accountId = Cookies.get('accountId');
+        if (!accountId) {
+            navigate(`/authentication/sign-in`);
+            return;
+        }
         if (!product) return;
-
         try {
-            await axios.post('http://localhost:8080/api/favorites', {
+            // Gửi yêu cầu thêm vào danh sách yêu thích
+            await axios.post(`http://localhost:8080/api/favorites?accountId=${accountId}`, {
                 productId: product.id
-            }, { withCredentials: true });
-
+            }, { withCredentials: true }); 
             setIsFavorite(true);
-
             const count = await fetchFavoriteCount(product.id);
             setFavoriteCount(count);
         } catch (error) {
@@ -128,17 +138,21 @@ function ShopDetail() {
     };
 
     const handleRemoveFavorite = async () => {
+        const accountId = Cookies.get('accountId');
+        if (!accountId) {
+            navigate(`/authentication/sign-in`);
+            return;
+        }
         if (!product) return;
-
         try {
             const productId = product.id;
+            const response = await axios.delete(`http://localhost:8080/api/favorites/${productId}?accountId=${accountId}`, {
 
-            const response = await axios.delete(`http://localhost:8080/api/favorites/${productId}`, {
                 withCredentials: true
             });
-
             if (response.status === 204) {
                 setIsFavorite(false);
+                // Fetch the updated favorite count
                 const count = await fetchFavoriteCount(productId);
                 setFavoriteCount(count);
             } else {
@@ -146,6 +160,43 @@ function ShopDetail() {
             }
         } catch (error) {
             console.error('Error removing from favorites:', error.response?.data || error.message);
+        }
+    };
+
+    const handleByNow = async () => {
+
+        const accountId = Cookies.get('accountId');
+        if (!accountId) {
+            navigate(`/authentication/sign-in`);
+            return;
+        }
+
+        if (!product || !selectedColor || !selectedSize) {
+            toast.error('Vui lòng chọn màu sắc và kích thước.');
+            return;
+        }
+
+        try {
+            const response = await cartService.addToCart({
+                accountId,
+                colorId: selectedColor,
+                sizeId: selectedSize,
+                quantity,
+                productId,
+                price: product.importPrice,
+            });
+
+            if (response.status === 201 || response.status === 200) {
+                fetchTotalQuantity();  
+                toast.success('Sản phẩm đã được thêm vào giỏ hàng thành công!');
+                navigate('/Cart')
+                console.log('Cart updated:', response.data);
+            } else {
+                toast.error('Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại.');
+            }
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            toast.error('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.');
         }
     };
 
@@ -163,17 +214,17 @@ function ShopDetail() {
             <HasagiNav />
             <ToastContainer />
             <div className="container-fluid">
-                <div className="row px-xl-5">
+                <div className="row px-xl-5 py-5">
                     <div className="col-12">
                         <nav className="breadcrumb bg-light mb-30">
                             <a className="breadcrumb-item text-dark" href="/feature-section">Trang chủ</a>
                             <a className="breadcrumb-item text-dark" href="/Shop">Sản phẩm</a>
-                            <span className="breadcrumb-item active">Chi tiết sản phẩm</span>
+                            <span className="breadcrumb-item active">Sản phẩm chi tiết</span>
                         </nav>
                     </div>
                 </div>
             </div>
-            <div className="container-fluid pb-5" style={{maxWidth: "1400px"}}>
+            <div className="container-fluid pb-5" style={{ maxWidth: "1400px" }}>
                 <div className="row px-xl-5">
                     <div className="col-lg-5 mb-30">
                         <div className="product-thumbnail">
@@ -182,7 +233,7 @@ function ShopDetail() {
                     </div>
                     <div className="col-lg-7 h-auto mb-30">
                         <div className="h-100 bg-light p-30 pt-4">
-                            <h3 className="font-weight-semi-bold mb-3">{product.name}</h3>
+                            <h3 className="font-weight-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>{product.name}</h3>
                             <div className="d-flex mb-3">
                                 <div className="text-primary mr-3">
                                     <small className="fas fa-star"></small>
@@ -193,10 +244,10 @@ function ShopDetail() {
                                 </div>
                                 <small className="pt-1">(99 Reviews)</small>
                             </div>
-                            <h3 className="font-weight-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>Giá: {product.importPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</h3>
-                          
+                            <h3 className="font-weight-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>{product.importPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</h3>
+                            <h3 className="font-medium-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>Số lượng: {product.importQuantity || "N/A"}</h3>
                             <div className="d-flex mb-3" id="size-input-list">
-                                <strong className="text-dark mr-3">Kích thước:</strong>
+                                <strong className="text-dark mr-3">Sizes:</strong>
                                 {product.sizes.length > 0 ? (
                                     <form>
                                         {product.sizes.map((size) => (
@@ -207,7 +258,7 @@ function ShopDetail() {
                                                     id={`size-${size.id}`}
                                                     name="size"
                                                     value={size.id}
-                                                    onChange={(e) => setSelectedSize(e.target.value)}
+                                                    onChange={(e) => setSelectedSize(e.target.value)} // Update size state
                                                 />
                                                 <label className="custom-control-label" htmlFor={`size-${size.id}`}>
                                                     {size.name}
@@ -220,7 +271,7 @@ function ShopDetail() {
                                 )}
                             </div>
                             <div className="d-flex mb-4" id="color-input-list">
-                                <strong className="text-dark mr-3">Màu sắc:</strong>
+                                <strong className="text-dark mr-3">Colors:</strong>
                                 {product.colors.length > 0 ? (
                                     <form>
                                         {product.colors.map((color) => (
@@ -228,10 +279,10 @@ function ShopDetail() {
                                                 <input
                                                     type="radio"
                                                     className="custom-control-input"
-                                                    id={`color-${color.id}`}
+                                                    id={`color-${color.id}`} 
                                                     name="color"
                                                     value={color.id}
-                                                    onChange={(e) => setSelectedColor(e.target.value)}
+                                                    onChange={(e) => setSelectedColor(e.target.value)} 
                                                 />
                                                 <label className="custom-control-label" htmlFor={`color-${color.id}`}>
                                                     {color.name}
@@ -247,7 +298,12 @@ function ShopDetail() {
                             <div className="d-flex align-items-center mb-4 pt-1">
                                 <div className="input-group quantity mr-3" style={{ width: '130px' }}>
                                     <div className="input-group-btn">
-                                        <button className="btn btn-primary btn-minus" onClick={() => setQuantity(quantity - 1)} disabled={quantity <= 1}>
+                                        <button
+                                            className="btn btn-primary btn-minus"
+                                            onClick={() => setQuantity(quantity - 1)}
+                                            disabled={quantity <= 1}
+                                            style={{ marginRight: '5px' }} 
+                                        >
                                             <i className="fa fa-minus"></i>
                                         </button>
                                     </div>
@@ -259,20 +315,23 @@ function ShopDetail() {
                                         readOnly
                                     />
                                     <div className="input-group-btn">
-                                        <button className="btn btn-primary btn-plus" onClick={() => setQuantity(quantity + 1)}>
+                                        <button
+                                            className="btn btn-primary btn-plus"
+                                            onClick={() => setQuantity(quantity + 1)}
+                                            style={{ marginLeft: '5px' }} 
+                                        >
                                             <i className="fa fa-plus"></i>
                                         </button>
                                     </div>
                                 </div>
-                                <h3 style={{fontFamily: `"Times New Roman", Times, serif` }}>Số lượng: {product.importQuantity || "N/A"}</h3>
                             </div>
                             <div className="d-flex align-items-center py-1">
-                            <button id="cartBtn" onClick={handleAddToCart} className="btn btn-primary px-3 mr-2">
-                                <i className="fa fa-shopping-cart mr-1"></i> Add To Cart
-                            </button>
-                            <Link to="/Cart" className="btn btn-primary px-3" onClick={handleAddToCart}>
-                                Mua ngay
-                            </Link>
+                                <button id="cartBtn" onClick={handleAddToCart} className="btn btn-primary px-3 mr-2">
+                                    <i className="fa fa-shopping-cart mr-1"></i> Add To Cart
+                                </button>
+                                <button className="btn btn-primary px-3" onClick={handleByNow}>
+                                    Mua ngay
+                                </button>
                             </div>
                             <div className="d-flex align-items-center py-2">
                                 {isFavorite ? (
@@ -310,14 +369,29 @@ function ShopDetail() {
                             <div className="tab-content">
                                 <div className="tab-pane fade show active" id="tab-pane-1">
                                     <h4 className="mb-3">Product Description</h4>
-                                    <p>
+                                    <p>Eos no lorem eirmod diam diam, eos elitr et gubergren diam sea. Consetetur vero aliquyam
+                                        invidunt duo dolores et duo sit. Vero diam ea vero et dolore rebum, dolor rebum eirmod
+                                        consetetur invidunt sed sed et, lorem duo et eos elitr, sadipscing kasd ipsum rebum
+                                        diam. Dolore diam stet rebum sed tempor kasd eirmod. Takimata kasd ipsum accusam
+                                        sadipscing, eos dolores sit no ut diam consetetur duo justo est, sit sanctus diam tempor
+                                        aliquyam eirmod nonumy rebum dolor accusam, ipsum kasd eos consetetur at sit rebum, diam
+                                        kasd invidunt tempor lorem, ipsum lorem elitr sanctus eirmod takimata dolor ea invidunt.
                                     </p>
-                                    <p>
+                                    <p>Dolore magna est eirmod sanctus dolor, amet diam et eirmod et ipsum. Amet dolore tempor
+                                        consetetur sed lorem dolor sit lorem tempor. Gubergren amet amet labore sadipscing clita
+                                        clita diam clita. Sea amet et sed ipsum lorem elitr et, amet et labore voluptua sit
+                                        rebum. Ea erat sed et diam takimata sed justo. Magna takimata justo et amet magna et.
                                     </p>
                                 </div>
                                 <div className="tab-pane fade" id="tab-pane-2">
                                     <h4 className="mb-3">Additional Information</h4>
-                                    <p>
+                                    <p>Eos no lorem eirmod diam diam, eos elitr et gubergren diam sea. Consetetur vero aliquyam
+                                        invidunt duo dolores et duo sit. Vero diam ea vero et dolore rebum, dolor rebum eirmod
+                                        consetetur invidunt sed sed et, lorem duo et eos elitr, sadipscing kasd ipsum rebum
+                                        diam. Dolore diam stet rebum sed tempor kasd eirmod. Takimata kasd ipsum accusam
+                                        sadipscing, eos dolores sit no ut diam consetetur duo justo est, sit sanctus diam tempor
+                                        aliquyam eirmod nonumy rebum dolor accusam, ipsum kasd eos consetetur at sit rebum, diam
+                                        kasd invidunt tempor lorem, ipsum lorem elitr sanctus eirmod takimata dolor ea invidunt.
                                     </p>
                                     <div className="row">
                                         <div className="col-md-6">

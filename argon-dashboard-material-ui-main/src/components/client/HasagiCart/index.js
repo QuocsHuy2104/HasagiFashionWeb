@@ -11,6 +11,8 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Link } from "react-router-dom";
 import Navbar from "../HasagiNavbar";
+import aboutImage from "layouts/assets/img/shopping.png";
+
 const Cart = () => {
     const [cartItems, setCartItems] = useState([]);
     const [address, setAddress] = useState(null);
@@ -85,10 +87,10 @@ const Cart = () => {
         try {
             await axios.delete(`http://localhost:3000/api/cart/remove/${itemId}?accountId=${accountId}`);
             setCartItems(cartItems.filter(item => item.cartdetailid !== itemId));
-            toast.success("Xóa thành công.");
+            toast.success("Item removed successfully.");
         } catch (error) {
             console.error("Error removing item:", error);
-            toast.error("Xóa thất bại");
+            toast.error("Error removing item.");
         }
     };
 
@@ -192,15 +194,15 @@ const Cart = () => {
 
     const goBack = () => {
         const productId = Cookies.get('productId');
-        
+
         if (!productId) {
             navigate('/feature-section');
         } else {
             navigate(`/ShopDetail?id=${productId}`);
         }
     };
-    
-    
+
+
 
     return (
         <>
@@ -213,18 +215,36 @@ const Cart = () => {
                 </div>
             )}
             <HasagiNav />
-    
-            <div className="container-fluid py-2" >
+            <Navbar />
+            <div className="container-fluid py-2">
                 <div className="row px-xl-5">
                     <div className="col-lg-12 mb-5" id="tableAddCart">
                         <div className="header">
                             <button className="back-button" onClick={() => goBack()}>
                                 <i className="ni ni-bold-left" />
                             </button>
-                            <h5 className="section-title mb-1" style={{ fontWeight: "bold", fontSize: "24px", color: "#343a40", marginLeft: '-15px' }}>Giỏ Hàng</h5>
+                            <h5 className="mb-1" style={{ fontWeight: "bold", fontSize: "24px", color: "#343a40", marginLeft: '-15px' }}>Giỏ Hàng</h5>
                         </div>
                         {cartItems.length === 0 ? (
-                            <p className="text-center" style={{ fontSize: "18px", color: "#6c757d" }}>Giỏ hàng của bạn đang trống.</p>
+                            <div className="text-center py-3">
+                                <img src={aboutImage} style={{height: "60px", width: "60px"}}/>
+                                <p style={{ fontSize: "18px", color: "#6c757d" }}>Giỏ hàng của bạn đang trống.</p>
+                                <button
+                                    style={{
+                                        padding: "10px 20px",
+                                        fontSize: "16px",
+                                        backgroundColor: "#f29913",
+                                        color: "#fff",
+                                        border: "none",
+                                        borderRadius: "5px",
+                                        cursor: "pointer"
+                                    }}
+                                    onClick={() => window.location.href = '/Shop'}
+                                >
+                                    MUA NGAY
+                                </button>
+                            </div>
+
                         ) : (
                             <table className="table table-hover table-bordered text-center mb-0">
                                 <thead className="bg-primary text-white">
@@ -239,7 +259,7 @@ const Cart = () => {
                                             />
                                         </th>
                                         <th scope="col" style={{ width: "20%", textAlign: "left", padding: "10px", fontWeight: "bold" }}>Sản Phẩm</th>
-                                        <th scope="col" style={{ width: "25%", padding: "10px", fontWeight: "bold" }}>Phân loại</th>
+                                        <th scope="col" style={{ width: "25%", padding: "10px", fontWeight: "bold" }}></th>
                                         <th scope="col" style={{ width: "10%", textAlign: "center", padding: "10px", fontWeight: "bold" }}>Đơn Giá</th>
                                         <th scope="col" style={{ width: "15%", textAlign: "center", padding: "10px", fontWeight: "bold" }}>Số Lượng</th>
                                         <th scope="col" style={{ width: "10%", textAlign: "center", padding: "10px", fontWeight: "bold" }}>Tổng</th>
@@ -259,8 +279,8 @@ const Cart = () => {
                                                 />
                                             </td>
                                             <td className="align-middle" style={{ textAlign: "left", paddingLeft: "20px" }}>
-                                            <Link to={`/ShopDetail?id=${item.productId}`}> 
-                                                <img src={item.image} style={{ width: 60 }} alt={item.name} /> {item.name}
+                                                <Link to={`/ShopDetail?id=${item.productId}`}>
+                                                    <img src={item.image} style={{ width: 60 }} alt={item.name} /> {item.name}
                                                 </Link>
                                             </td>
                                             <td className="align-middle">
@@ -354,6 +374,7 @@ const Cart = () => {
                             </table>
 
                         )}
+                        {cartItems.length > 0 && (
                         <div className="d-flex align-items-center justify-content-between w-100 py-2">
                             <div className="d-flex align-items-center" style={{ marginLeft: '30px' }}>
                                 <input
@@ -392,7 +413,7 @@ const Cart = () => {
                                 </button>
                             </div>
                         </div>
-
+)}
                     </div>
                 </div>
             </div>

@@ -1,27 +1,4 @@
-.checkbox-list {
-    max-height: 200px; /* Limit height for scroll */
-    overflow-y: auto; /* Enable vertical scroll */
-    margin-top: 10px;
-    transition: max-height 0.3s ease;
-    /* Additional styles for aesthetics */
-  }
-  
-  .checkbox-list.open {
-    max-height: 300px; /* Expand on open */
-  }
-  
-  .sort-options {
-    padding: 15px; /* Adjust padding for overall container */
-  }
-  
-  .form-label {
-    cursor: pointer; /* Change cursor to indicate collapsible section */
-  }
-  
-  h5.section-title {
-    font-weight: bold;
-    font-size: 1.2rem; /* Adjust title size */
-  }
+
 /*** Spinner Start ***/
 .centered-container {
     display: flex;
@@ -149,7 +126,14 @@
     font-weight: normal;
 }
 
+/* .btn.btn-primary {
+    color: var(--bs-white);
+}
 
+.btn.btn-primary:hover {
+    background: var(--bs-secondary);
+    border: 1px solid var(--bs-secondary);
+} */
 
 .btn.btn-secondary {
     color: #212529;
@@ -201,12 +185,10 @@
     margin-left: 8px;
 }
 
-
 .dropdown .dropdown-menu a:hover {
-    background: rgba(13, 110, 253, 0.2);
-    color: rgba(255, 255, 255, 0.8); 
+    background: rgba(13, 110, 253, 0.2); /* Sử dụng màu primary nhẹ hơn với opacity */
+    color: rgba(255, 255, 255, 0.8); /* Màu trắng nhẹ hơn */
 }
-
 .navbar .nav-item:hover .dropdown-menu {
     transform: rotateX(0deg);
     visibility: visible;
@@ -320,13 +302,9 @@
     }
 }
 /*** Carousel Hero Header Start ***/
-.carousel-header {
+/* .carousel-header {
     position: relative;
     overflow: hidden;
-}
-
-.carousel-indicators {
-    display: none;
 }
 
 .carousel .carousel-control-prev,
@@ -479,7 +457,7 @@
 
 #searchModal .modal-content {
     background: rgba(255, 255, 255, .6);
-}
+} */
 /*** Carousel Hero Header End ***/
 
 /*** Single Page Hero Header Start ***/
