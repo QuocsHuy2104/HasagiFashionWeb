@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types'; // Import PropTypes
 import ArgonBox from 'components/ArgonBox';
 import ArgonTypography from 'components/ArgonTypography';
-import HasagiCard from 'components/client/HasagiCard';
+import HasagiCard2 from 'components/client/HasagiCard/Card2';
 import ShopService from "services/ShopServices";
 
 function FeaturedProducts({ searchTerm }) {
@@ -29,9 +29,9 @@ function FeaturedProducts({ searchTerm }) {
         <ArgonBox py={8} style={{ width: '100%' }}>
             <ArgonBox
                 borderRadius='lg'
-                p='25px 25px 10px'
+                p='25px'
                 style={{
-                    background: 'linear-gradient(to right, #ff5f6d, #ffc371)', // Changed to a solid orange color
+                    background: 'linear-gradient(to right, #ff5f6d, #ffc371)', // Gradient background
                     width: '100%',
                 }}
             >
@@ -48,24 +48,18 @@ function FeaturedProducts({ searchTerm }) {
                 </ArgonBox>
                 <ArgonBox display="flex" flexWrap="wrap" justifyContent="center" style={{ width: '100%' }}>
                     {filteredProducts.length === 0 ? (
-                        <ArgonTypography variant="h6">
+                        <ArgonTypography variant="h6" color="text" textAlign="center">
                             Không có sản phẩm nào.
                         </ArgonTypography>
                     ) : (
                         filteredProducts.map((product) => (
                             <ArgonBox key={product.id} mx={1} mb={2} style={{ flex: '1 0 23%', maxWidth: '23%' }}>
-                                <HasagiCard
+                                <HasagiCard2
                                     image={product.image}
-                                    sold={product.name}
-                                    description={product.name}
-                                    action={{
-                                        type: "internal",
-                                        route: `/ShopDetail?id=${product.id}`,
-                                    }}
+                                    name={product.name}
                                     id={product.id}
-                                    price={product.importPrice}
-                                    month={10}
-                                    buttonStyle={{ padding: '10px 20px', fontSize: '16px' }}
+                                    importPrice={product.importPrice}
+                                    sale={product.sale}
                                 />
                             </ArgonBox>
                         ))
