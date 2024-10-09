@@ -1,78 +1,53 @@
-import React, { useEffect, useState } from "react";
-import Cookies from "js-cookie";
-import { jwtDecode } from 'jwt-decode';
-import useCartQuantity from "../HasagiQuantity/useCartQuantity";
+import * as React from 'react';
 import PropTypes from 'prop-types';
-import 'layouts/assets/css/style.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'components/client/assets/js/script';
-import 'components/client/assets/js/plugins';
-import logo from 'components/client/assets/images/Hasagi.png';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch } from '@fortawesome/free-solid-svg-icons';
-import { faUser } from '@fortawesome/free-regular-svg-icons';
-import { faHeart } from '@fortawesome/free-regular-svg-icons';
-import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
-import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import CssBaseline from '@mui/material/CssBaseline';
+import useScrollTrigger from '@mui/material/useScrollTrigger';
+import MuiLink from "@mui/material/Link";
+import Cookies from 'js-cookie';
+import ArgonBox from 'components/ArgonBox';
+import ArgonTypography from 'components/ArgonTypography';
+import logo from 'components/client/assets/images/logo-ct-dark.png';
+import ArgonAvatar from 'components/ArgonAvatar';
 
+import PersonIcon from '@mui/icons-material/Person';
+import ReorderIcon from '@mui/icons-material/Reorder';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
-const Header = ({ onSearch }) => {
-    const [dropdownOpen, setDropdownOpen] = useState(false);
-    const { totalQuantity, fetchTotalQuantity } = useCartQuantity();
-    const [searchTerm, setSearchTerm] = useState("");
+import CategoriesService from 'services/CategoryServices';
+import BrandsService from 'services/BrandServices';
 
-    const handleSearchChange = (event) => {
-        const value = event.target.value;
-        setSearchTerm(value);
-        onSearch(value); // Gọi hàm tìm kiếm từ prop
-    };
+function ElevationScroll(props) {
+    const { children, window } = props;
+    const trigger = useScrollTrigger({
+        disableHysteresis: true,
+        threshold: 0,
+        target: window ? window() : undefined,
+    });
 
-    const handleMouseEnter = () => {
-        setDropdownOpen(true);
-    };
+    return children
+        ? React.cloneElement(children, {
+            elevation: trigger ? 6 : 0,
+            style: {
+                backgroundColor: trigger ? '#fff' : 'transparent',
+                boxShadow: trigger ? '0px 4px 20px rgba(0, 0, 0, 0.2)' : 'none',
+                transition: 'all 0.3s ease',
+            },
+        })
+        : null;
+}
 
-    const handleMouseLeave = () => {
-        setDropdownOpen(false);
-    };
+ElevationScroll.propTypes = {
+    children: PropTypes.element.isRequired,
+    window: PropTypes.func,
+};
 
-    const startVoiceSearch = (event) => {
-        event.preventDefault();
-        if (window.SpeechRecognition || window.webkitSpeechRecognition) {
-            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = 'vi-VN';
-            recognition.interimResults = false;
-    
-            recognition.onstart = () => {
-                console.log('Voice recognition started. Speak into the microphone.');
-            };
-    
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                setSearchTerm(transcript);
-                onSearch(transcript);
-                
-                const utterance = new SpeechSynthesisUtterance(transcript);
-                utterance.lang = 'vi-VN';
-                window.speechSynthesis.speak(utterance);
-            };
-    
-            recognition.onerror = (event) => {
-                console.error('Error occurred in recognition: ' + event.error);
-            };
-    
-            recognition.start();
-        } else {
-            alert('Trình duyệt của bạn không hỗ trợ tìm kiếm bằng giọng nói.');
-        }
-    };
-
-    useEffect(() => {
-        fetchTotalQuantity();
-    }, [fetchTotalQuantity]);
-
-    // Check login
+export default function Header(props) {
+    const [isHovering, setIsHovering] = React.useState(false);
     const user = Cookies.get('user');
-    let position = false;
+    var position = false;
     if (user === null) position = false;
     else
         try {
@@ -84,190 +59,158 @@ const Header = ({ onSearch }) => {
             console.error(error);
         }
 
-    // Inline styles
-    const styles = {
-        header: {
-            backgroundColor: '#e9ecef',
-            padding: '1rem',
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 1000,
-        },
-        logo: {
-            marginLeft: "50px",
-            width: '50px',
-            height: '50px',
-        },
-        navLink: {
-            fontSize: '16px',
-            fontWeight: '500',
-            color: '#333',
-            marginLeft: '20px',
-            transition: 'color 0.3s ease-in-out',
-        },
-        formControl: {
-            border: '1px solid #ddd',
-            padding: '10px 20px',
-            fontSize: '14px',
-            width: '300px',
-        },
-        searchButton: {
-            borderColor: 'black',
-            color: 'black',
-            transition: 'background-color 0.3s, color 0.3s',
-        },
-        icon: {
-            fontSize: '20px',
-            transition: 'transform 0.2s ease',
-        },
-        badge: {
-            position: 'absolute',
-            top: '-5px',
-            right: '-10px',
-            fontSize: '12px',
-            width: '20px',
-            height: '20px',
-            borderRadius: '50%',
-            backgroundColor: '#007678',
-            color: 'white',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-        },
-        userIcon: {
-            padding: '10px',
-            borderRadius: '50%',
-            transition: 'background-color 0.3s ease, box-shadow 0.3s ease',
-            position: 'relative',
-        },
-    };
+    const handleMouseEnter = () => setIsHovering(true);
+    const handleMouseLeave = () => setIsHovering(false);
+    const fetchData = async () => {
+        const [categories, brands] = await Promise.all([
+            CategoriesService.getAllCategories()
+        ])
+    }
 
     return (
         <>
-            <div className="container-fluid bg-secondary">
-                <header className="navbar navbar-expand-lg" style={styles.header}>
-                    <div className="main-logo">
-                        {position === true ? (
-                            <a href="/dashboard" className="navbar-brand">
-                                <img
-                                    src={logo}
-                                    alt="logo"
-                                    className="img-fluid"
-                                    style={styles.logo}
-                                />
-                                <span className="mt-5" style={{ fontWeight: 1000 }}>Hasagi Fashion</span>
-                            </a>
-                        ) : (
-                            <a href="/#" className="navbar-brand">
-                                <img
-                                    src={logo}
-                                    alt="logo"
-                                    style={styles.logo}
-                                />
-                                <span className="mt-5" style={{ fontWeight: 1000 }}>Hasagi Fashion</span>
-                            </a>
-                        )}
-                    </div>
-                    <div className="collapse navbar-collapse">
-                        <div className="nav-menu d-flex">
-                            <a href="/feature-section" className="nav-item nav-link" style={styles.navLink}>Trang Chủ</a>
-                            <a href="/Shop" className="nav-item nav-link" style={styles.navLink}>Sản Phẩm</a>
-                            <a href="#about" className="nav-item nav-link" style={styles.navLink}>Giới Thiệu</a>
-                            <a href="#contact" className="nav-item nav-link" style={styles.navLink}>Liên Hệ</a>
-                            <a href="#faq" className="nav-item nav-link" style={styles.navLink}>Yêu thích</a>
-                        </div>
-                    </div>
+            <ArgonBox height='110px' sx={{ borderBottom: '1px solid #d2d2d2' }}>
+                <CssBaseline />
+                <ElevationScroll {...props}>
+                    <AppBar >
+                        <Toolbar>
+                            <ArgonBox display="flex" justifyContent="space-between" height="110px" mx={16} alignItems="center" width="100%">
+                                {/* Logo Section */}
+                                {position ? (
+                                    <MuiLink href='/dashboard'>
+                                        <ArgonBox display="flex" alignItems="center">
+                                            <ArgonAvatar src={logo} alt="Avatar" variant="rounded" size="lg" p={3} />
+                                            <ArgonTypography variant="h5" ml={2}>HasagiFashion</ArgonTypography>
+                                        </ArgonBox>
+                                    </MuiLink>
+                                ) : (
+                                    <ArgonBox display="flex" alignItems="center">
+                                        <ArgonAvatar src={logo} alt="Avatar" variant="rounded" size="lg" p={3} />
+                                        <ArgonTypography variant="h5" ml={2}>HasagiFashion</ArgonTypography>
+                                    </ArgonBox>
+                                )}
 
-                    <div className="d-flex align-items-center" style={{ paddingRight: '38px' }}>
-                        <form className="d-flex form-search" role="search" style={{ marginRight: "20px" }}>
-                            <input
-                                type="search"
-                                placeholder="Tìm kiếm"
-                                value={searchTerm}
-                                onChange={handleSearchChange}
-                                className="form-control rounded-pill me-2"
-                                aria-label="Search"
-                                style={styles.formControl}
-                            />
-                            <button
-                                className="btn btn-outline-secondary rounded-pill"
-                                type="button"
-                                onClick={startVoiceSearch}
-                                style={styles.searchButton}
-                            >
-                                <FontAwesomeIcon icon={faMicrophone} />
-                            </button>
-                        </form>
-
-                        <ul className="d-flex justify-content-end list-unstyled m-0">
-                            <li className="user-menu dropdown" style={{ marginRight: "10px" }}
-                                onMouseEnter={handleMouseEnter}
-                                onMouseLeave={handleMouseLeave}
-                            >
-                                <a
-                                    className="rounded-circle"
-                                    style={{
-                                        ...styles.userIcon,
-                                        ...(dropdownOpen ? styles.userIconHover : {}),
+                                <ArgonBox
+                                    display="flex"
+                                    justifyContent="center"
+                                    alignItems='center'
+                                    height='110px'
+                                    mx={6}
+                                    sx={{
+                                        flexGrow: 1,
+                                        display: { xs: 'none', sm: 'flex' } // Hidden on extra small screens
                                     }}
                                 >
-                                    <FontAwesomeIcon icon={faUser} className='icon' style={styles.icon} />
-                                </a>
-                                <ul className={`dropdown-menu icon-user ${dropdownOpen ? 'show' : ''}`}>
+                                    <MuiLink href="/" sx={{ paddingRight: 3 }}>
+                                        <ArgonTypography variant="h5">TRANG CHỦ</ArgonTypography>
+                                    </MuiLink>
+
+                                    <MuiLink href="/shop" sx={{ paddingRight: 3 }}>
+                                        <ArgonTypography variant="h5">SẢN PHẨM</ArgonTypography>
+                                    </MuiLink>
+
+                                    <MuiLink href="/new" sx={{ paddingRight: 3 }}>
+                                        <ArgonTypography variant="h5">MỚI</ArgonTypography>
+                                    </MuiLink>
+
+                                    <MuiLink href="/ao-thun" sx={{ paddingRight: 3 }}>
+                                        <ArgonTypography variant="h5">ÁO THUN NAM NỮ</ArgonTypography>
+                                    </MuiLink>
+
+                                    {/* Icons with Hover */}
+                                    <ArgonBox
+                                        display="flex"
+                                        px={2} height={110}
+                                        alignItems="center"
+                                        onMouseEnter={handleMouseEnter}
+                                        onMouseLeave={handleMouseLeave}
+                                        style={{ cursor: 'pointer' }}>
+                                        <ReorderIcon sx={{ fontSize: 30 }} />
+                                        <ExpandMoreIcon sx={{ fontSize: 30 }} />
+                                        {isHovering && (
+                                            <ArgonBox
+                                                sx={{
+                                                    position: 'absolute',
+                                                    boxShadow: '0px 4px 20px rgb(0, 0, 0, 0.2)',
+                                                    borderTop: '2px solid red',
+                                                    top: '85%',
+                                                    left: 0,
+                                                    p: 2,
+                                                }}
+                                                width='100%'
+                                                bgColor='secondary'
+                                                variant='gradient'
+                                            >
+
+                                                <ArgonBox
+                                                    display="grid"
+                                                    gridTemplateColumns="repeat(5, 1fr)"
+                                                    gap={2}
+                                                >
+                                                    <ArgonBox p={2} color='white' display='flex' flexDirection='column' >
+                                                        <MuiLink href='#'>Áo Thun Trơn</MuiLink>
+                                                        <MuiLink href='#'>Áo Thun Cổ Tròn</MuiLink>
+                                                        <MuiLink href='#'>Áo Thun In Hình</MuiLink>
+                                                    </ArgonBox>
+                                                    <ArgonBox p={2} border="1px solid lightgray" color='white' display='flex' flexDirection='column'>
+                                                        <MuiLink href='#'>Áo POLO Trơn</MuiLink>
+                                                        <MuiLink href='#'>Áo POLO In Hình</MuiLink>
+                                                        <MuiLink href='#'>Áo POLO dáng rộng</MuiLink>
+                                                        <MuiLink href='#'>Áo POLO dáng vừa</MuiLink>
+                                                    </ArgonBox>
+                                                    <ArgonBox p={2} border="1px solid lightgray" color='white' display='flex' flexDirection='column'>
+                                                        <ArgonTypography>Column 3</ArgonTypography>
+                                                    </ArgonBox>
+                                                    <ArgonBox p={2} border="1px solid lightgray" color='white' display='flex' flexDirection='column'>
+                                                        <ArgonTypography>Column 4</ArgonTypography>
+                                                    </ArgonBox>
+                                                    <ArgonBox p={2} border="1px solid lightgray" color='white' display='flex' flexDirection='column'>
+                                                        <ArgonTypography>Column 5</ArgonTypography>
+                                                    </ArgonBox>
+                                                </ArgonBox>
+                                            </ArgonBox>
+                                        )}
+                                    </ArgonBox>
+                                </ArgonBox>
+
+                                <ArgonBox>
                                     {user == null ? (
-                                        <>
-                                            <li>
-                                                <a href="/authentication/sign-in" className="dropdown-item">Đăng nhập</a>
-                                            </li>
-                                            <li>
-                                                <a href="/authentication/sign-up" className="dropdown-item">Đăng ký</a>
-                                            </li>
-                                        </>
+                                        <ArgonBox display="flex" flexDirection="column" alignItems="center">
+                                            <PersonIcon />
+                                            <ArgonBox display='flex' justifyContent='space-evenly' alignItems='center' mt={1}>
+                                                <MuiLink href='/authentication/sign-in' sx={{ marginRight: 1 }}>
+                                                    <ArgonTypography variant="inherit">Đăng Nhập</ArgonTypography>
+                                                </MuiLink>
+
+                                                <MuiLink href='/authentication/sign-up'>
+                                                    <ArgonTypography variant="inherit">Đăng Ký</ArgonTypography>
+                                                </MuiLink>
+                                            </ArgonBox>
+                                        </ArgonBox>
                                     ) : (
-                                        <>
-                                            <li>
-                                                <a href="logout" className="dropdown-item">Tài khoản của tôi</a>
-                                            </li>
-                                            <li>
-                                                <a href="/History" className="dropdown-item">Lịch sử đơn hàng</a>
-                                            </li>
-                                            <li>
-                                                <a href="logout" className="dropdown-item">Đăng xuất</a>
-                                            </li>
-                                        </>
+                                        <ArgonBox display="flex" flexDirection="column" alignItems="center">
+                                            <PersonIcon />
+                                            <ArgonBox display='flex' justifyContent='space-evenly' alignItems='center' mt={1}>
+                                                <MuiLink href='/dashboard'>
+                                                    <ArgonTypography variant="inherit">Tài Khoản</ArgonTypography>
+                                                </MuiLink>
+                                            </ArgonBox>
+                                        </ArgonBox>
                                     )}
-                                </ul>
-                            </li>
-                            {user && (
-                                <>
-                                    <li>
-                                        <a href="" style={{ padding: '10px', textDecoration: 'none' }}>
-                                            <FontAwesomeIcon icon={faHeart} className='icon' style={styles.icon} />
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="/Cart" style={{ position: 'relative', padding: '10px', textDecoration: 'none' }}>
-                                            <FontAwesomeIcon icon={faShoppingCart} className='icon' style={styles.icon} />
-                                            {totalQuantity > 0 && (
-                                                <span className="badge" style={styles.badge}>{totalQuantity}</span>
-                                            )}
-                                        </a>
-                                    </li>
-                                </>
-                            )}
-                        </ul>
-                    </div>
-                </header>
-            </div>
+                                </ArgonBox>
+
+                                <ArgonBox p={3}>
+                                    <MuiLink href='/cart'>
+                                        <ShoppingCartIcon fontSize="large" />
+                                    </MuiLink>
+                                </ArgonBox>
+
+                            </ArgonBox>
+                        </Toolbar>
+                    </AppBar>
+                </ElevationScroll>
+                <Toolbar />
+            </ArgonBox>
         </>
     );
-};
-
-// Add prop types validation
-Header.propTypes = {
-    onSearch: PropTypes.func.isRequired,
-};
-
-export default Header;
+}

@@ -234,13 +234,11 @@ const routes = [
     showInSidenav: true,
   },
   {
-    // type: "route",
     name: "Shop",
     key: "shop",
-    route: "/Shop",
+    route: "/shop",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
     component: <Shop />,
-    showInSidenav: true,
   },
   {
     // type: "route",

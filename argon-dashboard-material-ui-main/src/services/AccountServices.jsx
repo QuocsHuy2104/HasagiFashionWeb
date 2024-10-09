@@ -5,7 +5,7 @@ const AccountService = {
         return apiClient.get("/admin/account");
     },
 
-    getAccountById: (id) => { // Add the id parameter
+    getAccountById: (id) => {
         return apiClient.get(`/admin/account/${id}`);
     },
 
@@ -28,6 +28,7 @@ const AccountService = {
 
     dismissalAccount: id => apiClient.put(`/admin/account/dismissal/${id}`),
 
+    getAuthor: () => apiClient.get('/admin/my-ìno'),
 
 }
 
