@@ -1,33 +1,36 @@
 import React, { useState } from "react";
 import Card from "@mui/material/Card";
-import { Link, useNavigate } from 'react-router-dom';
-// Các thành phần của Argon Dashboard 2 MUI
+import { Link, useNavigate } from "react-router-dom";
+
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
 import ArgonButton from "components/ArgonButton";
 import ArgonInput from "components/ArgonInput";
 
-// Các thành phần của layout xác thực
 import CoverLayout from "layouts/authentication/components/CoverLayout";
 import Socials from "layouts/authentication/components/Socials";
 import Separator from "layouts/authentication/components/Separator";
 
-// Hình ảnh
-const bgImage = "https://raw.githubusercontent.com/creativetimofficial/public-assets/master/argon-dashboard-pro/assets/img/signup-cover.jpg";
+import AccountService from "services/AccountServices";
+
+const bgImage =
+  "https://raw.githubusercontent.com/creativetimofficial/public-assets/master/argon-dashboard-pro/assets/img/signup-cover.jpg";
 
 function Cover() {
-  const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
+  const [fullName, setFullname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState("");
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   // Xác thực dữ liệu đầu vào
   const validateForm = () => {
     let formErrors = {};
 
     // Kiểm tra họ tên
+    if (!username) formErrors.username = "Vui lòng nhập tên đăng nhập.";
     if (!fullName) formErrors.fullName = "Vui lòng nhập họ tên.";
 
     // Kiểm tra email
@@ -40,13 +43,13 @@ function Cover() {
     else {
       if (password.length < 6) formErrors.password = "Mật khẩu phải có ít nhất 6 ký tự.";
       if (!/\d/.test(password)) formErrors.password = "Mật khẩu phải chứa ít nhất một ký tự số.";
-      if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) formErrors.password = "Mật khẩu phải chứa ít nhất một ký tự đặc biệt.";
+      if (!/[!@#$%^&*(),.?":{}|<>]/.test(password))
+        formErrors.password = "Mật khẩu phải chứa ít nhất một ký tự đặc biệt.";
     }
 
     return formErrors;
   };
 
-  // Xử lý đăng ký
   const handleSignUp = async (e) => {
     e.preventDefault();
 
@@ -59,10 +62,10 @@ function Cover() {
     setErrors({});
     setMessage("");
 
-    const userData = { fullName, email, password };
+    const userData = { username, fullName, email, password };
 
     try {
-      const response = await fetch("http://localhost:3000/api/admin/account", {
+      const response = await fetch("http://localhost:3000/api/regis", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -74,13 +77,13 @@ function Cover() {
         const result = await response.text();
         console.log(result);
         setMessage("Đăng ký thành công.");
-        navigate("/authentication/sign-in"); 
+        navigate("/authentication/sign-in");
         // Chuyển hướng hoặc thực hiện các hành động khác sau khi đăng ký thành công
       } else {
         const errorText = await response.text();
         console.error("Đăng ký không thành công:", errorText);
-        if (errorText.includes("email đã được đăng ký")) {
-          setMessage("Email đã được đăng ký.");
+        if (errorText.includes("Email này đã tồn tại")) {
+          setMessage("Email này đã tồn tại");
         } else {
           setMessage("Đăng ký không thành công. Vui lòng thử lại.");
         }
@@ -102,24 +105,34 @@ function Cover() {
       <Card>
         <ArgonBox p={3} mb={1} textAlign="center">
           <ArgonTypography variant="h5" fontWeight="medium">
-            Đăng ký với
+            ĐĂNG KÝ
           </ArgonTypography>
-        </ArgonBox>
-        <ArgonBox mb={2}>
-          <Socials />
-        </ArgonBox>
-        <ArgonBox px={12}>
-          <Separator />
         </ArgonBox>
         <ArgonBox pt={2} pb={3} px={3}>
           <ArgonBox component="form" role="form" onSubmit={handleSignUp}>
             <ArgonBox mb={2}>
-              <ArgonInput 
-                type="text" 
-                placeholder="Họ tên" 
-                value={fullName} 
+              <ArgonInput
+                type="text"
+                placeholder="Tên tài khoản"
+                value={username}
+                name="username"
+                onChange={(e) => setUsername(e.target.value)}
+                fullWidth
+                error={!!errors.username}
+              />
+              {errors.username && (
+                <ArgonTypography variant="body2" color="error">
+                  {errors.username}
+                </ArgonTypography>
+              )}
+            </ArgonBox>
+            <ArgonBox mb={2}>
+              <ArgonInput
+                type="text"
+                placeholder="Họ và tên"
+                value={fullName}
                 name="fullName"
-                onChange={(e) => setFullName(e.target.value)}
+                onChange={(e) => setFullname(e.target.value)}
                 fullWidth
                 error={!!errors.fullName}
               />
@@ -130,10 +143,10 @@ function Cover() {
               )}
             </ArgonBox>
             <ArgonBox mb={2}>
-              <ArgonInput 
-                type="text" 
-                placeholder="Email" 
-                value={email} 
+              <ArgonInput
+                type="text"
+                placeholder="Email"
+                value={email}
                 name="email"
                 onChange={(e) => setEmail(e.target.value)}
                 fullWidth
@@ -146,10 +159,10 @@ function Cover() {
               )}
             </ArgonBox>
             <ArgonBox mb={2}>
-              <ArgonInput 
-                type="password" 
-                placeholder="Mật khẩu" 
-                value={password} 
+              <ArgonInput
+                type="password"
+                placeholder="Mật khẩu"
+                value={password}
                 name="password"
                 onChange={(e) => setPassword(e.target.value)}
                 fullWidth
@@ -169,12 +182,7 @@ function Cover() {
               </ArgonBox>
             )}
             <ArgonBox mt={4} mb={1}>
-              <ArgonButton 
-                variant="gradient" 
-                color="dark" 
-                fullWidth 
-                type="submit"
-              >
+              <ArgonButton variant="gradient" color="dark" fullWidth type="submit">
                 Sign-Up
               </ArgonButton>
             </ArgonBox>
