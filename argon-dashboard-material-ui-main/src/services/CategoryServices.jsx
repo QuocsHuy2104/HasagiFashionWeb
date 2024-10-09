@@ -1,6 +1,8 @@
 import apiClient from "config/axiosConfig";
 
 const CategoriesService = {
+
+    
     getAllCategories: async () => {
         try {
             const response = await apiClient.get("/admin/category");
@@ -49,7 +51,9 @@ const CategoriesService = {
             console.error(`Error deleting category with ID ${id}:`, error);
             throw error;
         }
-    }
+    },
+
+    
 };
 
 

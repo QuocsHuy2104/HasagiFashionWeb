@@ -63,7 +63,6 @@ const Navbar = () => {
         boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
         borderBottom: 'white solid 1px',
         borderTop: 'white solid 1px',
-        
     };
 
     const navMenuStyle = {
@@ -92,9 +91,25 @@ const Navbar = () => {
         boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
         display: 'flex',
         flexWrap: 'wrap',
-        width: '500px',
+        width: '400px',
     };
     
+    const dropdownMenuStyle1 = {
+        backgroundColor: '#ffffff',
+        border: '1px solid #dee2e6',
+        boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+        display: 'flex',
+        flexWrap: 'wrap',
+        width: '280px',
+    };
+    const dropdownMenuStyle2 = {
+        backgroundColor: '#ffffff',
+        border: '1px solid #dee2e6',
+        boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+        display: 'flex',
+        flexWrap: 'wrap',
+    };
+
     const dropdownItemStyle = {
         color: '#333',
         padding: '10px 15px',
@@ -104,7 +119,7 @@ const Navbar = () => {
     
 
     return (
-        <div className="container-fluid justify-content-between align-items-center py-6">
+        <div className="container-fluid justify-content-between align-items-center py-5">
             <nav className="navbar navbar-expand-lg p-0" style={navbarStyle}>
                 <div className="collapse navbar-collapse">
                     <ul className="nav-menu" style={navMenuStyle}>
@@ -140,7 +155,7 @@ const Navbar = () => {
                             <a className="nav-link dropdown-toggle menuLink" style={menuLinkStyle} role="button" id="pages" data-bs-toggle="dropdown" aria-expanded="false">
                                 MÀU SẮC
                             </a>
-                            <ul className="dropdown-menu" style={dropdownMenuStyle} aria-labelledby="colors">
+                            <ul className="dropdown-menu" style={dropdownMenuStyle1} aria-labelledby="colors">
                                 {colors.map((color) => (
                                     <li key={color.id}>
                                         <a href="/#" className="dropdown-item" style={dropdownItemStyle}>
@@ -154,7 +169,7 @@ const Navbar = () => {
                             <a className="nav-link dropdown-toggle menuLink" style={menuLinkStyle} role="button" id="pages" data-bs-toggle="dropdown" aria-expanded="false">
                                 KÍCH CỠ
                             </a>
-                            <ul className="dropdown-menu" style={dropdownMenuStyle} aria-labelledby="pages">
+                            <ul className="dropdown-menu" style={dropdownMenuStyle2} aria-labelledby="pages">
                                 {sizes.map((size) => (
                                     <li key={size.id}>
                                         <a href="/#" className="dropdown-item" style={dropdownItemStyle}>

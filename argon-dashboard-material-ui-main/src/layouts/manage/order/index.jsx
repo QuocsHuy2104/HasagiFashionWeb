@@ -76,16 +76,20 @@ function Order() {
 
     setFilteredOrders(filteredOrders);
   };
-  const handleRowClick = async (params) => {
-    const orderId = params.row.id;
-    try {
-      const response = await axios.get(`http://localhost:3000/api/orderdetails/${orderId}`);
-      setSelectedOrder(response.data);
-      setShowDetailsModal(true);
-    } catch (error) {
-      console.error("Error fetching order details", error);
+  const handleRowClick = async (params, event) => {
+    // Kiểm tra nếu cột được bấm không phải là "status"
+    if (params.field !== "status") {
+      const orderId = params.row.id;
+      try {
+        const response = await axios.get(`http://localhost:3000/api/orderdetails/${orderId}`);
+        setSelectedOrder(response.data);
+        setShowDetailsModal(true);
+      } catch (error) {
+        console.error("Error fetching order details", error);
+      }
     }
   };
+
 
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(
@@ -171,7 +175,7 @@ function Order() {
                     onClick={() => handleStatusChange(order.id, 'huy')}
                     style={{ marginLeft: '10px' }}
                   >
-                    Hủy Đơn Hàng
+                    Hủy
                   </ArgonButton>
                 )}
               </>
@@ -196,6 +200,7 @@ function Order() {
         setFilteredOrders(prevFilteredOrders =>
           prevFilteredOrders.map(order => (order.id === orderId ? { ...order, slug: nextStatusSlug } : order))
         );
+        setShowDetailsModal(false);
       } catch (error) {
         console.error("There was an error updating the status!", error);
       }
@@ -263,31 +268,38 @@ function Order() {
           </Card>
         </ArgonBox>
         <ArgonBox>
-          <Paper style={{ width: "100%", height: 400 }}>
-            <DataGrid
-              rows={filteredOrders}
-              columns={columns}
-              paginationModel={paginationModel}
-              onPaginationModelChange={setPaginationModel}
-              pageSizeOptions={[5, 10, 20]}
-              disableSelectionOnClick
-              onRowClick={handleRowClick}
-              sx={{
-                "& .MuiDataGrid-footerContainer": {
-                  justifyContent: "space-between",
-                },
-                "& .MuiTablePagination-selectLabel": {
-                  marginRight: 0,
-                },
-                "& .MuiTablePagination-root": {
-                  width: "400px",
-                },
-                "& .MuiInputBase-root": {
-                  maxWidth: "60px",
-                },
-              }}
-            />
-          </Paper>
+        <Paper style={{ height: 420, width: "100%" }}>
+          <DataGrid
+            onCellClick={handleRowClick}
+            rows={filteredOrders}
+            columns={columns}
+            pageSize={5}
+            rowsPerPageOptions={[5, 10]}
+            checkboxSelection
+            disableSelectionOnClick
+            sx={{
+              "& .MuiDataGrid-cell": {
+                fontSize: "1rem", // Giảm kích thước chữ trong các ô của bảng
+                padding: "4px", // Giảm padding để làm cho nội dung trong ô gần nhau hơn
+              },
+              "& .MuiDataGrid-columnHeaders": {
+                fontSize: "0.8rem", // Giảm kích thước chữ trong tiêu đề cột
+              },
+              "& .MuiTablePagination-root": {
+                fontSize: "0.75rem", // Giảm kích thước chữ cho phần "Rows per page"
+                minHeight: "30px", // Giảm chiều cao tối thiểu
+              },
+              "& .MuiTablePagination-select": {
+                fontSize: "0.75rem", // Giảm kích thước chữ trong phần lựa chọn số hàng
+                padding: "4px", // Giảm padding để nhỏ hơn
+              },
+              "& .MuiTablePagination-displayedRows": {
+                fontSize: "1rem", // Giảm kích thước chữ trong phần số trang được hiển thị
+              },
+            }}
+            rowHeight={100} // Giảm chiều cao hàng để bảng trông nhỏ gọn hơn
+          />
+        </Paper>
         </ArgonBox>
       </ArgonBox>
       <Modal show={showDetailsModal} onHide={() => setShowDetailsModal(false)} centered>

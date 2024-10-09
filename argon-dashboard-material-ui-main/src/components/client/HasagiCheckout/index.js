@@ -35,7 +35,7 @@ const Checkout = () => {
         setTimeout(() => {
             setIsLoading(false);
         }, 700);
-        
+
         const accountId = Cookies.get('accountId');
         if (!accountId) {
             navigate(`/authentication/sign-in`);
@@ -256,44 +256,81 @@ const Checkout = () => {
             price: item.price,
         }));
 
-        const payStatus = selectedPayment === 'Direct Check' ? 'Not Paid' : 'Paid';
         const accountId = Cookies.get('accountId');
-        try {
-            const response = await axios.post(
-                `http://localhost:3000/api/checkout/${addressId}?accountId=${accountId}`,
-                {
-                    addressDTO,
-                    cartDetails: cartDetailsDTO,
-                    payMethod: selectedPayment,
-                    payStatus: payStatus,
-                    shippingFree: shipFee.total
-                },
-                {
-                    withCredentials: true,
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
 
-            if (response.status === 200) {
-                console.log("Order placed successfully!")
-                toast.success("Đặt hàng thành công!");
-                await handleRemoveItems();
-                navigate('/Complete', {
-                    state: {
-                        address: addressDTO,
-                        orderDetails: cartDetailsDTO,
+        setIsLoading(true); // Set loading state to true at the start
+        try {
+            // Handle cash on delivery
+            if (selectedPayment === 'Direct Check') {
+                const payStatus = 'Not Paid'; // Status for cash on delivery
+                const response = await axios.post(
+                    `http://localhost:3000/api/checkout/${addressId}?accountId=${accountId}`,
+                    {
+                        addressDTO,
+                        cartDetails: cartDetailsDTO,
+                        payMethod: selectedPayment,
+                        payStatus: payStatus,
+                        shippingFree: shipFee.total
+                    },
+                    {
+                        withCredentials: true,
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
                     }
-                });
+                );
+
+                if (response.status === 200) {
+                    console.log("Order placed successfully!");
+                    toast.success("Đặt hàng thành công!");
+                    await handleRemoveItems();
+                    navigate('/Complete', {
+                        state: {
+                            address: addressDTO,
+                            orderDetails: cartDetailsDTO,
+                        }
+                    });
+                } else {
+                    console.error('Failed to place order:', response.data);
+                    toast.error("Có lỗi xảy ra khi đặt hàng.");
+                }
+
+                // Handle VNPAY payment
+            } else if (selectedPayment === 'Bank Transfer') {
+                const payStatus = 'Paid'; // Status for VNPAY
+                const response = await axios.post(
+                    `http://localhost:3000/api/checkout/${addressId}?accountId=${accountId}`,
+                    {
+                        addressDTO,
+                        cartDetails: cartDetailsDTO,
+                        payMethod: selectedPayment,
+payStatus: payStatus,
+                        shippingFree: shipFee.total
+                    },
+                    {
+                        withCredentials: true,
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+
+                if (response.data.paymentUrl) {
+                    // Redirect to VNPAY payment page
+                    window.location.href = response.data.paymentUrl;
+                } else {
+                    toast.error("Có lỗi xảy ra khi xử lý thanh toán VNPAY.");
+                }
+
             } else {
-                console.error('Failed to place order:', response.data);
-                // window.alert("Có lỗi xảy ra khi đặt hàng.");
-                toast.error("Có lỗi xảy ra khi đặt hàng.");
+                toast.warn("Phương thức thanh toán không hợp lệ.");
             }
+
         } catch (error) {
             console.error('Error placing order:', error.response ? error.response.data : error.message);
-            window.alert("Có lỗi xảy ra khi đặt hàng.");
+            toast.error("Có lỗi xảy ra khi đặt hàng.");
+        } finally {
+            setIsLoading(false); // Set loading state to false in the end
         }
     };
 
@@ -312,7 +349,6 @@ const Checkout = () => {
                 </div>
             )}
             <HasagiNav />
-            <Navbar/>
             <div className="container-fluid">
                 <div className="row px-xl-5">
                     <div className="header py-3">
@@ -407,18 +443,22 @@ const Checkout = () => {
                                         <div className="payment-options d-flex ml-3">
                                             {showPaymentButtons && (
                                                 <>
-                                                    <ArgonButton
-                                                        className={`custom-btn payment-btn ${selectedPayment === 'Direct Check' ? 'active' : ''}`}
-                                                        onClick={() => handleButtonClick('Direct Check')}
-                                                    >
-                                                        Thanh toán khi nhận hàng
-                                                    </ArgonButton>
-                                                    <ArgonButton
-                                                        className={`custom-btn payment-btn ${selectedPayment === 'Bank Transfer' ? 'active' : ''}`}
-                                                        onClick={() => handleButtonClick('Bank Transfer')}
-                                                    >
-                                                        Bank Transfer
-                                                    </ArgonButton>
+                                                    <div className="payment-buttons">
+                                                        <ArgonButton
+                                                            className={`custom-btn payment-btn ${selectedPayment === 'Direct Check' ? 'active' : ''}`}
+
+                                                            onClick={() => handleButtonClick('Direct Check')}
+                                                        >
+                                                            Thanh toán khi nhận hàng
+                                                        </ArgonButton>
+                                                        <ArgonButton
+                                                            className={`custom-btn payment-btn ${selectedPayment === 'Bank Transfer' ? 'active' : ''}`}
+                                                            style={{ marginLeft: '10px' }}
+                                                            onClick={() => handleButtonClick('Bank Transfer')}
+                                                        >
+                                                            Chuyển khoản ngân hàng
+                                                        </ArgonButton>
+                                                    </div>
                                                 </>
                                             )}
                                         </div>
@@ -434,34 +474,13 @@ const Checkout = () => {
                                                 người mua sẽ thanh toán tiền mặt (tiền đặt hàng) cho người giao hàng ngay tại thời điểm nhận hàng.</p>
                                         </div>
                                     )}
-                                    {selectedPayment === 'Bank Transfer' && (
+                                    {/* {selectedPayment === 'Bank Transfer' && (
                                         <div className="payment-description mb-3">
-                                            <p>Chọn phương thức chuyển khoản:</p>
-                                            <div className="payment-buttons d-flex flex-wrap">
-                                                <button className="payment-btn1 mr-2 mb-2">
-                                                    <div className="icon-container">
-                                                        <FontAwesomeIcon icon={faCcVisa} />
-                                                    </div>
-                                                    <span>Giảm 50000đ</span>
-                                                    <span>Đơn từ 250.000đ với thẻ VISA</span>
-                                                </button>
-                                                <button className="payment-btn1 mr-2 mb-2">
-                                                    <div className="icon-container">
-                                                        <FontAwesomeIcon icon={faCcMastercard} />
-                                                    </div>
-                                                    <span>Giảm 50000đ</span>
-                                                    <span>Đơn từ 250.000đ với ví VNPAY</span>
-                                                </button>
-                                                <button className="payment-btn1 mb-2">
-                                                    <div className="icon-container">
-                                                        <FontAwesomeIcon icon={faCcAmex} />
-                                                    </div>
-                                                    <span>Giảm 50000đ</span>
-                                                    <span>Đơn từ 250.000đ với thẻ TPBANK</span>
-                                                </button>
-                                            </div>
+                                            <p>
+                                                Chuyển khoản ngân hàng là một phương thức thanh toán hoặc chuyển tiền từ tài khoản ngân hàng này sang tài khoản ngân hàng khác. Hình thức chuyển khoản này rất phổ biến trong các giao dịch tài chính và có thể được thực hiện qua nhiều cách khác nhau.
+                                            </p>
                                         </div>
-                                    )}
+                                    )} */}
                                 </div>
                                 <div className="col-lg-5">
                                     {selectedPayment === 'Direct Check' && (
