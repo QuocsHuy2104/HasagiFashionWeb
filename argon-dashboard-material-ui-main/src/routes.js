@@ -51,12 +51,10 @@ import ArgonBox from "components/ArgonBox";
 import Category from "layouts/manage/category";
 import Brand from "layouts/manage/brand";
 // import FeatureSection from "layouts/clientuser";
-import FeatureSection from "layouts/clientuser/home";
+import FeatureSection from "layouts/clientuser/index";
 import OrderDetail from "layouts/manage/orderdetail";
 import Role from "layouts/manage/role";
-// import ShopDetail from "components/client/HasagiShopDetail";
 import ShopDetail from "components/client/HasagiShopDetail/ShopDetails";
-// import Shop from "components/client/HasagiShop";
 import Shop from "components/client/HasagiShop/home";
 import Cart from "components/client/HasagiCart";
 import Contact from "components/client/HasagiContact";
@@ -234,7 +232,7 @@ const routes = [
     showInSidenav: true,
   },
   {
-    name: "Shop",
+    name: "shop",
     key: "shop",
     route: "/shop",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,

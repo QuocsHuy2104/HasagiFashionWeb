@@ -18,6 +18,7 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 import CategoriesService from 'services/CategoryServices';
 import BrandsService from 'services/BrandServices';
+import { jwtDecode } from 'jwt-decode';
 
 function ElevationScroll(props) {
     const { children, window } = props;
@@ -105,7 +106,7 @@ export default function Header(props) {
                                         <ArgonTypography variant="h5">TRANG CHỦ</ArgonTypography>
                                     </MuiLink>
 
-                                    <MuiLink href="/shop" sx={{ paddingRight: 3 }}>
+                                    <MuiLink href="/Shop" sx={{ paddingRight: 3 }}>
                                         <ArgonTypography variant="h5">SẢN PHẨM</ArgonTypography>
                                     </MuiLink>
 

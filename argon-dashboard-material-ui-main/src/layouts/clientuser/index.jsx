@@ -7,6 +7,8 @@ import Footer from 'components/client/HasagiFooter'
 import Coupon from "./coupon";
 import Policy from "./policy";
 import Voucher from "./voucher";
+import ImageCarousel from "components/client/HasagiCarousel";
+import NewProduct from "./newPD";
 
 
 const FeaturesAndAbout = () => {
@@ -14,9 +16,11 @@ const FeaturesAndAbout = () => {
     <>
       <Header />
       <ArgonBox px={20}>
+        <ImageCarousel />
         <Policy />
         <BestSeller />
         <Voucher />
+        <NewProduct />
       </ArgonBox>
       <Coupon />
       <Footer />
