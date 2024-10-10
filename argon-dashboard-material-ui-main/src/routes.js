@@ -50,14 +50,11 @@ import Product from "layouts/manage/product";
 import ArgonBox from "components/ArgonBox";
 import Category from "layouts/manage/category";
 import Brand from "layouts/manage/brand";
-// import FeatureSection from "layouts/clientuser";
 import FeatureSection from "layouts/clientuser/home";
 import OrderDetail from "layouts/manage/orderdetail";
 import Role from "layouts/manage/role";
-// import ShopDetail from "components/client/HasagiShopDetail";
 import ShopDetail from "components/client/HasagiShopDetail/ShopDetails";
-// import Shop from "components/client/HasagiShop";
-import Shop from "components/client/HasagiShop/home";
+import Shop from "components/client/HasagiShop/Shop";
 import Cart from "components/client/HasagiCart";
 import Contact from "components/client/HasagiContact";
 import Checkout from "components/client/HasagiCheckout";
@@ -178,7 +175,7 @@ const routes = [
     key: "Favorite",
     route: "/Favorite",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
-    // component: <Favorite />,
+    component: <Favorite />,
     showInSidenav: true,
   },
 
