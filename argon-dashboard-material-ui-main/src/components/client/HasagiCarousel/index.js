@@ -28,13 +28,13 @@ const ImageCarousel = () => {
         return <p>Loading banners...</p>;
     }
 
-    // Giới hạn số lượng banner nhỏ (sử dụng URL cụ thể cho banner nhỏ)
-    const smallBannerUrl = "https://vending-cdn.kootoro.com/torov-cms/upload/image/1669358914523-kh%C3%A1i%20ni%E1%BB%87m%20qu%E1%BA%A3ng%20c%C3%A1o%20banner%20tr%C3%AAn%20website.jpg"; // Use the specific URL you provided
-    const smallBannerUrl1 = "https://img.timviec.com.vn/2021/07/banner-la-gi-1.jpg"; // Use the specific URL you provided
+
+    const smallBannerUrl = "https://vending-cdn.kootoro.com/torov-cms/upload/image/1669358914523-kh%C3%A1i%20ni%E1%BB%87m%20qu%E1%BA%A3ng%20c%C3%A1o%20banner%20tr%C3%AAn%20website.jpg"; 
+    const smallBannerUrl1 = "https://img.timviec.com.vn/2021/07/banner-la-gi-1.jpg"; 
 
     return (
         <ArgonBox mt={5}>
-            {/* Container cho ảnh lớn và banner nhỏ */}
+
             <div style={styles.mainContainer}>
                 {/* Ảnh lớn */}
                 <div className="carousel-container" style={styles.carouselContainer}>
@@ -83,18 +83,18 @@ const ImageCarousel = () => {
 
 const styles = {
     mainContainer: {
-        display: 'flex', // Sử dụng Flexbox để sắp xếp theo chiều ngang
-        justifyContent: 'space-between', // Giữa ảnh lớn và các banner nhỏ
-        alignItems: 'flex-start', // Căn trên để các banner nhỏ thẳng hàng với ảnh lớn
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
     },
     carouselContainer: {
-        flex: '3', // Chiếm 75% chiều rộng
+        flex: '3', 
         borderRadius: '10px',
         boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
     },
     carouselImage: {
-        height: '400px', // Đặt chiều cao cố định cho ảnh lớn
-        objectFit: 'cover', // Giữ tỉ lệ ảnh và cắt phần thừa
+        height: '400px',
+        objectFit: 'cover',
         borderRadius: '10px',
     },
     customPrevIcon: {
@@ -110,24 +110,24 @@ const styles = {
         marginRight: '40px',
     },
     smallBannersContainer: {
-        flex: '1', // Chiếm 25% chiều rộng
+        flex: '1',
         display: 'flex',
-        flexDirection: 'column', // Sắp xếp các banner nhỏ theo cột
-        justifyContent: 'space-between', // Căn đều khoảng cách giữa các banner nhỏ
-        marginLeft: '20px', // Khoảng cách giữa ảnh lớn và các banner nhỏ
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        marginLeft: '20px',
     },
     smallBanner: {
         marginBottom: '10px',
         borderRadius: '10px',
         overflow: 'hidden',
         boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
-        height: '200px', // Chiều cao cố định cho banner nhỏ
-        width: '100%', // Đảm bảo banner nhỏ chiếm toàn bộ chiều rộng của container
+        height: '200px',
+        width: '100%', 
     },
     smallBannerImage: {
         width: '100%',
-        height: '100%', // Đảm bảo ảnh trong banner nhỏ phù hợp với kích thước container
-        objectFit: 'cover', // Giữ tỉ lệ ảnh và cắt phần thừa
+        height: '100%',
+        objectFit: 'cover',
         borderRadius: '10px',
     },
 };
