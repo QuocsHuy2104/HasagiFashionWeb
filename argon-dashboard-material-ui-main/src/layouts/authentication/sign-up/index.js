@@ -84,6 +84,8 @@ function Cover() {
         console.error("Đăng ký không thành công:", errorText);
         if (errorText.includes("Email này đã tồn tại")) {
           setMessage("Email này đã tồn tại");
+        } else if (errorText.includes("Username này đã tồn tại")) {
+          setMessage("Username này đã tồn tại");
         } else {
           setMessage("Đăng ký không thành công. Vui lòng thử lại.");
         }
