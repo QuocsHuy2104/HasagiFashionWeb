@@ -76,7 +76,7 @@ function ShopDetail() {
             return response.data;
         } catch (error) {
             console.error('Error fetching favorite count:', error);
-            return 0; // Default value if there's an error
+            return 0;
         }
     };
 
@@ -125,10 +125,9 @@ function ShopDetail() {
         }
         if (!product) return;
         try {
-            // Gửi yêu cầu thêm vào danh sách yêu thích
             await axios.post(`http://localhost:8080/api/favorites?accountId=${accountId}`, {
                 productId: product.id
-            }, { withCredentials: true }); 
+            }, { withCredentials: true });
             setIsFavorite(true);
             const count = await fetchFavoriteCount(product.id);
             setFavoriteCount(count);
@@ -187,7 +186,7 @@ function ShopDetail() {
             });
 
             if (response.status === 201 || response.status === 200) {
-                fetchTotalQuantity();  
+                fetchTotalQuantity();
                 toast.success('Sản phẩm đã được thêm vào giỏ hàng thành công!');
                 navigate('/Cart')
                 console.log('Cart updated:', response.data);
@@ -279,10 +278,10 @@ function ShopDetail() {
                                                 <input
                                                     type="radio"
                                                     className="custom-control-input"
-                                                    id={`color-${color.id}`} 
+                                                    id={`color-${color.id}`}
                                                     name="color"
                                                     value={color.id}
-                                                    onChange={(e) => setSelectedColor(e.target.value)} 
+                                                    onChange={(e) => setSelectedColor(e.target.value)}
                                                 />
                                                 <label className="custom-control-label" htmlFor={`color-${color.id}`}>
                                                     {color.name}
@@ -302,7 +301,7 @@ function ShopDetail() {
                                             className="btn btn-primary btn-minus"
                                             onClick={() => setQuantity(quantity - 1)}
                                             disabled={quantity <= 1}
-                                            style={{ marginRight: '5px' }} 
+                                            style={{ marginRight: '5px' }}
                                         >
                                             <i className="fa fa-minus"></i>
                                         </button>
@@ -318,7 +317,7 @@ function ShopDetail() {
                                         <button
                                             className="btn btn-primary btn-plus"
                                             onClick={() => setQuantity(quantity + 1)}
-                                            style={{ marginLeft: '5px' }} 
+                                            style={{ marginLeft: '5px' }}
                                         >
                                             <i className="fa fa-plus"></i>
                                         </button>

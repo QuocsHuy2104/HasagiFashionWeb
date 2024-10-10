@@ -1,7 +1,7 @@
 import React from "react";
 import aboutImage4 from "layouts/assets/img/offer-1.jpg";
-import aboutImage from "layouts/assets/img/carousel-1.jpg";
-import aboutImage1 from "layouts/assets/img/carousel-2.jpg";
+import aboutImage from "layouts/assets/img/h1.jpg";
+import aboutImage1 from "layouts/assets/img/h2.jpg";
 import aboutImage2 from "layouts/assets/img/carousel-3.jpg";
 import 'layouts/assets/css/style.css';
 import { Carousel } from 'react-bootstrap';
@@ -25,10 +25,10 @@ const HasagiCau = () => {
                                     style={{ objectFit: 'cover', height: '100%' }}
                                 />
                                 <Carousel.Caption className="d-flex flex-column align-items-center justify-content-center">
-                                    <div style={{ maxWidth: '700px' }}>
+                                    <div style={{ maxWidth: '700px'}}>
                                         <h1 className="display-4 text-white mb-3 animate__animated animate__fadeInDown">Men Fashion</h1>
                                         <p className="mx-md-5 px-5 animate__animated animate__bounceIn">
-                                            Lorem rebum magna amet lorem magna erat diam stet. Sadips duo stet amet amet ndiam elitr ipsum diam
+                                            Phong cách thời trang không bị lỗi thời, thường mang tính trang trọng và tinh tế.
                                         </p>
                                     </div>
                                 </Carousel.Caption>
@@ -44,7 +44,7 @@ const HasagiCau = () => {
                                     <div style={{ maxWidth: '700px' }}>
                                         <h1 className="display-4 text-white mb-3 animate__animated animate__fadeInDown">Women Fashion</h1>
                                         <p className="mx-md-5 px-5 animate__animated animate__bounceIn">
-                                            Lorem rebum magna amet lorem magna erat diam stet. Sadips duo stet amet amet ndiam elitr ipsum diam
+                                            Phong cách thời trang tự do, phóng khoáng với cảm hứng từ nghệ thuật dân gian và thiên nhiên.
                                         </p>
                                     </div>
                                 </Carousel.Caption>
@@ -60,7 +60,7 @@ const HasagiCau = () => {
                                     <div style={{ maxWidth: '700px' }}>
                                         <h1 className="display-4 text-white mb-3 animate__animated animate__fadeInDown">Kids Fashion</h1>
                                         <p className="mx-md-5 px-5 animate__animated animate__bounceIn">
-                                            Lorem rebum magna amet lorem magna erat diam stet. Sadips duo stet amet amet ndiam elitr ipsum diam
+                                            Phong cách thời trang dành cho trẻ em với sự thoải mái và linh hoạt trong các hoạt động hàng ngày.
                                         </p>
                                     </div>
                                 </Carousel.Caption>

@@ -9,17 +9,19 @@ import 'components/client/assets/js/script';
 import 'components/client/assets/js/plugins';
 import logo from 'components/client/assets/images/Hasagi.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import { faUser } from '@fortawesome/free-regular-svg-icons';
 import { faHeart } from '@fortawesome/free-regular-svg-icons';
 import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
-
+import useFavoriteCount from "../HasagiFavoriteCount";
+import { useNavigate } from 'react-router-dom';
 
 const Header = ({ onSearch }) => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const { totalQuantity, fetchTotalQuantity } = useCartQuantity();
     const [searchTerm, setSearchTerm] = useState("");
+    const { favoriteCount } = useFavoriteCount();
+    const navigate = useNavigate();
 
     const handleSearchChange = (event) => {
         const value = event.target.value;
@@ -41,30 +43,36 @@ const Header = ({ onSearch }) => {
             const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
             recognition.lang = 'vi-VN';
             recognition.interimResults = false;
-    
+
             recognition.onstart = () => {
                 console.log('Voice recognition started. Speak into the microphone.');
             };
-    
+
             recognition.onresult = (event) => {
                 const transcript = event.results[0][0].transcript;
                 setSearchTerm(transcript);
                 onSearch(transcript);
-                
+
                 // Speak the recognized text
                 const utterance = new SpeechSynthesisUtterance(transcript);
                 utterance.lang = 'vi-VN';
                 window.speechSynthesis.speak(utterance);
             };
-    
+
             recognition.onerror = (event) => {
                 console.error('Error occurred in recognition: ' + event.error);
             };
-    
+
             recognition.start();
         } else {
             alert('Trình duyệt của bạn không hỗ trợ tìm kiếm bằng giọng nói.');
         }
+    };
+    const handleLogout = () => {
+
+        Cookies.remove('user');
+        Cookies.remove('accountId')
+        navigate('/feature-section');
     };
 
     useEffect(() => {
@@ -82,7 +90,6 @@ const Header = ({ onSearch }) => {
                 position = true;
         } catch (error) {
             position = false;
-            console.error(error);
         }
 
     // Inline styles
@@ -177,7 +184,7 @@ const Header = ({ onSearch }) => {
                             <a href="/Shop" className="nav-item nav-link" style={styles.navLink}>Sản Phẩm</a>
                             <a href="#about" className="nav-item nav-link" style={styles.navLink}>Giới Thiệu</a>
                             <a href="#contact" className="nav-item nav-link" style={styles.navLink}>Liên Hệ</a>
-                            <a href="#faq" className="nav-item nav-link" style={styles.navLink}>Yêu thích</a>
+                            <a href="#faq" className="nav-item nav-link" style={styles.navLink}>Hỏi Đáp</a>
                         </div>
                     </div>
 
@@ -235,7 +242,7 @@ const Header = ({ onSearch }) => {
                                                 <a href="/History" className="dropdown-item">Lịch sử đơn hàng</a>
                                             </li>
                                             <li>
-                                                <a href="logout" className="dropdown-item">Đăng xuất</a>
+                                                <a href="" className="dropdown-item" onClick={handleLogout}>Đăng xuất</a>
                                             </li>
                                         </>
                                     )}
@@ -244,8 +251,11 @@ const Header = ({ onSearch }) => {
                             {user && (
                                 <>
                                     <li>
-                                        <a href="" style={{ padding: '10px', textDecoration: 'none' }}>
+                                        <a href="/Favorite" style={{ position: 'relative', padding: '10px', textDecoration: 'none' }}>
                                             <FontAwesomeIcon icon={faHeart} className='icon' style={styles.icon} />
+                                            {favoriteCount > 0 && (
+                                                <span className="badge" style={styles.badge}>{favoriteCount}</span>
+                                            )}
                                         </a>
                                     </li>
                                     <li>
