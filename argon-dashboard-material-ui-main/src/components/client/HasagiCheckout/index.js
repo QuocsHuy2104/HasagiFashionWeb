@@ -167,6 +167,7 @@ const Checkout = () => {
     const handleButtonClick = (paymentMethod) => {
         setSelectedPayment(paymentMethod);
         setShowPaymentButtons(paymentMethod !== 'Direct Check');
+        Cookies.set('selectedPayment', paymentMethod);
     };
 
     const handleChangePaymentMethod = () => {
@@ -260,9 +261,8 @@ const Checkout = () => {
 
         setIsLoading(true); // Set loading state to true at the start
         try {
-            // Handle cash on delivery
             if (selectedPayment === 'Direct Check') {
-                const payStatus = 'Not Paid'; // Status for cash on delivery
+                const payStatus = 'Not Paid'; 
                 const response = await axios.post(
                     `http://localhost:3000/api/checkout/${addressId}?accountId=${accountId}`,
                     {
@@ -284,6 +284,8 @@ const Checkout = () => {
                     console.log("Order placed successfully!");
                     toast.success("Đặt hàng thành công!");
                     await handleRemoveItems();
+                    localStorage.setItem('address1', JSON.stringify(addressDTO));   
+                    localStorage.setItem('orderDetails1', JSON.stringify(cartDetailsDTO));
                     navigate('/Complete', {
                         state: {
                             address: addressDTO,
@@ -297,14 +299,14 @@ const Checkout = () => {
 
                 // Handle VNPAY payment
             } else if (selectedPayment === 'Bank Transfer') {
-                const payStatus = 'Paid'; // Status for VNPAY
+                const payStatus = 'Paid';
                 const response = await axios.post(
                     `http://localhost:3000/api/checkout/${addressId}?accountId=${accountId}`,
                     {
-                        addressDTO,
+addressDTO,
                         cartDetails: cartDetailsDTO,
                         payMethod: selectedPayment,
-payStatus: payStatus,
+                        payStatus: payStatus,
                         shippingFree: shipFee.total
                     },
                     {
@@ -316,7 +318,10 @@ payStatus: payStatus,
                 );
 
                 if (response.data.paymentUrl) {
-                    // Redirect to VNPAY payment page
+                    
+                    localStorage.setItem('address1', JSON.stringify(addressDTO));   
+                    localStorage.setItem('orderDetails1', JSON.stringify(cartDetailsDTO));
+                    Cookies.set('addressId', address.id);
                     window.location.href = response.data.paymentUrl;
                 } else {
                     toast.error("Có lỗi xảy ra khi xử lý thanh toán VNPAY.");
@@ -330,7 +335,7 @@ payStatus: payStatus,
             console.error('Error placing order:', error.response ? error.response.data : error.message);
             toast.error("Có lỗi xảy ra khi đặt hàng.");
         } finally {
-            setIsLoading(false); // Set loading state to false in the end
+            setIsLoading(false); 
         }
     };
 
@@ -349,6 +354,7 @@ payStatus: payStatus,
                 </div>
             )}
             <HasagiNav />
+            <Navbar />
             <div className="container-fluid">
                 <div className="row px-xl-5">
                     <div className="header py-3">
@@ -443,22 +449,18 @@ payStatus: payStatus,
                                         <div className="payment-options d-flex ml-3">
                                             {showPaymentButtons && (
                                                 <>
-                                                    <div className="payment-buttons">
-                                                        <ArgonButton
-                                                            className={`custom-btn payment-btn ${selectedPayment === 'Direct Check' ? 'active' : ''}`}
-
-                                                            onClick={() => handleButtonClick('Direct Check')}
-                                                        >
-                                                            Thanh toán khi nhận hàng
-                                                        </ArgonButton>
-                                                        <ArgonButton
-                                                            className={`custom-btn payment-btn ${selectedPayment === 'Bank Transfer' ? 'active' : ''}`}
-                                                            style={{ marginLeft: '10px' }}
-                                                            onClick={() => handleButtonClick('Bank Transfer')}
-                                                        >
-                                                            Chuyển khoản ngân hàng
-                                                        </ArgonButton>
-                                                    </div>
+                                                    <ArgonButton
+                                                        className={`custom-btn payment-btn ${selectedPayment === 'Direct Check' ? 'active' : ''}`}
+                                                        onClick={() => handleButtonClick('Direct Check')}
+                                                    >
+                                                        Thanh toán khi nhận hàng
+                                                    </ArgonButton>
+                                                    <ArgonButton
+                                                        className={`custom-btn payment-btn ${selectedPayment === 'Bank Transfer' ? 'active' : ''}`}
+                                                        onClick={() => handleButtonClick('Bank Transfer')}
+                                                    >
+                                                        Bank Transfer
+                                                    </ArgonButton>
                                                 </>
                                             )}
                                         </div>
@@ -474,13 +476,34 @@ payStatus: payStatus,
                                                 người mua sẽ thanh toán tiền mặt (tiền đặt hàng) cho người giao hàng ngay tại thời điểm nhận hàng.</p>
                                         </div>
                                     )}
-                                    {selectedPayment === 'Bank Transfer' && (
+                                    {/* {selectedPayment === 'Bank Transfer' && (
                                         <div className="payment-description mb-3">
-                                            <p>
-                                                Chuyển khoản ngân hàng là một phương thức thanh toán hoặc chuyển tiền từ tài khoản ngân hàng này sang tài khoản ngân hàng khác. Hình thức chuyển khoản này rất phổ biến trong các giao dịch tài chính và có thể được thực hiện qua nhiều cách khác nhau.
-                                            </p>
+                                            <p>Chọn phương thức chuyển khoản:</p>
+                                            <div className="payment-buttons d-flex flex-wrap">
+                                                <button className="payment-btn1 mr-2 mb-2">
+                                                    <div className="icon-container">
+                                                        <FontAwesomeIcon icon={faCcVisa} />
+                                                    </div>
+                                                    <span>Giảm 50000đ</span>
+                                                    <span>Đơn từ 250.000đ với thẻ VISA</span>
+                                                </button>
+                                                <button className="payment-btn1 mr-2 mb-2">
+                                                    <div className="icon-container">
+                                                        <FontAwesomeIcon icon={faCcMastercard} />
+                                                    </div>
+                                                    <span>Giảm 50000đ</span>
+                                                    <span>Đơn từ 250.000đ với ví VNPAY</span>
+                                                </button>
+                                                <button className="payment-btn1 mb-2">
+                                                    <div className="icon-container">
+                                                        <FontAwesomeIcon icon={faCcAmex} />
+                                                    </div>
+                                                    <span>Giảm 50000đ</span>
+                                                    <span>Đơn từ 250.000đ với thẻ TPBANK</span>
+                                                </button>
+                                            </div>
                                         </div>
-                                    )}
+                                    )} */}
                                 </div>
                                 <div className="col-lg-5">
                                     {selectedPayment === 'Direct Check' && (

@@ -178,7 +178,7 @@ const routes = [
     key: "Favorite",
     route: "/Favorite",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
-    // component: <Favorite />,
+    component: <Favorite />,
     showInSidenav: true,
   },
 

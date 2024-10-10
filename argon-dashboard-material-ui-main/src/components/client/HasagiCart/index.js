@@ -87,7 +87,7 @@ const Cart = () => {
         try {
             await axios.delete(`http://localhost:3000/api/cart/remove/${itemId}?accountId=${accountId}`);
             setCartItems(cartItems.filter(item => item.cartdetailid !== itemId));
-            toast.success("Item removed successfully.");
+            toast.success("Xóa sản phẩm thành công.");
         } catch (error) {
             console.error("Error removing item:", error);
             toast.error("Error removing item.");
@@ -304,7 +304,7 @@ const Cart = () => {
                                                         width: "140px",
                                                         display: "flex",
                                                         alignItems: "center",
-                                                        justifyContent: "space-between",  // Ensure even spacing
+                                                        justifyContent: "space-between", 
                                                     }}
                                                 >
                                                     <div className="input-group-btn">

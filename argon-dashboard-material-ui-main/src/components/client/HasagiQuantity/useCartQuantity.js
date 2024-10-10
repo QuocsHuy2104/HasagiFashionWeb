@@ -11,7 +11,6 @@ const useCartQuantity = () => {
             const response = await axios.get(`http://localhost:3000/api/cart/totalQuantity?accountId=${accountId}`, { withCredentials: true });
             setTotalQuantity(response.data);
         } catch (error) {
-            console.error("Error fetching total quantity:", error.response?.data || error.message);
         }
     };
 

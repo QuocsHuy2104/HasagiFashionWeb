@@ -27,7 +27,10 @@ const CouponCard = () => {
                     sx={{
                         color: "#FF4500",
                         fontSize: "32px", // Reduced icon size
-                        marginRight: "8px",
+                        marginRight: "10px",
+                        marginLeft: "-10px",
+                        marginTop: "-80px",
+                        flexShrink: 0, // Prevents the icon from shrinking
                     }}
                 />
 

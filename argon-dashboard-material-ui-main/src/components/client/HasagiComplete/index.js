@@ -1,19 +1,76 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import ArgonButton from "components/ArgonButton";
 import { FaCheckCircle } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
+import Cookies from "js-cookie";
 
 const Complete = () => {
-    const location = useLocation();
-    const { state } = location;
-    const address = state?.address || {};
-    const orderDetails = state?.orderDetails || [];
+    const [address, setAddress] = useState({});
+    const [orderDetails, setOrderDetails] = useState([]);
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const addressId = Cookies.get('addressId'); 
+        const params = new URLSearchParams(location.search);
+        const responseCode = params.get('vnp_ResponseCode');
+        const transactionStatus = params.get('vnp_TransactionStatus');
+        const selectedPayment = Cookies.get('selectedPayment'); 
+        
+        if (selectedPayment !== 'Direct Check' && (responseCode !== '00' || transactionStatus !== '00')) {
+            // Thanh toán thất bại, điều hướng đến trang Checkout mà không xóa sản phẩm
+            navigate(`/Checkout?id=${addressId}`); 
+        } else {
+            // Thanh toán thành công, gọi hàm xóa sản phẩm
+            const handleRemoveItems = async () => {
+                const cartItemsBackup = JSON.parse(localStorage.getItem('cartItemsBackup')) || [];
+                const selectedItemIds = cartItemsBackup
+                    .filter(item => item.selected)
+                    .map(item => item.cartdetailid);
+                    
+                if (selectedItemIds.length === 0) {
+                    console.error("No items selected for removal");
+                    return;
+                }
+                try {
+                    const response = await axios.delete('http://localhost:3000/api/cart/delete', {
+                        data: selectedItemIds,
+                        withCredentials: true,
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (response.status === 200) {
+                        console.log("Items deleted successfully");
+                        const updatedCartItems = cartItemsBackup.filter(item => !selectedItemIds.includes(item.cartdetailid));
+                        localStorage.setItem('cartItemsBackup', JSON.stringify(updatedCartItems));
+                        setCartItems(updatedCartItems);
+                    } else {
+                        console.error("Failed to delete items:", response.data);
+                    }
+                } catch (error) {
+                    console.error("Error deleting items:", error);
+                }
+            };
+            handleRemoveItems();
+        }
+    }, [location, navigate]);
+    
+
+    useEffect(() => {
+        const storedAddress = JSON.parse(localStorage.getItem('address1'));
+        const storedOrderDetails = JSON.parse(localStorage.getItem('orderDetails1'));
+
+        if (storedAddress && storedOrderDetails) {
+            setAddress(storedAddress);
+            setOrderDetails(storedOrderDetails);
+        }
+        localStorage.removeItem('address');
+        localStorage.removeItem('orderDetails');
+    }, []);
 
     useEffect(() => {
         fetchProvinces();
@@ -38,6 +95,7 @@ const Complete = () => {
     const handleGoHome = async () => {
         navigate('/feature-section');
     };
+
 
     const fetchProvinces = async () => {
         try {
@@ -73,7 +131,6 @@ const Complete = () => {
             console.error("Error fetching wards:", error);
         }
     };
-
     const getAddressNameById = (id, list, type) => {
         const addressItem = list.find(item => {
             if (type === 'province' && item.ProvinceID === Number(id)) return true;
@@ -106,8 +163,8 @@ const Complete = () => {
                 <ArgonButton onClick={handleGoHome} color="secondary" style={styles.button}>
                     Quay về trang chủ
                 </ArgonButton>
-                <ArgonButton onClick={handleViewOrder} color="primary" style={styles.button}>
-                    <i className="fas fa-lock"></i> View order
+                <ArgonButton onClick={handleViewOrder} color="primary" style={styles.button} >
+                    Xem đơn hàng
                 </ArgonButton>
             </div>
         </div>
@@ -126,7 +183,7 @@ const styles = {
     },
     icon: {
         fontSize: '40px',
-        color: '#00C851', 
+        color: '#00C851',
     },
     title: {
         fontSize: '24px',
