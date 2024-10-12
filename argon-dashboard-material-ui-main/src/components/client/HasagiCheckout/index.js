@@ -31,16 +31,13 @@ const Checkout = () => {
     const navigate = useNavigate();
     const [shipFee, setShipFee] = useState(null);
 
+
+
     useEffect(() => {
         setTimeout(() => {
             setIsLoading(false);
         }, 700);
 
-        const accountId = Cookies.get('accountId');
-        if (!accountId) {
-            navigate(`/authentication/sign-in`);
-            return;
-        }
         const fetchAddress = async () => {
             try {
                 const addressesId = new URLSearchParams(window.location.search).get('id');
@@ -249,6 +246,7 @@ const Checkout = () => {
             provinceID: address.provinceID,
             districtCode: address.districtCode,
             wardCode: address.wardCode,
+           
         };
 
         const cartDetailsDTO = selectedItems.map(item => ({
@@ -258,11 +256,11 @@ const Checkout = () => {
         }));
 
         const accountId = Cookies.get('accountId');
-
         setIsLoading(true); // Set loading state to true at the start
         try {
+            // Handle cash on delivery
             if (selectedPayment === 'Direct Check') {
-                const payStatus = 'Not Paid'; 
+                const payStatus = 'Not Paid'; // Status for cash on delivery
                 const response = await axios.post(
                     `http://localhost:3000/api/checkout/${addressId}?accountId=${accountId}`,
                     {
@@ -270,7 +268,8 @@ const Checkout = () => {
                         cartDetails: cartDetailsDTO,
                         payMethod: selectedPayment,
                         payStatus: payStatus,
-                        shippingFree: shipFee.total
+                        shippingFree: shipFee.total,
+                        fullName: `${address.address} ${getAddressNameById(address.wardCode, wards, 'ward')} ${getAddressNameById(address.districtCode, districts, 'district')} ${getAddressNameById(address.provinceID, provinces, 'province')}`.trim()
                     },
                     {
                         withCredentials: true,
@@ -284,7 +283,7 @@ const Checkout = () => {
                     console.log("Order placed successfully!");
                     toast.success("Đặt hàng thành công!");
                     await handleRemoveItems();
-                    localStorage.setItem('address1', JSON.stringify(addressDTO));   
+                    localStorage.setItem('address1', JSON.stringify(addressDTO));
                     localStorage.setItem('orderDetails1', JSON.stringify(cartDetailsDTO));
                     navigate('/Complete', {
                         state: {
@@ -303,11 +302,12 @@ const Checkout = () => {
                 const response = await axios.post(
                     `http://localhost:3000/api/checkout/${addressId}?accountId=${accountId}`,
                     {
-addressDTO,
+                        addressDTO,
                         cartDetails: cartDetailsDTO,
                         payMethod: selectedPayment,
                         payStatus: payStatus,
-                        shippingFree: shipFee.total
+                        shippingFree: shipFee.total,
+                        fullName: `${address.address} ${getAddressNameById(address.wardCode, wards, 'ward')} ${getAddressNameById(address.districtCode, districts, 'district')} ${getAddressNameById(address.provinceID, provinces, 'province')}`.trim()
                     },
                     {
                         withCredentials: true,
@@ -318,10 +318,11 @@ addressDTO,
                 );
 
                 if (response.data.paymentUrl) {
-                    
-                    localStorage.setItem('address1', JSON.stringify(addressDTO));   
+
+                    localStorage.setItem('address1', JSON.stringify(addressDTO));
                     localStorage.setItem('orderDetails1', JSON.stringify(cartDetailsDTO));
                     Cookies.set('addressId', address.id);
+                    await handleRemoveItems();
                     window.location.href = response.data.paymentUrl;
                 } else {
                     toast.error("Có lỗi xảy ra khi xử lý thanh toán VNPAY.");
@@ -335,7 +336,7 @@ addressDTO,
             console.error('Error placing order:', error.response ? error.response.data : error.message);
             toast.error("Có lỗi xảy ra khi đặt hàng.");
         } finally {
-            setIsLoading(false); 
+            setIsLoading(false);
         }
     };
 
@@ -379,11 +380,11 @@ addressDTO,
                                                 {address.fullNameAddress} (+84) {address.numberPhone.startsWith('0') ? address.numberPhone.substring(1) : address.numberPhone}
                                             </span>
                                             <span style={{ whiteSpace: 'nowrap' }}>
-                                                {address.address},{" "}
-                                                {getAddressNameById(address.wardCode, wards, 'ward')},{" "}
-                                                {getAddressNameById(address.districtCode, districts, 'district')},{" "}
-                                                {getAddressNameById(address.provinceID, provinces, 'province')}
-                                            </span>
+                                            {address.address},{" "}
+                                            {getAddressNameById(address.wardCode, wards, 'ward')},{" "}
+                                            {getAddressNameById(address.districtCode, districts, 'district')},{" "}
+                                            {getAddressNameById(address.provinceID, provinces, 'province')}
+                                        </span>
                                             {address.status && (
                                                 <span className="badge bg-danger" style={{ fontSize: '0.75rem', marginLeft: '10px' }}>Mặc định</span>
                                             )}
@@ -402,6 +403,7 @@ addressDTO,
                                     <strong>Không có thông tin địa chỉ nào có sẵn.</strong>
                                 )}
                             </div>
+
                         </div>
                     </div>
                     <div className="col-lg-12">
@@ -476,34 +478,6 @@ addressDTO,
                                                 người mua sẽ thanh toán tiền mặt (tiền đặt hàng) cho người giao hàng ngay tại thời điểm nhận hàng.</p>
                                         </div>
                                     )}
-                                    {/* {selectedPayment === 'Bank Transfer' && (
-                                        <div className="payment-description mb-3">
-                                            <p>Chọn phương thức chuyển khoản:</p>
-                                            <div className="payment-buttons d-flex flex-wrap">
-                                                <button className="payment-btn1 mr-2 mb-2">
-                                                    <div className="icon-container">
-                                                        <FontAwesomeIcon icon={faCcVisa} />
-                                                    </div>
-                                                    <span>Giảm 50000đ</span>
-                                                    <span>Đơn từ 250.000đ với thẻ VISA</span>
-                                                </button>
-                                                <button className="payment-btn1 mr-2 mb-2">
-                                                    <div className="icon-container">
-                                                        <FontAwesomeIcon icon={faCcMastercard} />
-                                                    </div>
-                                                    <span>Giảm 50000đ</span>
-                                                    <span>Đơn từ 250.000đ với ví VNPAY</span>
-                                                </button>
-                                                <button className="payment-btn1 mb-2">
-                                                    <div className="icon-container">
-                                                        <FontAwesomeIcon icon={faCcAmex} />
-                                                    </div>
-                                                    <span>Giảm 50000đ</span>
-                                                    <span>Đơn từ 250.000đ với thẻ TPBANK</span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )} */}
                                 </div>
                                 <div className="col-lg-5">
                                     {selectedPayment === 'Direct Check' && (
