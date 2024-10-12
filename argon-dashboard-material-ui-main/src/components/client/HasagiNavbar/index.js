@@ -4,7 +4,7 @@ import CategoryService from "../../../services/CategoryServices";
 import BrandService from "../../../services/BrandServices";
 import ColorService from "../../../services/ColorServices";
 import SizeService from "../../../services/SizeServices";
-
+import ShopService from "../../../services/ShopServices";
 const Navbar = () => {
     const [categories, setCategories] = useState([]);
     const [brands, setBrands] = useState([]);
@@ -14,7 +14,7 @@ const Navbar = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await CategoryService.getAllCategories();
+                const response = await ShopService.getCateHome();
                 setCategories(Array.isArray(response.data) ? response.data : []);
             } catch (error) {
                 console.error("Error fetching categories:", error);
@@ -24,7 +24,7 @@ const Navbar = () => {
 
         const fetchBrands = async () => {
             try {
-                const response = await BrandService.getAllBrands();
+                const response = await ShopService.getBrandHome();
                 setBrands(Array.isArray(response.data) ? response.data : []);
             } catch (error) {
                 console.error("Error fetching brands:", error);
@@ -119,7 +119,7 @@ const Navbar = () => {
     
 
     return (
-        <div className="container-fluid justify-content-between align-items-center py-5">
+        <div className="container-fluid justify-content-between align-items-center py-1" style={{paddingBottom: '0px'}}>
             <nav className="navbar navbar-expand-lg p-0" style={navbarStyle}>
                 <div className="collapse navbar-collapse">
                     <ul className="nav-menu" style={navMenuStyle}>

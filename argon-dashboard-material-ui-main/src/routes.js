@@ -51,7 +51,7 @@ import ArgonBox from "components/ArgonBox";
 import Category from "layouts/manage/category";
 import Brand from "layouts/manage/brand";
 // import FeatureSection from "layouts/clientuser";
-import FeatureSection from "layouts/clientuser";
+import FeatureSection from "layouts/clientuser/home";
 import OrderDetail from "layouts/manage/orderdetail";
 import Role from "layouts/manage/role";
 // import ShopDetail from "components/client/HasagiShopDetail";

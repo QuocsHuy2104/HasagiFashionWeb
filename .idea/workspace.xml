@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="2d484ece-ee4a-4842-8cb0-c540a684895a" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiNavbar/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiNavbar/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/layouts/clientuser/bestSeller.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/layouts/clientuser/home.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/layouts/clientuser/home.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/layouts/clientuser/index.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/layouts/clientuser/newPD.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/layouts/clientuser/policy.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/layouts/clientuser/sanpham.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/layouts/clientuser/voucher.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/layouts/manage/category/data.js" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/layouts/manage/category/data.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/layouts/manage/category/index.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/layouts/manage/category/index.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/routes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/services/CategoryServices.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/services/CategoryServices.jsx" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 0
+}]]></component>
+  <component name="ProjectId" id="2nF3PU4zYeuRaRgfnEpr7K0ti2T" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "day",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/HK6/Java6/HasagiFashionWeb"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="2d484ece-ee4a-4842-8cb0-c540a684895a" name="Changes" comment="" />
+      <created>1728554973077</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1728554973077</updated>
+    </task>
+    <servers />
+  </component>
+</project>

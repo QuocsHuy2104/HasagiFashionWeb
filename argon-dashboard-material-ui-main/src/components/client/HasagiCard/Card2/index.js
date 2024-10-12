@@ -38,7 +38,8 @@ function HasagiCard2({ image, name, id, importPrice, sale }) {
                     position: 'absolute',
                     top: 15,
                     left: 15,
-                    fontSize: '13px'
+                    fontSize: '13px',
+                     zIndex: '1200'
                 }}
             >
                 -{sale}%
@@ -54,7 +55,8 @@ function HasagiCard2({ image, name, id, importPrice, sale }) {
                     backgroundColor: '#F9F9F9',
                     padding: '5px',
                     borderRadius: '50%',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                     zIndex: '1200'
                 }} 
             />
 
@@ -70,7 +72,8 @@ function HasagiCard2({ image, name, id, importPrice, sale }) {
                             backgroundColor: '#F9F9F9',
                             padding: '5px',
                             borderRadius: '50%',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                             zIndex: '1200'
                         }}
                     />
                     <ShoppingCartIcon
@@ -83,7 +86,8 @@ function HasagiCard2({ image, name, id, importPrice, sale }) {
                             backgroundColor: '#F9F9F9',
                             padding: '5px',
                             borderRadius: '50%',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            zIndex: '1200'
                         }}
                     />
                 </>
@@ -103,15 +107,15 @@ function HasagiCard2({ image, name, id, importPrice, sale }) {
                         component="img"
                         src={image}
                         alt={name}
-                        height="275px"
+                        height="480px"
                         width="auto"
                         borderRadius="lg"
                         style={{
                             transition: 'transform 0.3s ease',
                             transform: hover ? 'scale(1.1)' : 'scale(1)',
                             overflow: 'hidden',
-                            height: '250px',
-                            paddingTop: '20px'
+                            height: '400px',
+                            width: '100%'
                         }}
                     />
                 </ArgonBox>

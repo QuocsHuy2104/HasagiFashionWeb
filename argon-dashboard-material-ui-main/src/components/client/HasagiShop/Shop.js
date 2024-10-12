@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import aboutImage5 from "layouts/assets/img/product-1.jpg";
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
 import ShopService from "services/ShopServices";
+import ArgonBox from 'components/ArgonBox';
+import ArgonTypography from 'components/ArgonTypography';
+import HasagiCard2 from 'components/client/HasagiCard/Card2';
+import Grid from '@mui/material/Grid'; // Import MUI Grid
 
 function Shop() {
     const [products, setProducts] = useState([]);
@@ -31,6 +34,7 @@ function Shop() {
     const toggleBrandOpen = () => {
         setIsBrandOpen((prev) => !prev);
     };
+
     useEffect(() => {
         setTimeout(() => {
             setIsLoading(false);
@@ -47,7 +51,6 @@ function Shop() {
         } else {
             setSelectedCategory([...selectedCategory, categoryId]);
         }
-        console.log("Selected Category:", selectedCategory);
         setCurrentPage(1);
     };
 
@@ -98,7 +101,6 @@ function Shop() {
         return matchesCategory && matchesBrand && matchesSearchTerm;
     });
 
-
     const sortedProducts = filteredProducts.sort((a, b) => {
         if (sortOption === "price-asc") {
             return (a.importPrice || 0) - (b.importPrice || 0);
@@ -123,67 +125,109 @@ function Shop() {
             setCurrentPage(pageNumber);
         }
     };
+
     return (
         <>
             <style>
                 {`
-        .loader {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .product-item {
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            transition: transform 0.3s;
-        }
-        .product-item:hover {
-            transform: scale(1.05);
-        }
-        .pagination {
-            margin-top: 20px;
-        }
-        .pagination .page-item.active .page-link {
-            background-color: orange;
-            color: white;
-        }
-        .checkbox-group {
-            margin-bottom: 1rem;
-        }
-        .checkbox-list {
-            display: none;
-        }
-        .checkbox-list.open {
-            display: block;
-        }
-        .filter-box {
-            border: 1px solid #ddd; /* Border color */
-            border-radius: 5px; /* Rounded corners */
-            padding: 1rem; /* Padding around the content */
-            margin-bottom: 1rem; /* Space below the filter box */
-            background-color: #f9f9f9; /* Optional background color */
-        }.breadcrumb {
-                background-color: #f8f9fa; /* Light background */
-                border-radius: 0.5rem; /* Rounded corners */
-                padding: 10px 15px; /* Padding for better spacing */
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Soft shadow */
-        }
+                    .loader {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 100vh;
+                    }
+                    .product-item {
+                        border: 1px solid #ddd;
+                        border-radius: 5px;
+                        transition: transform 0.3s;
+                    }
+                    .product-item:hover {
+                        transform: scale(1.05);
+                    }
+                    .pagination {
+                        margin-top: 20px;
+                    }
+                    .pagination .page-item.active .page-link {
+                        background-color: orange;
+                        color: white;
+                    }
+                    .checkbox-group {
+                        margin-bottom: 1rem;
+                    }
+                    .checkbox-list {
+                        display: none;
+                    }
+                    .checkbox-list.open {
+                        display: block;
+                    }
+                    .filter-box {
+                        border: 1px solid #ddd; 
+                        border-radius: 5px; 
+                        padding: 1rem; 
+                        margin-bottom: 1rem; 
+                        background-color: #f9f9f9; 
+                    }
+                    .breadcrumb {
+                        background-color: #f8f9fa; 
+                        border-radius: 0.5rem; 
+                        padding: 10px 15px; 
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+                    }
+                    .breadcrumb-item {
+                        color: #343a40; 
+                    }
+                    .breadcrumb-item:hover {
+                        color: #007bff; 
+                        text-decoration: underline; 
+                    }
+                    .breadcrumb-item.active {
+                        font-weight: bold; 
+                        color: #007bff; 
+                    }
+                    .banner {
+    background-image: url('https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/main_collection_breadcrumb_bg.jpg?1713464283843');
+    background-size: cover;
+    background-position: center;
+    height: 300px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 100px 40px; /* Increased padding-top to push content down */
+}
 
-        .breadcrumb-item {
-            color: #343a40; /* Dark color for text */
-        }
+.content {
+    text-align: left;
+    color: #333;
+}
 
-        .breadcrumb-item:hover {
-            color: #007bff; /* Color change on hover */
-            text-decoration: underline; /* Underline effect */
-        }
+.content h1 {
+    font-size: 42px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
 
-        .breadcrumb-item.active {
-            font-weight: bold; /* Bold for active item */
-            color: #007bff; /* Change color for active item */
-        }
-    `}
+nav {
+    display: flex;
+    align-items: center; /* Vertically center breadcrumb items */
+    gap: 5px; /* Space between breadcrumb items */
+}
+
+.breadcrumb-item {
+    display: inline-block;
+    font-size: 20px;
+    color: #333;
+}
+
+.breadcrumb-item strong {
+    font-weight: bold;
+}
+
+.breadcrumb-item.active {
+    color: #007bff; /* Active breadcrumb color */
+}
+  
+                `}
             </style>
             {isLoading && (
                 <div className="loader">
@@ -196,18 +240,23 @@ function Shop() {
             <div className="container-fluid py-3">
                 <div className="row px-xl-5">
                     <div className="col-12">
-                        <nav className="breadcrumb bg-light mb-30 rounded p-3 shadow-sm">
-                            <a className="breadcrumb-item text-dark" href="/feature-section">
-                                <strong>Home</strong>
-                            </a>
-                            <span className="breadcrumb-item active text-primary">
-                                <strong>Shop</strong>
-                            </span>
-                        </nav>
+                        <div className="banner">
+                            <div className="content">
+                                <h1>CONVERSE ALL</h1>
+                                <nav>
+                                    <a className="breadcrumb-item text-dark" href="/feature-section">
+                                        <strong>Home</strong>
+                                    </a>
+                                    <span className="breadcrumb-item text-dark">
+                                        <strong>Shop</strong>
+                                    </span>
+                                </nav>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div className="container-fluid">
+            <div className="container-fluid" style={{ paddingBottom: '150px' }}>
                 <div className="row px-xl-5">
                     <div className="col-3">
                         <h5 className="section-title position-relative text-uppercase mb-3">
@@ -276,98 +325,62 @@ function Shop() {
                                 </div>
                             </div>
                         </div>
-
-
-
                     </div>
 
                     <div className="col-9">
                         <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h5>Sản phẩm</h5>
-                            <div className="sorting-group">
-                                <select
-                                    id="fashion-sorting"
-                                    name="sorting"
-                                    className="form-select stylish-select small-sort-dropdown"
-                                    onChange={handleSortChange}
-                                    value={sortOption}
-                                    style={{ width: '150px' }}
-                                >
-                                    <option value="default">Sắp xếp</option>
-                                    <option value="price-asc">Giá tâng dần</option>
-                                    <option value="price-desc">Giá giảm dần</option>
-
-                                </select>
-                            </div>
+                            <select
+                                className="form-select"
+                                value={sortOption}
+                                onChange={handleSortChange}
+                                style={{ width: '200px' }}
+                            >
+                                <option value="default">Mặc định</option>
+                                <option value="price-asc">Giá: Thấp đến Cao</option>
+                                <option value="price-desc">Giá: Cao đến Thấp</option>
+                                <option value="popularity">Phổ biến</option>
+                                <option value="newest">Mới nhất</option>
+                            </select>
                         </div>
-                        <div className="row pb-3">
-                            {currentProducts.map((product, index) => (
-                                <div className="col-lg-3 col-md-6 col-sm-6 pb-1" key={index}>
-                                    <div className="product-item bg-light mb-4">
-                                        <div className="product-img position-relative overflow-hidden">
-                                            <Link to={`/ShopDetail?id=${product.id}`}>
-                                                <img
-                                                    className="img-fluid w-100"
-                                                    src={product.image || aboutImage5}
-                                                    alt={product.name || 'Product Name'}
-                                                />
-
-                                            </Link>
-                                        </div>
-                                        <div className="text-center py-4">
-                                            <a
-                                                className="h6 text-decoration-none text-truncate"
-                                                href={`/ShopDetail?id=${product.id}`}
-                                            >
-                                                {product.name || "Product Name Goes Here"}
-                                            </a>
-                                            <div className="d-flex align-items-center justify-content-center mt-2">
-                                                <h5>
-                                                    {product.importPrice.toLocaleString("vi-VN", {
-                                                        style: "currency",
-                                                        currency: "VND",
-                                                    })}
-                                                </h5>
-                                            </div>
-                                            <div className="d-flex align-items-center justify-content-center mb-1">
-                                                <small className="fa fa-star text-primary mr-1"></small>
-                                                <small className="fa fa-star text-primary mr-1"></small>
-                                                <small className="fa fa-star text-primary mr-1"></small>
-                                                <small className="fa fa-star text-primary mr-1"></small>
-                                                <small className="fa fa-star text-primary mr-1"></small>
-                                                <small>({product.rating || 99})</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                        <Grid container spacing={0} style={{ width: '100%' }}>
+                            {currentProducts.map((product) => (
+                                <Grid item xs={12} sm={6} md={4} key={product.id}>
+                                    <ArgonBox mx={1} mb={2} className="product-item">
+                                        <HasagiCard2
+                                            image={product.image}
+                                            name={product.name}
+                                            id={product.id}
+                                            importPrice={product.importPrice}
+                                            sale={product.sale}
+                                        />
+                                    </ArgonBox>
+                                </Grid>
                             ))}
-                            <div className="col-12" style={{ marginTop: "-30px" }}>
-                                <nav>
-                                    <ul className="pagination justify-content-center">
-                                        <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                                            <a className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
-                                                <i className="ni ni-bold-left" />
-                                            </a>
-                                        </li>
-                                        {[...Array(totalPages)].map((_, index) => (
-                                            <li className={`page-item ${currentPage === index + 1 ? "active" : ""}`} key={index}>
-                                                <a className="page-link" onClick={() => handlePageChange(index + 1)}>
-                                                    {index + 1}
-                                                </a>
-                                            </li>
-                                        ))}
-                                        <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                                            <a className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
-                                                <i className="ni ni-bold-right" />
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </nav>
-                            </div>
-                        </div>
+                        </Grid>
 
-
+                        <nav>
+                            <ul className="pagination justify-content-center mt-4">
+                                <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                                    <a className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
+                                        <i className="ni ni-bold-left" />
+                                    </a>
+                                </li>
+                                {[...Array(totalPages)].map((_, index) => (
+                                    <li className={`page-item ${currentPage === index + 1 ? "active" : ""}`} key={index}>
+                                        <a className="page-link" onClick={() => handlePageChange(index + 1)}>
+                                            {index + 1}
+                                        </a>
+                                    </li>
+                                ))}
+                                <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                                    <a className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
+                                        <i className="ni ni-bold-right" />
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
+
                 </div>
             </div>
             <Footer />

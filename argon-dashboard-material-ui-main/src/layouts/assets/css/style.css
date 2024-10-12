@@ -5,6 +5,94 @@
  * Copyright 2011-2020 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
+ .grid-container {
+  display: flex;
+  flex-wrap: nowrap; /* Keep items in one row */
+  overflow-x: auto;  /* Enable horizontal scrolling if needed */
+  padding-bottom: 16px; /* Space between items and the bottom */
+  gap: 16px; /* Add some spacing between items */
+}
+
+.cat-item {
+  flex-shrink: 0; /* Prevent the item from shrinking */
+  width: 250px; /* Fixed width for each category item */
+}
+
+ .container-fluid {
+  padding-top: 4rem;
+}
+
+.section-title {
+  position: relative;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.section-title .bg-secondary {
+  background-color: #f5f5f5;
+  padding-right: 1rem;
+}
+
+.cat-item {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cat-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.cat-item img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.cat-item img:hover {
+  transform: scale(1.1);
+}
+
+.cat-item .flex-fill {
+  padding-left: 1.5rem;
+}
+
+.cat-item h4 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .section-title {
+      font-size: 1.5rem;
+  }
+
+  .cat-item h4 {
+      font-size: 1rem;
+  }
+
+  .cat-item {
+      padding: 0.75rem;
+  }
+
+  .cat-item img {
+      width: 80px;
+      height: 80px;
+  }
+}
+
 :root {
   --blue: #007bff;
   --indigo: #6610f2;
@@ -601,8 +689,8 @@ pre code {
 .container-lg,
 .container-xl {
   width: 100%;
-  padding-right: 15px;
-  padding-left: 15px;
+  padding-right: 52px;
+  padding-left: 52px;
   margin-right: auto;
   margin-left: auto;
 }
@@ -9643,6 +9731,7 @@ a.text-dark:hover, a.text-dark:focus {
 .cat-item {
   background: #FFFFFF;
   transition: .5s;
+  max-width: max-content;
 }
 
 /* .cat-item:hover {

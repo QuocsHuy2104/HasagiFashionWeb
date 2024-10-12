@@ -10,12 +10,14 @@ import Footer from "../../components/client/HasagiFooter";
 import Cookies from "js-cookie";
 import ProductService from "../../services/ProductServices";
 import CategoryService from "../../services/CategoryServices";
-import BrandService from "../../services/BrandServices";
+import Coupon from "./coupon";
 import { Link } from "react-router-dom";
 import CouponList from "components/client/HasagiVorcher";
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import ArgonBox from 'components/ArgonBox';
 import ArgonTypography from 'components/ArgonTypography';
+import ShopService from "services/ShopServices";
+import BrandCarousel from "./BrandCarousel";
 
 function Home() {
     const [currentPage, setCurrentPage] = useState(1);
@@ -51,7 +53,7 @@ function Home() {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await ProductService.getAllProducts();
+                const response = await ShopService.getProductHome();
                 setProducts(Array.isArray(response.data) ? response.data : []);
             } catch (error) {
                 console.error("Error fetching products:", error);
@@ -61,7 +63,7 @@ function Home() {
 
         const fetchCategories = async () => {
             try {
-                const response = await CategoryService.getAllCategories();
+                const response = await ShopService.getCateHome();
                 setCategories(Array.isArray(response.data) ? response.data : []);
             } catch (error) {
                 console.error("Error fetching categories:", error);
@@ -71,7 +73,7 @@ function Home() {
 
         const fetchBrands = async () => {
             try {
-                const response = await BrandService.getAllBrands();
+                const response = await ShopService.getBrandHome();
                 setBrands(Array.isArray(response.data) ? response.data : []);
             } catch (error) {
                 console.error("Error fetching brands:", error);
@@ -130,7 +132,7 @@ function Home() {
             <Header onSearch={handleSearch} />
             < Navbar />
             <HasagiCau />
-            <div className="col-lg-12 px-xl-5" style={{ top: "-25px" }}>
+            <div className="col-lg-12 px-xl-5 py-3" style={{ top: "10px" }}>
                 <div className="bg-light p-3 d-flex flex-column"
                     style={{
                         border: "1px solid #ddd",
@@ -241,44 +243,24 @@ function Home() {
 
             <CouponList />
             <div className="container-fluid pt-4">
-                <Typography variant="h2" className="section-title position-relative text-uppercase mx-xl-5 mb-4">
-                    <span className="bg-secondary pr-3">Danh mục</span>
-                </Typography>
-                <Grid container spacing={2} className="px-xl-5 pb-3">
-                    {categories.map((category, index) => (
-                        <Grid item lg={3} md={4} sm={6} key={index}>
-                            <div className="cat-item d-flex align-items-center mb-4">
-                                <div className="overflow-hidden" style={{ width: "100px", height: "100px" }}>
-                                    <img className="img-fluid" src={category.image || aboutImage3} alt={category.name || "Category"} />
-                                </div>
-                                <div className="flex-fill pl-3">
-                                    <Typography variant="h4">{category.name || "Category Name"}</Typography>
-                                </div>
-                            </div>
-                        </Grid>
-                    ))}
-                </Grid>
+    <Typography variant="h2" className="section-title position-relative text-uppercase mx-xl-5 mb-4">
+        <span className="bg-secondary pr-3">Danh mục</span>
+    </Typography>
+    <Grid container spacing={2} className="px-xl-5 pb-3 grid-container">
+        {categories.map((category, index) => (
+            <div className="cat-item d-flex align-items-center mb-4" key={index}>
+                <div className="overflow-hidden" style={{ width: "100px", height: "100px" }}>
+                    <img className="img-fluid" src={category.image || aboutImage3} alt={category.name || "Category"} />
+                </div>
+                <div className="flex-fill pl-3">
+                    <Typography variant="h4">{category.name || "Category Name"}</Typography>
+                </div>
             </div>
-            <div
-                className="container-fluid pt-4">
-                <Typography variant="h2" className="section-title position-relative text-uppercase mx-xl-5 mb-4">
-                    <span className="bg-secondary pr-3">Thương hiệu</span>
-                </Typography>
-                <Grid container spacing={2} className="px-xl-5 pb-3">
-                    {brands.map((brand, index) => (
-                        <Grid item lg={3} md={4} sm={6} xs={12} key={index}>
-                            <div className="cat-item d-flex align-items-center mb-4">
-                                <div className="overflow-hidden" style={{ width: "100px", height: "100px" }}>
-                                    <img className="img-fluid" src={brand.image || aboutImage3} alt={brand.name || "Category"} />
-                                </div>
-                                <div className="flex-fill pl-3">
-                                    <Typography variant="h4">{brand.name}</Typography>
-                                </div>
-                            </div>
-                        </Grid>
-                    ))}
-                </Grid>
-            </div>
+        ))}
+    </Grid>
+</div>
+
+           
             <div className="container-fluid pt-4 pb-3">
                 <h2 className="section-title position-relative text-uppercase mx-xl-5 mb-4">
                     <span className="bg-secondary pr-3">Sản phẩm</span>
@@ -322,7 +304,7 @@ function Home() {
                     ))}
                     <div className="col-12" style={{ marginTop: "-30px" }}>
                         <nav>
-                            <ul className="pagination justify-content-center">
+                            <ul className="pagination justify-content-center" style={{marginBottom: '10px'}}>
                                 <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
                                     <a className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
                                         <i className="ni ni-bold-left" />
@@ -345,6 +327,11 @@ function Home() {
                     </div>
                 </div>
             </div>
+            <div className="container-fluid pt-4">
+               
+                <BrandCarousel />
+            </div>
+            <Coupon />
             <Footer />
         </>
     );

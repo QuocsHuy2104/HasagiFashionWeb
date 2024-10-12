@@ -30,6 +30,7 @@ const Checkout = () => {
     const [selectedAddress, setSelectedAddress] = useState(null);
     const navigate = useNavigate();
     const [shipFee, setShipFee] = useState(null);
+    const [showComplete, setShowComplete] = useState(false);
 
     useEffect(() => {
         setTimeout(() => {
@@ -262,7 +263,7 @@ const Checkout = () => {
         setIsLoading(true); // Set loading state to true at the start
         try {
             if (selectedPayment === 'Direct Check') {
-                const payStatus = 'Not Paid'; 
+                const payStatus = 'Not Paid';
                 const response = await axios.post(
                     `http://localhost:3000/api/checkout/${addressId}?accountId=${accountId}`,
                     {
@@ -284,7 +285,7 @@ const Checkout = () => {
                     console.log("Order placed successfully!");
                     toast.success("Đặt hàng thành công!");
                     await handleRemoveItems();
-                    localStorage.setItem('address1', JSON.stringify(addressDTO));   
+                    localStorage.setItem('address1', JSON.stringify(addressDTO));
                     localStorage.setItem('orderDetails1', JSON.stringify(cartDetailsDTO));
                     navigate('/Complete', {
                         state: {
@@ -303,7 +304,7 @@ const Checkout = () => {
                 const response = await axios.post(
                     `http://localhost:3000/api/checkout/${addressId}?accountId=${accountId}`,
                     {
-addressDTO,
+                        addressDTO,
                         cartDetails: cartDetailsDTO,
                         payMethod: selectedPayment,
                         payStatus: payStatus,
@@ -318,8 +319,8 @@ addressDTO,
                 );
 
                 if (response.data.paymentUrl) {
-                    
-                    localStorage.setItem('address1', JSON.stringify(addressDTO));   
+
+                    localStorage.setItem('address1', JSON.stringify(addressDTO));
                     localStorage.setItem('orderDetails1', JSON.stringify(cartDetailsDTO));
                     Cookies.set('addressId', address.id);
                     window.location.href = response.data.paymentUrl;
@@ -335,7 +336,7 @@ addressDTO,
             console.error('Error placing order:', error.response ? error.response.data : error.message);
             toast.error("Có lỗi xảy ra khi đặt hàng.");
         } finally {
-            setIsLoading(false); 
+            setIsLoading(false);
         }
     };
 
@@ -476,34 +477,7 @@ addressDTO,
                                                 người mua sẽ thanh toán tiền mặt (tiền đặt hàng) cho người giao hàng ngay tại thời điểm nhận hàng.</p>
                                         </div>
                                     )}
-                                    {/* {selectedPayment === 'Bank Transfer' && (
-                                        <div className="payment-description mb-3">
-                                            <p>Chọn phương thức chuyển khoản:</p>
-                                            <div className="payment-buttons d-flex flex-wrap">
-                                                <button className="payment-btn1 mr-2 mb-2">
-                                                    <div className="icon-container">
-                                                        <FontAwesomeIcon icon={faCcVisa} />
-                                                    </div>
-                                                    <span>Giảm 50000đ</span>
-                                                    <span>Đơn từ 250.000đ với thẻ VISA</span>
-                                                </button>
-                                                <button className="payment-btn1 mr-2 mb-2">
-                                                    <div className="icon-container">
-                                                        <FontAwesomeIcon icon={faCcMastercard} />
-                                                    </div>
-                                                    <span>Giảm 50000đ</span>
-                                                    <span>Đơn từ 250.000đ với ví VNPAY</span>
-                                                </button>
-                                                <button className="payment-btn1 mb-2">
-                                                    <div className="icon-container">
-                                                        <FontAwesomeIcon icon={faCcAmex} />
-                                                    </div>
-                                                    <span>Giảm 50000đ</span>
-                                                    <span>Đơn từ 250.000đ với thẻ TPBANK</span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )} */}
+
                                 </div>
                                 <div className="col-lg-5">
                                     {selectedPayment === 'Direct Check' && (

@@ -90,7 +90,7 @@ const BannersList = ({ getBannerId }) => {
                         <div className="banner-carousel">
                             <Slider {...sliderSettings}>
                                 {doc.imageUrls && doc.imageUrls.length > 0 ? (
-                                    doc.imageUrls.map((url, index) => (
+doc.imageUrls.map((url, index) => (
                                         <div key={index} className="banner-image-container">
                                             <img
                                                 src={url}
@@ -138,9 +138,8 @@ const BannersList = ({ getBannerId }) => {
     );
 };
 
-// Định nghĩa kiểu dữ liệu cho props
 BannersList.propTypes = {
-    getBannerId: PropTypes.func.isRequired, // Định nghĩa getBannerId là một hàm và là bắt buộc
+    getBannerId: PropTypes.func.isRequired,
 };
 
 export default BannersList;

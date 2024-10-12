@@ -58,5 +58,3 @@ const CategoriesService = {
 
 
 export default CategoriesService;
-
-

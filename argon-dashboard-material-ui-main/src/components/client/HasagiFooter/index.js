@@ -14,6 +14,7 @@ const Footer = () => {
                 backgroundImage: 'url("https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/footers2_background.jpg?1713464283843")',
                 backgroundSize: 'cover',
                 backgroundPosition: '100% 100%',
+                // Added paddingTop here
             }}>
             <ArgonBox mx={20}>
                 <ArgonBox pt='5rem'>
