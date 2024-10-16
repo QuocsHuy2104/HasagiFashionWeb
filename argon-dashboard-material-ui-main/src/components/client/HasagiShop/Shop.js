@@ -51,7 +51,6 @@ function Shop() {
         } else {
             setSelectedCategory([...selectedCategory, categoryId]);
         }
-        setCurrentPage(1);
     };
 
     const handleBrandChange = (brandId) => {
@@ -60,7 +59,6 @@ function Shop() {
         } else {
             setSelectedBrands([...selectedBrands, brandId]);
         }
-        setCurrentPage(1);
     };
 
     useEffect(() => {
@@ -69,20 +67,10 @@ function Shop() {
                 const productResponse = await ShopService.getProductHome();
                 const categoryResponse = await ShopService.getCateHome();
                 const brandResponse = await ShopService.getBrandHome();
-
-                if (
-                    Array.isArray(productResponse.data) &&
-                    Array.isArray(categoryResponse.data) &&
-                    Array.isArray(brandResponse.data)
-                ) {
-                    setProducts(productResponse.data);
-                    setCategories(categoryResponse.data);
-                    setBrands(brandResponse.data);
-                } else {
-                    setProducts([]);
-                    setCategories([]);
-                    setBrands([]);
-                }
+                console.log(productResponse.data, categoryResponse.data, brandResponse.data); // Debug
+                setProducts(productResponse.data || []);
+                setCategories(categoryResponse.data || []);
+                setBrands(brandResponse.data || []);
             } catch (error) {
                 console.error("Error fetching data:", error);
                 setProducts([]);
@@ -90,9 +78,9 @@ function Shop() {
                 setBrands([]);
             }
         };
-
         fetchProductsAndCategories();
     }, []);
+
 
     const filteredProducts = products.filter((product) => {
         const matchesCategory = selectedCategory.length === 0 || selectedCategory.includes(product.categoryId);
@@ -100,6 +88,7 @@ function Shop() {
         const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLowerCase());
         return matchesCategory && matchesBrand && matchesSearchTerm;
     });
+
 
     const sortedProducts = filteredProducts.sort((a, b) => {
         if (sortOption === "price-asc") {
@@ -146,6 +135,7 @@ function Shop() {
                     }
                     .pagination {
                         margin-top: 20px;
+                        padding-bottom: 60px;
                     }
                     .pagination .page-item.active .page-link {
                         background-color: orange;
@@ -185,47 +175,47 @@ function Shop() {
                         color: #007bff; 
                     }
                     .banner {
-    background-image: url('https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/main_collection_breadcrumb_bg.jpg?1713464283843');
-    background-size: cover;
-    background-position: center;
-    height: 300px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
-    padding: 100px 40px; /* Increased padding-top to push content down */
-}
+                        background-image: url('https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/main_collection_breadcrumb_bg.jpg?1713464283843');
+                        background-size: cover;
+                        background-position: center;
+                        height: 300px;
+                        display: flex;
+                        align-items: flex-start;
+                        justify-content: flex-start;
+                        padding: 100px 40px; /* Increased padding-top to push content down */
+                    }
 
-.content {
-    text-align: left;
-    color: #333;
-}
+                    .content {
+                        text-align: left;
+                        color: #333;
+                    }
 
-.content h1 {
-    font-size: 42px;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 10px;
-}
+                    .content h1 {
+                        font-size: 42px;
+                        font-weight: bold;
+                        color: #333;
+                        margin-bottom: 10px;
+                    }
 
-nav {
-    display: flex;
-    align-items: center; /* Vertically center breadcrumb items */
-    gap: 5px; /* Space between breadcrumb items */
-}
+                    nav {
+                        display: flex;
+                        align-items: center; /* Vertically center breadcrumb items */
+                        gap: 5px; /* Space between breadcrumb items */
+                    }
 
-.breadcrumb-item {
-    display: inline-block;
-    font-size: 20px;
-    color: #333;
-}
+                    .breadcrumb-item {
+                        display: inline-block;
+                        font-size: 20px;
+                        color: #333;
+                    }
 
-.breadcrumb-item strong {
-    font-weight: bold;
-}
+                    .breadcrumb-item strong {
+                        font-weight: bold;
+                    }
 
-.breadcrumb-item.active {
-    color: #007bff; /* Active breadcrumb color */
-}
+                    .breadcrumb-item.active {
+                        color: #007bff; /* Active breadcrumb color */
+                    }
   
                 `}
             </style>
@@ -256,7 +246,7 @@ nav {
                     </div>
                 </div>
             </div>
-            <div className="container-fluid" style={{ paddingBottom: '150px' }}>
+            <div className="container-fluid" style={{ paddingBottom: '150px', paddingTop: '0px' }}>
                 <div className="row px-xl-5">
                     <div className="col-3">
                         <h5 className="section-title position-relative text-uppercase mb-3">
@@ -358,7 +348,7 @@ nav {
                             ))}
                         </Grid>
 
-                        <nav>
+                        <nav className="pagination">
                             <ul className="pagination justify-content-center mt-4">
                                 <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
                                     <a className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
@@ -379,6 +369,7 @@ nav {
                                 </li>
                             </ul>
                         </nav>
+
                     </div>
 
                 </div>

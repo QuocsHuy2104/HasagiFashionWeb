@@ -276,18 +276,22 @@ export default function Header(props) {
                                                 <MuiLink href='/dashboard'>
                                                     <ArgonTypography variant="inherit">Tài Khoản</ArgonTypography>
                                                 </MuiLink>
+                                                <MuiLink href='/History' sx={{ marginLeft: 2 }}>
+                                                    <ArgonTypography variant="inherit">Lịch sử mua hàng</ArgonTypography>
+                                                </MuiLink>
                                             </ArgonBox>
                                         </ArgonBox>
                                     )}
                                 </ArgonBox>
 
-                                <a href="/Cart" style={{ position: 'relative', display: 'flex', alignItems: 'center', padding: '10px', textDecoration: 'none', paddingLeft:'20px' }}>
+
+                                <a href="/Cart" style={{ position: 'relative', display: 'flex', alignItems: 'center', padding: '10px', textDecoration: 'none', paddingLeft: '20px' }}>
                                     <FontAwesomeIcon icon={faShoppingCart} className="icon" style={{ fontSize: '24px' }} />
                                     {totalQuantity > 0 && (
                                         <span
                                             className="badge bg-primary"
                                             style={{
-                                               
+
                                                 position: 'absolute',
                                                 top: '-5px',
                                                 right: '-10px',
@@ -311,5 +315,5 @@ export default function Header(props) {
     );
 }
 Header.propTypes = {
-    onSearch: PropTypes.func.isRequired, // Định nghĩa prop onSearch là một hàm và là bắt buộc
+    onSearch: PropTypes.func.isRequired,
 };
