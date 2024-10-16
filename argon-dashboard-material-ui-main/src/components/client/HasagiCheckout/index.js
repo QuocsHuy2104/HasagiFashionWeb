@@ -295,31 +295,33 @@ const Checkout = () => {
                     toast.error("Có lỗi xảy ra khi đặt hàng.");
                 }
 
-                // Handle VNPAY payment
-            } else if (selectedPayment === 'Bank Transfer') {
-                const payStatus = 'Paid'; // Status for VNPAY
-                const response = await axios.post(
-                    `http://localhost:3000/api/checkout/${addressId}?accountId=${accountId}`,
-                    {
-                        addressDTO,
-                        cartDetails: cartDetailsDTO,
-                        payMethod: selectedPayment,
-payStatus: payStatus,
-                        shippingFree: shipFee.total
-                    },
-                    {
-                        withCredentials: true,
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    }
-                );
+                // Handle PayOS payment
+            } else if (selectedPayment === 'PayOS') {
+                const payStatus = 'Paid'; // Status for PayOS
 
-                if (response.data.paymentUrl) {
-                    // Redirect to VNPAY payment page
-                    window.location.href = response.data.paymentUrl;
+                // Call PaymentService to initiate PayOS payment
+                const paymentResponse = await PaymentService.processPayment({
+                    addressDTO,
+                    cartDetails: cartDetailsDTO,
+                    payMethod: selectedPayment,
+                    payStatus: payStatus,
+                    shippingFree: shipFee.total,
+                    accountId
+                });
+
+                if (paymentResponse.success) {
+                    console.log("Payment completed successfully!");
+                    toast.success("Thanh toán thành công!");
+                    await handleRemoveItems();
+                    navigate('/Complete', {
+                        state: {
+                            address: addressDTO,
+                            orderDetails: cartDetailsDTO,
+                        }
+                    });
                 } else {
-                    toast.error("Có lỗi xảy ra khi xử lý thanh toán VNPAY.");
+                    console.error('Failed to process payment:', paymentResponse.message);
+                    toast.error("Có lỗi xảy ra khi thanh toán.");
                 }
 
             } else {
@@ -333,6 +335,7 @@ payStatus: payStatus,
             setIsLoading(false); // Set loading state to false in the end
         }
     };
+
 
     const goBack = () => {
         navigate('/Cart');
@@ -431,7 +434,6 @@ payStatus: payStatus,
                                     ))}
                                 </tbody>
                             </table>
-
                         </div>
                     </div>
                     <div className="col-lg-12">
@@ -474,13 +476,7 @@ payStatus: payStatus,
                                                 người mua sẽ thanh toán tiền mặt (tiền đặt hàng) cho người giao hàng ngay tại thời điểm nhận hàng.</p>
                                         </div>
                                     )}
-                                    {/* {selectedPayment === 'Bank Transfer' && (
-                                        <div className="payment-description mb-3">
-                                            <p>
-                                                Chuyển khoản ngân hàng là một phương thức thanh toán hoặc chuyển tiền từ tài khoản ngân hàng này sang tài khoản ngân hàng khác. Hình thức chuyển khoản này rất phổ biến trong các giao dịch tài chính và có thể được thực hiện qua nhiều cách khác nhau.
-                                            </p>
-                                        </div>
-                                    )} */}
+
                                 </div>
                                 <div className="col-lg-5">
                                     {selectedPayment === 'Direct Check' && (

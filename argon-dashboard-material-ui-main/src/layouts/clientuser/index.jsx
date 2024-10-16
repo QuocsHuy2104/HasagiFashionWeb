@@ -8,7 +8,7 @@ import Coupon from "./coupon";
 import Policy from "./policy";
 import Voucher from "./voucher";
 import ImageCarousel from "components/client/HasagiCarousel";
-import NewProduct from "./newPD";
+import FeaturedProducts from "./sanpham";
 
 
 const FeaturesAndAbout = () => {
@@ -20,7 +20,7 @@ const FeaturesAndAbout = () => {
         <Policy />
         <BestSeller />
         <Voucher />
-        <NewProduct />
+        <FeaturedProducts />
       </ArgonBox>
       <Coupon />
       <Footer />

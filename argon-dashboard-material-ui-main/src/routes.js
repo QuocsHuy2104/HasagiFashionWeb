@@ -55,7 +55,7 @@ import FeatureSection from "layouts/clientuser/index";
 import OrderDetail from "layouts/manage/orderdetail";
 import Role from "layouts/manage/role";
 import ShopDetail from "components/client/HasagiShopDetail/ShopDetails";
-import Shop from "components/client/HasagiShop/home";
+import Shop from "components/client/HasagiShop/Shop";
 import Cart from "components/client/HasagiCart";
 import Contact from "components/client/HasagiContact";
 import Checkout from "components/client/HasagiCheckout";

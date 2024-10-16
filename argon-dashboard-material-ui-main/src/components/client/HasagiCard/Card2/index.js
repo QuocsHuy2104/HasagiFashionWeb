@@ -5,8 +5,7 @@ import MuiLink from "@mui/material/Link";
 
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
-import ArgonButton from "components/ArgonButton";
-import ArgonBadge from "components/ArgonBadge";
+import ProductPopup from "components/client/HasagiPopup";
 
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
@@ -16,6 +15,16 @@ import { useState } from "react";
 
 function HasagiCard2({ image, name, id, price, sale }) {
     const [hover, setHover] = useState(false);
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+    const handleOpenPopup = () => {
+        setIsPopupOpen(true);
+    }
+
+    const handleClosePopup = () => {
+        setIsPopupOpen(false);
+    };
+
     return (
         <Card
             onMouseEnter={() => setHover(true)}
@@ -44,22 +53,25 @@ function HasagiCard2({ image, name, id, price, sale }) {
             >-{sale}%</ArgonBox>
 
             <FavoriteBorderIcon
-             sx={{
-                
-                position: 'absolute',
-                top: 15,
-                right: 15,
-                backgroundColor: '#F9F9F9',
-                padding: '5px',
-                borderRadius: '50%'
-            }} />
+                sx={{
+                    width: '2em',
+                    height: '2em',
+                    position: 'absolute',
+                    top: 15,
+                    right: 15,
+                    backgroundColor: '#F9F9F9',
+                    padding: '5px',
+                    borderRadius: '50%'
+                }} />
 
             {hover && (
                 <>
                     <SearchOutlinedIcon
-                    
+                        onClick={handleOpenPopup}   
+                        id={id}
                         sx={{
-                            
+                            width: '2em',
+                            height: '2em',
                             position: 'absolute',
                             top: 60,
                             right: 15,
@@ -71,9 +83,9 @@ function HasagiCard2({ image, name, id, price, sale }) {
                     />
 
                     <ShoppingCartIcon
-                    
                         sx={{
-                            
+                            width: '2em',
+                            height: '2em',
                             position: 'absolute',
                             top: 110,
                             right: 15,
@@ -134,6 +146,9 @@ function HasagiCard2({ image, name, id, price, sale }) {
                     </ArgonTypography>
                 </ArgonBox>
             </MuiLink>
+
+            {/* Popup component */}
+            <ProductPopup open={isPopupOpen} handleClose={handleClosePopup} />
         </Card>
     );
 }

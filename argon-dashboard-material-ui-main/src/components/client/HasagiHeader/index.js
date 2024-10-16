@@ -14,11 +14,12 @@ import ArgonAvatar from 'components/ArgonAvatar';
 import PersonIcon from '@mui/icons-material/Person';
 import ReorderIcon from '@mui/icons-material/Reorder';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 import CategoriesService from 'services/CategoryServices';
 import BrandsService from 'services/BrandServices';
 import { jwtDecode } from 'jwt-decode';
+import AccountService from 'services/AccountServices';
+import AnchorTemporaryDrawer from '../HasagiDrawer';
 
 function ElevationScroll(props) {
     const { children, window } = props;
@@ -47,6 +48,7 @@ ElevationScroll.propTypes = {
 
 export default function Header(props) {
     const [isHovering, setIsHovering] = React.useState(false);
+    const [author, setAuthor] = React.useState('');
     const user = Cookies.get('user');
     var position = false;
     if (user === null) position = false;
@@ -67,6 +69,15 @@ export default function Header(props) {
             CategoriesService.getAllCategories()
         ])
     }
+
+    React.useEffect(async () => {
+        try {
+            const resp = await AccountService.getAuthor();
+            setAuthor(resp.data);
+        } catch (err) {
+            console.error(err)
+        }
+    }, [])
 
     return (
         <>
@@ -176,12 +187,13 @@ export default function Header(props) {
 
                                 <ArgonBox>
                                     {user == null ? (
-                                        <ArgonBox display="flex" flexDirection="column" alignItems="center">
-                                            <PersonIcon />
-                                            <ArgonBox display='flex' justifyContent='space-evenly' alignItems='center' mt={1}>
+                                        <ArgonBox display="flex" alignItems="center" justifyContent='space-between'>
+                                            <ArgonBox display='flex' justifyContent='space-between' alignItems='center' mt={1}>
                                                 <MuiLink href='/authentication/sign-in' sx={{ marginRight: 1 }}>
                                                     <ArgonTypography variant="inherit">Đăng Nhập</ArgonTypography>
                                                 </MuiLink>
+
+                                                <ArgonBox display='block' height='25px' width='2px' bgColor='dark' broderRadius='lg' sx={{ marginRight: 1 }}></ArgonBox>
 
                                                 <MuiLink href='/authentication/sign-up'>
                                                     <ArgonTypography variant="inherit">Đăng Ký</ArgonTypography>
@@ -189,23 +201,16 @@ export default function Header(props) {
                                             </ArgonBox>
                                         </ArgonBox>
                                     ) : (
-                                        <ArgonBox display="flex" flexDirection="column" alignItems="center">
-                                            <PersonIcon />
-                                            <ArgonBox display='flex' justifyContent='space-evenly' alignItems='center' mt={1}>
-                                                <MuiLink href='/dashboard'>
-                                                    <ArgonTypography variant="inherit">Tài Khoản</ArgonTypography>
-                                                </MuiLink>
-                                            </ArgonBox>
+                                        <ArgonBox display='flex' justifyContent='space-evenly' alignItems='center'>
+                                            <ArgonAvatar src={author.avatar !== '' ? author.avatar : "https://bit.ly/3I3pbe6"} alt="Avatar" size="md" sx={{ marginRight: 1 }} bgColor='light' />
+                                            <ArgonTypography variant="inherit">xin chào {author.username}</ArgonTypography>
                                         </ArgonBox>
                                     )}
                                 </ArgonBox>
 
                                 <ArgonBox p={3}>
-                                    <MuiLink href='/cart'>
-                                        <ShoppingCartIcon fontSize="large" />
-                                    </MuiLink>
+                                    <AnchorTemporaryDrawer />
                                 </ArgonBox>
-
                             </ArgonBox>
                         </Toolbar>
                     </AppBar>

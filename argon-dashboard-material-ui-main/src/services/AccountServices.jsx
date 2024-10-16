@@ -28,7 +28,7 @@ const AccountService = {
 
     dismissalAccount: id => apiClient.put(`/admin/account/dismissal/${id}`),
 
-    getAuthor: () => apiClient.get('/admin/my-ìno'),
+    getAuthor: () => apiClient.get('/admin/account/my-info'),
 
 }
 

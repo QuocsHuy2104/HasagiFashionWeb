@@ -2,19 +2,20 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import Button from '@mui/material/Button';
-import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
+
+
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+
 
 import ArgonAvatar from "components/ArgonAvatar";
+import ArgonBox from 'components/ArgonBox';
+import ArgonTypography from 'components/ArgonTypography';
 
 
 export default function AnchorTemporaryDrawer() {
+
+  const [items, setItems] = React.useState('');
   const [state, setState] = React.useState({
     right: false,
   });
@@ -23,7 +24,6 @@ export default function AnchorTemporaryDrawer() {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
       return;
     }
-
     setState({ ...state, [anchor]: open });
   };
 
@@ -34,32 +34,18 @@ export default function AnchorTemporaryDrawer() {
       onClick={toggleDrawer(anchor, false)}
       onKeyDown={toggleDrawer(anchor, false)}
     >
-      <List>
-        {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-      <Divider />
-      <List>
-        {['All mail', 'Trash', 'Spam'].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-    </Box>
+      <ArgonBox display='flex' justifyContent='space-evenly' alignItems='center' broderBottom='1px solid light'>
+        <ArgonTypography variant='button2' letterSpacing='3px'>GIỎ HÀNG</ArgonTypography>
+      </ArgonBox>
+
+      {
+        items.length > 0 ? <></> :
+          <ArgonBox display='flex' justifyContent='center' alignItems='center' width='100%' height='60%'>
+              <ArgonTypography variant='button1'>Giỏ hàng bạn còn trống</ArgonTypography>
+          </ArgonBox>
+      }
+
+    </Box >
   );
 
   return (
@@ -67,7 +53,7 @@ export default function AnchorTemporaryDrawer() {
       {['right'].map((anchor) => (
         <React.Fragment key={anchor}>
           <Button onClick={toggleDrawer(anchor, true)}>
-            <ArgonAvatar alt="User Avatar" src="/path-to-avatar-image.jpg" />
+            <ShoppingCartIcon />
           </Button>
           <Drawer
             anchor={anchor}

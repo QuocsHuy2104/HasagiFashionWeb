@@ -55,7 +55,7 @@ function Illustration() {
         { username: username.trim(), password: password.trim() },
         { withCredentials: true }
       );
-  
+
       if (response.status === 200) {
         const expirationTime = rememberMe
           ? new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000) // 30 days
