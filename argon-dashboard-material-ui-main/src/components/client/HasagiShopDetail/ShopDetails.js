@@ -26,6 +26,28 @@ function ShopDetail() {
     const { totalQuantity, fetchTotalQuantity } = useCartQuantity();
     const navigate = useNavigate();
 
+    const getUniqueSizes = (sizes) => {
+        return sizes.reduce((unique, size) => {
+            if (!unique.some(item => item.id === size.id)) {
+                unique.push(size);
+            }
+            return unique;
+        }, []);
+    };
+    
+    
+    const getUniqueColors = (colors) => {
+        return colors.reduce((unique, color) => {
+            if (!unique.some(item => item.id === color.id)) {
+                unique.push(color);
+            }
+            return unique;
+        }, []);
+    };
+    
+    const uniqueSizes = product ? getUniqueSizes(product.sizes) : [];
+    const uniqueColors = product ? getUniqueColors(product.colors) : [];
+
     React.useEffect(() => {
         setTimeout(() => {
             setIsLoading(false);
@@ -248,7 +270,7 @@ function ShopDetail() {
                                 <strong className="text-dark mr-3">Sizes:</strong>
                                 {product.sizes.length > 0 ? (
                                     <form>
-                                        {product.sizes.map((size) => (
+                                        {uniqueSizes.map((size) => (
                                             <div key={size.id} className="custom-control custom-radio custom-control-inline">
                                                 <input
                                                     type="radio"
@@ -272,7 +294,7 @@ function ShopDetail() {
                                 <strong className="text-dark mr-3">Colors:</strong>
                                 {product.colors.length > 0 ? (
                                     <form>
-                                        {product.colors.map((color) => (
+                                        {uniqueColors.map((color) => (
                                             <div key={color.id} className="custom-control custom-radio custom-control-inline">
                                                 <input
                                                     type="radio"

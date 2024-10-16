@@ -6,6 +6,7 @@ import axios from 'axios';
 import Backup3 from '../HasagiBackup3';
 import Backup2 from '../HasagiBackup2';
 import Cookies from "js-cookie";
+import { ToastContainer, toast } from 'react-toastify';
 
 const AddressSelection = ({ show, onClose }) => {
     const [address, setAddress] = useState([]);
@@ -67,8 +68,6 @@ const AddressSelection = ({ show, onClose }) => {
         }
     };
 
-
-
     useEffect(() => {
         if (show) {
             fetchAddress();
@@ -104,18 +103,26 @@ const AddressSelection = ({ show, onClose }) => {
     };
 
     const handleDeleteAddress = async (id) => {
+        const accountId = Cookies.get('accountId');
         try {
             const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa địa chỉ này?");
             if (!confirmDelete) return;
+
             const payload = {};
-            await axios.put(`http://localhost:3000/api/addresses/delete/${id}`, payload);
-            alert("Địa chỉ đã được xóa thành công");
-            fetchAddress();
+            await axios.put(`http://localhost:3000/api/addresses/delete/${id}`, payload, {
+                params: { accountId },
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                withCredentials: true,
+            });
+            fetchAddress(); // Chỉ gọi một lần ở đây.
+            toast.success('Xóa địa chỉ thành công!');
         } catch (error) {
-            console.error("Lỗi khi xóa địa chỉ:", error);
-            alert("Xóa địa chỉ thất bại");
+            toast.error('Xóa địa chỉ thất bại!');
         }
     };
+
 
     const handleComplete = () => {
         if (selectedAddress) {
@@ -143,8 +150,6 @@ const AddressSelection = ({ show, onClose }) => {
     };
 
 
-
-
     const fetchDistricts = async (provinceId) => {
         try {
             const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/district', {
@@ -158,7 +163,7 @@ const AddressSelection = ({ show, onClose }) => {
             }
         }
     };
-    
+
     const fetchWards = async (districtId) => {
         try {
             const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/ward', {
@@ -173,12 +178,13 @@ const AddressSelection = ({ show, onClose }) => {
             }
         }
     };
-    
+
 
     if (!show && !showBackup) return null;
 
     return (
         <>
+            <ToastContainer />
             {show && !showBackup && !showBackup1 && (
                 <div className="modal" style={{ display: show ? 'block' : 'none' }}>
                     <div className="modal-dialog">
@@ -199,12 +205,12 @@ const AddressSelection = ({ show, onClose }) => {
                                                     style={{ marginRight: '10px' }}
                                                 />
                                                 <div className="ms-3">
-                                                    <div style={{ fontWeight: '500' }}>{addr.fullNameAddress} <span style={{ fontSize: '12px' }}>({addr.numberPhone})</span></div>
+                                                    <div style={{ fontWeight: '500' }}>{addr.fullName} <span style={{ fontSize: '12px' }}>({addr.numberPhone})</span></div>
                                                     <div style={{ fontSize: '12px', color: '#666' }}>
                                                         {addr.address},
-                                                        {addr.provinceName},
+                                                        {addr.wardName},
                                                         {addr.districtName},
-                                                        {addr.wardName}
+                                                        {addr.provinceName}
                                                     </div>
                                                     {addr.status && <span className="badge bg-danger" style={{ fontSize: '10px' }}>Mặc định</span>}
                                                 </div>

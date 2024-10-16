@@ -14,15 +14,15 @@ const Complete = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const addressId = Cookies.get('addressId'); 
+        const addressId = Cookies.get('addressId');
         const params = new URLSearchParams(location.search);
         const responseCode = params.get('vnp_ResponseCode');
         const transactionStatus = params.get('vnp_TransactionStatus');
-        const selectedPayment = Cookies.get('selectedPayment'); 
-        
+        const selectedPayment = Cookies.get('selectedPayment');
+
         if (selectedPayment !== 'Direct Check' && (responseCode !== '00' || transactionStatus !== '00')) {
             // Thanh toán thất bại, điều hướng đến trang Checkout mà không xóa sản phẩm
-            navigate(`/Checkout?id=${addressId}`); 
+            navigate(`/Checkout?id=${addressId}`);
         } else {
             // Thanh toán thành công, gọi hàm xóa sản phẩm
             const handleRemoveItems = async () => {
@@ -30,7 +30,7 @@ const Complete = () => {
                 const selectedItemIds = cartItemsBackup
                     .filter(item => item.selected)
                     .map(item => item.cartdetailid);
-                    
+
                 if (selectedItemIds.length === 0) {
                     console.error("No items selected for removal");
                     return;
@@ -58,7 +58,7 @@ const Complete = () => {
             handleRemoveItems();
         }
     }, [location, navigate]);
-    
+
 
     useEffect(() => {
         const storedAddress = JSON.parse(localStorage.getItem('address1'));
@@ -89,9 +89,8 @@ const Complete = () => {
     }, [address.districtCode]);
 
     const handleViewOrder = async () => {
-        navigate('/History');
+        navigate("/History", { state: { activeTab: 'dang-giao' } });
     };
-
     const handleGoHome = async () => {
         navigate('/feature-section');
     };
@@ -153,24 +152,23 @@ const Complete = () => {
             <h2 style={styles.title}>Đã gửi đơn hàng</h2>
             <p style={styles.description}>
                 Đơn hàng của bạn sẽ được vận chuyển đến: <br />
-                <strong>{address.fullNameAddress}</strong> · (+84){address.numberPhone} <br />
-                {address.address},
-                {getAddressNameById(address.provinceID, provinces, 'province')},
-                {getAddressNameById(address.districtCode, districts, 'district')},
-                {getAddressNameById(address.wardCode, wards, 'ward')}
+                <strong>{address.fullName || 'N/A'}</strong> (+84) {address.numberPhone?.startsWith('0') ? address.numberPhone.substring(1) : address.numberPhone || 'N/A'} <br />
+                {address.address || 'N/A'},
+                {getAddressNameById(address.wardCode, wards, 'ward') || 'Unknown'}, 
+                {getAddressNameById(address.districtCode, districts, 'district') || 'Unknown'},
+                {getAddressNameById(address.provinceID, provinces, 'province') || 'Unknown'}
             </p>
             <div style={styles.buttonContainer}>
                 <ArgonButton onClick={handleGoHome} color="secondary" style={styles.button}>
                     Quay về trang chủ
                 </ArgonButton>
-                <ArgonButton onClick={handleViewOrder} color="primary" style={styles.button} >
+                <ArgonButton onClick={handleViewOrder} color="primary" style={styles.button}>
                     Xem đơn hàng
                 </ArgonButton>
             </div>
         </div>
     );
 };
-
 const styles = {
     container: {
         textAlign: 'center',

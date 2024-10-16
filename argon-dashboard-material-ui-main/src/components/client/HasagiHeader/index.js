@@ -95,7 +95,7 @@ const Header = ({ onSearch }) => {
     // Inline styles
     const styles = {
         header: {
-            backgroundColor: '#e9ecef',
+            backgroundColor: 'black',
             padding: '1rem',
             position: 'fixed',
             top: 0,
@@ -111,7 +111,7 @@ const Header = ({ onSearch }) => {
         navLink: {
             fontSize: '16px',
             fontWeight: '500',
-            color: '#333',
+            color: 'white',
             marginLeft: '20px',
             transition: 'color 0.3s ease-in-out',
         },
@@ -122,11 +122,13 @@ const Header = ({ onSearch }) => {
             width: '300px',
         },
         searchButton: {
-            borderColor: 'black',
+            backgroundColor: "white",
+            borderColor: 'white',
             color: 'black',
             transition: 'background-color 0.3s, color 0.3s',
         },
         icon: {
+            color: "white",
             fontSize: '20px',
             transition: 'transform 0.2s ease',
         },
@@ -165,7 +167,7 @@ const Header = ({ onSearch }) => {
                                     className="img-fluid"
                                     style={styles.logo}
                                 />
-                                <span className="mt-5" style={{ fontWeight: 1000 }}>Hasagi Fashion</span>
+                                <span className="mt-5" style={{ fontWeight: 1000, color: "white" }}>Hasagi Fashion</span>
                             </a>
                         ) : (
                             <a href="/#" className="navbar-brand">
@@ -174,7 +176,7 @@ const Header = ({ onSearch }) => {
                                     alt="logo"
                                     style={styles.logo}
                                 />
-                                <span className="mt-5" style={{ fontWeight: 1000 }}>Hasagi Fashion</span>
+                                <span className="mt-5" style={{ fontWeight: 1000, color: "white"}}>Hasagi Fashion</span>
                             </a>
                         )}
                     </div>
