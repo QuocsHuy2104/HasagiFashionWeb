@@ -31,16 +31,13 @@ const Checkout = () => {
     const navigate = useNavigate();
     const [shipFee, setShipFee] = useState(null);
 
+
+
     useEffect(() => {
         setTimeout(() => {
             setIsLoading(false);
         }, 700);
 
-        const accountId = Cookies.get('accountId');
-        if (!accountId) {
-            navigate(`/authentication/sign-in`);
-            return;
-        }
         const fetchAddress = async () => {
             try {
                 const addressesId = new URLSearchParams(window.location.search).get('id');
@@ -167,6 +164,7 @@ const Checkout = () => {
     const handleButtonClick = (paymentMethod) => {
         setSelectedPayment(paymentMethod);
         setShowPaymentButtons(paymentMethod !== 'Direct Check');
+        Cookies.set('selectedPayment', paymentMethod);
     };
 
     const handleChangePaymentMethod = () => {
@@ -248,6 +246,7 @@ const Checkout = () => {
             provinceID: address.provinceID,
             districtCode: address.districtCode,
             wardCode: address.wardCode,
+           
         };
 
         const cartDetailsDTO = selectedItems.map(item => ({
@@ -257,7 +256,6 @@ const Checkout = () => {
         }));
 
         const accountId = Cookies.get('accountId');
-
         setIsLoading(true); // Set loading state to true at the start
         try {
             // Handle cash on delivery
@@ -270,7 +268,8 @@ const Checkout = () => {
                         cartDetails: cartDetailsDTO,
                         payMethod: selectedPayment,
                         payStatus: payStatus,
-                        shippingFree: shipFee.total
+                        shippingFree: shipFee.total,
+                        fullName: `${address.address} ${getAddressNameById(address.wardCode, wards, 'ward')} ${getAddressNameById(address.districtCode, districts, 'district')} ${getAddressNameById(address.provinceID, provinces, 'province')}`.trim()
                     },
                     {
                         withCredentials: true,
@@ -284,6 +283,8 @@ const Checkout = () => {
                     console.log("Order placed successfully!");
                     toast.success("Đặt hàng thành công!");
                     await handleRemoveItems();
+                    localStorage.setItem('address1', JSON.stringify(addressDTO));
+                    localStorage.setItem('orderDetails1', JSON.stringify(cartDetailsDTO));
                     navigate('/Complete', {
                         state: {
                             address: addressDTO,
@@ -295,33 +296,36 @@ const Checkout = () => {
                     toast.error("Có lỗi xảy ra khi đặt hàng.");
                 }
 
-                // Handle PayOS payment
-            } else if (selectedPayment === 'PayOS') {
-                const payStatus = 'Paid'; // Status for PayOS
-
-                // Call PaymentService to initiate PayOS payment
-                const paymentResponse = await PaymentService.processPayment({
-                    addressDTO,
-                    cartDetails: cartDetailsDTO,
-                    payMethod: selectedPayment,
-                    payStatus: payStatus,
-                    shippingFree: shipFee.total,
-                    accountId
-                });
-
-                if (paymentResponse.success) {
-                    console.log("Payment completed successfully!");
-                    toast.success("Thanh toán thành công!");
-                    await handleRemoveItems();
-                    navigate('/Complete', {
-                        state: {
-                            address: addressDTO,
-                            orderDetails: cartDetailsDTO,
+                // Handle VNPAY payment
+            } else if (selectedPayment === 'Bank Transfer') {
+                const payStatus = 'Paid';
+                const response = await axios.post(
+                    `http://localhost:3000/api/checkout/${addressId}?accountId=${accountId}`,
+                    {
+                        addressDTO,
+                        cartDetails: cartDetailsDTO,
+                        payMethod: selectedPayment,
+                        payStatus: payStatus,
+                        shippingFree: shipFee.total,
+                        fullName: `${address.address} ${getAddressNameById(address.wardCode, wards, 'ward')} ${getAddressNameById(address.districtCode, districts, 'district')} ${getAddressNameById(address.provinceID, provinces, 'province')}`.trim()
+                    },
+                    {
+                        withCredentials: true,
+                        headers: {
+                            'Content-Type': 'application/json'
                         }
-                    });
+                    }
+                );
+
+                if (response.data.paymentUrl) {
+
+                    localStorage.setItem('address1', JSON.stringify(addressDTO));
+                    localStorage.setItem('orderDetails1', JSON.stringify(cartDetailsDTO));
+                    Cookies.set('addressId', address.id);
+                    await handleRemoveItems();
+                    window.location.href = response.data.paymentUrl;
                 } else {
-                    console.error('Failed to process payment:', paymentResponse.message);
-                    toast.error("Có lỗi xảy ra khi thanh toán.");
+                    toast.error("Có lỗi xảy ra khi xử lý thanh toán VNPAY.");
                 }
 
             } else {
@@ -332,10 +336,9 @@ const Checkout = () => {
             console.error('Error placing order:', error.response ? error.response.data : error.message);
             toast.error("Có lỗi xảy ra khi đặt hàng.");
         } finally {
-            setIsLoading(false); // Set loading state to false in the end
+            setIsLoading(false);
         }
     };
-
 
     const goBack = () => {
         navigate('/Cart');
@@ -352,6 +355,7 @@ const Checkout = () => {
                 </div>
             )}
             <HasagiNav />
+            <Navbar />
             <div className="container-fluid">
                 <div className="row px-xl-5">
                     <div className="header py-3">
@@ -376,11 +380,11 @@ const Checkout = () => {
                                                 {address.fullNameAddress} (+84) {address.numberPhone.startsWith('0') ? address.numberPhone.substring(1) : address.numberPhone}
                                             </span>
                                             <span style={{ whiteSpace: 'nowrap' }}>
-                                                {address.address},{" "}
-                                                {getAddressNameById(address.wardCode, wards, 'ward')},{" "}
-                                                {getAddressNameById(address.districtCode, districts, 'district')},{" "}
-                                                {getAddressNameById(address.provinceID, provinces, 'province')}
-                                            </span>
+                                            {address.address},{" "}
+                                            {getAddressNameById(address.wardCode, wards, 'ward')},{" "}
+                                            {getAddressNameById(address.districtCode, districts, 'district')},{" "}
+                                            {getAddressNameById(address.provinceID, provinces, 'province')}
+                                        </span>
                                             {address.status && (
                                                 <span className="badge bg-danger" style={{ fontSize: '0.75rem', marginLeft: '10px' }}>Mặc định</span>
                                             )}
@@ -399,6 +403,7 @@ const Checkout = () => {
                                     <strong>Không có thông tin địa chỉ nào có sẵn.</strong>
                                 )}
                             </div>
+
                         </div>
                     </div>
                     <div className="col-lg-12">
@@ -434,6 +439,7 @@ const Checkout = () => {
                                     ))}
                                 </tbody>
                             </table>
+
                         </div>
                     </div>
                     <div className="col-lg-12">
@@ -445,22 +451,18 @@ const Checkout = () => {
                                         <div className="payment-options d-flex ml-3">
                                             {showPaymentButtons && (
                                                 <>
-                                                    <div className="payment-buttons">
-                                                        <ArgonButton
-                                                            className={`custom-btn payment-btn ${selectedPayment === 'Direct Check' ? 'active' : ''}`}
-
-                                                            onClick={() => handleButtonClick('Direct Check')}
-                                                        >
-                                                            Thanh toán khi nhận hàng
-                                                        </ArgonButton>
-                                                        <ArgonButton
-                                                            className={`custom-btn payment-btn ${selectedPayment === 'Bank Transfer' ? 'active' : ''}`}
-                                                            style={{ marginLeft: '10px' }}
-                                                            onClick={() => handleButtonClick('Bank Transfer')}
-                                                        >
-                                                            Chuyển khoản ngân hàng
-                                                        </ArgonButton>
-                                                    </div>
+                                                    <ArgonButton
+                                                        className={`custom-btn payment-btn ${selectedPayment === 'Direct Check' ? 'active' : ''}`}
+                                                        onClick={() => handleButtonClick('Direct Check')}
+                                                    >
+                                                        Thanh toán khi nhận hàng
+                                                    </ArgonButton>
+                                                    <ArgonButton
+                                                        className={`custom-btn payment-btn ${selectedPayment === 'Bank Transfer' ? 'active' : ''}`}
+                                                        onClick={() => handleButtonClick('Bank Transfer')}
+                                                    >
+                                                        Bank Transfer
+                                                    </ArgonButton>
                                                 </>
                                             )}
                                         </div>
@@ -476,7 +478,6 @@ const Checkout = () => {
                                                 người mua sẽ thanh toán tiền mặt (tiền đặt hàng) cho người giao hàng ngay tại thời điểm nhận hàng.</p>
                                         </div>
                                     )}
-
                                 </div>
                                 <div className="col-lg-5">
                                     {selectedPayment === 'Direct Check' && (

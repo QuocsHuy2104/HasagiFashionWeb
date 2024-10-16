@@ -25,8 +25,8 @@
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  width: 700px;
-  max-width: 90%;
+  width: 30%;
+  max-width: 30%;
   overflow: hidden;
   animation: slideUp 0.4s ease-in-out;
 }
@@ -101,7 +101,7 @@ input[type="checkbox"] {
 .color-options {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 2%;
 }
 
 .color-box {
@@ -119,11 +119,31 @@ input[type="checkbox"] {
 
 .color-box.selected {
   border-color: #007bff;
+  background-color: #007bff;
+  
+}
+
+.color-box.btn.btn-secondary {
+  color: darkgray;
+  width: calc(25% - 6.33px);
+  box-sizing: border-box; 
+  margin-bottom: 2%;
+}
+
+.color-box.selected.btn.btn-secondary {
+  color: white;
+  
 }
 
 .color-box:hover {
   border-color: #007bff;
   transform: scale(1.1);
+  
+}
+
+.color-box.btn.btn-secondary:hover {
+  color: white;
+  
 }
 
 .modal-footer {
@@ -131,6 +151,7 @@ input[type="checkbox"] {
   justify-content: space-between;
   align-items: center;
   padding: 10px 0;
+  margin-bottom: -30px;
 }
 
 .text-danger {
