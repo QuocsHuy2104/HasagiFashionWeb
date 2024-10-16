@@ -303,7 +303,7 @@ const dropdownMenuStyle = {
                       {order.id || 'null'}
                     </Link>
                   </td>
-                  <td style={styles.td}>{order.fullNameAddress || 'null'}</td>
+                  <td style={styles.td}>{order.fullName || 'null'}</td>
                   <td style={styles.td}>{new Date(order.orderDate).toLocaleDateString() || 'null'}</td>
                   <td style={styles.td}>
                     <span style={{ color: order.slug === "huy-don-hang" ? "red" : "#1d8cf8" }}>
@@ -311,9 +311,7 @@ const dropdownMenuStyle = {
                     </span>
                   </td>
                   <td style={styles.td}>{(order.amount ? order.amount.toLocaleString() : 'null') + ' VND'}</td>
-                  <td style={styles.td}>
-                    {order.address || 'null'},{getAddressNameById(order.provinceID, provinces, 'province') || 'null'},{getAddressNameById(order.districtCode, districts, 'district') || 'null'},{getAddressNameById(order.wardCode, wards, 'ward') || 'null'}
-                  </td>
+                  <td style={styles.td}>{order.fullNameAddress || 'null'}</td>
                   <td style={styles.td}>
                     {order.statusSlug === 'dang-xu-ly' ? (
                       <ArgonButton

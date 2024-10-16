@@ -93,7 +93,6 @@ function ShopDetail() {
         }
         try {
             if (!productId) throw new Error("Product ID is missing");
-
             const response = await cartService.getProductDetail(productId);
             const productData = response.data;
             console.log("Fetched Product Data:", productData);
