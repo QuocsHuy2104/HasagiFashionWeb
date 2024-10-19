@@ -9110,7 +9110,7 @@ button.bg-dark:focus {
   .pl-xl-5,
   .px-xl-5 {
     padding-left: 3rem !important;
-    padding-top: 10px;
+    /* padding-top: 10px; */
   }
   .m-xl-n1 {
     margin: -0.25rem !important;

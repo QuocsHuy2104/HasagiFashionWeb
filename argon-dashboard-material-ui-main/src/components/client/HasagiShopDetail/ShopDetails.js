@@ -10,7 +10,7 @@ import Cookies from "js-cookie";
 import { toast, ToastContainer } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
- 
+
 function ShopDetail() {
     const [product, setProduct] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -207,6 +207,54 @@ function ShopDetail() {
 
     return (
         <>
+        <style>
+                {`
+                   
+                    .banner {
+                        background-image: url('https://www.shutterstock.com/image-photo/brunette-asian-woman-red-fashionable-260nw-2235546605.jpg');
+                        background-size: cover;
+                        background-position: center;
+                        height: 300px;
+                        display: flex;
+                        align-items: flex-start;
+                        justify-content: flex-start;
+                        padding: 100px 40px; /* Increased padding-top to push content down */
+                    }
+
+                    .content {
+                        text-align: left;
+                        color: #333;
+                    }
+
+                    .content h1 {
+                        font-size: 42px;
+                        font-weight: bold;
+                        color: #333;
+                        margin-bottom: 10px;
+                    }
+
+                    nav {
+                        display: flex;
+                        align-items: center; /* Vertically center breadcrumb items */
+                        gap: 5px; /* Space between breadcrumb items */
+                    }
+
+                    .breadcrumb-item {
+                        display: inline-block;
+                        font-size: 20px;
+                        color: #333;
+                    }
+
+                    .breadcrumb-item strong {
+                        font-weight: bold;
+                    }
+
+                    .breadcrumb-item.active {
+                        color: #007bff; /* Active breadcrumb color */
+                    }
+  
+                `}
+            </style>
             {isLoading && (
                 <div className="loader">
                     <div className="loader-inner">
@@ -216,14 +264,25 @@ function ShopDetail() {
             )}
             <HasagiNav />
             <ToastContainer />
-            <div className="container-fluid">
-                <div className="row px-xl-5 py-5">
+            <div className="container-fluid py-3">
+                <div className="row px-xl-5">
                     <div className="col-12">
-                        <nav className="breadcrumb bg-light mb-30">
-                            <a className="breadcrumb-item text-dark" href="/feature-section">Trang chủ</a>
-                            <a className="breadcrumb-item text-dark" href="/Shop">Sản phẩm</a>
-                            <span className="breadcrumb-item active">Sản phẩm chi tiết</span>
-                        </nav>
+                        <div className="banner">
+                            <div className="content">
+                            <h1>{product.name}</h1>
+                                <nav>
+                                    <a className="breadcrumb-item text-dark" href="/feature-section">
+                                        <strong>Home</strong>
+                                    </a>
+                                    <a className="breadcrumb-item text-dark" href="/Shop">
+                                        <strong>Shop</strong>
+                                    </a>
+                                    <span className="breadcrumb-item text-dark">
+                                        <strong>{product.name}</strong>
+                                    </span>
+                                </nav>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -237,20 +296,34 @@ function ShopDetail() {
                     <div className="col-lg-7 h-auto mb-30">
                         <div className="h-100 bg-light p-30 pt-4">
                             <h3 className="font-weight-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>{product.name}</h3>
-                            <div className="d-flex mb-3">
-                                <div className="text-primary mr-3">
-                                    <small className="fas fa-star"></small>
-                                    <small className="fas fa-star"></small>
-                                    <small className="fas fa-star"></small>
-                                    <small className="fas fa-star-half-alt"></small>
-                                    <small className="far fa-star"></small>
-                                </div>
-                                <small className="pt-1">(99 Reviews)</small>
+                            <div className="d-flex justify-content-between mb-3">
+                                <p className="mb-0"><strong>Mã sản phẩm:</strong> {product.id}</p>
+                                <p className="mb-0"><strong>Tình trạng:</strong> {product.importQuantity > 0 ? "Còn hàng" : "Hết hàng"}</p>
                             </div>
-                            <h3 className="font-weight-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>{product.importPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</h3>
-                            <h3 className="font-medium-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>Số lượng: {product.importQuantity || "N/A"}</h3>
+                            <div className="d-flex justify-content-between mb-3">
+                                <p className="mb-3"><strong>Danh mục:</strong>: {product.category || "N/A"}</p>
+                                <p className="mb-3"><strong>Thương hiệu:</strong> {product.trademark || "N/A"}</p>
+                            </div>
+                           
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                <h3 className="font-weight-semi-bold mb-0" style={{ fontFamily: `"Times New Roman", Times, serif` }}>
+                                    {product.importPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                                </h3>
+
+                                <div className="d-flex align-items-center">
+                                    <div className="text-primary mr-2">
+                                        <small className="fas fa-star"></small>
+                                        <small className="fas fa-star"></small>
+                                        <small className="fas fa-star"></small>
+                                        <small className="fas fa-star-half-alt"></small>
+                                        <small className="far fa-star"></small>
+                                    </div>
+                                    <small className="pt-1">(99 Reviews)</small>
+                                </div>
+                            </div>
+
                             <div className="d-flex mb-3" id="size-input-list">
-                                <strong className="text-dark mr-3">Sizes:</strong>
+                                <strong className="text-dark mr-3"> Kích thước:</strong>
                                 {product.sizes.length > 0 ? (
                                     <form>
                                         {product.sizes.map((size) => (
@@ -273,8 +346,9 @@ function ShopDetail() {
                                     <span>No sizes available.</span>
                                 )}
                             </div>
+
                             <div className="d-flex mb-4" id="color-input-list">
-                                <strong className="text-dark mr-3">Colors:</strong>
+                                <strong className="text-dark mr-3">Màu sắc:</strong>
                                 {product.colors.length > 0 ? (
                                     <form>
                                         {product.colors.map((color) => (
@@ -328,6 +402,7 @@ function ShopDetail() {
                                     </div>
                                 </div>
                             </div>
+
                             <div className="d-flex align-items-center py-1">
                                 <button id="cartBtn" onClick={handleAddToCart} className="btn btn-primary px-3 mr-2">
                                     <i className="fa fa-shopping-cart mr-1"></i> Add To Cart
@@ -336,6 +411,7 @@ function ShopDetail() {
                                     Mua ngay
                                 </button>
                             </div>
+
                             <div className="d-flex align-items-center py-2">
                                 {isFavorite ? (
                                     <span
@@ -359,8 +435,9 @@ function ShopDetail() {
                             </div>
                         </div>
                     </div>
+
                 </div>
-                
+
             </div>
             <Footer />
         </>

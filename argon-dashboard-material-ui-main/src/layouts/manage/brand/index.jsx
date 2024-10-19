@@ -20,7 +20,7 @@ function Brand() {
   });
 
   const [brands, setBrands] = useState([]);
-  const [errors, setErrors] = useState({}); // State for tracking validation errors
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,14 +39,14 @@ function Brand() {
 
     // Validate name
     if (!formData.name.trim()) {
-      newErrors.name = "Brand name is required";
+      newErrors.name = "Tên thương hiệu là bắt buộc.";
     } else if (/\d/.test(formData.name)) {
-      newErrors.name = "Brand name cannot contain numbers";
+      newErrors.name = "Tên thương hiệu không được chứa số.";
     }
 
     // Validate image
     if (!formData.image) {
-      newErrors.image = "Brand image is required";
+      newErrors.image = "Hình ảnh thương hiệu là cần thiết.";
     }
 
     setErrors(newErrors);
@@ -72,7 +72,7 @@ function Brand() {
     e.preventDefault();
 
     if (!validateForm()) {
-      return; // Don't submit if the form is invalid
+      return; 
     }
 
     const data = new FormData();

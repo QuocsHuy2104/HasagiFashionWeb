@@ -6,7 +6,7 @@ import ShopService from "services/ShopServices";
 import ArgonBox from 'components/ArgonBox';
 import ArgonTypography from 'components/ArgonTypography';
 import HasagiCard2 from 'components/client/HasagiCard/Card2';
-import Grid from '@mui/material/Grid'; // Import MUI Grid
+import Grid from '@mui/material/Grid';
 
 function Shop() {
     const [products, setProducts] = useState([]);
@@ -232,7 +232,7 @@ function Shop() {
                     <div className="col-12">
                         <div className="banner">
                             <div className="content">
-                                <h1>CONVERSE ALL</h1>
+                                <h1>Danh sách sản phẩm</h1>
                                 <nav>
                                     <a className="breadcrumb-item text-dark" href="/feature-section">
                                         <strong>Home</strong>
@@ -328,8 +328,7 @@ function Shop() {
                                 <option value="default">Mặc định</option>
                                 <option value="price-asc">Giá: Thấp đến Cao</option>
                                 <option value="price-desc">Giá: Cao đến Thấp</option>
-                                <option value="popularity">Phổ biến</option>
-                                <option value="newest">Mới nhất</option>
+                                
                             </select>
                         </div>
                         <Grid container spacing={0} style={{ width: '100%' }}>

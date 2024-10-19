@@ -14,41 +14,43 @@ const AddBanner = ({ id, setBannerId }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage({ error: false, msg: "" });
-
-        if (title === "" || images.length === 0) {
-            setMessage({ error: true, msg: "All fields including images are mandatory!" });
+    
+        if (title === "" || (images.length === 0 && previewUrls.length === 0)) {
+            setMessage({ error: true, msg: "Tất cả các trường bao gồm hình ảnh đều là bắt buộc!" });
             return;
         }
-
+    
         try {
-            const imageUrls = await Promise.all(
+            const newImageUrls = await Promise.all(
                 images.map(async (image) => {
                     const imageRef = ref(storage, `banner_images/${image.name}`);
                     const snapshot = await uploadBytes(imageRef, image);
                     return await getDownloadURL(snapshot.ref);
                 })
             );
-
-            const newBanner = { title, imageUrls };
-
-            if (id !== undefined && id !== "") {
+    
+            const updatedImageUrls = [...previewUrls, ...newImageUrls]; 
+            const newBanner = { title, imageUrls: updatedImageUrls };
+    
+            if (id) {
                 await BannerDataService.updateBanner(id, newBanner);
-                setBannerId("");  // Reset banner ID after update
-                setMessage({ error: false, msg: "Updated successfully!" });
+                setBannerId(""); 
+                setMessage({ error: false, msg: "Cập nhật thành công!" });
             } else {
                 await BannerDataService.addBanner(newBanner);
-                setMessage({ error: false, msg: "New Banner added successfully!" });
+                setMessage({ error: false, msg: "Thêm thành công!" });
             }
-
-            // Reset form fields
+    
             setTitle("");
             setImages([]);
-            setPreviewUrls([]);
-            document.querySelector('input[type="file"]').value = null;  // Clear file input
+            setPreviewUrls([]); 
+            document.querySelector('input[type="file"]').value = null;
+    
         } catch (err) {
             setMessage({ error: true, msg: err.message });
         }
     };
+    
 
     const editHandler = useCallback(async () => {
         setMessage("");
@@ -57,19 +59,13 @@ const AddBanner = ({ id, setBannerId }) => {
             if (docSnap.exists()) {
                 const bannerData = docSnap.data();
                 setTitle(bannerData.title);
-                const urls = await Promise.all(
-                    bannerData.imageUrls.map(async (url) => {
-                        const response = await fetch(url);
-                        const blob = await response.blob();
-                        return URL.createObjectURL(blob);
-                    })
-                );
-                setPreviewUrls(urls);
+                setPreviewUrls(bannerData.imageUrls);
             }
         } catch (err) {
             setMessage({ error: true, msg: err.message });
         }
     }, [id]);
+    
 
     useEffect(() => {
         if (id !== undefined && id !== "") {
@@ -80,19 +76,19 @@ const AddBanner = ({ id, setBannerId }) => {
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
         setImages(files);
-
-        const previewUrls = files.map(file => URL.createObjectURL(file));
-        setPreviewUrls(previewUrls);
+        const newPreviewUrls = files.map(file => URL.createObjectURL(file));
+        setPreviewUrls(prevUrls => [...prevUrls, ...newPreviewUrls]);
     };
+    
 
     const handleRemoveImage = (index) => {
-        // Remove image from images state
-        const newImages = images.filter((_, i) => i !== index);
-        setImages(newImages);
-
-        // Remove image from previewUrls state
-        const newPreviewUrls = previewUrls.filter((_, i) => i !== index);
-        setPreviewUrls(newPreviewUrls);
+        if (index < previewUrls.length) {
+            const newPreviewUrls = previewUrls.filter((_, i) => i !== index);
+            setPreviewUrls(newPreviewUrls);
+        } else {
+            const newImages = images.filter((_, i) => i !== (index - previewUrls.length));
+            setImages(newImages);
+        }
     };
 
     return (

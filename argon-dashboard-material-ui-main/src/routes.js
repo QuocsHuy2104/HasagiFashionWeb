@@ -98,7 +98,7 @@ const routes = [
   { type: "title", title: "Account Pages", key: "account-pages" },
   {
     type: "route",
-    name: "Profile",
+    name: "Thông tin cá nhân",
     key: "profile",
     route: "/profile",
     icon: <ArgonBox component="i" color="dark" fontSize="14px" className="ni ni-single-02" />,
@@ -108,7 +108,7 @@ const routes = [
   { type: "title", title: "Management pages", key: "manage-pages" },
   {
     type: "route",
-    name: "Manage Account",
+    name: "Quản lý người dùng",
     key: "account",
     route: "/manage/account",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -117,7 +117,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Role",
+    name: "Quản lý vai trò",
     key: "role",
     route: "/manage/role",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -125,7 +125,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Product",
+    name: "Quản lý sản phẩm",
     key: "product",
     route: "/manage/product",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -133,7 +133,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Category",
+    name: "Quản lý danh mục",
     key: "category",
     route: "/manage/category",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -141,7 +141,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Brand",
+    name: "Quản lý thương hiệu",
     key: "brand",
     route: "/manage/brand",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -149,7 +149,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Color",
+    name: "Quản lý màu sắc",
     key: "Manage Color",
     route: "/manage/color",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -157,7 +157,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Size",
+    name: "Quản lý kích thước",
     key: "size",
     route: "/manage/size",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -184,7 +184,7 @@ const routes = [
 
   {
     type: "route",
-    name: "Manage Order",
+    name: "Quản lý đơn hàng",
     key: "order",
     route: "/manage/order",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -192,7 +192,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Status",
+    name: "Quản lý trạng thái",
     key: "status",
     route: "/manage/status",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -200,7 +200,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Banner",
+    name: "Quản lý Banner",
     key: "banner",
     route: "/manage/banners",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,

@@ -51,7 +51,7 @@ ElevationScroll.propTypes = {
 };
 
 export default function Header(props) {
-    const { onSearch } = props; // Lấy onSearch từ props
+    const { onSearch } = props;
     const [isHovering, setIsHovering] = React.useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const { totalQuantity, fetchTotalQuantity } = useCartQuantity();
@@ -59,7 +59,7 @@ export default function Header(props) {
     const handleSearchChange = (event) => {
         const value = event.target.value;
         setSearchTerm(value);
-        onSearch(value); // Gọi hàm tìm kiếm từ prop
+        onSearch(value); 
     };
 
     useEffect(() => {
