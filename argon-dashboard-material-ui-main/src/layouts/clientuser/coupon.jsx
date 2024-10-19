@@ -13,7 +13,7 @@ const Coupon = () => {
             {/* Coupon */}
             <ArgonBox
                 borderTop='1px solid #ccc'
-                mt={10}
+                mt={8}
                 sx={{
                     backgroundImage: 'url("https://file.hstatic.net/200000306687/file/news-latter-background_70d641e978834763851df1abe46d64df.png")',
                     backgroundSize: 'cover',

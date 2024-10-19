@@ -19,7 +19,7 @@ function Category({ image, name }) {
                 <ArgonAvatar src={imageUrl} alt={name} size="sm" variant="rounded" />
             </ArgonBox>
             <ArgonBox display="flex" flexDirection="column">
-                <ArgonTypography variant="button" fontWeight="medium" color="textPrimary">
+                <ArgonTypography variant="button" fontWeight="medium" color="dark">
                     {name}
                 </ArgonTypography>
             </ArgonBox>

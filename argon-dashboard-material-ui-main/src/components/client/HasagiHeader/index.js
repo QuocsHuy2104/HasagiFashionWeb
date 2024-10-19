@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import * as React from 'react';
 import PropTypes from 'prop-types';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -10,20 +10,16 @@ import ArgonBox from 'components/ArgonBox';
 import ArgonTypography from 'components/ArgonTypography';
 import logo from 'components/client/assets/images/logo-ct-dark.png';
 import ArgonAvatar from 'components/ArgonAvatar';
-import useCartQuantity from "../HasagiQuantity/useCartQuantity";
 
 import PersonIcon from '@mui/icons-material/Person';
 import ReorderIcon from '@mui/icons-material/Reorder';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 
 import CategoriesService from 'services/CategoryServices';
 import BrandsService from 'services/BrandServices';
 import { jwtDecode } from 'jwt-decode';
-import SearchIcon from '@mui/icons-material/Search';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import InputBase from '@mui/material/InputBase';
-import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
+import AccountService from 'services/AccountServices';
+import AnchorTemporaryDrawer from '../HasagiDrawer';
 
 function ElevationScroll(props) {
     const { children, window } = props;
@@ -51,52 +47,8 @@ ElevationScroll.propTypes = {
 };
 
 export default function Header(props) {
-    const { onSearch } = props;
     const [isHovering, setIsHovering] = React.useState(false);
-    const [searchTerm, setSearchTerm] = useState("");
-    const { totalQuantity, fetchTotalQuantity } = useCartQuantity();
-
-    const handleSearchChange = (event) => {
-        const value = event.target.value;
-        setSearchTerm(value);
-        onSearch(value); 
-    };
-
-    useEffect(() => {
-        fetchTotalQuantity();
-    }, [fetchTotalQuantity]);
-
-
-    const startVoiceSearch = (event) => {
-        event.preventDefault();
-        if (window.SpeechRecognition || window.webkitSpeechRecognition) {
-            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = 'vi-VN';
-            recognition.interimResults = false;
-
-            recognition.onstart = () => {
-                console.log('Voice recognition started. Speak into the microphone.');
-            };
-
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                setSearchTerm(transcript);
-                onSearch(transcript);
-
-                const utterance = new SpeechSynthesisUtterance(transcript);
-                utterance.lang = 'vi-VN';
-                window.speechSynthesis.speak(utterance);
-            };
-
-            recognition.onerror = (event) => {
-                console.error('Error occurred in recognition: ' + event.error);
-            };
-
-            recognition.start();
-        } else {
-            alert('Trình duyệt của bạn không hỗ trợ tìm kiếm bằng giọng nói.');
-        }
-    };
+    const [author, setAuthor] = React.useState('');
     const user = Cookies.get('user');
     var position = false;
     if (user === null) position = false;
@@ -117,6 +69,15 @@ export default function Header(props) {
             CategoriesService.getAllCategories()
         ])
     }
+
+    React.useEffect(async () => {
+        try {
+            const resp = await AccountService.getAuthor();
+            setAuthor(resp.data);
+        } catch (err) {
+            console.error(err)
+        }
+    }, [])
 
     return (
         <>
@@ -222,47 +183,17 @@ export default function Header(props) {
                                             </ArgonBox>
                                         )}
                                     </ArgonBox>
-                                    <ArgonBox display="flex" alignItems="center" sx={{ borderBottom: '1px solid #d2d2d2', position: 'relative', flexGrow: 1 }}>
-                                        <InputBase
-                                            placeholder="Tìm kiếm sản phẩm..."
-                                            inputProps={{ 'aria-label': 'search' }}
-                                            sx={{ ml: 1, flex: 1 }}
-                                            value={searchTerm}
-                                            onChange={handleSearchChange}
-                                            aria-label="Search"
-                                        />
-                                        <button
-                                            className="btn btn-outline-secondary rounded-pill"
-                                            type="button"
-                                            onClick={startVoiceSearch}
-                                            style={{
-                                                position: 'absolute',
-                                                right: 10,
-                                                top: '50%',
-                                                transform: 'translateY(-50%)',
-                                                border: 'none',
-                                                backgroundColor: 'transparent',
-                                                cursor: 'pointer',
-                                                padding: 0,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                opacity: 1,
-                                            }}
-                                        >
-                                            <FontAwesomeIcon icon={faMicrophone} style={{ fontSize: '1.5rem', color: '#333' }} /> {/* Adjust color if needed */}
-                                        </button>
-                                    </ArgonBox>
-
                                 </ArgonBox>
 
                                 <ArgonBox>
                                     {user == null ? (
-                                        <ArgonBox display="flex" flexDirection="column" alignItems="center">
-                                            <PersonIcon />
-                                            <ArgonBox display='flex' justifyContent='space-evenly' alignItems='center' mt={1}>
+                                        <ArgonBox display="flex" alignItems="center" justifyContent='space-between'>
+                                            <ArgonBox display='flex' justifyContent='space-between' alignItems='center' mt={1}>
                                                 <MuiLink href='/authentication/sign-in' sx={{ marginRight: 1 }}>
                                                     <ArgonTypography variant="inherit">Đăng Nhập</ArgonTypography>
                                                 </MuiLink>
+
+                                                <ArgonBox display='block' height='25px' width='2px' bgColor='dark' broderRadius='lg' sx={{ marginRight: 1 }}></ArgonBox>
 
                                                 <MuiLink href='/authentication/sign-up'>
                                                     <ArgonTypography variant="inherit">Đăng Ký</ArgonTypography>
@@ -270,41 +201,16 @@ export default function Header(props) {
                                             </ArgonBox>
                                         </ArgonBox>
                                     ) : (
-                                        <ArgonBox display="flex" flexDirection="column" alignItems="center">
-                                            <PersonIcon />
-                                            <ArgonBox display='flex' justifyContent='space-evenly' alignItems='center' mt={1}>
-                                                <MuiLink href='/dashboard'>
-                                                    <ArgonTypography variant="inherit">Tài Khoản</ArgonTypography>
-                                                </MuiLink>
-                                                <MuiLink href='/History' sx={{ marginLeft: 2 }}>
-                                                    <ArgonTypography variant="inherit">Lịch sử mua hàng</ArgonTypography>
-                                                </MuiLink>
-                                            </ArgonBox>
+                                        <ArgonBox display='flex' justifyContent='space-evenly' alignItems='center'>
+                                            <ArgonAvatar src={author.avatar !== '' ? author.avatar : "https://bit.ly/3I3pbe6"} alt="Avatar" size="md" sx={{ marginRight: 1 }} bgColor='light' />
+                                            <ArgonTypography variant="inherit">xin chào {author.username}</ArgonTypography>
                                         </ArgonBox>
                                     )}
                                 </ArgonBox>
 
-
-                                <a href="/Cart" style={{ position: 'relative', display: 'flex', alignItems: 'center', padding: '10px', textDecoration: 'none', paddingLeft: '20px' }}>
-                                    <FontAwesomeIcon icon={faShoppingCart} className="icon" style={{ fontSize: '24px' }} />
-                                    {totalQuantity > 0 && (
-                                        <span
-                                            className="badge bg-primary"
-                                            style={{
-
-                                                position: 'absolute',
-                                                top: '-5px',
-                                                right: '-10px',
-                                                backgroundColor: 'orange',
-                                                borderRadius: '50%',
-                                                padding: '5px 10px',
-                                                fontSize: '12px',
-                                                color: 'white'
-                                            }}>
-                                            {totalQuantity}
-                                        </span>
-                                    )}
-                                </a>
+                                <ArgonBox p={3}>
+                                    <AnchorTemporaryDrawer />
+                                </ArgonBox>
                             </ArgonBox>
                         </Toolbar>
                     </AppBar>
@@ -314,6 +220,3 @@ export default function Header(props) {
         </>
     );
 }
-Header.propTypes = {
-    onSearch: PropTypes.func.isRequired,
-};

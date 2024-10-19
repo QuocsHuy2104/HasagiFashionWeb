@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import HasagiNav from "components/client/HasagiHeader";
+import Header from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
 import { FaTimes } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
@@ -202,8 +202,6 @@ const Cart = () => {
         }
     };
 
-
-
     return (
         <>
             <ToastContainer />
@@ -214,7 +212,7 @@ const Cart = () => {
                     </div>
                 </div>
             )}
-            <HasagiNav />
+            <Header />
             <div className="container-fluid py-2">
                 <div className="row px-xl-5">
                     <div className="col-lg-12 mb-5" id="tableAddCart">

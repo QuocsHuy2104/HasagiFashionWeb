@@ -30,18 +30,14 @@ const Checkout = () => {
     const [selectedAddress, setSelectedAddress] = useState(null);
     const navigate = useNavigate();
     const [shipFee, setShipFee] = useState(null);
-    const [showComplete, setShowComplete] = useState(false);
+
+
 
     useEffect(() => {
         setTimeout(() => {
             setIsLoading(false);
         }, 700);
 
-        const accountId = Cookies.get('accountId');
-        if (!accountId) {
-            navigate(`/authentication/sign-in`);
-            return;
-        }
         const fetchAddress = async () => {
             try {
                 const addressesId = new URLSearchParams(window.location.search).get('id');
@@ -250,6 +246,7 @@ const Checkout = () => {
             provinceID: address.provinceID,
             districtCode: address.districtCode,
             wardCode: address.wardCode,
+           
         };
 
         const cartDetailsDTO = selectedItems.map(item => ({
@@ -259,11 +256,11 @@ const Checkout = () => {
         }));
 
         const accountId = Cookies.get('accountId');
-
         setIsLoading(true); // Set loading state to true at the start
         try {
+            // Handle cash on delivery
             if (selectedPayment === 'Direct Check') {
-                const payStatus = 'Not Paid';
+                const payStatus = 'Not Paid'; // Status for cash on delivery
                 const response = await axios.post(
                     `http://localhost:3000/api/checkout/${addressId}?accountId=${accountId}`,
                     {
@@ -271,7 +268,8 @@ const Checkout = () => {
                         cartDetails: cartDetailsDTO,
                         payMethod: selectedPayment,
                         payStatus: payStatus,
-                        shippingFree: shipFee.total
+                        shippingFree: shipFee.total,
+                        fullName: `${address.address} ${getAddressNameById(address.wardCode, wards, 'ward')} ${getAddressNameById(address.districtCode, districts, 'district')} ${getAddressNameById(address.provinceID, provinces, 'province')}`.trim()
                     },
                     {
                         withCredentials: true,
@@ -308,7 +306,8 @@ const Checkout = () => {
                         cartDetails: cartDetailsDTO,
                         payMethod: selectedPayment,
                         payStatus: payStatus,
-                        shippingFree: shipFee.total
+                        shippingFree: shipFee.total,
+                        fullName: `${address.address} ${getAddressNameById(address.wardCode, wards, 'ward')} ${getAddressNameById(address.districtCode, districts, 'district')} ${getAddressNameById(address.provinceID, provinces, 'province')}`.trim()
                     },
                     {
                         withCredentials: true,
@@ -323,6 +322,7 @@ const Checkout = () => {
                     localStorage.setItem('address1', JSON.stringify(addressDTO));
                     localStorage.setItem('orderDetails1', JSON.stringify(cartDetailsDTO));
                     Cookies.set('addressId', address.id);
+                    await handleRemoveItems();
                     window.location.href = response.data.paymentUrl;
                 } else {
                     toast.error("Có lỗi xảy ra khi xử lý thanh toán VNPAY.");
@@ -380,11 +380,11 @@ const Checkout = () => {
                                                 {address.fullNameAddress} (+84) {address.numberPhone.startsWith('0') ? address.numberPhone.substring(1) : address.numberPhone}
                                             </span>
                                             <span style={{ whiteSpace: 'nowrap' }}>
-                                                {address.address},{" "}
-                                                {getAddressNameById(address.wardCode, wards, 'ward')},{" "}
-                                                {getAddressNameById(address.districtCode, districts, 'district')},{" "}
-                                                {getAddressNameById(address.provinceID, provinces, 'province')}
-                                            </span>
+                                            {address.address},{" "}
+                                            {getAddressNameById(address.wardCode, wards, 'ward')},{" "}
+                                            {getAddressNameById(address.districtCode, districts, 'district')},{" "}
+                                            {getAddressNameById(address.provinceID, provinces, 'province')}
+                                        </span>
                                             {address.status && (
                                                 <span className="badge bg-danger" style={{ fontSize: '0.75rem', marginLeft: '10px' }}>Mặc định</span>
                                             )}
@@ -403,6 +403,7 @@ const Checkout = () => {
                                     <strong>Không có thông tin địa chỉ nào có sẵn.</strong>
                                 )}
                             </div>
+
                         </div>
                     </div>
                     <div className="col-lg-12">
@@ -477,7 +478,6 @@ const Checkout = () => {
                                                 người mua sẽ thanh toán tiền mặt (tiền đặt hàng) cho người giao hàng ngay tại thời điểm nhận hàng.</p>
                                         </div>
                                     )}
-
                                 </div>
                                 <div className="col-lg-5">
                                     {selectedPayment === 'Direct Check' && (
