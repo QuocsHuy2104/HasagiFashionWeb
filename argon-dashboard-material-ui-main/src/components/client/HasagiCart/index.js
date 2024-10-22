@@ -12,7 +12,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Link } from "react-router-dom";
 import Navbar from "../HasagiNavbar";
 import aboutImage from "layouts/assets/img/shopping.png";
-
+import CartService from"../../../services/CartService";
 const Cart = () => {
     const [cartItems, setCartItems] = useState([]);
     const [address, setAddress] = useState(null);
@@ -38,7 +38,7 @@ const Cart = () => {
 
         try {
             const [cartResponse, addressResponse] = await Promise.all([
-                axios.get(`http://localhost:3000/api/cart/account?accountId=${accountId}`),
+              CartService.getCart(),
                 axios.get(`http://localhost:3000/api/addresses/exists?accountId=${accountId}`, { withCredentials: true })
             ]);
             setCartItems(cartResponse.data);

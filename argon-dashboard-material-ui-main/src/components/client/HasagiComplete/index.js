@@ -99,7 +99,7 @@ const Complete = () => {
     const fetchProvinces = async () => {
         try {
             const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/province', {
-                headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' }
+                headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' }
             });
             setProvinces(response.data.data);
         } catch (error) {
@@ -110,7 +110,7 @@ const Complete = () => {
     const fetchDistricts = async (provinceId) => {
         try {
             const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/district', {
-                headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' },
+                headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' },
                 params: { province_id: provinceId }
             });
             setDistricts(response.data.data);
@@ -122,7 +122,7 @@ const Complete = () => {
     const fetchWards = async (districtId) => {
         try {
             const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/ward', {
-                headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' },
+                headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' },
                 params: { district_id: districtId }
             });
             setWards(response.data.data);

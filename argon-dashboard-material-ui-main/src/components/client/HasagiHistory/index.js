@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Box, RadioGroup, FormControlLabel, Radio, Tabs, Tab, Paper } from "@mui/material";
+import { Modal, Box, Tabs, Tab, Paper, Button, Grid, Typography, RadioGroup, FormControlLabel, Radio } from "@mui/material";
 import ArgonButton from "components/ArgonButton";
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
-import axios from "axios";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import Cookies from "js-cookie";
 import HasagiNav from "components/client/HasagiHeader";
-import Footer from "components/client/HasagiFooter";
-import aboutImage from "layouts/assets/img/order.png";
+import HistoryOrderService from "../../../services/HistoryOrderServices";
+import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 const History = () => {
   const [orders, setOrders] = useState([]);
@@ -27,16 +25,15 @@ const History = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
-  useEffect(() => {
-    const accountId = Cookies.get('accountId');
 
+  useEffect(() => {
     if (location.state?.activeTab) {
       setActiveTab(location.state.activeTab);
     }
 
     const fetchOrderHistory = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/history-order?accountId=${accountId}`);
+        const response = await HistoryOrderService.getHistory();
         setOrders(response.data);
       } catch (error) {
         setError("Failed to fetch order history.");
@@ -54,20 +51,16 @@ const History = () => {
   };
 
   const handleCancelOrder = async () => {
-    const accountId = Cookies.get('accountId');
     try {
       await axios.put(`http://localhost:3000/api/history-order/${selectedOrderId}/cancel`, {
-        reason: cancelReason
+        reason: cancelReason,
       });
 
-      // Fetch the updated orders list
-      const response1 = await axios.get(`http://localhost:3000/api/history-order?accountId=${accountId}`);
-      setOrders(response1.data);
+      const response = await HistoryOrderService.getHistory();
+      setOrders(response.data);
 
-      // Find the canceled order to check its payStatus
-      const canceledOrder = response1.data.find(order => order.id === selectedOrderId);
+      const canceledOrder = response.data.find(order => order.id === selectedOrderId);
 
-      // Set the active tab based on the payment status of the canceled order
       if (canceledOrder?.payStatus === "Đã thanh toán") {
         setActiveTab('cho-hoan-tien');
       } else {
@@ -81,30 +74,29 @@ const History = () => {
   };
 
   const handleStatusComplete = async (orderId) => {
-    const accountId = Cookies.get('accountId');
     try {
       const response = await axios.put(`http://localhost:3000/api/history-order/${orderId}/complete`);
-      console.log("Complete Order Response:", response.data); // Log the response
+      console.log("Complete Order Response:", response.data);
       setOrders(prevOrders =>
         prevOrders.map(order =>
           order.id === orderId ? { ...order, slug: 'hoan-thanh' } : order
         )
       );
-      const response1 = await axios.get(`http://localhost:3000/api/history-order?accountId=${accountId}`);;
+      const response1 = await HistoryOrderService.getHistory();
       setOrders(response1.data);
     } catch (error) {
       console.error("There was an error updating the status to complete!", error);
     }
   };
 
-
   const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue); // Set the active tab when clicked
+    setActiveTab(newValue);
   };
 
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value); // Update search query on input change
+    setSearchQuery(e.target.value);
   };
+
   const filteredOrders = orders.filter(order => {
     if (activeTab !== 'all' && order.statusSlug !== activeTab) {
       return false;
@@ -124,26 +116,6 @@ const History = () => {
   };
 
   const styles = {
-    orderHistory: {
-      width: '100%',
-      margin: '20px auto',
-    },
-    table: {
-      width: '100%',
-      borderCollapse: 'collapse',
-      textAlign: 'center',
-    },
-    th: {
-      padding: '10px',
-      borderBottom: '2px solid #ddd',
-      fontWeight: 'bold',
-      backgroundColor: '#f5f5f5',
-    },
-    td: {
-      padding: '10px',
-      borderBottom: '1px solid #ddd',
-      fontSize: "18px",
-    },
     formControl: {
       border: '1px solid #ddd',
       padding: '10px 20px',
@@ -152,20 +124,20 @@ const History = () => {
     },
   };
 
-  // Inside your History component
   return (
     <>
       <HasagiNav />
       <br />
       <ArgonBox p={3}>
         <div className="header" style={{ paddingTop: "50px" }}>
-          <button className="back-button" onClick={() => goBack()}>
+          <button className="back-button" onClick={goBack}>
             <i className="ni ni-bold-left" />
           </button>
           <h5 className="mb-1" style={{ fontWeight: "bold", fontSize: "24px", color: "#343a40", marginLeft: '-15px' }}>Lịch sử đơn hàng</h5>
         </div>
+
         {/* Tabs for filtering orders */}
-        <Paper elevation={3} sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: '20px' }}>
+        <Paper elevation={3} style={{ padding: "16px", position: "relative", maxWidth: "1000px", margin: "0 auto", marginBottom: "20px" }}>
           <Tabs value={activeTab} onChange={handleTabChange}>
             <Tab label={`Tất cả (${orders.length})`} value="all" />
             <Tab label={`Đang xử lý (${getOrderCount('dang-xu-ly')})`} value="dang-xu-ly" />
@@ -177,7 +149,6 @@ const History = () => {
           </Tabs>
         </Paper>
 
-        {/* Conditionally render the search input */}
         {activeTab === 'all' && (
           <div className="d-flex justify-content-center">
             <input
@@ -192,78 +163,109 @@ const History = () => {
           </div>
         )}
 
-        <div style={styles.orderHistory}>
-          <table style={styles.table}>
-            <thead>
-              <tr style={{ fontSize: "18px" }}>
-                <th style={styles.th}>Mã đơn hàng</th>
-                <th style={styles.th}>Tên Người Đặt</th>
-                <th style={styles.th}>Ngày đặt</th>
-                <th style={styles.th}>Trạng thái thanh toán</th>
-                <th style={styles.th}>Trạng thái</th>
-                <th style={styles.th}>Tổng tiền</th>
-                <th style={styles.th}>Địa chỉ</th>
-                <th style={styles.th}>Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredOrders.length === 0 ? (
-                <tr>
-                  <td colSpan="8" className="text-center">
-                    <div className="text-center py-4">
-                      <img src={aboutImage} style={{ height: "60px", width: "60px" }} />
-                      <p style={{ fontSize: "18px", color: "#6c757d" }}>Chưa có đơn hàng.</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                filteredOrders.map((order) => (
-                  <tr key={order.id}>
-                    <td style={styles.td}>
-                      <Link to={`/history-order/${order.id}`} style={{ textDecoration: 'none', color: '#333' }}>
-                        {order.id || 'null'}
-                      </Link>
-                    </td>
-                    <td style={styles.td}>{order.fullName || 'null'}</td>
-                    <td style={styles.td}>{new Date(order.orderDate).toLocaleDateString() || 'null'}</td>
-                    <td style={styles.td}>{order.payStatus || 'null'}</td>
-                    <td style={styles.td}>
-                      <span style={{ color: order.slug === "huy-don-hang" ? "red" : "#1d8cf8" }}>
-                        {order.statusName || 'null'}
-                      </span>
-                    </td>
-                    <td style={styles.td}>{(order.amount ? order.amount.toLocaleString() : 'null') + ' VND'}</td>
-                    <td style={styles.td}>{order.fullNameAddress || 'null'}</td>
-                    <td style={styles.td}>
+        <Box p={3} style={{ padding: "16px", position: "relative", maxWidth: "1030px", margin: "0 auto", marginBottom: "20px" }}>
+          {orders.length === 0 ? (
+            <Typography>No orders found.</Typography>
+          ) : (
+            <Grid container spacing={2}>
+              {filteredOrders.map((order) => (
+                <Grid item xs={12} key={order.id}>
+                  <Paper elevation={3} style={{ padding: "16px", position: "relative" }}>
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                      <Box display="flex" alignItems="center">
+                        <i
+                          className="fa fa-map-marker-alt"
+                          style={{ color: 'red', fontSize: '1.5rem', marginRight: '5px' }}
+                        ></i>
+                        <Typography
+                          variant="h6"
+                          component="h5"
+                          style={{ color: '#e63946', fontSize: '1.2rem', fontWeight: 'bold', marginRight: '10px' }}
+                        >
+                          Địa Chỉ Nhận Hàng:
+                        </Typography>
+                        <Typography variant="body1" color="textPrimary">
+                          {order.fullNameAddress}
+                        </Typography>
+                      </Box>
+                      <Typography variant="h6" color="textSecondary" gutterBottom>
+                        {order.statusName}
+                      </Typography>
+                    </Box>
+                    <section />
+                    {order.products && order.products.length > 0 ? (
+                      <Box display="flex" flexDirection="column">
+                        {order.products.map((product, index) => (
+                          <Box display="flex" alignItems="center" key={index} style={{ marginBottom: "8px" }}>
+                            <img src={product.productImage} alt="Product" style={{ width: "100px", marginRight: "16px" }} />
+                            <Box>
+                              <Typography variant="h6" gutterBottom>
+                                {product.productName}
+                              </Typography>
+                              <Typography variant="body2" color="textSecondary" style={{ color: "black" }}>
+                                Phân loại hàng: {product.color}, {product.size}
+                              </Typography>
+                              <Box display="flex" justifyContent="space-between">
+                                <Typography variant="body2" color="textSecondary" style={{ color: "black" }}>
+                                  Số lượng: {product.productQuantity}
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary" style={{ marginLeft: "600px", color: "black" }}>
+                                  Thành tiền: {product.productPrice}
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </Box>
+                        ))}
+                      </Box>
+                    ) : (
+                      <Typography variant="body2" color="textSecondary">
+                        Không có sản phẩm nào trong đơn hàng.
+                      </Typography>
+                    )}
+                    <section/>
+                    <Typography variant="body2" color="textSecondary" style={{ marginLeft: "800px", color: "black" }}>
+                      Tổng tiền: 40000đ
+                    </Typography>
+                    <Box display="flex" justifyContent="flex-end" mt={2}>
                       {order.statusSlug === 'dang-xu-ly' ? (
-                        <ArgonButton
-                          variant="contained"
-                          style={{ backgroundColor: 'red', color: 'white' }}
-                          size="small"
+                        <Button
+                          variant="outlined"
                           onClick={() => handleOpenCancelModal(order.id)}
+                          style={{ marginRight: "10px", backgroundColor: "red" }}
                         >
-                          Hủy
-                        </ArgonButton>
+                          Hủy đơn
+                        </Button>
                       ) : order.statusSlug === 'da-giao' ? (
-                        <ArgonButton
-                          variant="contained"
-                          style={{ backgroundColor: 'green', color: 'white' }}
-                          size="small"
+                        <Button
+                          variant="outlined"
                           onClick={() => handleStatusComplete(order.id)}
+                          style={{ marginRight: "10px", backgroundColor: "green" }}
                         >
-                          Hoàn Thành
-                        </ArgonButton>
-                      ) : null}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                          Hoàn thành
+                        </Button>
+                      ) : order.statusSlug === 'da-giao' ? (
+                        <Button
+                          variant="outlined"
+                          onClick={() => handleStatusComplete(order.id)}
+                          style={{ marginRight: "10px", backgroundColor: "red" }}
+                        >
+                          Đã hủy </Button>) :
+                        null}
+                      <Button variant="contained" href={`/history-order/${order.id}`} color="primary" style={{ marginRight: "10px" }}>
+                        Xem chi tiết hóa đơn
+                      </Button>
+                      <Button variant="contained" color="primary">
+                        Mua Lại
+                      </Button>
+                    </Box>
+                  </Paper>
+                </Grid>
+              ))}
+            </Grid>
+          )}
+        </Box>
+
       </ArgonBox>
-      <Footer />
-      {/* Modal for cancel reason */}
       <Modal open={openCancelModal} onClose={() => setOpenCancelModal(false)}>
         <Box p={3} style={{ backgroundColor: 'white', width: '300px', margin: '50px auto', borderRadius: '8px' }}>
           <ArgonTypography variant="h6">Chọn lý do hủy đơn hàng</ArgonTypography>
@@ -294,7 +296,6 @@ const History = () => {
       </Modal>
     </>
   );
-
 };
 
 export default History;

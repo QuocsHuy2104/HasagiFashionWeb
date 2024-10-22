@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import 'layouts/assets/css/style.css';
 import aboutImage3 from "layouts/assets/img/cat-1.jpg";
 import aboutImage5 from "layouts/assets/img/product-1.jpg";
 import { Grid, Typography } from "@mui/material";

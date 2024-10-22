@@ -7,6 +7,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import "components/client/assets/css/phanloai1.css";
 import Select from "react-select";
+import AddressService from '../../../services/AddressServices';
 
 const Backup = ({ show, onClose }) => {
     const [fullName, setFullName] = useState("");
@@ -132,7 +133,7 @@ const Backup = ({ show, onClose }) => {
             try {
                 const response = await axios.get(
                     "https://online-gateway.ghn.vn/shiip/public-api/master-data/province",
-                    { headers: { Token: "8d0588cd-65d9-11ef-b3c4-52669f455b4f" } }
+                    { headers: { Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d" } }
                 );
                 if (response.data && response.data.data) {
                     setProvinces(response.data.data);
@@ -155,7 +156,7 @@ const Backup = ({ show, onClose }) => {
         try {
             const response = await axios.get(
                 "https://online-gateway.ghn.vn/shiip/public-api/master-data/district",
-                { headers: { Token: "8d0588cd-65d9-11ef-b3c4-52669f455b4f" }, params: { province_id: provinceId } }
+                { headers: { Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d" }, params: { province_id: provinceId } }
             );
             if (response.data && response.data.data) {
                 setDistricts(response.data.data);
@@ -175,7 +176,7 @@ const Backup = ({ show, onClose }) => {
         try {
             const response = await axios.get(
                 "https://online-gateway.ghn.vn/shiip/public-api/master-data/ward",
-                { headers: { Token: "8d0588cd-65d9-11ef-b3c4-52669f455b4f" }, params: { district_id: districtId } }
+                { headers: { Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d" }, params: { district_id: districtId } }
             );
             if (response.data && response.data.data) {
                 setWards(response.data.data);
@@ -200,44 +201,29 @@ const Backup = ({ show, onClose }) => {
             provinceID: selectedProvince,
             districtCode: selectedDistrict,
             wardCode: selectedWard,
-            fullAddress: `${address}, ${selectedWard}, ${selectedDistrict}, ${selectedProvince}`,
         };
-        const accountId = Cookies.get("accountId");
-        if (!accountId) {
-            alert("Không tìm thấy tài khoản. Vui lòng đăng nhập lại.");
-            return;
-        }
+        
         try {
-            const response = await axios.post(
-                `http://localhost:3000/api/addresses/create?accountId=${accountId}`,
-                formData,
-                { withCredentials: true }
-            );
-            if (response.data && response.data.id) {
+            const response = await AddressService.createAddressFirst(formData);
+        
+            if (response && response.data && response.data.id) {
                 const newAddressId = response.data.id;
                 onClose();
                 navigate(`/Checkout?id=${newAddressId}`);
+            } else {
+                console.log("Invalid response structure or missing ID:", response);
+                alert("Không thể lưu địa chỉ. Vui lòng thử lại.");
             }
         } catch (error) {
             console.error("Error submitting address:", error);
             alert("Không thể lưu địa chỉ. Vui lòng thử lại.");
-        }
+        }        
     };
 
     useEffect(() => {
         const checkUserAddresses = async () => {
-            try {
-                const accountId = Cookies.get("accountId");
-                if (!accountId) {
-                    console.error("Account ID is missing");
-                    return;
-                }
-
-                const response = await axios.get(
-                    `http://localhost:3000/api/addresses/account?accountId=${accountId}`,
-                    { withCredentials: true }
-                );
-
+            try {             
+                const response = await AddressService.getAllAddress(); 
                 const userHasAddresses = response.data.length > 0;
                 setIsAddressAvailable(userHasAddresses);
                 if (!userHasAddresses) setStatus(true);

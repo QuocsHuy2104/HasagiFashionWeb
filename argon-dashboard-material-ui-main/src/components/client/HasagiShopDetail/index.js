@@ -4,7 +4,6 @@ import 'layouts/assets/css/style.css';
 import HasagiNav from "components/client/HasagiHeader";
 import { useLocation, Link } from 'react-router-dom';
 import Footer from "components/client/HasagiFooter";
-import useCartQuantity from "../HasagiQuantity/useCartQuantity";
 import cartService from "../../../services/ProductDetail";
 import Cookies from "js-cookie";
 import { toast, ToastContainer } from 'react-toastify';
@@ -23,7 +22,6 @@ function ShopDetail() {
     const query = new URLSearchParams(location.search);
     const productId = query.get('id');
     const [favoriteCount, setFavoriteCount] = useState(0);
-    const { totalQuantity, fetchTotalQuantity } = useCartQuantity();
     const navigate = useNavigate();
 
     const getUniqueSizes = (sizes) => {
@@ -34,7 +32,6 @@ function ShopDetail() {
             return unique;
         }, []);
     };
-    
     
     const getUniqueColors = (colors) => {
         return colors.reduce((unique, color) => {
@@ -54,42 +51,26 @@ function ShopDetail() {
         }, 700);
     }, []);
     const handleAddToCart = async () => {
-
-        const accountId = Cookies.get('accountId');
-        if (!accountId) {
-            navigate(`/authentication/sign-in`);
-            return;
-        }
-
         if (!product || !selectedColor || !selectedSize) {
             toast.error('Vui lòng chọn màu sắc và kích thước.');
             return;
         }
 
         try {
-            const response = await cartService.addToCart({
-                accountId,
+        cartService.addToCart({
                 colorId: selectedColor,
                 sizeId: selectedSize,
                 quantity,
                 productId,
-                price: product.importPrice,
             });
-
-            if (response.status === 201 || response.status === 200) {
-                Cookies.set('productId', productId);
-                fetchTotalQuantity();
-                toast.success('Sản phẩm đã được thêm vào giỏ hàng thành công!');
-                console.log('Cart updated:', response.data);
-            } else {
-                toast.error('Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại.');
-            }
+            Cookies.set('productId', productId);
+            toast.success('Sản phẩm đã được thêm vào giỏ hàng thành công!');
         } catch (error) {
             console.error('Error adding to cart:', error);
             toast.error('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.');
         }
     };
-
+    
     const fetchFavoriteCount = async (productId) => {
         try {
             const response = await axios.get(`http://localhost:8080/api/favorites/count`, {
@@ -101,6 +82,25 @@ function ShopDetail() {
             return 0;
         }
     };
+    const checkFavoriteStatus = async (productId) => {
+        try {
+            // Await the response from cartService.checkFavorite
+            const favoriteResponse = await cartService.checkFavorite(productId);
+    
+            // Log the full response to check its structure
+            console.log(favoriteResponse);
+    
+            // Ensure the data property exists and then use it
+            if (favoriteResponse && favoriteResponse.data !== undefined) {
+                setIsFavorite(favoriteResponse.data);  // This should now work
+            } else {
+                console.error('Favorite response is missing data');
+            }
+        } catch (error) {
+            console.error("Error checking favorite status:", error);
+        }
+    };
+    
 
     const fetchProductDetail = async () => {
         const accountId = Cookies.get('accountId');
@@ -115,13 +115,10 @@ function ShopDetail() {
             console.log("Fetched Product Data:", productData);
 
             setProduct(productData);
+            setTotalPrice(productData.importPrice);
             const countRSN = await fetchFavoriteCount(productId);
             setFavoriteCount(countRSN);
-            const favoriteResponse = await axios.get(`http://localhost:8080/api/favorites/check?accountId=${accountId}`, {
-                params: { productId },
-                withCredentials: true
-            });
-            setIsFavorite(favoriteResponse.data);
+            checkFavoriteStatus(productId);
         } catch (error) {
             console.error("Error fetching product details:", error);
         }
@@ -131,12 +128,24 @@ function ShopDetail() {
         fetchProductDetail();
     }, [productId]);
 
-    useEffect(() => {
-        if (product) {
-            setTotalPrice(product.importPrice * quantity);
+    const fetchPrice = async (productId, colorId, sizeId) => {
+        try {
+            const response = await axios.get(`http://localhost:8080/api/product-detail/price`, {
+                params: { productId, colorId, sizeId }
+            });
+            setTotalPrice(response.data * quantity); // cập nhật giá với số lượng
+        } catch (error) {
+            console.error('Error fetching price:', error);
+            toast.error('Đã xảy ra lỗi khi lấy giá sản phẩm. Vui lòng thử lại sau.');
         }
-    }, [quantity, product]);
+    };
 
+    // Gọi API để cập nhật giá mỗi khi chọn color hoặc size
+    useEffect(() => {
+        if (selectedColor && selectedSize) {
+            fetchPrice(productId, selectedColor, selectedSize);
+        }
+    }, [selectedColor, selectedSize, quantity]);
 
     const handleAddFavorite = async () => {
         const accountId = Cookies.get('accountId');
@@ -146,9 +155,7 @@ function ShopDetail() {
         }
         if (!product) return;
         try {
-            await axios.post(`http://localhost:8080/api/favorites?accountId=${accountId}`, {
-                productId: product.id
-            }, { withCredentials: true });
+            await cartService.addToFavorites(product.id);
             setIsFavorite(true);
             const count = await fetchFavoriteCount(product.id);
             setFavoriteCount(count);
@@ -166,54 +173,29 @@ function ShopDetail() {
         if (!product) return;
         try {
             const productId = product.id;
-            const response = await axios.delete(`http://localhost:8080/api/favorites/${productId}?accountId=${accountId}`, {
-
-                withCredentials: true
-            });
-            if (response.status === 204) {
-                setIsFavorite(false);
-                // Fetch the updated favorite count
-                const count = await fetchFavoriteCount(productId);
-                setFavoriteCount(count);
-            } else {
-                console.error('Failed to remove from favorites');
-            }
+            await cartService.removeFromFavorites(productId);
+            setIsFavorite(false);
+            const count = await fetchFavoriteCount(productId);
+            setFavoriteCount(count);
         } catch (error) {
             console.error('Error removing from favorites:', error.response?.data || error.message);
         }
     };
 
     const handleByNow = async () => {
-
-        const accountId = Cookies.get('accountId');
-        if (!accountId) {
-            navigate(`/authentication/sign-in`);
-            return;
-        }
-
         if (!product || !selectedColor || !selectedSize) {
             toast.error('Vui lòng chọn màu sắc và kích thước.');
             return;
         }
 
         try {
-            const response = await cartService.addToCart({
-                accountId,
+        await cartService.addToCart({         
                 colorId: selectedColor,
                 sizeId: selectedSize,
                 quantity,
                 productId,
-                price: product.importPrice,
             });
-
-            if (response.status === 201 || response.status === 200) {
-                fetchTotalQuantity();
-                toast.success('Sản phẩm đã được thêm vào giỏ hàng thành công!');
-                navigate('/Cart')
-                console.log('Cart updated:', response.data);
-            } else {
-                toast.error('Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại.');
-            }
+            navigate('/Cart')
         } catch (error) {
             console.error('Error adding to cart:', error);
             toast.error('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.');
@@ -264,7 +246,7 @@ function ShopDetail() {
                                 </div>
                                 <small className="pt-1">(99 Reviews)</small>
                             </div>
-                            <h3 className="font-weight-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>{product.importPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</h3>
+                            <h3 className="font-weight-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>{totalPrice}</h3>
                             <h3 className="font-medium-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>Số lượng: {product.importQuantity || "N/A"}</h3>
                             <div className="d-flex mb-3" id="size-input-list">
                                 <strong className="text-dark mr-3">Sizes:</strong>

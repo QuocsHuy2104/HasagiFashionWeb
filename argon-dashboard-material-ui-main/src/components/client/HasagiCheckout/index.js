@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
 import "components/client/assets/css/style.css";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCcVisa, faCcMastercard, faCcAmex } from '@fortawesome/free-brands-svg-icons';
 import ArgonButton from "components/ArgonButton";
 import AddressSelection from "components/client/HasagiBackup1";
 import axios from 'axios';
@@ -14,6 +12,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import Navbar from '../HasagiNavbar';
 import VoucherService from "../../../services/VoucherServices";
 import { Card, Container, Button } from "react-bootstrap";
+import CheckoutService from '../../../services/CheckoutServices';
 
 const Checkout = () => {
     const [selectedPayment, setSelectedPayment] = useState('');
@@ -99,7 +98,7 @@ const Checkout = () => {
     const fetchProvinces = async () => {
         try {
             const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/province', {
-                headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' }
+                headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' }
             });
             setProvinces(response.data.data);
         } catch (error) {
@@ -112,11 +111,13 @@ const Checkout = () => {
         try {
             const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee', {
                 headers: {
-                    'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f'
+                    'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d'
                 },
                 params: {
                     from_district_id: XuanKhanhDistrictID,
+                    from_ward_code:"550113",
                     to_district_id: address.districtCode,
+                    to_ward_code:address.wardCode,
                     weight: 1000,
                     length: 10,
                     width: 10,
@@ -144,7 +145,7 @@ const Checkout = () => {
     const fetchDistricts = async (provinceId) => {
         try {
             const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/district', {
-                headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' },
+                headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' },
                 params: { province_id: provinceId }
             });
             setDistricts(response.data.data);
@@ -156,7 +157,7 @@ const Checkout = () => {
     const fetchWards = async (districtId) => {
         try {
             const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/ward', {
-                headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' },
+                headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' },
                 params: { district_id: districtId }
             });
             setWards(response.data.data);
@@ -243,7 +244,6 @@ const Checkout = () => {
             return;
         }
 
-        // Define AddressDTO and CartDetailsDTO for request
         const addressDTO = {
             fullNameAddress: address.fullNameAddress,
             numberPhone: address.numberPhone,
@@ -259,35 +259,34 @@ const Checkout = () => {
             quantity: item.quantity,
             price: item.price,
         }));
+        const payStatusDirect = 'Chưa thanh toán'; 
+        const voucherId = selectedVoucher ? selectedVoucher.id : null; 
+        const checkoutDataDirect = {
+            addressDTO,
+            cartDetails: cartDetailsDTO,
+            payMethod: selectedPayment,
+            payStatus: payStatusDirect,
+            voucherId: voucherId, 
+            shippingFree: shipFee.total,
+            fullName: `${address.address}, ${getAddressNameById(address.wardCode, wards, 'ward')}, ${getAddressNameById(address.districtCode, districts, 'district')}, ${getAddressNameById(address.provinceID, provinces, 'province')}`,
+        };
+        const payStatusBank = 'Đã thanh toán'; 
+        const checkoutDataBank = {
+            addressDTO,
+            cartDetails: cartDetailsDTO,
+            payMethod: selectedPayment,
+            payStatus: payStatusBank,
+            voucherId: voucherId, 
+            shippingFree: shipFee.total,
+            fullName: `${address.address}, ${getAddressNameById(address.wardCode, wards, 'ward')}, ${getAddressNameById(address.districtCode, districts, 'district')}, ${getAddressNameById(address.provinceID, provinces, 'province')}`,
+        };
+      
 
-        const accountId = Cookies.get('accountId');
-        const voucherId = selectedVoucher ? selectedVoucher.id : null; // Optional voucher ID
-
-        setIsLoading(true); // Set loading state to true at the start
+        setIsLoading(true); 
         try {
             let response;
-
-            // Handle cash on delivery (Direct Check)
             if (selectedPayment === 'Direct Check') {
-                const payStatus = 'Chưa thanh toán'; // Status for cash on delivery
-                response = await axios.post(
-                    `http://localhost:3000/api/checkout/${addressId}?accountId=${accountId}`,
-                    {
-                        addressDTO,
-                        cartDetails: cartDetailsDTO,
-                        payMethod: selectedPayment,
-                        payStatus: payStatus,
-                        voucherId: voucherId,  // Include voucher if applicable
-                        shippingFree: shipFee.total,
-                        fullName: `${address.address},${getAddressNameById(address.wardCode, wards, 'ward')},${getAddressNameById(address.districtCode, districts, 'district')},${getAddressNameById(address.provinceID, provinces, 'province')}`
-                    },
-                    {
-                        withCredentials: true,
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    }
-                );
+           response=   await CheckoutService.postCheckout(addressId,checkoutDataDirect);
 
                 if (response.status === 200) {
                     await handleRemoveItems();
@@ -303,29 +302,8 @@ const Checkout = () => {
                     console.error('Failed to place order:', response.data);
                     toast.error("Có lỗi xảy ra khi đặt hàng.");
                 }
-
-                // Handle VNPAY payment (Bank Transfer)
             } else if (selectedPayment === 'Bank Transfer') {
-                const payStatus = 'Đã thanh toán';
-                response = await axios.post(
-                    `http://localhost:3000/api/checkout/${addressId}?accountId=${accountId}`,
-                    {
-                        addressDTO,
-                        cartDetails: cartDetailsDTO,
-                        payMethod: selectedPayment,
-                        payStatus: payStatus,
-                        voucherId: voucherId,  // Include voucher if applicable
-                        shippingFree: shipFee.total,
-                        fullName: `${address.address},${getAddressNameById(address.wardCode, wards, 'ward')},${getAddressNameById(address.districtCode, districts, 'district')},${getAddressNameById(address.provinceID, provinces, 'province')}`
-                    },
-                    {
-                        withCredentials: true,
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    }
-                );
-
+                response=   await CheckoutService.postCheckout(addressId,checkoutDataBank);
                 if (response.data.paymentUrl) {
                     localStorage.setItem('address1', JSON.stringify(addressDTO));
                     localStorage.setItem('orderDetails1', JSON.stringify(cartDetailsDTO));

@@ -7,6 +7,7 @@ import Cookies from "js-cookie";
 import "components/client/assets/css/phanloai1.css";
 import Select from "react-select";
 import AddressSelection from '../HasagiBackup1';
+import AddressService from '../../../services/AddressServices';
 
 const Backup = ({ show, onClose, onAddressUpdated }) => {
     const [fullName, setFullName] = useState('');
@@ -131,7 +132,7 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
                     "https://online-gateway.ghn.vn/shiip/public-api/master-data/province",
                     {
                         headers: {
-                            Token: "8d0588cd-65d9-11ef-b3c4-52669f455b4f",
+                            Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d",
                         },
                     }
                 );
@@ -156,7 +157,7 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
                 "https://online-gateway.ghn.vn/shiip/public-api/master-data/district",
                 {
                     headers: {
-                        Token: "8d0588cd-65d9-11ef-b3c4-52669f455b4f",
+                        Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d",
                     },
                     params: { province_id: provinceId },
                 }
@@ -179,7 +180,7 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
                 "https://online-gateway.ghn.vn/shiip/public-api/master-data/ward",
                 {
                     headers: {
-                        Token: "8d0588cd-65d9-11ef-b3c4-52669f455b4f",
+                        Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d",
                     },
                     params: { district_id: districtId },
                 }
@@ -215,7 +216,6 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
         const isValid = validateForm();
         if (!isValid) return;
 
-        const accountId = Cookies.get('accountId');
         const formData = {
             fullName,
             numberPhone,
@@ -226,10 +226,9 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
             address: address,
         };
         try {
-            await axios.post(`http://localhost:3000/api/addresses?accountId=${accountId}`, formData, {
-                withCredentials: true
-            });
+            await AddressService.createAddress(formData);
             onClose();
+            await AddressService.getAllAddress(); 
             onAddressUpdated();
             <AddressSelection show={showAddressSelection} onClose={() => setShowAddressSelection(false)} />
         } catch (error) {

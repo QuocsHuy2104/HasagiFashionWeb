@@ -1,21 +1,27 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import Cookies from "js-cookie";
+import cartService from "../../../services/ProductDetail";
 const useCartQuantity = () => {
     const [totalQuantity, setTotalQuantity] = useState(0);
 
     const fetchTotalQuantity = async () => {
-        const accountId = Cookies.get('accountId');
         try {
-           
-            const response = await axios.get(`http://localhost:3000/api/cart/totalQuantity?accountId=${accountId}`, { withCredentials: true });
+            const response = await cartService.getAllShopDetail();
             setTotalQuantity(response.data);
         } catch (error) {
+            console.error("Error fetching total quantity:", error.response?.data || error.message);
         }
     };
+    
 
     useEffect(() => {
         fetchTotalQuantity();
+        const intervalId = setInterval(() => {
+            fetchTotalQuantity();
+        }, 3000);
+        return () => {
+            clearInterval(intervalId);
+        };
     }, []);
 
     return { totalQuantity, fetchTotalQuantity };

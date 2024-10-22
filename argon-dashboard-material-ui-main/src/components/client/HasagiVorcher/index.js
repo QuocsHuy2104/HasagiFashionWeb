@@ -1,28 +1,19 @@
 import React, { useEffect, useState } from "react";
 import ArgonBox from "components/ArgonBox";
 import ArgonButton from "components/ArgonButton";
-import { Grid, CircularProgress, Snackbar, Typography } from "@mui/material";
+import { CircularProgress, Typography } from "@mui/material";
 import DiscountIcon from "@mui/icons-material/LocalOffer";
 import VoucherService from "../../../services/VoucherServices";
 import Cookies from "js-cookie";
 import PropTypes from "prop-types";
+import Slider from "react-slick";
+
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 const Voucher = ({ voucher }) => {
-    const [openSnackbar, setOpenSnackbar] = useState(false);
-
-    const copyToClipboard = () => {
-        navigator.clipboard.writeText(voucher.code)
-            .then(() => {
-                setOpenSnackbar(true);
-            })
-            .catch(err => {
-                console.error('Lỗi khi sao chép mã:', err);
-            });
-    };
-
-    const handleCloseSnackbar = () => {
-        setOpenSnackbar(false);
-    };
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -57,7 +48,6 @@ const Voucher = ({ voucher }) => {
                         flexShrink: 0,
                     }}
                 />
-
                 <ArgonBox sx={{ overflow: "hidden", textOverflow: "ellipsis" }}>
                     <ArgonBox
                         sx={{
@@ -74,7 +64,6 @@ const Voucher = ({ voucher }) => {
                     >
                         VOUCHER
                     </ArgonBox>
-
                     <ArgonBox
                         sx={{
                             fontWeight: "bold",
@@ -84,10 +73,9 @@ const Voucher = ({ voucher }) => {
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                         }}
-                    >
+>
                         Mã: {voucher.code}
                     </ArgonBox>
-
                     <ArgonBox
                         sx={{
                             fontSize: "12px",
@@ -114,7 +102,6 @@ const Voucher = ({ voucher }) => {
                     </ArgonBox>
                 </ArgonBox>
             </ArgonBox>
-
             <ArgonBox sx={{ textAlign: "right", flexShrink: 0 }}>
                 <ArgonBox
                     sx={{
@@ -126,7 +113,6 @@ const Voucher = ({ voucher }) => {
                 >
                     Giảm {voucher.discountPercentage}%
                 </ArgonBox>
-
                 <ArgonButton
                     sx={{
                         backgroundColor: "#FF4500",
@@ -143,17 +129,9 @@ const Voucher = ({ voucher }) => {
                             background: "linear-gradient(to right, #FF4500, #FF6347)",
                         },
                     }}
-                    onClick={copyToClipboard}
                 >
                     Sao chép mã
                 </ArgonButton>
-                <Snackbar
-                    open={openSnackbar}
-                    autoHideDuration={3000}
-                    onClose={handleCloseSnackbar}
-                    message={`Đã sao chép mã voucher: ${voucher.code}`}
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                />
             </ArgonBox>
         </ArgonBox>
     );
@@ -167,6 +145,53 @@ Voucher.propTypes = {
         endDate: PropTypes.string.isRequired,
     }).isRequired,
 };
+
+
+
+const CustomPrevArrow = ({ onClick }) => (
+    <ArrowBackIosIcon
+        onClick={onClick}
+        sx={{
+            position: "absolute",
+            top: "-20px",
+            right: "100px",
+            zIndex: 1,
+            cursor: "pointer",
+            fontSize: "28px",
+transition: "transform 0.2s ease-in-out",
+            "&:hover": {
+                transform: "scale(1.2)",
+            },
+        }}
+    />
+);
+
+CustomPrevArrow.propTypes = {
+    onClick: PropTypes.func.isRequired,
+};
+
+const CustomNextArrow = ({ onClick }) => (
+    <ArrowForwardIosIcon
+        onClick={onClick}
+        sx={{
+            position: "absolute",
+            top: "-20px",
+            right: "80px",
+            zIndex: 1,
+            cursor: "pointer",
+            fontSize: "28px",
+            transition: "transform 0.2s ease-in-out",
+            "&:hover": {
+                transform: "scale(1.2)",
+            },
+        }}
+    />
+);
+
+CustomNextArrow.propTypes = {
+    onClick: PropTypes.func.isRequired,
+};
+
 
 const VoucherList = () => {
     const [vouchers, setVouchers] = useState([]);
@@ -182,7 +207,6 @@ const VoucherList = () => {
                     VoucherService.getUsedVouchersByAccount(accountId),
                 ]);
 
-                // Filter out inactive vouchers
                 const activeVouchers = voucherResponse.data.filter(voucher => voucher.isActive);
 
                 setVouchers(activeVouchers);
@@ -190,7 +214,7 @@ const VoucherList = () => {
             } catch (error) {
                 console.error("Error fetching data:", error);
             } finally {
-                setLoading(false); // Ensure loading is set to false after data fetch
+                setLoading(false);
             }
         };
 
@@ -199,38 +223,71 @@ const VoucherList = () => {
         }
     }, [accountId]);
 
-    // Filter out used vouchers from active vouchers
     const availableVouchers = vouchers.filter(voucher =>
         !usedVouchers.some(usedVoucher => usedVoucher.id === voucher.id)
     );
+
+    const sliderSettings = {
+        infinite: false,
+        speed: 500,
+        slidesToShow: Math.min(4, availableVouchers.length),
+        slidesToScroll: 1,
+        nextArrow: <CustomNextArrow />,
+        prevArrow: <CustomPrevArrow />,
+        responsive: [
+            {
+                breakpoint: 1024,
+                settings: {
+                    slidesToShow: Math.min(3, availableVouchers.length),
+                },
+            },
+            {
+                breakpoint: 600,
+                settings: {
+                    slidesToShow: Math.min(2, availableVouchers.length),
+                },
+            },
+            {
+                breakpoint: 480,
+                settings: {
+                    slidesToShow: Math.min(1, availableVouchers.length),
+                },
+            },
+        ],
+    };
+
 
     if (loading) {
         return <CircularProgress />;
     }
 
+
+
     return (
         <>
-            <div
-                className="container-fluid pt-3">
+            <div className="container-fluid pt-3">
                 <Typography variant="h2" className="section-title position-relative text-uppercase mx-xl-5 mb-3">
-                    <span className="bg-secondary pr-3">VORCHER</span>
+<span className="bg-secondary pr-3">VOUCHER</span>
                 </Typography>
             </div>
-            <Grid container spacing={0} className="px-xl-5 pb-3">
-                {availableVouchers.length === 0 ? (
-                    <Grid item xs={12}>
+
+            <div style={{ position: "relative" }}>
+                <Slider {...sliderSettings} className="px-xl-5 pb-3">
+                    {availableVouchers.length === 0 ? (
                         <Typography variant="h6">Không có voucher nào.</Typography>
-                    </Grid>
-                ) : (
-                    availableVouchers.map(voucher => (
-                        <Grid item xs={12} sm={6} md={3} key={voucher.id}>
-                            <Voucher voucher={voucher} />
-                        </Grid>
-                    ))
-                )}
-            </Grid>
+                    ) : (
+                        availableVouchers.map(voucher => (
+                            <div key={voucher.id}>
+                                <Voucher voucher={voucher} />
+                            </div>
+                        ))
+                    )}
+                </Slider>
+            </div>
         </>
     );
 };
+
+
 
 export default VoucherList;

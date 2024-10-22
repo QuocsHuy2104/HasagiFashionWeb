@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { jwtDecode } from 'jwt-decode';
-import useCartQuantity from "../HasagiQuantity/useCartQuantity";
-import PropTypes from 'prop-types';
+import useCartQuantity from "../HasagiQuantity";
 import 'layouts/assets/css/style.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'components/client/assets/js/script';
@@ -278,9 +277,8 @@ const Header = ({ onSearch }) => {
     );
 };
 
-// Add prop types validation
 Header.propTypes = {
-    onSearch: PropTypes.func.isRequired,
+    onSearch: () => {}
 };
 
 export default Header;
