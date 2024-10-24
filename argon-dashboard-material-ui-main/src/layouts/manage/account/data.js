@@ -55,7 +55,7 @@ Function.propTypes = {
 };
 
 
-const AuthorsTableData = ({ onEditClick , searchTerm = "", selectedRoles = [] }) => {
+const AuthorsTableData = ({ onEditClick, searchTerm = "", selectedRoles = [] }) => {
   const [accounts, setAccounts] = useState([]);
 
   useEffect(() => {
@@ -75,6 +75,7 @@ const AuthorsTableData = ({ onEditClick , searchTerm = "", selectedRoles = [] })
       (account.fullName && account.fullName.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (account.email && account.email.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
 
   const handleEditClick = (account) => {
     onEditClick(account);
@@ -192,7 +193,7 @@ const AuthorsTableData = ({ onEditClick , searchTerm = "", selectedRoles = [] })
 
 
 AuthorsTableData.propTypes = {
-  onEditClick : PropTypes.func.isRequired,
+  onEditClick: PropTypes.func.isRequired,
   searchTerm: PropTypes.string,
   selectedRoles: PropTypes.array,
 };

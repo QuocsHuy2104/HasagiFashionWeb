@@ -8,23 +8,36 @@ const ShopDetailService = {
 
     getCategoryDetail: (categoryId) => apiClient.get(`/category/${categoryId}`),
 
-    getProductDetail: (productId) => apiClient.get(`/admin/product/${productId}`),
+    getProductDetail: (productId) => apiClient.get(`/product/${productId}`),
 
-    checkFavorite: (productId) => apiClient.get("/favorites/check", {
-        params: { productId },
-        withCredentials: true
+    checkFavorite: (productId) => {
+        return apiClient.get("/favorites/check", {
+            params: { productId },
+            withCredentials: true
+        });
+    },
+
+    getAllFavorites: () => apiClient.get('/favorites/count/account', {
+        withCredentials: true 
     }),
 
-    addToCart: ({ colorId, sizeId, quantity, productId, price }) => {
-        apiClient.post('/cart/add', {
-            colorId,
-            sizeId,
-            quantity,
-            productId,
-            price
-        }, { withCredentials: true })
 
-    },
+    getGotoFavorites: () => apiClient.get('/favorites/user', {
+        withCredentials: true 
+    }),
+
+    
+    
+        addToCart: ({ colorId, sizeId, quantity, productId, price }) => {
+        return  apiClient.post('/cart/add', {
+                colorId,
+                sizeId,
+                quantity,
+                productId,
+                price
+            }, { withCredentials: true })
+
+        },
 
     getFavoritesCount: (productId) =>
         apiClient.get('/favorites/count', {

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
-import aboutImage from "components/client/assets/images/single-item.jpg";
-import { AiOutlinePlus, AiOutlineMinus } from "react-icons/ai";
 import { FaTimes } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
@@ -11,7 +9,10 @@ import ColorSelectionModal from "../HasagiPhanLoai";
 import Cookies from "js-cookie";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import { Link } from "react-router-dom";
+import Navbar from "../HasagiNavbar";
+import aboutImage from "layouts/assets/img/shopping.png";
+import CartService from"../../../services/CartService";
 const Cart = () => {
     const [cartItems, setCartItems] = useState([]);
     const [address, setAddress] = useState(null);
@@ -31,13 +32,13 @@ const Cart = () => {
         const accountId = Cookies.get('accountId');
 
         if (!accountId) {
-            toast.error("Account ID is required.");
+            navigate(`/authentication/sign-in`);
             return;
         }
 
         try {
             const [cartResponse, addressResponse] = await Promise.all([
-                axios.get(`http://localhost:3000/api/cart/account?accountId=${accountId}`),
+              CartService.getCart(),
                 axios.get(`http://localhost:3000/api/addresses/exists?accountId=${accountId}`, { withCredentials: true })
             ]);
             setCartItems(cartResponse.data);
@@ -83,23 +84,15 @@ const Cart = () => {
 
     const handleRemoveItem = async (itemId) => {
         const accountId = Cookies.get('accountId');
-        console.log("Account ID:", accountId);  // Kiểm tra accountId
-    
-        if (!accountId) {
-            toast.error("User not logged in.");
-            return;
-        }
-    
         try {
             await axios.delete(`http://localhost:3000/api/cart/remove/${itemId}?accountId=${accountId}`);
             setCartItems(cartItems.filter(item => item.cartdetailid !== itemId));
-            toast.success("Item removed successfully.");
+            toast.success("Xóa sản phẩm thành công.");
         } catch (error) {
             console.error("Error removing item:", error);
             toast.error("Error removing item.");
         }
     };
-    
 
     const handleSelectAllChange = () => {
         const newSelectAll = !selectAll;
@@ -108,9 +101,13 @@ const Cart = () => {
     };
 
     const handleCheckboxChange = (itemId) => {
-        setCartItems(cartItems.map(item =>
+        const updatedCartItems = cartItems.map(item =>
             item.cartdetailid === itemId ? { ...item, selected: !item.selected } : item
-        ));
+        );
+        setCartItems(updatedCartItems);
+
+        const allSelected = updatedCartItems.every(item => item.selected);
+        setSelectAll(allSelected);
     };
 
     const handleCheckout = () => {
@@ -195,6 +192,18 @@ const Cart = () => {
         return cartItems.filter(item => item.selected).length;
     };
 
+    const goBack = () => {
+        const productId = Cookies.get('productId');
+
+        if (!productId) {
+            navigate('/feature-section');
+        } else {
+            navigate(`/ShopDetail?id=${productId}`);
+        }
+    };
+
+
+
     return (
         <>
             <ToastContainer />
@@ -206,20 +215,36 @@ const Cart = () => {
                 </div>
             )}
             <HasagiNav />
-            <div className="container-fluid page-header py-5">
-                <h1 className="text-center text-white display-6">Cart</h1>
-                <ol className="breadcrumb justify-content-center mb-0">
-                    <li className="breadcrumb-item"><a href="/">Home</a></li>
-                    <li className="breadcrumb-item"><a href="/ShopDetail">ShopDetail</a></li>
-                    <li className="breadcrumb-item active text-white">Cart</li>
-                </ol>
-            </div>
-            <div className="container-fluid py-5">
+            <Navbar />
+            <div className="container-fluid py-2">
                 <div className="row px-xl-5">
                     <div className="col-lg-12 mb-5" id="tableAddCart">
-                        <h5 className="section-title text-uppercase mb-4" style={{ fontWeight: "bold", fontSize: "24px", color: "#343a40" }}>Giỏ Hàng</h5>
+                        <div className="header">
+                            <button className="back-button" onClick={() => goBack()}>
+                                <i className="ni ni-bold-left" />
+                            </button>
+                            <h5 className="mb-1" style={{ fontWeight: "bold", fontSize: "24px", color: "#343a40", marginLeft: '-15px' }}>Giỏ Hàng</h5>
+                        </div>
                         {cartItems.length === 0 ? (
-                            <p className="text-center" style={{ fontSize: "18px", color: "#6c757d" }}>Giỏ hàng của bạn đang trống.</p>
+                            <div className="text-center py-3">
+                                <img src={aboutImage} style={{height: "60px", width: "60px"}}/>
+                                <p style={{ fontSize: "18px", color: "#6c757d" }}>Giỏ hàng của bạn đang trống.</p>
+                                <button
+                                    style={{
+                                        padding: "10px 20px",
+                                        fontSize: "16px",
+                                        backgroundColor: "#f29913",
+                                        color: "#fff",
+                                        border: "none",
+                                        borderRadius: "5px",
+                                        cursor: "pointer"
+                                    }}
+                                    onClick={() => window.location.href = '/Shop'}
+                                >
+                                    MUA NGAY
+                                </button>
+                            </div>
+
                         ) : (
                             <table className="table table-hover table-bordered text-center mb-0">
                                 <thead className="bg-primary text-white">
@@ -230,11 +255,12 @@ const Cart = () => {
                                                 checked={selectAll}
                                                 onChange={handleSelectAllChange}
                                                 aria-label="Select All"
+                                                style={{ transform: "scale(1.5)" }}
                                             />
                                         </th>
                                         <th scope="col" style={{ width: "20%", textAlign: "left", padding: "10px", fontWeight: "bold" }}>Sản Phẩm</th>
-                                        <th scope="col" style={{ width: "25%", padding: "10px", fontWeight: "bold" }}>Phân loại</th>
-                                        <th scope="col" style={{ width: "10%", textAlign: "right", padding: "10px", fontWeight: "bold" }}>Đơn Giá</th>
+                                        <th scope="col" style={{ width: "25%", padding: "10px", fontWeight: "bold" }}></th>
+                                        <th scope="col" style={{ width: "10%", textAlign: "center", padding: "10px", fontWeight: "bold" }}>Đơn Giá</th>
                                         <th scope="col" style={{ width: "15%", textAlign: "center", padding: "10px", fontWeight: "bold" }}>Số Lượng</th>
                                         <th scope="col" style={{ width: "10%", textAlign: "center", padding: "10px", fontWeight: "bold" }}>Tổng</th>
                                         <th scope="col" style={{ width: "10%", textAlign: "center", padding: "10px", fontWeight: "bold" }}>Thao tác</th>
@@ -253,14 +279,24 @@ const Cart = () => {
                                                 />
                                             </td>
                                             <td className="align-middle" style={{ textAlign: "left", paddingLeft: "20px" }}>
-                                                <img src={aboutImage} style={{ width: 60 }} alt={item.name} /> {item.name}
+                                                <Link to={`/ShopDetail?id=${item.productId}`}>
+                                                    <img src={item.image} style={{ width: 60 }} alt={item.name} /> {item.name}
+                                                </Link>
                                             </td>
                                             <td className="align-middle">
-                                                <button onClick={() => toggleModal(item.cartdetailid)} className="btn btn-outline-primary">
+                                                <button
+                                                    onClick={() => toggleModal(item.cartdetailid)}
+                                                    style={{
+                                                        backgroundColor: 'transparent',
+                                                        border: 'none',
+                                                        color: 'black',
+                                                        cursor: 'pointer'
+                                                    }}>
                                                     Phân Loại Hàng: <br />
                                                     {item.color || "Chưa chọn màu"} , {item.size || "Chưa chọn kích thước"}
                                                 </button>
                                             </td>
+
                                             <td className="align-middle">{item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
                                             <td className="align-middle">
                                                 <div
@@ -269,12 +305,12 @@ const Cart = () => {
                                                         width: "140px",
                                                         display: "flex",
                                                         alignItems: "center",
-                                                        justifyContent: "space-between",  // Ensure even spacing
+                                                        justifyContent: "space-between", 
                                                     }}
                                                 >
                                                     <div className="input-group-btn">
                                                         <button
-                                                            className="btn btn-sm btn-outline-secondary"
+                                                            className="btn btn-primary btn-minus"
                                                             onClick={() => handleQuantityChange(item.cartdetailid, -1)}
                                                             aria-label={`Decrease quantity of ${item.name}`}
                                                             style={{
@@ -283,10 +319,10 @@ const Cart = () => {
                                                                 display: "flex",
                                                                 alignItems: "center",
                                                                 justifyContent: "center",
-                                                                margin: "0 5px",
+                                                                marginLeft: "5px",
                                                             }}
                                                         >
-                                                            <AiOutlineMinus />
+                                                            <i className="fa fa-minus"></i>
                                                         </button>
                                                     </div>
 
@@ -304,7 +340,7 @@ const Cart = () => {
 
                                                     <div className="input-group-btn">
                                                         <button
-                                                            className="btn btn-sm btn-outline-secondary"
+                                                            className="btn btn-primary btn-plus"
                                                             onClick={() => handleQuantityChange(item.cartdetailid, 1)}
                                                             aria-label={`Increase quantity of ${item.name}`}
                                                             style={{
@@ -313,10 +349,10 @@ const Cart = () => {
                                                                 display: "flex",
                                                                 alignItems: "center",
                                                                 justifyContent: "center",
-                                                                margin: "0 5px",
+                                                                marginRight: "4px",
                                                             }}
                                                         >
-                                                            <AiOutlinePlus />
+                                                            <i className="fa fa-plus"></i>
                                                         </button>
                                                     </div>
                                                 </div>
@@ -325,7 +361,7 @@ const Cart = () => {
                                             <td className="align-middle">{(item.price * item.quantity).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
                                             <td className="align-middle">
                                                 <button
-                                                    onClick={() => handleRemoveItem(item.cartDetailId)}
+                                                    onClick={() => handleRemoveItem(item.cartdetailid)}
                                                     className="btn btn-danger"
                                                     style={{ padding: "0.5rem 1rem" }}
                                                 >
@@ -338,8 +374,9 @@ const Cart = () => {
                             </table>
 
                         )}
-                        <div className="d-flex align-items-center justify-content-between w-100">
-                            <div className="d-flex align-items-center">
+                        {cartItems.length > 0 && (
+                        <div className="d-flex align-items-center justify-content-between w-100 py-2">
+                            <div className="d-flex align-items-center" style={{ marginLeft: '30px' }}>
                                 <input
                                     type="checkbox"
                                     checked={selectAll}
@@ -356,7 +393,7 @@ const Cart = () => {
                                         backgroundColor: "transparent",
                                         border: "none",
                                         color: "black",
-                                        fontSize: "16px",
+                                        fontSize: "20px",
                                         fontWeight: "normal",
                                         marginLeft: "10px",
                                     }}
@@ -365,18 +402,18 @@ const Cart = () => {
                                 </button>
                             </div>
                             <div className="d-flex align-items-center">
-                                <h5 className="font-weight-bold mb-0">
+                                <h5 className="font-weight-medium mb-0">
                                     Tổng thanh toán ({countSelectedItems()} sản phẩm): {total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                                 </h5>
                                 <button
                                     onClick={handleCheckout}
-                                    className="btn btn-primary rounded-pill d-inline-flex flex-shrink-0 py-2 px-4 ms-3"
+                                    className="btn btn-primary rounded-pill d-inline-flex flex-shrink-0 py-1.5 px-4 ms-3"
                                 >
                                     Mua ngay
                                 </button>
                             </div>
                         </div>
-
+)}
                     </div>
                 </div>
             </div>

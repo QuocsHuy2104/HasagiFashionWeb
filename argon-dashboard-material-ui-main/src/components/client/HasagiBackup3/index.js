@@ -1,33 +1,138 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import "components/client/assets/css/phanloai1.css";
 import ArgonInput from "components/ArgonInput";
 import ArgonButton from "components/ArgonButton";
-import axios from 'axios';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Box from '@mui/material/Box';
-import AddressService from '../../../services/AddressService';
+import axios from "axios";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import Box from "@mui/material/Box";
+import Cookies from "js-cookie";
+import Select from "react-select";
+import AddressService from '../../../services/AddressServices';
+
 const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
-    const [fullNameAddress, setFullNameAddress] = useState('');
-    const [numberPhone, setNumBerPhone] = useState('');
-    const [address, setAddress] = useState('');
+    const [fullName, setFullName] = useState("");
+    const [numberPhone, setNumBerPhone] = useState("");
+    const [address, setAddress] = useState("");
     const [selectedProvince, setSelectedProvince] = useState(null);
     const [selectedDistrict, setSelectedDistrict] = useState(null);
-    const [selectedWard, setSelectedWard] = useState(null);    
+    const [selectedWard, setSelectedWard] = useState(null);
     const [status, setStatus] = useState(false);
     const [showTabs, setShowTabs] = useState(false);
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
     const wrapperRef = useRef(null);
+    const [errors, setErrors] = useState({});
+    const [isSubmitted, setIsSubmitted] = useState(false); // New state variable
+
+    const validateForm = () => {
+        const newErrors = {};
+        if (!fullName.trim()) {
+            newErrors.fullName = "Họ và tên không được để trống.";
+        } else if (fullName.trim().split(" ").length < 2) {
+            newErrors.fullName = "Vui lòng điền Họ và Tên.";
+        }
+        if (!numberPhone.trim()) {
+            newErrors.numberPhone = "Số điện thoại không được để trống.";
+        } else if (!/^0\d{9}$/.test(numberPhone.trim())) {
+            newErrors.numberPhone = "Số điện thoại không hợp lệ.";
+        }
+        if (!address.trim()) {
+            newErrors.address = "Địa chỉ cụ thể không được để trống.";
+        }
+        if (!selectedProvince) {
+            newErrors.selectedProvince = "Vui lòng chọn tỉnh/thành phố.";
+        }
+        if (!selectedDistrict) {
+            newErrors.selectedDistrict = "Vui lòng chọn quận/huyện.";
+        }
+        if (!selectedWard) {
+            newErrors.selectedWard = "Vui lòng chọn phường/xã.";
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0; // Return true if no errors
+    };
+
+    // In your return statement, add error messages for the province, district, and ward selections
+    {
+        isSubmitted && errors.selectedProvince && (
+            <div className="text-danger">{errors.selectedProvince}</div>
+        )
+    }
+    {
+        isSubmitted && errors.selectedDistrict && (
+            <div className="text-danger">{errors.selectedDistrict}</div>
+        )
+    }
+    {
+        isSubmitted && errors.selectedWard && (
+            <div className="text-danger">{errors.selectedWard}</div>
+        )
+    }
+
+
+    const handleInputClick = (field) => {
+        setErrors((prevErrors) => ({
+            ...prevErrors,
+            [field]: "", // Clear error when input is clicked
+        }));
+    };
+
+    const handleFullNameChange = (e) => {
+        const value = e.target.value;
+        setFullName(value);
+
+        if (isSubmitted) {
+            setErrors((prevErrors) => ({ ...prevErrors, fullName: "" }));
+        }
+    };
+
+    const handleFullNameBlur = () => {
+        if (isSubmitted) {
+            validateForm(); // Validate only when the field loses focus
+        }
+    };
+
+    const handleNumberPhoneChange = (e) => {
+        const value = e.target.value;
+        setNumBerPhone(value);
+
+        // Clear the specific error on change
+        if (isSubmitted) {
+            setErrors((prevErrors) => ({ ...prevErrors, numberPhone: "" }));
+        }
+    };
+
+    const handleNumberPhoneBlur = () => {
+        if (isSubmitted) {
+            validateForm(); // Validate only when the field loses focus
+        }
+    };
+
+
+    const handleAddressChange = (e) => {
+        const value = e.target.value;
+        setAddress(value);
+        if (isSubmitted) {
+            setErrors((prevErrors) => ({ ...prevErrors, address: "" }));
+        }
+    };
+
+    const handleAddressBlur = () => {
+        if (isSubmitted) {
+            validateForm(); // Validate only when the field loses focus
+        }
+    };
 
     const fetchAddressById = async () => {
         try {
             if (addressId) {
                 const response = await axios.get(`http://localhost:3000/api/addresses/${addressId}`);
                 const addressData = response.data;
-                setFullNameAddress(addressData.fullNameAddress);
+                setFullName(addressData.fullName);
                 setNumBerPhone(addressData.numberPhone);
                 setAddress(addressData.address);
                 setSelectedProvince(addressData.provinceID);
@@ -60,9 +165,12 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
 
     const fetchProvinces = async () => {
         try {
-            const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/province', {
-                headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' }
-            });
+            const response = await axios.get(
+                "https://online-gateway.ghn.vn/shiip/public-api/master-data/province",
+                {
+                    headers: { Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d" },
+                }
+            );
             setProvinces(response.data.data);
         } catch (error) {
             console.error("Error fetching provinces:", error);
@@ -71,10 +179,13 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
 
     const fetchDistricts = async (provinceId) => {
         try {
-            const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/district', {
-                headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' },
-                params: { province_id: provinceId }
-            });
+            const response = await axios.get(
+                "https://online-gateway.ghn.vn/shiip/public-api/master-data/district",
+                {
+                    headers: { Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d" },
+                    params: { province_id: provinceId },
+                }
+            );
             setDistricts(response.data.data);
         } catch (error) {
             console.error("Error fetching districts:", error);
@@ -83,10 +194,13 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
 
     const fetchWards = async (districtId) => {
         try {
-            const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/ward', {
-                headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' },
-                params: { district_id: districtId }
-            });
+            const response = await axios.get(
+                "https://online-gateway.ghn.vn/shiip/public-api/master-data/ward",
+                {
+                    headers: { Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d" },
+                    params: { district_id: districtId },
+                }
+            );
             setWards(response.data.data);
         } catch (error) {
             console.error("Error fetching wards:", error);
@@ -109,9 +223,14 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
         }
     }, [selectedDistrict]);
 
-    const handleComplete = async () => { 
+    const handleComplete = async () => {
+        setIsSubmitted(true); // Set submitted state to true
+
+        const isValid = validateForm();
+        if (!isValid) return;
+
         const formData = {
-            fullNameAddress,
+            fullName,
             numberPhone,
             provinceID: selectedProvince,
             districtCode: selectedDistrict,
@@ -120,7 +239,7 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
             address,
         };
         try {
-            await AddressService.updateAddress(addressId, formData); 
+            await AddressService.updateAddress(addressId, formData);
             onClose();
             onAddressUpdated();
         } catch (error) {
@@ -132,40 +251,55 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
         setStatus(event.target.checked);
     };
 
-    const handleInputClick = () => {
-        setShowTabs(true);
-    };
-
-    const handleProvinceChange = (provinceName, provinceId) => {
+    const handleProvinceChange = (provinceId) => {
         setSelectedProvince(provinceId);
-        setSelectedDistrict(null);
-        setSelectedWard(null);
+        setSelectedDistrict("");
+        setSelectedWard("");
         fetchDistricts(provinceId);
+        setErrors((prevErrors) => ({ ...prevErrors, selectedProvince: "" }));
     };
 
-    const handleDistrictChange = (name, id) => {
+    const handleDistrictChange = (id) => {
         setSelectedDistrict(id);
-        setSelectedWard(null);
+        setSelectedWard("");
         fetchWards(id);
+        setErrors((prevErrors) => ({ ...prevErrors, selectedDistrict: "" }));
     };
 
-    const handleWardChange = (name, code) => {
-        setSelectedWard(code);
+    //chọn tỉnh thành phố
+    const provinceOptions = provinces.map((province) => ({
+        value: province.ProvinceID,
+        label: province.ProvinceName,
+    }));
+
+    //chọn quận/huyện
+    const districtOptions = districts.map((district) => ({
+        value: district.DistrictID,
+        label: district.DistrictName,
+    }));
+
+    //phường xã
+    const wardOptions = wards.map((ward) => ({
+        value: ward.WardCode,
+        label: ward.WardName,
+    }));
+
+    const resetForm = () => {
+        setFullName("");
+        setNumBerPhone("");
+        setAddress("");
+        setSelectedProvince("");
+        setSelectedDistrict("");
+        setSelectedWard("");
+        setErrors({});
+        setIsSubmitted(false);
+        setDistricts([]);
+        setWards([]);
     };
 
-    const getAddressNameById = (id, list, type) => {
-        const addressItem = list.find(item => {
-            if (type === 'province' && item.ProvinceID === Number(id)) return true;
-            if (type === 'district' && item.DistrictID === Number(id)) return true;
-            if (type === 'ward' && item.WardCode === String(id)) return true;
-            return false;
-        });
-
-        if (addressItem) {
-            if (type === 'province') return addressItem.ProvinceName;
-            if (type === 'district') return addressItem.DistrictName;
-            if (type === 'ward') return addressItem.WardName;
-        }
+    const handleModalClose = () => {
+        resetForm(); // Reset form data
+        onClose(); // Close the modal
     };
 
     if (!show) return null;
@@ -181,69 +315,135 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
                     <div className="modal-body p-4" ref={wrapperRef}>
                         <div className="row">
                             <div className="col-md-6 form-group">
-                                <label>Họ và tên</label>
                                 <ArgonInput
-                                    className="form-control"
                                     type="text"
-                                    placeholder="Nguyễn Văn A"
-                                    value={fullNameAddress}
-                                    onChange={(e) => setFullNameAddress(e.target.value)}
+                                    name="fullName"
+                                    placeholder="Họ và tên"
+                                    value={fullName}
+                                    onChange={handleFullNameChange}
+                                    onBlur={handleFullNameBlur} // Validate on blur
+                                    onClick={() => handleInputClick("fullName")}
+                                    onFocus={() => handleInputClick("fullName")} // Xóa lỗi khi focus vào input
+                                    className={errors.fullName ? "border-danger" : ""}
+                                    style={{
+                                        color: errors.fullName ? 'red' : 'black',
+                                        fontWeight: errors.fullName ? 'bold' : 'normal',
+                                    }}
                                 />
-                            </div>
-                            <div className="col-md-6 form-group">
-                                <label>Số điện thoại</label>
-                                <ArgonInput
-                                    className="form-control"
-                                    type="text"
-                                    placeholder="0123 456 789"
-                                    value={numberPhone}
-                                    onChange={(e) => setNumBerPhone(e.target.value)}
-                                />
-                            </div>
-                            <div className="col-md-12 form-group">
-                                <label>Địa chỉ chi tiết</label>
-                                <ArgonInput
-                                    className="form-control"
-                                    type="text"
-                                    placeholder="0123 456 789"
-                                    value={address}
-                                    onChange={(e) => setAddress(e.target.value)}
-                                />
-                            </div>
-                            <div className="col-md-12 form-group">
-                                <label>Tỉnh/Thành phố, Quận/Huyện, Phường/Xã</label>
-                                <div className="custom-input-container">
-                                    <ArgonInput
-                                        className="form-control custom-input"
-                                        placeholder="Chọn địa chỉ"
-                                        value={[getAddressNameById(selectedProvince, provinces, 'province'),
-                                            getAddressNameById(selectedDistrict, districts, 'district'),
-                                            getAddressNameById(selectedWard, wards, 'ward')]
-                                            .filter(Boolean)
-                                            .join(", ")}
-                                        onClick={handleInputClick}
-                                    />
-                                </div>
-                                <input
-                                    type="checkbox"
-                                    checked={status}
-                                    onChange={handleCheckboxChange}
-                                    style={{ transform: "scale(1.5)", marginBottom: "0" }}
-                                />
-                                <label style={{ marginLeft: "10px", marginBottom: "0" }}>Đặt làm địa chỉ mặc định</label>        
-                                {showTabs && (
-                                    <BasicTabs
-                                        onSelectProvince={handleProvinceChange}
-                                        onSelectDistrict={handleDistrictChange}
-                                        onSelectWard={handleWardChange}
-                                        setShowTabs={setShowTabs}
-                                    />
+                                {isSubmitted && errors.fullName && (
+                                    <div className="text-danger">{errors.fullName}</div>
                                 )}
                             </div>
+                            <div className="col-md-6 form-group">
+                                <ArgonInput
+                                    type="text"
+                                    name="numberPhone"
+                                    placeholder="Số điện thoại"
+                                    value={numberPhone}
+                                    onChange={handleNumberPhoneChange}
+                                    onBlur={handleNumberPhoneBlur} // Validate on blur
+                                    onClick={() => handleInputClick("numberPhone")}
+                                    onFocus={() => handleInputClick("numberPhone")}
+                                    className={errors.numberPhone ? "border-danger" : ""}
+                                    style={{
+                                        color: errors.numberPhone ? 'red' : 'black',
+                                        fontWeight: errors.numberPhone ? 'bold' : 'normal',
+                                    }}
+                                />
+                                {isSubmitted && errors.numberPhone && (
+                                    <div className="text-danger">{errors.numberPhone}</div>
+                                )}
+                            </div>
+                            <div className="col-md-12 form-group">
+                                <ArgonInput
+                                    type="text"
+                                    name="address"
+                                    placeholder="Địa chỉ cụ thể"
+                                    value={address}
+                                    onChange={handleAddressChange}
+                                    onBlur={handleAddressBlur} // Validate on blur
+                                    onClick={() => handleInputClick("address")}
+                                    onFocus={() => handleInputClick("address")} // Xóa lỗi khi focus vào input
+                                    className={errors.address ? "border-danger" : ""}
+                                    style={{
+                                        color: errors.address ? 'red' : 'black',
+                                        fontWeight: errors.address ? 'bold' : 'normal',
+                                    }}
+                                />
+                                {isSubmitted && errors.address && (
+                                    <div className="text-danger">{errors.address}</div>
+                                )}
+                            </div>
+                            <div className="col-md-12 form-group">
+                                <Select
+                                    placeholder="Chọn tỉnh/thành phố"
+                                    className="province-select"
+                                    value={provinceOptions.find((option) => option.value == selectedProvince)}
+                                    onChange={(selectedOption) => {
+                                        handleProvinceChange(selectedOption.value);
+                                        setErrors((prevErrors) => ({ ...prevErrors, selectedProvince: "" }));
+                                    }}
+                                    options={provinceOptions}
+                                    isSearchable
+                                />
+                                {isSubmitted && errors.selectedProvince && (
+                                    <div className="text-danger">{errors.selectedProvince}</div>
+                                )}
+                            </div>
+                            <div className="col-md-12 form-group">
+                                <Select
+                                    className="district-select"
+                                    value={districtOptions.find((option) => option.value == selectedDistrict)}
+                                    onChange={(selectedOption) => {
+                                        handleDistrictChange(selectedOption.value);
+                                        setErrors((prevErrors) => ({ ...prevErrors, selectedDistrict: "" }));
+                                    }}
+                                    options={districtOptions}
+                                    placeholder="Chọn quận/huyện"
+                                    isDisabled={!selectedProvince}
+                                    isSearchable
+                                />
+                                {isSubmitted && errors.selectedDistrict && (
+                                    <div className="text-danger">{errors.selectedDistrict}</div>
+                                )}
+                            </div>
+                            <div className="col-md-12 form-group">
+                                <Select
+                                    className="ward-select"
+                                    value={wardOptions.find((option) => option.value === selectedWard)}
+                                    onChange={(selectedOption) => {
+                                        setSelectedWard(selectedOption.value);
+                                        setErrors((prevErrors) => ({ ...prevErrors, selectedWard: "" }));
+                                    }}
+                                    options={wardOptions}
+                                    placeholder="Chọn phường/xã"
+                                    isDisabled={!selectedDistrict}
+                                    isSearchable
+                                />
+                                {isSubmitted && errors.selectedWard && (
+                                    <div className="text-danger">{errors.selectedWard}</div>
+                                )}
+                            </div>
+                            {!status && (
+                                <label style={{ marginLeft: "10px", marginBottom: "0" }}>
+                                    Đặt làm địa chỉ mặc định
+                                    <input
+                                        type="checkbox"
+                                        checked={status}
+                                        onChange={handleCheckboxChange}
+                                        style={{ transform: "scale(1.5)", marginBottom: "0", marginLeft: "10px" }}
+                                    />
+
+                                </label>
+                            )}
                         </div>
                         <div className="d-flex justify-content-between mt-4">
-                        <ArgonButton className="btn btn-light" onClick={onClose}>Trở Lại</ArgonButton>
-                        <ArgonButton className="btn btn-primary" onClick={handleComplete}>Hoàn thành</ArgonButton>
+                            <ArgonButton className="btn btn-light" onClick={handleModalClose}>
+                                Trở Lại
+                            </ArgonButton>
+                            <ArgonButton className="btn btn-primary" onClick={handleComplete}>
+                                Hoàn thành
+                            </ArgonButton>
                         </div>
                     </div>
                 </div>
@@ -257,189 +457,6 @@ Backup3.propTypes = {
     onClose: PropTypes.func.isRequired,
     onAddressUpdated: PropTypes.func.isRequired,
     addressId: PropTypes.string.isRequired,
-};
-
-function CustomTabPanel(props) {
-    const { children, value, index, ...other } = props;
-
-    return (
-        <div
-            role="tabpanel"
-            hidden={value !== index}
-            id={`simple-tabpanel-${index}`}
-            aria-labelledby={`simple-tab-${index}`}
-            {...other}
-        >
-            {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-        </div>
-    );
-}
-CustomTabPanel.propTypes = {
-    children: PropTypes.node,
-    index: PropTypes.number.isRequired,
-    value: PropTypes.number.isRequired,
-};
-
-function a11yProps(index) {
-    return {
-        id: `simple-tab-${index}`,
-        'aria-controls': `simple-tabpanel-${index}`,
-    };
-}
-
-export function BasicTabs({ onSelectProvince, onSelectDistrict, onSelectWard, setShowTabs }) {
-    const [value, setValue] = useState(0);
-    const [provinces, setProvinces] = useState([]);
-    const [districts, setDistricts] = useState([]);
-    const [wards, setWards] = useState([]);
-    const [selectedProvince, setSelectedProvince] = useState(null);
-    const [selectedDistrict, setSelectedDistrict] = useState(null);
-
-    useEffect(() => {
-        const fetchProvinces = async () => {
-            try {
-                const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/province', {
-                    headers: {
-                        'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f'
-                    }
-                });
-                console.log(response.data.data); // Log dữ liệu nhận được để kiểm tra
-                setProvinces(response.data.data);
-            } catch (error) {
-                console.error("Error fetching provinces:", error);
-            }
-        };
-        fetchProvinces();
-    }, []);
-
-    useEffect(() => {
-        if (selectedProvince) {
-            const fetchDistricts = async () => {
-                try {
-                    const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/district', {
-                        headers: {
-                            'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f'
-                        },
-                        params: {
-                            province_id: selectedProvince
-                        }
-                    });
-                    setDistricts(response.data.data);
-                } catch (error) {
-                    console.error("Error fetching districts:", error);
-                }
-            };
-            fetchDistricts();
-        }
-    }, [selectedProvince]);
-
-    useEffect(() => {
-        if (selectedDistrict) {
-            const fetchWards = async () => {
-                try {
-                    const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/ward', {
-                        headers: {
-                            'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f'
-                        },
-                        params: {
-                            district_id: selectedDistrict
-                        }
-                    });
-                    setWards(response.data.data);
-                } catch (error) {
-                    console.error("Error fetching wards:", error);
-                }
-            };
-            fetchWards();
-        }
-    }, [selectedDistrict]);
-
-    const handleChange = (event, newValue) => {
-        setValue(newValue);
-    };
-
-    const handleProvinceSelect = (provinceId, provinceName) => {
-        setSelectedProvince(provinceId); 
-        setSelectedDistrict(null); 
-        setDistricts([]);
-        setWards([]); // Xóa danh sách phường/xã
-        onSelectProvince(provinceName, provinceId);
-        setValue(1);
-    };
-
-    const handleDistrictSelect = (districtId, districtName) => {
-        setSelectedDistrict(districtId);
-        onSelectDistrict(districtName, districtId);
-        setValue(2);
-    };
-
-    const handleWardSelect = (wardCode, wardName) => {
-        onSelectWard(wardName, wardCode);
-        setShowTabs(false);
-    };
-
-
-    return (
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-                <Tab label="Tỉnh/Thành phố" {...a11yProps(0)} />
-                <Tab label="Quận/Huyện" {...a11yProps(1)} />
-                <Tab label="Phường/Xã" {...a11yProps(2)} />
-            </Tabs>
-            <CustomTabPanel value={value} index={0}>
-                <Box sx={{ maxHeight: 200, overflow: 'auto' }}>
-                    {provinces.length > 0 ? (
-                        <ul>
-                            {provinces.map((province) => (
-                                <li key={province.ProvinceID} onClick={() => handleProvinceSelect(province.ProvinceID, province.ProvinceName)}>
-                                    {province.ProvinceName}
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p>Đang tải dữ liệu...</p>
-                    )}
-                </Box>
-            </CustomTabPanel>
-            <CustomTabPanel value={value} index={1}>
-                <Box sx={{ maxHeight: 200, overflow: 'auto' }}>
-                    {districts.length > 0 ? (
-                        <ul>
-                            {districts.map((district) => (
-                                <li key={district.DistrictID} onClick={() => handleDistrictSelect(district.DistrictID, district.DistrictName)}>
-                                    {district.DistrictName}
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p>Vui lòng chọn tỉnh/thành phố để xem quận/huyện.</p>
-                    )}
-                </Box>
-            </CustomTabPanel>
-            <CustomTabPanel value={value} index={2}>
-                <Box sx={{ maxHeight: 200, overflow: 'auto' }}>
-                    {wards.length > 0 ? (
-                        <ul>
-                            {wards.map((ward) => (
-                                <li key={ward.WardCode} onClick={() => handleWardSelect(ward.WardCode, ward.WardName)}>
-                                    {ward.WardName}
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p>Vui lòng chọn quận/huyện để xem phường/xã.</p>
-                    )}
-                </Box>
-            </CustomTabPanel>
-        </Box>
-    );
-}
-
-BasicTabs.propTypes = {
-    onSelectProvince: PropTypes.func.isRequired,
-    onSelectDistrict: PropTypes.func.isRequired,
-    onSelectWard: PropTypes.func.isRequired,
-    setShowTabs: PropTypes.func.isRequired,
 };
 
 export default Backup3;

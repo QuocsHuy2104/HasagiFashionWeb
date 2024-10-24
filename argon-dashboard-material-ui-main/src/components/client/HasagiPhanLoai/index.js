@@ -79,9 +79,24 @@ const ColorSelectionModal = ({ show, onClose, onColorSelect, onSizeSelect, produ
         <div className="modal1">
             <div className="modal1-dialog">
                 <div className="modal1-content">
-                    <div className="modal1-header">
-                        <h5 className="modal1-title">Chọn Màu Sắc:</h5>
-                        <Button onClick={onClose} close />
+                    <div className="modal1-header" style={{ position: 'relative' }}>
+                        <h5 className="modal1-title">Phân loại:</h5>
+                        <button
+                            onClick={onClose}
+                            style={{
+                                position: 'absolute',
+                                top: '-20px',
+                                right: '10px',
+                                border: 'none',
+                                background: 'none',
+                                fontSize: '2.5rem',
+                                color: 'black',
+                                cursor: 'pointer'
+                            }}
+                            aria-label="Close"
+                        >
+                            &times;
+                        </button>
                     </div>
                     <div className="modal1-body">
                         {error && <p className="text-danger">{error}</p>}
@@ -96,7 +111,7 @@ const ColorSelectionModal = ({ show, onClose, onColorSelect, onSizeSelect, produ
                                             className={`color-box ${selectedColor?.id === color.id ? 'selected' : ''}`}
                                             onClick={() => setSelectedColor(color)}
                                         >
-                                            {color.color}
+                                            {color.name}
                                         </Button>
                                     ))}
                                 </div>
@@ -110,15 +125,12 @@ const ColorSelectionModal = ({ show, onClose, onColorSelect, onSizeSelect, produ
                                             className={`color-box ${selectedSize?.id === size.id ? 'selected' : ''}`}
                                             onClick={() => setSelectedSize(size)}
                                         >
-                                            {size.size}
+                                            {size.name}
                                         </Button>
                                     ))}
                                 </div>
                             </FormGroup>
                             <div className="modal-footer">
-                                <Button color="secondary" onClick={onClose}>
-                                    Trở Lại
-                                </Button>
                                 <Button color="primary" type="submit">
                                     Xác Nhận
                                 </Button>
@@ -128,6 +140,7 @@ const ColorSelectionModal = ({ show, onClose, onColorSelect, onSizeSelect, produ
                 </div>
             </div>
         </div>
+
     );
 };
 

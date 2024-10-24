@@ -5,7 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Backup3 from '../HasagiBackup3';
 import Backup2 from '../HasagiBackup2';
-import AddressService from '../../../services/AddressService';
+import Cookies from "js-cookie";
+import { ToastContainer, toast } from 'react-toastify';
+import AddressService from '../../../services/AddressServices';
+
 const AddressSelection = ({ show, onClose }) => {
     const [address, setAddress] = useState([]);
     const [selectedAddress, setSelectedAddress] = useState(null);
@@ -17,23 +20,45 @@ const AddressSelection = ({ show, onClose }) => {
     const [showBackup1, setShowBackup1] = useState(false);
     const [backupAddress, setBackupAddress] = useState(null);
     const navigate = useNavigate();
+ 
     const fetchAddress = async () => {
+ 
         try {
             setLoading(true);
             const response = await AddressService.getAllAddress(); 
-            
             let addresses = response.data;
-            await fetchProvinces();
+
+            // Fetching the province, district, and ward names directly from the GHN API
             for (const addr of addresses) {
-                await fetchDistricts(addr.provinceID);
-                await fetchWards(addr.districtCode);
+                // Fetch province name
+                const provinceData = await axios.get(`https://online-gateway.ghn.vn/shiip/public-api/master-data/province`, {
+                    headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' }
+                });
+                const province = provinceData.data.data.find(p => p.ProvinceID === Number(addr.provinceID));
+                addr.provinceName = province ? province.ProvinceName : 'Không xác định';
+
+                // Fetch district name
+                const districtData = await axios.get(`https://online-gateway.ghn.vn/shiip/public-api/master-data/district`, {
+                    headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' },
+                    params: { province_id: addr.provinceID }
+                });
+                const district = districtData.data.data.find(d => d.DistrictID === Number(addr.districtCode));
+                addr.districtName = district ? district.DistrictName : 'Không xác định';
+
+                // Fetch ward name
+                const wardData = await axios.get(`https://online-gateway.ghn.vn/shiip/public-api/master-data/ward`, {
+                    headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' },
+                    params: { district_id: addr.districtCode }
+                });
+                const ward = wardData.data.data.find(w => w.WardCode === String(addr.wardCode));
+                addr.wardName = ward ? ward.WardName : 'Không xác định';
             }
+
             const defaultAddress = addresses.find(addr => addr.status);
             if (defaultAddress) {
                 addresses = [defaultAddress, ...addresses.filter(addr => addr.id !== defaultAddress.id)];
                 setSelectedAddress(defaultAddress.id);
             }
-            
             setAddress(addresses);
         } catch (error) {
             console.error("Error fetching addresses:", error);
@@ -41,6 +66,7 @@ const AddressSelection = ({ show, onClose }) => {
             setLoading(false);
         }
     };
+
     useEffect(() => {
         if (show) {
             fetchAddress();
@@ -79,25 +105,21 @@ const AddressSelection = ({ show, onClose }) => {
         try {
             const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa địa chỉ này?");
             if (!confirmDelete) return;
-    
-            console.log('Deleting address with ID:', id); // Log the ID being deleted
-    
-            await AddressService.removeAddress(id); // Call the removeAddress method
-    
-            alert("Địa chỉ đã được xóa thành công");
-            fetchAddress(); // Refresh the address list
+
+            const payload = {};
+            await AddressService.removeAddress(id);
+            fetchAddress(); 
+            toast.success('Xóa địa chỉ thành công!');
         } catch (error) {
-            console.error("Lỗi khi xóa địa chỉ:", error.response || error.message); // Log the full error
-            alert("Xóa địa chỉ thất bại");
+            toast.error('Xóa địa chỉ thất bại!');
         }
     };
-    
-    
+
 
     const handleComplete = () => {
         if (selectedAddress) {
             handleAddressSelect(selectedAddress);
-            navigate(`/Checkout?id=${selectedAddress}`); 
+            navigate(`/Checkout?id=${selectedAddress}`);
         }
     };
 
@@ -119,65 +141,42 @@ const AddressSelection = ({ show, onClose }) => {
         onClose(selectedAddress);
     };
 
-    const getAddressNameById = (id, list, type) => {
-        if (!id) return 'Đang tải...';
-        const addressItem = list.find(item => {
-            if (type === 'province' && item.ProvinceID === Number(id)) {
-                return true;
-            } else if (type === 'district' && item.DistrictID === Number(id)) {
-                return true;
-            } else if (type === 'ward' && item.WardCode === String(id)) {
-                return true;
-            }
-            return false;
-        });
-        if (addressItem) {
-            if (type === 'province') return addressItem.ProvinceName;
-            if (type === 'district') return addressItem.DistrictName;
-            if (type === 'ward') return addressItem.WardName;
-        }
-        return 'Không xác định';
-    };
-
-    const fetchProvinces = async () => {
-        try {
-            const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/province', {
-                headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' }
-            });
-            setProvinces(response.data.data);
-        } catch (error) {
-            console.error("Error fetching provinces:", error);
-        }
-    };
 
     const fetchDistricts = async (provinceId) => {
         try {
             const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/district', {
-                headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' },
+                headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' },
                 params: { province_id: provinceId }
             });
             setDistricts(prev => ({ ...prev, [provinceId]: response.data.data }));
         } catch (error) {
-            console.error("Error fetching districts:", error);
+            if (process.env.NODE_ENV === 'development') {
+                console.error("Error fetching districts:", error);
+            }
         }
     };
 
     const fetchWards = async (districtId) => {
         try {
             const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/ward', {
-                headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' },
+                headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' },
                 params: { district_id: districtId }
             });
             setWards(prev => ({ ...prev, [districtId]: response.data.data }));
         } catch (error) {
-            console.error("Error fetching wards:", error);
+            // Only log the error in development mode
+            if (process.env.NODE_ENV === 'development') {
+                console.error("Error fetching wards:", error);
+            }
         }
     };
+
 
     if (!show && !showBackup) return null;
 
     return (
         <>
+            <ToastContainer />
             {show && !showBackup && !showBackup1 && (
                 <div className="modal" style={{ display: show ? 'block' : 'none' }}>
                     <div className="modal-dialog">
@@ -198,12 +197,12 @@ const AddressSelection = ({ show, onClose }) => {
                                                     style={{ marginRight: '10px' }}
                                                 />
                                                 <div className="ms-3">
-                                                    <div style={{ fontWeight: '500' }}>{addr.fullNameAddress} <span style={{ fontSize: '12px' }}>({addr.numberPhone})</span></div>
+                                                    <div style={{ fontWeight: '500' }}>{addr.fullName} <span style={{ fontSize: '12px' }}>({addr.numberPhone})</span></div>
                                                     <div style={{ fontSize: '12px', color: '#666' }}>
                                                         {addr.address},
-                                                        {getAddressNameById(addr.provinceID, provinces, 'province')},
-                                                        {districts[addr.provinceID] ? getAddressNameById(addr.districtCode, districts[addr.provinceID], 'district') : 'Đang tải...'},
-                                                        {wards[addr.districtCode] ? getAddressNameById(addr.wardCode, wards[addr.districtCode], 'ward') : 'Đang tải...'}
+                                                        {addr.wardName},
+                                                        {addr.districtName},
+                                                        {addr.provinceName}
                                                     </div>
                                                     {addr.status && <span className="badge bg-danger" style={{ fontSize: '10px' }}>Mặc định</span>}
                                                 </div>
@@ -211,7 +210,7 @@ const AddressSelection = ({ show, onClose }) => {
                                             <button
                                                 className="btn ms-2"
                                                 style={{ transform: "scale(1)", fontSize: "13px" }}
-                                                onClick={() => handleAddressUpdate(addr.id)} 
+                                                onClick={() => handleAddressUpdate(addr.id)}
                                             >
                                                 Update
                                             </button>
