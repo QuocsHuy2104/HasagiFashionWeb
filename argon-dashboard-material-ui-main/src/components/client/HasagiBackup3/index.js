@@ -239,7 +239,7 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
             address,
         };
         try {
-            await AddressService.updateAddress(addressId, formData); 
+            await AddressService.updateAddress(addressId, formData);
             onClose();
             onAddressUpdated();
         } catch (error) {
@@ -335,7 +335,7 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
                                 )}
                             </div>
                             <div className="col-md-6 form-group">
-                            <ArgonInput
+                                <ArgonInput
                                     type="text"
                                     name="numberPhone"
                                     placeholder="Số điện thoại"
@@ -424,15 +424,18 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
                                     <div className="text-danger">{errors.selectedWard}</div>
                                 )}
                             </div>
-                            <label style={{ marginLeft: "10px", marginBottom: "0" }}>
-                                Đặt làm địa chỉ mặc định
-                                <input
-                                    type="checkbox"
-                                    checked={status}
-                                    onChange={handleCheckboxChange}
-                                    style={{ transform: "scale(1.5)", marginBottom: "0", marginLeft: "10px" }}
-                                />
-                            </label>
+                            {!status && (
+                                <label style={{ marginLeft: "10px", marginBottom: "0" }}>
+                                    Đặt làm địa chỉ mặc định
+                                    <input
+                                        type="checkbox"
+                                        checked={status}
+                                        onChange={handleCheckboxChange}
+                                        style={{ transform: "scale(1.5)", marginBottom: "0", marginLeft: "10px" }}
+                                    />
+
+                                </label>
+                            )}
                         </div>
                         <div className="d-flex justify-content-between mt-4">
                             <ArgonButton className="btn btn-light" onClick={handleModalClose}>

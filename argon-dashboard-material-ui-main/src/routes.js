@@ -45,7 +45,7 @@ import Account from "layouts/manage/account";
 import Image from "layouts/manage/image";
 import ForgotPassword from "layouts/authentication/forgot-password";
 import Product from "layouts/manage/product";
-
+import Review from "layouts/manage/review";
 // Argon Dashboard 2 MUI components
 import ArgonBox from "components/ArgonBox";
 import Category from "layouts/manage/category";
@@ -160,6 +160,14 @@ const routes = [
     route: "/manage/size",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
     component: <Size />,
+  },
+  {
+    type: "route",
+    name: "Manage Review",
+    key: "review",
+    route: "/manage/review",
+    icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
+    component: <Review />,
   },
   {
     // type: "route",

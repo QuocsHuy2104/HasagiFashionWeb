@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
 import "components/client/assets/css/style.css";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCcVisa, faCcMastercard, faCcAmex } from '@fortawesome/free-brands-svg-icons';
 import ArgonButton from "components/ArgonButton";
 import AddressSelection from "components/client/HasagiBackup1";
 import axios from 'axios';
@@ -13,7 +15,6 @@ import Navbar from '../HasagiNavbar';
 import VoucherService from "../../../services/VoucherServices";
 import { Card, Container, Button } from "react-bootstrap";
 import CheckoutService from '../../../services/CheckoutServices';
-
 const Checkout = () => {
     const [selectedPayment, setSelectedPayment] = useState('');
     const [showPaymentButtons, setShowPaymentButtons] = useState(true);
@@ -44,6 +45,8 @@ const Checkout = () => {
                 if (addressesId) {
                     const response = await axios.get(`http://localhost:3000/api/addresses/${addressesId}`);
                     setAddress(response.data);
+
+                    console.log(address);
                     await fetchProvinces();
                 } else {
                     console.error("No address ID found in the URL");
@@ -55,12 +58,12 @@ const Checkout = () => {
         fetchAddress();
         const cartItemsBackup = JSON.parse(localStorage.getItem('cartItemsBackup')) || [];
         setCartItems(cartItemsBackup);
-        const intervalId = setInterval(() => {
-            fetchAddress();
-        }, 3000);
-        return () => {
-            clearInterval(intervalId);
-        };
+        // const intervalId = setInterval(() => {
+        //     fetchAddress();
+        // }, 3000);
+        // return () => {
+        //     clearInterval(intervalId);
+        // };
     }, []);
 
     useEffect(() => {
@@ -71,6 +74,7 @@ const Checkout = () => {
                 });
                 if (response.data && response.data.districtCode) {
                     setAddress(response.data);
+                    console.log(address);
                 } else {
                     console.error("District code is missing in the address data");
                 }
@@ -129,6 +133,7 @@ const Checkout = () => {
             });
             setShipFee(response.data.data);
         } catch (error) {
+            console.log(error);
         }
     };
 
@@ -259,6 +264,10 @@ const Checkout = () => {
             quantity: item.quantity,
             price: item.price,
         }));
+    
+        const productDetailIdSelected = selectedItems.map(item => item.id);
+
+
         const payStatusDirect = 'Chưa thanh toán'; 
         const voucherId = selectedVoucher ? selectedVoucher.id : null; 
         const checkoutDataDirect = {
@@ -269,6 +278,7 @@ const Checkout = () => {
             voucherId: voucherId, 
             shippingFree: shipFee.total,
             fullName: `${address.address}, ${getAddressNameById(address.wardCode, wards, 'ward')}, ${getAddressNameById(address.districtCode, districts, 'district')}, ${getAddressNameById(address.provinceID, provinces, 'province')}`,
+            productDetailIdSelected: productDetailIdSelected
         };
         const payStatusBank = 'Đã thanh toán'; 
         const checkoutDataBank = {
@@ -279,7 +289,9 @@ const Checkout = () => {
             voucherId: voucherId, 
             shippingFree: shipFee.total,
             fullName: `${address.address}, ${getAddressNameById(address.wardCode, wards, 'ward')}, ${getAddressNameById(address.districtCode, districts, 'district')}, ${getAddressNameById(address.provinceID, provinces, 'province')}`,
+            productDetailIdSelected: productDetailIdSelected
         };
+     
       
 
         setIsLoading(true); 
