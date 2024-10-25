@@ -16,13 +16,12 @@ function Size() {
   const [formData, setFormData] = useState({
     id: "",
     name: "", // Đổi từ 'size' thành 'name'
-    price: "",
   });
 
   const [sizes, setSizes] = useState([]);
   const [errors, setErrors] = useState({
     name: false, // Đổi từ 'size' thành 'name'
-    price: false,
+
   });
 
   useEffect(() => {
@@ -47,15 +46,10 @@ function Size() {
 
   const validateForm = () => {
     let isValid = true;
-    const newErrors = { name: false, price: false };
+    const newErrors = { name: false };
 
     if (!formData.name.trim()) {
       newErrors.name = "Size name is required.";
-      isValid = false;
-    }
-
-    if (!formData.price || isNaN(formData.price) || parseFloat(formData.price) <= 0) {
-      newErrors.price = "Price must be a number greater than 0.";
       isValid = false;
     }
 
@@ -72,7 +66,7 @@ function Size() {
 
     const data = {
       name: formData.name, // Sử dụng 'name' thay vì 'size'
-      price: parseFloat(formData.price),
+
     };
 
     try {
@@ -95,16 +89,14 @@ function Size() {
     setFormData({
       id: "",
       name: "", // Đổi từ 'size' thành 'name'
-      price: "",
     });
-    setErrors({ name: false, price: false }); // Đổi từ 'size' thành 'name'
+    setErrors({ name: false }); // Đổi từ 'size' thành 'name'
   };
 
   const handleEditClick = (size) => {
     setFormData({
       id: size.id,
       name: size.name, // Sử dụng 'name' thay vì 'size.name'
-      price: size.price,
     });
   };
 
@@ -148,23 +140,7 @@ function Size() {
                   )}
                 </ArgonBox>
 
-                {/* Size Price Input */}
-                <ArgonBox mb={3} position="relative">
-                  <ArgonInput
-                    type="number"
-                    placeholder="Size Price"
-                    size="large"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleChange}
-                    error={!!errors.price} // Apply error state
-                  />
-                  {errors.price && (
-                    <ArgonTypography variant="caption" color="error">
-                      {errors.price}
-                    </ArgonTypography>
-                  )}
-                </ArgonBox>
+
 
                 {/* Submit Button */}
                 <ArgonBox mb={3} sx={{ width: { xs: '100%', sm: '50%', md: '30%' } }}>
