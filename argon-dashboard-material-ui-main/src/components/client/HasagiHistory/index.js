@@ -64,6 +64,12 @@ const History = () => {
     };
 
     fetchOrderHistory();
+    const intervalId = setInterval(() => {
+      fetchOrderHistory();
+  }, 3000);
+  return () => {
+      clearInterval(intervalId);
+  };
   }, [location.state]);
 
   const fetchHandleBuyNow = async (orderId) => {
@@ -204,30 +210,31 @@ const History = () => {
     const formData = new FormData();
     formData.append('star', star);
     formData.append('comment', comment);
-    formData.append('orderDetailId', 1); // Thêm productId vào formData
+    formData.append('orderDetailId', selectedProduct.orderDetailId); // Thêm productId vào formData
 
     if (image) {
-        formData.append('image', image);
+      formData.append('image', image);
     }
     if (video) {
-        formData.append('video', video);
+      formData.append('video', video);
     }
 
     try {
-        const response = await reviewsService.createReview(formData);
-        console.log('Review created successfully:', response);
-        // Reset fields after successful submission
-        setStar(5);
-        setComment('');
-        resetImageInput();
-        resetVideoInput();
-        setSnackbarMessage('Đánh giá đã được gửi thành công!');
-        setOpenSnackbar(true);
+      const response = await reviewsService.createReview(formData);
+      console.log('Review created successfully:', response);
+      // Reset fields after successful submission
+      setStar(5);
+      setComment('');
+      resetImageInput();
+      resetVideoInput();
+      setSnackbarMessage('Đánh giá đã được gửi thành công!');
+      setOpenSnackbar(true);
+      handleClose();
     } catch (error) {
-        console.error('Error creating review:', error.response.data);
-        alert('Có lỗi xảy ra khi tạo đánh giá. Vui lòng kiểm tra thông tin và thử lại.');
+      console.error('Error creating review:', error.response.data);
+      alert('Có lỗi xảy ra khi tạo đánh giá. Vui lòng kiểm tra thông tin và thử lại.');
     }
-};
+  };
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
   };
@@ -328,11 +335,17 @@ const History = () => {
                                 <Typography variant="h6" gutterBottom>
                                   {product.productName}
                                 </Typography>
-                                {order.statusSlug === "hoan-thanh" && (
-                                  <Typography variant="body2" color="textSecondary" onClick={() => handleReviewClick(product)} style={{ marginLeft: "600px", color: "black" }}>
+                                {order.statusSlug === "hoan-thanh" && product.canReview  &&(
+                                  <Typography
+                                    variant="body2"
+                                    color="textSecondary"
+                                    onClick={() => handleReviewClick(product)}
+                                    style={{ marginLeft: "600px", color: "black" }}
+                                  >
                                     Đánh giá
                                   </Typography>
                                 )}
+
                               </Box>
                               <Typography variant="body2" color="textSecondary" style={{ color: "black" }}>
                                 Phân loại hàng: {product.color}, {product.size}
@@ -449,133 +462,96 @@ const History = () => {
         </Box>
       </MuiModal>
       {selectedProduct && (
-      <BootstrapModal show={showReviewModal} size="lg">
-        <BootstrapModal.Body>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <p style={{ fontSize: '25px', margin: 0 }}>Đánh giá sản phẩm</p>
-            <IconButton onClick={handleClose} style={{ color: 'inherit' }}>
-              <CloseIcon />
-            </IconButton>
-          </div>
-          {selectedProduct && (
-            <>
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                <img
-                  src={selectedProduct.productImage}
-                  alt={selectedProduct.productName}
-                  style={{
-                    width: '100px',
-                    height: '100px',
-                    borderRadius: '5px',
-                    objectFit: 'cover',
-                    marginRight: '10px',
-                    border: '1px solid #ddd',
-                  }}
-                />
-                <div>
-                  <p style={{ fontSize: '20px', fontWeight: 'bold', margin: '0' }}>
-                    {selectedProduct.productName}
-                  </p>
-                  <div style={{ display: 'flex', alignItems: 'center', margin: '2px 0 0 0' }}>
-                    <p style={{ color: '#888', margin: '0 15px 0 0', fontSize: '16px' }}>
-                      Màu: <span style={{ color: '#555' }}>{selectedProduct.color}</span>
-                    </p>
-                    <p style={{ color: '#888', margin: '0', fontSize: '16px' }}>
-                      Kích cỡ: <span style={{ color: '#555' }}>{selectedProduct.size}</span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <form onSubmit={handleSubmit}>
+        <BootstrapModal show={showReviewModal} size="lg">
+          <BootstrapModal.Body>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <p style={{ fontSize: '25px', margin: 0 }}>Đánh giá sản phẩm</p>
+              <IconButton onClick={handleClose} style={{ color: 'inherit' }}>
+                <CloseIcon />
+              </IconButton>
+            </div>
+            {selectedProduct && (
+              <>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                  <label style={{ fontWeight: 'bold', marginRight: '50px', fontSize: '18px' }}>Chất lượng sản phẩm:</label>
-                  <div style={{ display: 'flex' }}>
-                    {[...Array(5)].map((_, index) => (
-                      <span
-                        key={index}
-                        onClick={() => handleStarClick(index)}
-                        style={{ cursor: 'pointer', marginRight: '20px' }}
-                      >
-                        {index < star ? (
-                          <StarIcon style={{ color: '#FFD700', transform: 'scale(2)' }} /> // Increase the scale size
-                        ) : (
-                          <StarBorderIcon style={{ color: '#FFD700', transform: 'scale(2)' }} />
-                        )}
-                      </span>
-                    ))}
+                  <img
+                    src={selectedProduct.productImage}
+                    alt={selectedProduct.productName}
+                    style={{
+                      width: '100px',
+                      height: '100px',
+                      borderRadius: '5px',
+                      objectFit: 'cover',
+                      marginRight: '10px',
+                      border: '1px solid #ddd',
+                    }}
+                  />
+                  <div>
+                    <p style={{ fontSize: '20px', fontWeight: 'bold', margin: '0' }}>
+                      {selectedProduct.productName}
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', margin: '2px 0 0 0' }}>
+                      <p style={{ color: '#888', margin: '0 15px 0 0', fontSize: '16px' }}>
+                        Màu: <span style={{ color: '#555' }}>{selectedProduct.color}</span>
+                      </p>
+                      <p style={{ color: '#888', margin: '0', fontSize: '16px' }}>
+                        Kích cỡ: <span style={{ color: '#555' }}>{selectedProduct.size}</span>
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
-                  {/* Nút Tải lên hình ảnh */}
-                  <div style={{ marginRight: '5px' }}>
-                    <input
-                      type="file"
-                      id="image-upload"
-                      accept="image/*"
-                      style={{ display: 'none' }}
-                      onChange={handleImageChange}
-                    />
-                    <BootstrapButton
-                      variant="outlined"
-                      component="span"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        border: '1px solid #000',
-                        padding: '0',
-                        width: '100px',
-                        height: '100px',
-                        borderRadius: '8px',
-                      }}
-                      onClick={() => document.getElementById('image-upload').click()}
-                    >
-                      <PhotoCamera style={{ fontSize: '48px', color: 'black' }} /> {/* Tăng kích thước icon */}
-                    </BootstrapButton>
+                <form onSubmit={handleSubmit}>
+                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                    <label style={{ fontWeight: 'bold', marginRight: '50px', fontSize: '18px' }}>Chất lượng sản phẩm:</label>
+                    <div style={{ display: 'flex' }}>
+                      {[...Array(5)].map((_, index) => (
+                        <span
+                          key={index}
+                          onClick={() => handleStarClick(index)}
+                          style={{ cursor: 'pointer', marginRight: '20px' }}
+                        >
+                          {index < star ? (
+                            <StarIcon style={{ color: '#FFD700', transform: 'scale(2)' }} /> // Increase the scale size
+                          ) : (
+                            <StarBorderIcon style={{ color: '#FFD700', transform: 'scale(2)' }} />
+                          )}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-
-                  {imagePreview && (
-                    <div style={{ position: 'relative', marginRight: '3px' }}>
-                      <img
-                        src={imagePreview}
-                        alt="Selected"
+                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
+                    {/* Nút Tải lên hình ảnh */}
+                    <div style={{ marginRight: '5px' }}>
+                      <input
+                        type="file"
+                        id="image-upload"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={handleImageChange}
+                      />
+                      <BootstrapButton
+                        variant="outlined"
+                        component="span"
                         style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          border: '1px solid #000',
+                          padding: '0',
                           width: '100px',
                           height: '100px',
                           borderRadius: '8px',
-                          objectFit: 'cover',
                         }}
-                      />
-                      <IconButton
-                        style={{
-                          position: 'absolute',
-                          top: '2px',
-                          right: '2px',
-                          padding: '0',
-                          color: '#fff',
-                          fontSize: '15px',
-                          backgroundColor: '#B8B8B8',
-                        }}
-                        onClick={resetImageInput} // Gọi hàm reset ảnh
+                        onClick={() => document.getElementById('image-upload').click()}
                       >
-                        <CloseIcon style={{ fontSize: '16px' }} />
-                      </IconButton>
+                        <PhotoCamera style={{ fontSize: '48px', color: 'black' }} /> {/* Tăng kích thước icon */}
+                      </BootstrapButton>
                     </div>
-                  )}
-                  {/* Nút Tải lên video */}
-                  <div style={{ marginLeft: '1px' }}>
-                    <input
-                      type="file"
-                      id="video-upload"
-                      accept="video/*"
-                      style={{ display: 'none' }}
-                      onChange={handleVideoChange}
-                    />
-                    {videoPreview ? (
-                      <div style={{ position: 'relative', marginTop: '10px' }}>
-                        <video
-                          src={videoPreview}
-                          controls
+
+                    {imagePreview && (
+                      <div style={{ position: 'relative', marginRight: '3px' }}>
+                        <img
+                          src={imagePreview}
+                          alt="Selected"
                           style={{
                             width: '100px',
                             height: '100px',
@@ -593,73 +569,110 @@ const History = () => {
                             fontSize: '15px',
                             backgroundColor: '#B8B8B8',
                           }}
-                          onClick={resetVideoInput}
+                          onClick={resetImageInput} // Gọi hàm reset ảnh
                         >
                           <CloseIcon style={{ fontSize: '16px' }} />
                         </IconButton>
                       </div>
-                    ) : (
-                      <BootstrapButton
-                        variant="outlined"
-                        component="span"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          border: '1px solid #000',
-                          padding: '0',
-                          width: '100px',
-                          height: '100px',
-                          borderRadius: '8px',
-                        }}
-                        onClick={() => document.getElementById('video-upload').click()}
-                      >
-                        <Videocam style={{ fontSize: '48px', color: 'black' }} /> {/* Tăng kích thước icon */}
-                      </BootstrapButton>
                     )}
+                    {/* Nút Tải lên video */}
+                    <div style={{ marginLeft: '1px' }}>
+                      <input
+                        type="file"
+                        id="video-upload"
+                        accept="video/*"
+                        style={{ display: 'none' }}
+                        onChange={handleVideoChange}
+                      />
+                      {videoPreview ? (
+                        <div style={{ position: 'relative', marginTop: '10px' }}>
+                          <video
+                            src={videoPreview}
+                            controls
+                            style={{
+                              width: '100px',
+                              height: '100px',
+                              borderRadius: '8px',
+                              objectFit: 'cover',
+                            }}
+                          />
+                          <IconButton
+                            style={{
+                              position: 'absolute',
+                              top: '2px',
+                              right: '2px',
+                              padding: '0',
+                              color: '#fff',
+                              fontSize: '15px',
+                              backgroundColor: '#B8B8B8',
+                            }}
+                            onClick={resetVideoInput}
+                          >
+                            <CloseIcon style={{ fontSize: '16px' }} />
+                          </IconButton>
+                        </div>
+                      ) : (
+                        <BootstrapButton
+                          variant="outlined"
+                          component="span"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            border: '1px solid #000',
+                            padding: '0',
+                            width: '100px',
+                            height: '100px',
+                            borderRadius: '8px',
+                          }}
+                          onClick={() => document.getElementById('video-upload').click()}
+                        >
+                          <Videocam style={{ fontSize: '48px', color: 'black' }} /> {/* Tăng kích thước icon */}
+                        </BootstrapButton>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <textarea
-                  rows="4"
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    fontSize: '16px',
-                    borderRadius: '8px',
-                    marginBottom: '15px',
-                    border: '1px solid #888888',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                  }}
-                  placeholder="Nhập đánh giá của bạn"
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                />
-                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <BootstrapButton
-                    type="submit"
-                    variant="contained"
+                  <textarea
+                    rows="4"
                     style={{
-                      color: '#000',
-                      backgroundColor: '#FFD700', // Yellow color for the Gửi đánh giá button
-                      borderColor: '#FFD700',
+                      width: '100%',
+                      padding: '10px',
+                      fontSize: '16px',
+                      borderRadius: '8px',
+                      marginBottom: '15px',
+                      border: '1px solid #888888',
+                      outline: 'none',
+                      boxSizing: 'border-box',
                     }}
-                  >
-                    Gửi đánh giá
-                  </BootstrapButton>
-                </div>
-                <Snackbar
-                  open={openSnackbar}
-                  onClose={handleCloseSnackbar}
-                  message={snackbarMessage}
-                  autoHideDuration={6000}
-                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                />
-              </form>
-            </>
-          )}
-        </BootstrapModal.Body>
-      </BootstrapModal>
+                    placeholder="Nhập đánh giá của bạn"
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                  />
+                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <BootstrapButton
+                      type="submit"
+                      variant="contained"
+                      style={{
+                        color: '#000',
+                        backgroundColor: '#FFD700', // Yellow color for the Gửi đánh giá button
+                        borderColor: '#FFD700',
+                      }}
+                    >
+                      Gửi đánh giá
+                    </BootstrapButton>
+                  </div>
+                  <Snackbar
+                    open={openSnackbar}
+                    onClose={handleCloseSnackbar}
+                    message={snackbarMessage}
+                    autoHideDuration={6000}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  />
+                </form>
+              </>
+            )}
+          </BootstrapModal.Body>
+        </BootstrapModal>
       )}
       <Footer />
     </>

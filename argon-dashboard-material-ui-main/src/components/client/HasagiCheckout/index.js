@@ -351,13 +351,9 @@ const Checkout = () => {
     const [accountId, setAccountId] = useState(Cookies.get('accountId')); // Initialize accountId from cookies
 
     useEffect(() => {
-        // Fetch all vouchers
         const fetchVouchers = async () => {
-            try {
-                // Fetch all vouchers
+            try{
                 const response = await VoucherService.getAllVouchers();
-
-                // Filter out only active vouchers
                 const activeVouchers = response.data.filter(voucher => voucher.isActive);
 
                 setVouchers(activeVouchers);
@@ -365,9 +361,6 @@ const Checkout = () => {
                 console.error("Error fetching vouchers:", error);
             }
         };
-
-
-        // Fetch used vouchers for the account
         const fetchUsedVouchers = async () => {
             if (accountId) {
                 try {

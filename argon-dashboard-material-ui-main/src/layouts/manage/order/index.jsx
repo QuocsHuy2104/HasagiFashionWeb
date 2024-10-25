@@ -31,7 +31,6 @@ function Order() {
       try {
         const response = await axios.get("http://localhost:3000/api/order");
         if (response.data && response.data.orders) {
-          console.log(response.data);
           const orders = response.data.orders.map(order => ({
             ...order,
             orderDate: order.orderDate ? format(new Date(order.orderDate), "dd-MM-yyyy") : "Date not available"
@@ -46,8 +45,13 @@ function Order() {
         console.error("There was an error fetching the data!", error);
       }
     };
-
     fetchData();
+    const intervalId = setInterval(() => {
+            fetchData();
+        }, 3000);
+        return () => {
+            clearInterval(intervalId);
+        };
   }, []);
 
   const handleSearch = (event) => {
@@ -146,6 +150,8 @@ function Order() {
             return availableStatuses[currentIndex + 1];
           } else if (currentStatus === 'dang-giao') {
             return 'da-giao';
+          }else  if (currentStatus === 'cho-hoan-tien') {
+            return 'da-hoan-tien';
           }
           return null;
         };
@@ -157,7 +163,8 @@ function Order() {
             <span style={{ marginRight: '10px' }}>
               {statuses.find(status => status.slug === currentStatus)?.status || 'Unknown'}
             </span>
-            {currentStatus !== 'hoan-thanh' && currentStatus !== 'da-giao' && (
+            
+            {currentStatus !== 'hoan-thanh' && currentStatus !== 'da-giao' && currentStatus!=='da-hoan-tien' && (
               <>
                 {currentStatus !== 'da-huy' && (
                   <ArgonButton
@@ -178,6 +185,7 @@ function Order() {
                     Hủy
                   </ArgonButton>
                 )}
+                
               </>
             )}
           </div>
