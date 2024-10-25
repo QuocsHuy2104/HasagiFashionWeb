@@ -22,18 +22,6 @@ Size.propTypes = {
     name: PropTypes.string.isRequired,
 };
 
-// Component to display price information
-function SizePrice({ price }) {
-    return (
-        <ArgonTypography variant="caption" color="secondary" fontWeight="bold">
-            {`$${price.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`}
-        </ArgonTypography>
-    );
-}
-
-SizePrice.propTypes = {
-    price: PropTypes.number.isRequired,
-};
 
 // Main SizeTable component
 const SizeTable = ({ onEditClick }) => {
@@ -65,7 +53,6 @@ const SizeTable = ({ onEditClick }) => {
 
     const rows = sizes.map(size => ({
         size: <Size name={size.name} />,
-        price: <SizePrice price={size.price} />, // Use SizePrice component here
         action: (
             <ArgonBox display="flex" justifyContent="space-between" alignItems="center">
                 <ArgonTypography
@@ -107,7 +94,6 @@ const SizeTable = ({ onEditClick }) => {
     const sizeTableData = {
         columns: [
             { name: "size", align: "left" },
-            { name: "price", align: "center" },
             { name: "action", align: "center" },
         ],
         rows,
