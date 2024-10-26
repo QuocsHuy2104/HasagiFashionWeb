@@ -159,7 +159,7 @@ function Order() {
             </span>
             {currentStatus !== 'hoan-thanh' && currentStatus !== 'da-giao' && (
               <>
-                {currentStatus !== 'huy' && (
+                {currentStatus !== 'da-huy' && (
                   <ArgonButton
                     size="small"
                     color="primary"
@@ -172,7 +172,7 @@ function Order() {
                   <ArgonButton
                     size="small"
                     color="error"
-                    onClick={() => handleStatusChange(order.id, 'huy')}
+                    onClick={() => handleStatusChange(order.id, 'da-huy')}
                     style={{ marginLeft: '10px' }}
                   >
                     Hủy

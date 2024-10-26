@@ -9,25 +9,19 @@ import ArgonTypography from 'components/ArgonTypography';
 import aboutImage2 from 'components/client/assets/images/t1.jpg';
 import Cookies from 'js-cookie';
 import { toast, ToastContainer } from 'react-toastify';
-
+import ShopDetailService from '../../../services/ProductDetail';
 const Favorite = () => {
   const [favorites, setFavorites] = useState([]);
 
   useEffect(() => {
-    const accountId = Cookies.get('accountId');
-    if (accountId) {
-      axios.get(`http://localhost:3000/api/favorites/user?accountId=${accountId}`, {
-        withCredentials: true, 
-      })
+     ShopDetailService.getGotoFavorites()
         .then(response => {
           setFavorites(response.data); 
         })
         .catch(error => {
           console.error('Error fetching favorites:', error);
         });
-    } else {
-      console.error('Account ID is not available in cookies');
-    }
+   
   }, []);
 
   const removeFavorite = (productId) => {

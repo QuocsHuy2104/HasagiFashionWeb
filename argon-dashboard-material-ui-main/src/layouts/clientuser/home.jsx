@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import 'layouts/assets/css/style.css';
 import aboutImage3 from "layouts/assets/img/cat-1.jpg";
 import aboutImage5 from "layouts/assets/img/product-1.jpg";
 import { Grid, Typography } from "@mui/material";
@@ -214,14 +213,7 @@ function Home() {
                                             <Link className="h6 text-decoration-none text-truncate">
                                                 {product.name || "Product Name Goes Here"}
                                             </Link>
-                                            <div className="d-flex align-items-center justify-content-center mt-2">
-                                                <h5>
-                                                    {product.importPrice.toLocaleString("vi-VN", {
-                                                        style: "currency",
-                                                        currency: "VND",
-                                                    })}
-                                                </h5>
-                                            </div>
+                                            
                                             <div className="d-flex align-items-center justify-content-center mb-1">
                                                 <small className="fa fa-star text-primary mr-1"></small>
                                                 <small className="fa fa-star text-primary mr-1"></small>
@@ -300,14 +292,7 @@ function Home() {
                                     <Link className="h6 text-decoration-none text-truncate" to={`/ShopDetail?id=${product.id}`}>
                                         {product.name || "Product Name Goes Here"}
                                     </Link>
-                                    <div className="d-flex align-items-center justify-content-center mt-2">
-                                        <h5>
-                                            {product.importPrice.toLocaleString("vi-VN", {
-                                                style: "currency",
-                                                currency: "VND",
-                                            })}
-                                        </h5>
-                                    </div>
+                                    
                                     <div className="d-flex align-items-center justify-content-center mb-1">
                                         <small className="fa fa-star text-primary mr-1"></small>
                                         <small className="fa fa-star text-primary mr-1"></small>

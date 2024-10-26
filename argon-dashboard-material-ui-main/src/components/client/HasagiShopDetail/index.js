@@ -4,12 +4,17 @@ import 'layouts/assets/css/style.css';
 import HasagiNav from "components/client/HasagiHeader";
 import { useLocation, Link } from 'react-router-dom';
 import Footer from "components/client/HasagiFooter";
-import useCartQuantity from "../HasagiQuantity/useCartQuantity";
 import cartService from "../../../services/ProductDetail";
 import Cookies from "js-cookie";
 import { toast, ToastContainer } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import reviewsService from "services/ReviewsServices";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faStar as solidStar } from '@fortawesome/free-solid-svg-icons';
+import { faStar as regularStar } from '@fortawesome/free-regular-svg-icons';
+import { Modal, Box } from '@mui/material';
+import ReviewList from "../HasagiReview/reviewList";
 
 function ShopDetail() {
     const [product, setProduct] = useState(null);
@@ -23,45 +28,81 @@ function ShopDetail() {
     const query = new URLSearchParams(location.search);
     const productId = query.get('id');
     const [favoriteCount, setFavoriteCount] = useState(0);
-    const { totalQuantity, fetchTotalQuantity } = useCartQuantity();
     const navigate = useNavigate();
+    const [reviews, setReviews] = useState([]);
+    const [selectedStar, setSelectedStar] = useState(null);
+    const [open, setOpen] = useState(false);
+    const [mediaUrl, setMediaUrl] = useState('');
+
+    const fetchReviews = async (productId) => {
+        try {
+            const productReviews = await reviewsService.getReviewsByProduct(productId);
+            console.log('Fetched reviews for product:', productReviews);
+
+            if (Array.isArray(productReviews)) {
+                const sortedReviews = productReviews.sort((a, b) => b.star - a.star);
+                setReviews(sortedReviews);
+            } else {
+                console.error('Expected an array but got:', productReviews);
+                setReviews([]);
+            }
+        } catch (error) {
+            console.error('Error fetching reviews for product:', error);
+            setReviews([]);
+        }
+    };
+
+    useEffect(() => {
+        const query = new URLSearchParams(location.search);
+        const productId = query.get('id');
+
+        if (productId) {
+            fetchReviews(productId);
+        }
+    }, [location]);
+
+    const getUniqueSizes = (sizes) => {
+        return sizes.reduce((unique, size) => {
+            if (!unique.some(item => item.id === size.id)) {
+                unique.push(size);
+            }
+            return unique;
+        }, []);
+    };
+
+    const getUniqueColors = (colors) => {
+        return colors.reduce((unique, color) => {
+            if (!unique.some(item => item.id === color.id)) {
+                unique.push(color);
+            }
+            return unique;
+        }, []);
+    };
+
+    const uniqueSizes = product ? getUniqueSizes(product.sizes) : [];
+    const uniqueColors = product ? getUniqueColors(product.colors) : [];
 
     React.useEffect(() => {
         setTimeout(() => {
             setIsLoading(false);
         }, 700);
     }, []);
+
     const handleAddToCart = async () => {
-
-        const accountId = Cookies.get('accountId');
-        if (!accountId) {
-            navigate(`/authentication/sign-in`);
-            return;
-        }
-
         if (!product || !selectedColor || !selectedSize) {
             toast.error('Vui lòng chọn màu sắc và kích thước.');
             return;
         }
 
         try {
-            const response = await cartService.addToCart({
-                accountId,
+            cartService.addToCart({
                 colorId: selectedColor,
                 sizeId: selectedSize,
                 quantity,
                 productId,
-                price: product.importPrice,
             });
-
-            if (response.status === 201 || response.status === 200) {
-                Cookies.set('productId', productId);
-                fetchTotalQuantity();
-                toast.success('Sản phẩm đã được thêm vào giỏ hàng thành công!');
-                console.log('Cart updated:', response.data);
-            } else {
-                toast.error('Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại.');
-            }
+            Cookies.set('productId', productId);
+            toast.success('Sản phẩm đã được thêm vào giỏ hàng thành công!');
         } catch (error) {
             console.error('Error adding to cart:', error);
             toast.error('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.');
@@ -79,6 +120,25 @@ function ShopDetail() {
             return 0;
         }
     };
+    const checkFavoriteStatus = async (productId) => {
+        try {
+            // Await the response from cartService.checkFavorite
+            const favoriteResponse = await cartService.checkFavorite(productId);
+
+            // Log the full response to check its structure
+            console.log(favoriteResponse);
+
+            // Ensure the data property exists and then use it
+            if (favoriteResponse && favoriteResponse.data !== undefined) {
+                setIsFavorite(favoriteResponse.data);  // This should now work
+            } else {
+                console.error('Favorite response is missing data');
+            }
+        } catch (error) {
+            console.error("Error checking favorite status:", error);
+        }
+    };
+
 
     const fetchProductDetail = async () => {
         const accountId = Cookies.get('accountId');
@@ -93,13 +153,10 @@ function ShopDetail() {
             console.log("Fetched Product Data:", productData);
 
             setProduct(productData);
+            setTotalPrice(productData.importPrice);
             const countRSN = await fetchFavoriteCount(productId);
             setFavoriteCount(countRSN);
-            const favoriteResponse = await axios.get(`http://localhost:8080/api/favorites/check?accountId=${accountId}`, {
-                params: { productId },
-                withCredentials: true
-            });
-            setIsFavorite(favoriteResponse.data);
+            checkFavoriteStatus(productId);
         } catch (error) {
             console.error("Error fetching product details:", error);
         }
@@ -107,14 +164,27 @@ function ShopDetail() {
 
     useEffect(() => {
         fetchProductDetail();
+        fetchReviews();
     }, [productId]);
 
-    useEffect(() => {
-        if (product) {
-            setTotalPrice(product.importPrice * quantity);
+    const fetchPrice = async (productId, colorId, sizeId) => {
+        try {
+            const response = await axios.get(`http://localhost:8080/api/product-detail/price`, {
+                params: { productId, colorId, sizeId }
+            });
+            setTotalPrice(response.data * quantity); // cập nhật giá với số lượng
+        } catch (error) {
+            console.error('Error fetching price:', error);
+            toast.error('Đã xảy ra lỗi khi lấy giá sản phẩm. Vui lòng thử lại sau.');
         }
-    }, [quantity, product]);
+    };
 
+    // Gọi API để cập nhật giá mỗi khi chọn color hoặc size
+    useEffect(() => {
+        if (selectedColor && selectedSize) {
+            fetchPrice(productId, selectedColor, selectedSize);
+        }
+    }, [selectedColor, selectedSize, quantity]);
 
     const handleAddFavorite = async () => {
         const accountId = Cookies.get('accountId');
@@ -124,9 +194,7 @@ function ShopDetail() {
         }
         if (!product) return;
         try {
-            await axios.post(`http://localhost:8080/api/favorites?accountId=${accountId}`, {
-                productId: product.id
-            }, { withCredentials: true });
+            await cartService.addToFavorites(product.id);
             setIsFavorite(true);
             const count = await fetchFavoriteCount(product.id);
             setFavoriteCount(count);
@@ -144,58 +212,38 @@ function ShopDetail() {
         if (!product) return;
         try {
             const productId = product.id;
-            const response = await axios.delete(`http://localhost:8080/api/favorites/${productId}?accountId=${accountId}`, {
-
-                withCredentials: true
-            });
-            if (response.status === 204) {
-                setIsFavorite(false);
-                // Fetch the updated favorite count
-                const count = await fetchFavoriteCount(productId);
-                setFavoriteCount(count);
-            } else {
-                console.error('Failed to remove from favorites');
-            }
+            await cartService.removeFromFavorites(productId);
+            setIsFavorite(false);
+            const count = await fetchFavoriteCount(productId);
+            setFavoriteCount(count);
         } catch (error) {
             console.error('Error removing from favorites:', error.response?.data || error.message);
         }
     };
 
     const handleByNow = async () => {
-
-        const accountId = Cookies.get('accountId');
-        if (!accountId) {
-            navigate(`/authentication/sign-in`);
-            return;
-        }
-
         if (!product || !selectedColor || !selectedSize) {
             toast.error('Vui lòng chọn màu sắc và kích thước.');
             return;
         }
 
         try {
-            const response = await cartService.addToCart({
-                accountId,
+            await cartService.addToCart({
                 colorId: selectedColor,
                 sizeId: selectedSize,
                 quantity,
                 productId,
-                price: product.importPrice,
             });
-
-            if (response.status === 201 || response.status === 200) {
-                fetchTotalQuantity();
-                toast.success('Sản phẩm đã được thêm vào giỏ hàng thành công!');
-                navigate('/Cart')
-                console.log('Cart updated:', response.data);
-            } else {
-                toast.error('Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại.');
-            }
+            navigate('/Cart')
         } catch (error) {
             console.error('Error adding to cart:', error);
             toast.error('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.');
         }
+    };
+    const [activeTab, setActiveTab] = useState('tab-pane-1');
+
+    const handleTabClick = (tabId) => {
+        setActiveTab(tabId);
     };
 
     if (!product) return <div></div>;
@@ -242,13 +290,13 @@ function ShopDetail() {
                                 </div>
                                 <small className="pt-1">(99 Reviews)</small>
                             </div>
-                            <h3 className="font-weight-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>{product.importPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</h3>
+                            <h3 className="font-weight-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>{totalPrice}</h3>
                             <h3 className="font-medium-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>Số lượng: {product.importQuantity || "N/A"}</h3>
                             <div className="d-flex mb-3" id="size-input-list">
                                 <strong className="text-dark mr-3">Sizes:</strong>
                                 {product.sizes.length > 0 ? (
                                     <form>
-                                        {product.sizes.map((size) => (
+                                        {uniqueSizes.map((size) => (
                                             <div key={size.id} className="custom-control custom-radio custom-control-inline">
                                                 <input
                                                     type="radio"
@@ -272,7 +320,7 @@ function ShopDetail() {
                                 <strong className="text-dark mr-3">Colors:</strong>
                                 {product.colors.length > 0 ? (
                                     <form>
-                                        {product.colors.map((color) => (
+                                        {uniqueColors.map((color) => (
                                             <div key={color.id} className="custom-control custom-radio custom-control-inline">
                                                 <input
                                                     type="radio"
@@ -359,128 +407,36 @@ function ShopDetail() {
                     <div className="col">
                         <div className="bg-light p-30">
                             <div className="nav nav-tabs mb-4">
-                                <a className="nav-item nav-link text-dark active" data-toggle="tab"
-                                    href="#tab-pane-1">Description</a>
-                                <a className="nav-item nav-link text-dark" data-toggle="tab" href="#tab-pane-2">Information</a>
-                                <a className="nav-item nav-link text-dark" data-toggle="tab" href="#tab-pane-3">Reviews (0)</a>
+                                <a
+                                    className={`nav-item nav-link text-dark ${activeTab === 'tab-pane-1' ? 'active' : ''}`}
+                                    onClick={() => handleTabClick('tab-pane-1')}
+                                >
+                                    Description
+                                </a>
+                                <a
+                                    className={`nav-item nav-link text-dark ${activeTab === 'tab-pane-2' ? 'active' : ''}`}
+                                    onClick={() => handleTabClick('tab-pane-2')}
+                                >
+                                    Information
+                                </a>
+                                <a
+                                    className={`nav-item nav-link text-dark ${activeTab === 'tab-pane-3' ? 'active' : ''}`}
+                                    onClick={() => handleTabClick('tab-pane-3')}
+                                >
+                                    Reviews ({reviews.length})
+                                </a>
                             </div>
                             <div className="tab-content">
-                                <div className="tab-pane fade show active" id="tab-pane-1">
+                                <div className={`tab-pane fade ${activeTab === 'tab-pane-1' ? 'show active' : ''}`} id="tab-pane-1">
                                     <h4 className="mb-3">Product Description</h4>
-                                    <p>Eos no lorem eirmod diam diam, eos elitr et gubergren diam sea. Consetetur vero aliquyam
-                                        invidunt duo dolores et duo sit. Vero diam ea vero et dolore rebum, dolor rebum eirmod
-                                        consetetur invidunt sed sed et, lorem duo et eos elitr, sadipscing kasd ipsum rebum
-                                        diam. Dolore diam stet rebum sed tempor kasd eirmod. Takimata kasd ipsum accusam
-                                        sadipscing, eos dolores sit no ut diam consetetur duo justo est, sit sanctus diam tempor
-                                        aliquyam eirmod nonumy rebum dolor accusam, ipsum kasd eos consetetur at sit rebum, diam
-                                        kasd invidunt tempor lorem, ipsum lorem elitr sanctus eirmod takimata dolor ea invidunt.
-                                    </p>
-                                    <p>Dolore magna est eirmod sanctus dolor, amet diam et eirmod et ipsum. Amet dolore tempor
-                                        consetetur sed lorem dolor sit lorem tempor. Gubergren amet amet labore sadipscing clita
-                                        clita diam clita. Sea amet et sed ipsum lorem elitr et, amet et labore voluptua sit
-                                        rebum. Ea erat sed et diam takimata sed justo. Magna takimata justo et amet magna et.
-                                    </p>
+                                    <p>Eos no lorem eirmod diam diam, eos elitr et gubergren diam sea...</p>
                                 </div>
-                                <div className="tab-pane fade" id="tab-pane-2">
+                                <div className={`tab-pane fade ${activeTab === 'tab-pane-2' ? 'show active' : ''}`} id="tab-pane-2">
                                     <h4 className="mb-3">Additional Information</h4>
-                                    <p>Eos no lorem eirmod diam diam, eos elitr et gubergren diam sea. Consetetur vero aliquyam
-                                        invidunt duo dolores et duo sit. Vero diam ea vero et dolore rebum, dolor rebum eirmod
-                                        consetetur invidunt sed sed et, lorem duo et eos elitr, sadipscing kasd ipsum rebum
-                                        diam. Dolore diam stet rebum sed tempor kasd eirmod. Takimata kasd ipsum accusam
-                                        sadipscing, eos dolores sit no ut diam consetetur duo justo est, sit sanctus diam tempor
-                                        aliquyam eirmod nonumy rebum dolor accusam, ipsum kasd eos consetetur at sit rebum, diam
-                                        kasd invidunt tempor lorem, ipsum lorem elitr sanctus eirmod takimata dolor ea invidunt.
-                                    </p>
-                                    <div className="row">
-                                        <div className="col-md-6">
-                                            <ul className="list-group list-group-flush">
-                                                <li className="list-group-item px-0">
-                                                    Sit erat duo lorem duo ea consetetur, et eirmod takimata.
-                                                </li>
-                                                <li className="list-group-item px-0">
-                                                    Amet kasd gubergren sit sanctus et lorem eos sadipscing at.
-                                                </li>
-                                                <li className="list-group-item px-0">
-                                                    Duo amet accusam eirmod nonumy stet et et stet eirmod.
-                                                </li>
-                                                <li className="list-group-item px-0">
-                                                    Takimata ea clita labore amet ipsum erat justo voluptua. Nonumy.
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        <div className="col-md-6">
-                                            <ul className="list-group list-group-flush">
-                                                <li className="list-group-item px-0">
-                                                    Sit erat duo lorem duo ea consetetur, et eirmod takimata.
-                                                </li>
-                                                <li className="list-group-item px-0">
-                                                    Amet kasd gubergren sit sanctus et lorem eos sadipscing at.
-                                                </li>
-                                                <li className="list-group-item px-0">
-                                                    Duo amet accusam eirmod nonumy stet et et stet eirmod.
-                                                </li>
-                                                <li className="list-group-item px-0">
-                                                    Takimata ea clita labore amet ipsum erat justo voluptua. Nonumy.
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
+                                    <p>Eos no lorem eirmod diam diam, eos elitr et gubergren diam sea...</p>
                                 </div>
-                                <div className="tab-pane fade" id="tab-pane-3">
-                                    <div className="row">
-                                        <div className="col-md-6">
-                                            <h4 className="mb-4">1 review for Product Name</h4>
-                                            <div className="media mb-4">
-                                                <img src="img/user.jpg" alt="Image" className="img-fluid mr-3 mt-1"
-                                                    style={{ width: '45px' }} />
-                                                <div className="media-body">
-                                                    <h6>John Doe<small> - <i>01 Jan 2045</i></small></h6>
-                                                    <div className="text-primary mb-2">
-                                                        <i className="fas fa-star"></i>
-                                                        <i className="fas fa-star"></i>
-                                                        <i className="fas fa-star"></i>
-                                                        <i className="fas fa-star-half-alt"></i>
-                                                        <i className="far fa-star"></i>
-                                                    </div>
-                                                    <p>Diam amet duo labore stet elitr ea clita ipsum, tempor labore accusam
-                                                        ipsum et no at. Kasd diam tempor rebum magna dolores sed sed eirmod
-                                                        ipsum.</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="col-md-6">
-                                            <h4 className="mb-4">Leave a review</h4>
-                                            <small>Your email address will not be published. Required fields are marked
-                                                *</small>
-                                            <div className="d-flex my-3">
-                                                <p className="mb-0 mr-2">Your Rating * :</p>
-                                                <div className="text-primary">
-                                                    <i className="far fa-star"></i>
-                                                    <i className="far fa-star"></i>
-                                                    <i className="far fa-star"></i>
-                                                    <i className="far fa-star"></i>
-                                                    <i className="far fa-star"></i>
-                                                </div>
-                                            </div>
-                                            <form>
-                                                <div className="form-group">
-                                                    <label htmlFor="message">Your Review *</label>
-                                                    <textarea id="message" cols="30" rows="5" className="form-control"></textarea>
-                                                </div>
-                                                <div className="form-group">
-                                                    <label htmlFor="name">Your Name *</label>
-                                                    <input type="text" className="form-control" id="name" />
-                                                </div>
-                                                <div className="form-group">
-                                                    <label htmlFor="email">Your Email *</label>
-                                                    <input type="email" className="form-control" id="email" />
-                                                </div>
-                                                <div className="form-group mb-0">
-                                                    <input type="submit" value="Leave Your Review" className="btn btn-primary px-3" />
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
+                                <div className={`tab-pane fade ${activeTab === 'tab-pane-3' ? 'show active' : ''}`} id="tab-pane-3">
+                                <ReviewList />
                                 </div>
                             </div>
                         </div>

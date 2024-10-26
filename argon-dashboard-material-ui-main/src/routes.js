@@ -45,7 +45,7 @@ import Account from "layouts/manage/account";
 import Image from "layouts/manage/image";
 import ForgotPassword from "layouts/authentication/forgot-password";
 import Product from "layouts/manage/product";
-
+import Review from "layouts/manage/review";
 // Argon Dashboard 2 MUI components
 import ArgonBox from "components/ArgonBox";
 import Category from "layouts/manage/category";
@@ -53,8 +53,8 @@ import Brand from "layouts/manage/brand";
 import FeatureSection from "layouts/clientuser/home";
 import OrderDetail from "layouts/manage/orderdetail";
 import Role from "layouts/manage/role";
-import ShopDetail from "components/client/HasagiShopDetail/ShopDetails";
-import Shop from "components/client/HasagiShop/Shop";
+import ShopDetail from "components/client/HasagiShopDetail";
+import Shop from "components/client/HasagiShop";
 import Cart from "components/client/HasagiCart";
 import Contact from "components/client/HasagiContact";
 import Checkout from "components/client/HasagiCheckout";
@@ -64,6 +64,7 @@ import SignUp from "layouts/authentication/sign-up";
 import Complete from "components/client/HasagiComplete";
 import History from "components/client/HasagiHistory";
 import HistoryOrderDetail from "components/client/HasagiHistoryDetail";
+import Voucher from "layouts/manage/voucher";
 
 const routes = [
   {
@@ -161,6 +162,14 @@ const routes = [
     component: <Size />,
   },
   {
+    type: "route",
+    name: "Manage Review",
+    key: "review",
+    route: "/manage/review",
+    icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
+    component: <Review />,
+  },
+  {
     // type: "route",
     name: "Feature Section",
     key: "feature-section",
@@ -211,7 +220,14 @@ const routes = [
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
     component: <Image />,
   },
-
+  {
+    type: "route",
+    name: "Manage Voucher",
+    key: "voucher",
+    route: "/manage/voucher",
+    icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
+    component: <Voucher />,
+  },
   {
     type: "collapse",
     name: "Order Detail",

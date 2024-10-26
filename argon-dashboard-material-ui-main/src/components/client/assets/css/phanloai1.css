@@ -25,8 +25,8 @@
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  width: 30%;
-  max-width: 30%;
+  width: 42%;
+  max-width: 50%;
   overflow: hidden;
   animation: slideUp 0.4s ease-in-out;
 }
@@ -151,11 +151,13 @@ input[type="checkbox"] {
   justify-content: space-between;
   align-items: center;
   padding: 10px 0;
-  margin-bottom: -30px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .text-danger {
   color: #dc3545;
+  font-size: 15px;
 }
 
 .text-success {

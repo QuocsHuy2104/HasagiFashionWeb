@@ -7,272 +7,413 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import "components/client/assets/css/phanloai1.css";
 import Select from "react-select";
+import AddressService from '../../../services/AddressServices';
 
 const Backup = ({ show, onClose }) => {
-  const [fullName, setFullname] = useState("");
-  const [numberPhone, setNumBerPHone] = useState("");
-  const [address, setAddress] = useState("");
-  const [provinces, setProvinces] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [wards, setWards] = useState([]);
-  const [selectedProvince, setSelectedProvince] = useState("");
-  const [selectedDistrict, setSelectedDistrict] = useState("");
-  const [selectedWard, setSelectedWard] = useState("");
-  const navigate = useNavigate();
-  const [status, setStatus] = useState(false);
-  const [isAddressAvailable, setIsAddressAvailable] = useState(true);
+    const [fullName, setFullName] = useState("");
+    const [numberPhone, setNumBerPhone] = useState("");
+    const [address, setAddress] = useState("");
+    const [provinces, setProvinces] = useState([]);
+    const [districts, setDistricts] = useState([]);
+    const [wards, setWards] = useState([]);
+    const [selectedProvince, setSelectedProvince] = useState("");
+    const [selectedDistrict, setSelectedDistrict] = useState("");
+    const [selectedWard, setSelectedWard] = useState("");
+    const [status, setStatus] = useState(false);
+    const [isAddressAvailable, setIsAddressAvailable] = useState(true);
+    const [errors, setErrors] = useState({});
+    const [isSubmitted, setIsSubmitted] = useState(false); // New state variable
+    const navigate = useNavigate();
 
-  const handleCheckboxChange = (event) => {
-    setStatus(event.target.checked);
-  };
-
-  useEffect(() => {
-    const fetchProvinces = async () => {
-      try {
-        const response = await axios.get(
-          "https://online-gateway.ghn.vn/shiip/public-api/master-data/province",
-          {
-            headers: {
-              Token: "8d0588cd-65d9-11ef-b3c4-52669f455b4f",
-            },
-          }
-        );
-        setProvinces(response.data.data);
-      } catch (error) {
-        console.error("Error fetching provinces:", error);
-      }
-    };
-    fetchProvinces();
-  }, []);
-
-  const handleProvinceChange = async (provinceId) => {
-    setSelectedProvince(provinceId);
-    setSelectedDistrict("");
-    setSelectedWard("");
-
-    try {
-      const response = await axios.get(
-        "https://online-gateway.ghn.vn/shiip/public-api/master-data/district",
-        {
-          headers: {
-            Token: "8d0588cd-65d9-11ef-b3c4-52669f455b4f",
-          },
-          params: { province_id: provinceId },
-        }
-      );
-      setDistricts(response.data.data);
-    } catch (error) {
-      console.error("Error fetching districts:", error);
-    }
-  };
-
-  const handleDistrictChange = async (districtId) => {
-    setSelectedDistrict(districtId);
-    setSelectedWard("");
-
-    try {
-      const response = await axios.get(
-        "https://online-gateway.ghn.vn/shiip/public-api/master-data/ward",
-        {
-          headers: {
-            Token: "8d0588cd-65d9-11ef-b3c4-52669f455b4f",
-          },
-          params: { district_id: districtId },
-        }
-      );
-      setWards(response.data.data);
-    } catch (error) {
-      console.error("Error fetching wards:", error);
-    }
-  };
-
-  const handleComplete = async () => {
-    const formData = {
-      fullName,
-      numberPhone,
-      address,
-      provinceID: selectedProvince,
-      districtCode: selectedDistrict,
-      wardCode: selectedWard,
-      fullAddress: `${address}, ${selectedWard}, ${selectedDistrict}, ${selectedProvince}`,
-    };
-    const accountId = Cookies.get("accountId");
-    if (!accountId) {
-      console.error("Account ID is missing");
-      return;
-    }
-    try {
-      const response = await axios.post(
-        `http://localhost:3000/api/addresses/create?accountId=${accountId}`,
-        formData,
-        {
-          withCredentials: true,
-        }
-      );
-      const newAddressId = response.data.id;
-      onClose();
-      navigate(`/Checkout?id=${newAddressId}`);
-    } catch (error) {
-      console.error("Error submitting address:", error);
-    }
-  };
-
-  useEffect(() => {
-    const checkUserAddresses = async () => {
-      try {
-        const accountId = Cookies.get("accountId"); // Get accountId from cookies or wherever it's stored
-        if (!accountId) {
-          console.error("Account ID is missing");
-          return;
-        }
-
-        // Make the API request with accountId as a query parameter
-        const addressCheckResponse = await axios.get(
-          `http://localhost:3000/api/addresses/account?accountId=${accountId}`,
-          { withCredentials: true }
-        );
-
-        const userHasAddresses = addressCheckResponse.data.length > 0;
-
-        if (!userHasAddresses) {
-          setStatus(true);
-          setIsAddressAvailable(false);
-        } else {
-          setIsAddressAvailable(true);
-        }
-      } catch (error) {
-        console.error("Error checking user addresses:", error);
-      }
+    const handleCheckboxChange = (event) => {
+        setStatus(event.target.checked);
     };
 
-    checkUserAddresses();
-  }, []);
+    const validateForm = () => {
+        const newErrors = {};
+        if (!fullName.trim()) {
+            newErrors.fullName = "Họ và tên không được để trống.";
+        } else if (fullName.trim().split(" ").length < 2) {
+            newErrors.fullName = "Vui lòng điền Họ và Tên.";
+        }
+        if (!numberPhone.trim()) {
+            newErrors.numberPhone = "Số điện thoại không được để trống.";
+        } else if (!/^0\d{9}$/.test(numberPhone.trim())) {
+            newErrors.numberPhone = "Số điện thoại không hợp lệ.";
+        }
+        if (!address.trim()) {
+            newErrors.address = "Địa chỉ cụ thể không được để trống.";
+        }
+        if (!selectedProvince) {
+            newErrors.selectedProvince = "Vui lòng chọn tỉnh/thành phố.";
+        }
+        if (!selectedDistrict) {
+            newErrors.selectedDistrict = "Vui lòng chọn quận/huyện.";
+        }
+        if (!selectedWard) {
+            newErrors.selectedWard = "Vui lòng chọn phường/xã.";
+        }
 
-  //chọn tỉnh thành phố
-  const provinceOptions = provinces.map((province) => ({
-    value: province.ProvinceID,
-    label: province.ProvinceName,
-  }));
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
-  //chọn quận/huyện
-  const districtOptions = districts.map((district) => ({
-    value: district.DistrictID,
-    label: district.DistrictName,
-  }));
+    {
+        isSubmitted && errors.selectedProvince && (
+            <div className="text-danger">{errors.selectedProvince}</div>
+        )
+    }
+    {
+        isSubmitted && errors.selectedDistrict && (
+            <div className="text-danger">{errors.selectedDistrict}</div>
+        )
+    }
+    {
+        isSubmitted && errors.selectedWard && (
+            <div className="text-danger">{errors.selectedWard}</div>
+        )
+    }
 
-  //phường xã
-  const wardOptions = wards.map((ward) => ({
-    value: ward.WardCode,
-    label: ward.WardName,
-  }));
 
-  if (!show) return null;
+    const handleInputClick = (field) => {
+        setErrors((prevErrors) => ({
+            ...prevErrors,
+            [field]: "", 
+        }));
+    };
 
-  return (
-    <div className="modal1">
-      <div className="modal1-dialog">
-        <div className="modal1-content">
-          <div className="modal1-header">
-            <h5 className="modal1-title">Địa chỉ mới</h5>
-            <button type="button" className="btn-close" onClick={onClose}></button>
-          </div>
-          <div className="modal1-body p-4">
-            <div className="row">
-              <div className="col-md-6 form-group">
-                <label>Họ và tên</label>
-                <ArgonInput
-                  type="text"
-                  placeholder="Nguyễn Văn A"
-                  value={fullName}
-                  onChange={(e) => setFullname(e.target.value)}
-                />
-              </div>
-              <div className="col-md-6 form-group">
-                <label>Số điện thoại</label>
-                <ArgonInput
-                  type="text"
-                  placeholder="0123 456 789"
-                  value={numberPhone}
-                  onChange={(e) => setNumBerPHone(e.target.value)}
-                />
-              </div>
-              <div className="col-md-12 form-group">
-                <label>Địa chỉ cụ thể</label>
-                <ArgonInput
-                  type="text"
-                  placeholder="Số đường"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                />
-              </div>
+    const handleFullNameChange = (e) => {
+        const value = e.target.value;
+        setFullName(value);
 
-              {/* Select tỉnh/thành phố */}
-              <div className="col-md-12 form-group">
-                <label>Tỉnh/Thành phố</label>
-                <Select
-                  className="province-select"
-                  value={provinceOptions.find((option) => option.value === selectedProvince)} // Hiển thị giá trị đã chọn
-                  onChange={(selectedOption) => handleProvinceChange(selectedOption.value)} // Gọi hàm với value của tùy chọn
-                  options={provinceOptions} // Danh sách tỉnh/thành phố
-                  placeholder="Chọn tỉnh/thành phố"
-                  isSearchable
-                />
-              </div>
+        if (isSubmitted) {
+            setErrors((prevErrors) => ({ ...prevErrors, fullName: "" }));
+        }
+    };
 
-              {/* Select quận/huyện */}
-              <div className="col-md-12 form-group">
-                <label>Quận/Huyện</label>
-                <Select
-                  className="district-select"
-                  value={districtOptions.find((option) => option.value === selectedDistrict)} // Hiển thị giá trị đã chọn
-                  onChange={(selectedOption) => handleDistrictChange(selectedOption.value)} // Gọi hàm khi chọn giá trị mới
-                  options={districtOptions} // Danh sách quận/huyện
-                  placeholder="Chọn quận/huyện"
-                  isDisabled={!selectedProvince} // Vô hiệu hóa nếu chưa chọn tỉnh
-                  isSearchable // Cho phép tìm kiếm
-                />
-              </div>
+    const handleFullNameBlur = () => {
+        if (isSubmitted) {
+            validateForm(); // Validate only when the field loses focus
+        }
+    };
 
-              {/* Select phường/xã */}
-              <div className="col-md-12 form-group">
-                <label>Phường/Xã</label>
-                <Select
-                  className="ward-select"
-                  value={wardOptions.find((option) => option.value === selectedWard)} // Hiển thị giá trị đã chọn
-                  onChange={(selectedOption) => setSelectedWard(selectedOption.value)} // Cập nhật phường/xã khi chọn
-                  options={wardOptions} // Danh sách phường/xã
-                  placeholder="Chọn phường/xã"
-                  isDisabled={!selectedDistrict} // Vô hiệu hóa nếu chưa chọn quận/huyện
-                  isSearchable // Cho phép tìm kiếm
-                />
-              </div>
-              <input
-                type="checkbox"
-                checked={status}
-                onChange={handleCheckboxChange}
-                disabled={!isAddressAvailable}
-                style={{ transform: "scale(1.5)", marginBottom: "0" }}
-              />
-              <label style={{ marginLeft: "10px", marginBottom: "0" }}>Select All</label>
+    const handleNumberPhoneChange = (e) => {
+        const value = e.target.value;
+        setNumBerPhone(value);
+
+        // Clear the specific error on change
+        if (isSubmitted) {
+            setErrors((prevErrors) => ({ ...prevErrors, numberPhone: "" }));
+        }
+    };
+
+    const handleNumberPhoneBlur = () => {
+        if (isSubmitted) {
+            validateForm(); 
+        }
+    };
+
+
+    const handleAddressChange = (e) => {
+        const value = e.target.value;
+        setAddress(value);
+        if (isSubmitted) {
+            setErrors((prevErrors) => ({ ...prevErrors, address: "" }));
+        }
+    };
+
+    const handleAddressBlur = () => {
+        if (isSubmitted) {
+            validateForm(); // Validate only when the field loses focus
+        }
+    };
+
+    useEffect(() => {
+        const fetchProvinces = async () => {
+            try {
+                const response = await axios.get(
+                    "https://online-gateway.ghn.vn/shiip/public-api/master-data/province",
+                    { headers: { Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d" } }
+                );
+                if (response.data && response.data.data) {
+                    setProvinces(response.data.data);
+                }
+            } catch (error) {
+                console.error("Error fetching provinces:", error);
+                alert("Không thể tải danh sách tỉnh/thành phố. Vui lòng thử lại.");
+            }
+        };
+        fetchProvinces();
+    }, []);
+
+    const handleProvinceChange = async (provinceId) => {
+        setSelectedProvince(provinceId);
+        setSelectedDistrict("");
+        setSelectedWard("");
+
+        setErrors((prevErrors) => ({ ...prevErrors, selectedProvince: "" }));
+
+        try {
+            const response = await axios.get(
+                "https://online-gateway.ghn.vn/shiip/public-api/master-data/district",
+                { headers: { Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d" }, params: { province_id: provinceId } }
+            );
+            if (response.data && response.data.data) {
+                setDistricts(response.data.data);
+            }
+        } catch (error) {
+            console.error("Error fetching districts:", error);
+            alert("Không thể tải danh sách quận/huyện. Vui lòng thử lại.");
+        }
+    };
+
+    const handleDistrictChange = async (districtId) => {
+        setSelectedDistrict(districtId);
+        setSelectedWard("");
+
+        setErrors((prevErrors) => ({ ...prevErrors, selectedDistrict: "" }));
+
+        try {
+            const response = await axios.get(
+                "https://online-gateway.ghn.vn/shiip/public-api/master-data/ward",
+                { headers: { Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d" }, params: { district_id: districtId } }
+            );
+            if (response.data && response.data.data) {
+                setWards(response.data.data);
+            }
+        } catch (error) {
+            console.error("Error fetching wards:", error);
+            alert("Không thể tải danh sách phường/xã. Vui lòng thử lại.");
+        }
+    };
+
+    const handleComplete = async () => {
+        setIsSubmitted(true); 
+
+        const isValid = validateForm();
+        if (!isValid) return;
+
+        const formData = {
+            fullName,
+            numberPhone,
+            address,
+            status,
+            provinceID: selectedProvince,
+            districtCode: selectedDistrict,
+            wardCode: selectedWard,
+        };
+        
+        try {
+            const response = await AddressService.createAddressFirst(formData);
+        
+            if (response && response.data && response.data.id) {
+                const newAddressId = response.data.id;
+                onClose();
+                navigate(`/Checkout?id=${newAddressId}`);
+            } else {
+                console.log("Invalid response structure or missing ID:", response);
+                alert("Không thể lưu địa chỉ. Vui lòng thử lại.");
+            }
+        } catch (error) {
+            console.error("Error submitting address:", error);
+            alert("Không thể lưu địa chỉ. Vui lòng thử lại.");
+        }        
+    };
+
+    useEffect(() => {
+        const checkUserAddresses = async () => {
+            try {             
+                const response = await AddressService.getAllAddress(); 
+                const userHasAddresses = response.data.length > 0;
+                setIsAddressAvailable(userHasAddresses);
+                if (!userHasAddresses) setStatus(true);
+            } catch (error) {
+                console.error("Error checking user addresses:", error);
+                alert("Không thể kiểm tra địa chỉ của bạn.");
+            }
+        };
+        checkUserAddresses();
+    }, []);
+
+    const provinceOptions = provinces.map((province) => ({
+        value: province.ProvinceID,
+        label: province.ProvinceName,
+    }));
+
+    const districtOptions = districts.map((district) => ({
+        value: district.DistrictID,
+        label: district.DistrictName,
+    }));
+
+    const wardOptions = wards.map((ward) => ({
+        value: ward.WardCode,
+        label: ward.WardName,
+    }));
+
+    const resetForm = () => {
+        setFullName("");
+        setNumBerPhone("");
+        setAddress("");
+        setSelectedProvince("");
+        setSelectedDistrict("");
+        setSelectedWard("");
+        setErrors({});
+        setIsSubmitted(false);
+        setDistricts([]);
+        setWards([]);
+    };
+
+    const handleModalClose = () => {
+        resetForm(); // Reset form data
+        onClose(); // Close the modal
+    };
+
+    if (!show) return null;
+
+    return (
+        <div className="modal1">
+            <div className="modal1-dialog">
+                <div className="modal1-content">
+                    <div className="modal1-header">
+                        <h5 className="modal1-title">Địa chỉ mới</h5>
+                        <button type="button" className="btn-close" onClick={onClose}></button>
+                    </div>
+                    <div className="modal1-body p-4">
+                        <div className="row">
+                            <div className="col-md-6 form-group">
+                                <ArgonInput
+                                    type="text"
+                                    name="fullName"
+                                    placeholder="Họ và tên"
+                                    value={fullName}
+                                    onChange={handleFullNameChange}
+                                    onBlur={handleFullNameBlur} // Validate on blur
+                                    onClick={() => handleInputClick("fullName")}
+                                    onFocus={() => handleInputClick("fullName")} // Xóa lỗi khi focus vào input
+                                    className={errors.fullName ? "border-danger" : ""}
+                                    style={{
+                                        color: errors.fullName ? 'red' : 'black',
+                                        fontWeight: errors.fullName ? 'bold' : 'normal',
+                                    }}
+                                />
+                                {isSubmitted && errors.fullName && (
+                                    <div className="text-danger">{errors.fullName}</div>
+                                )}
+                            </div>
+                            <div className="col-md-6 form-group">
+                                <ArgonInput
+                                    type="text"
+                                    name="numberPhone"
+                                    placeholder="Số điện thoại"
+                                    value={numberPhone}
+                                    onChange={handleNumberPhoneChange}
+                                    onBlur={handleNumberPhoneBlur} // Validate on blur
+                                    onClick={() => handleInputClick("numberPhone")}
+                                    onFocus={() => handleInputClick("numberPhone")}
+                                    className={errors.numberPhone ? "border-danger" : ""}
+                                    style={{
+                                        color: errors.numberPhone ? 'red' : 'black',
+                                        fontWeight: errors.numberPhone ? 'bold' : 'normal',
+                                    }}
+                                />
+                                {isSubmitted && errors.numberPhone && (
+                                    <div className="text-danger">{errors.numberPhone}</div>
+                                )}
+                            </div>
+                            <div className="col-md-12 form-group">
+                                <ArgonInput
+                                    type="text"
+                                    name="address"
+                                    placeholder="Địa chỉ cụ thể"
+                                    value={address}
+                                    onChange={handleAddressChange}
+                                    onBlur={handleAddressBlur} // Validate on blur
+                                    onClick={() => handleInputClick("address")}
+                                    onFocus={() => handleInputClick("address")} // Xóa lỗi khi focus vào input
+                                    className={errors.address ? "border-danger" : ""}
+                                    style={{
+                                        color: errors.address ? 'red' : 'black',
+                                        fontWeight: errors.address ? 'bold' : 'normal',
+                                    }}
+                                />
+                                {isSubmitted && errors.address && (
+                                    <div className="text-danger">{errors.address}</div>
+                                )}
+                            </div>
+                            <div className="col-md-12 form-group">
+                                <Select
+                                    placeholder="Chọn tỉnh/thành phố"
+                                    value={provinceOptions.find((option) => option.value === selectedProvince)}
+                                    onChange={(option) => {
+                                        handleProvinceChange(option.value);
+                                        // Clear any errors related to province selection when a new province is selected
+                                        setErrors((prevErrors) => ({ ...prevErrors, selectedProvince: "" }));
+                                    }}
+                                    options={provinceOptions}
+                                />
+                                {isSubmitted && errors.selectedProvince && (
+                                    <div className="text-danger">{errors.selectedProvince}</div>
+                                )}
+                            </div>
+                            <div className="col-md-12 form-group">
+                                <Select
+                                    placeholder="Chọn quận/huyện"
+                                    value={districtOptions.find((option) => option.value === selectedDistrict)}
+                                    onChange={(option) => {
+                                        handleDistrictChange(option.value);
+                                        // Clear any errors related to district selection when a new district is selected
+                                        setErrors((prevErrors) => ({ ...prevErrors, selectedDistrict: "" }));
+                                    }}
+                                    options={districtOptions}
+                                    isDisabled={!selectedProvince}
+                                />
+                                {isSubmitted && errors.selectedDistrict && (
+                                    <div className="text-danger">{errors.selectedDistrict}</div>
+                                )}
+                            </div>
+                            <div className="col-md-12 form-group">
+                                <Select
+                                    placeholder="Chọn phường/xã"
+                                    value={wardOptions.find((option) => option.value === selectedWard)}
+                                    onChange={(option) => {
+                                        setSelectedWard(option.value);
+                                        // Clear any errors related to ward selection when a new ward is selected
+                                        setErrors((prevErrors) => ({ ...prevErrors, selectedWard: "" }));
+                                    }}
+                                    options={wardOptions}
+                                    isDisabled={!selectedDistrict}
+                                />
+                                {isSubmitted && errors.selectedWard && (
+                                    <div className="text-danger">{errors.selectedWard}</div>
+                                )}
+                            </div>
+                            <label style={{ marginLeft: "10px" }}>
+                                Đặt làm địa chỉ mặc định
+                                <input
+                                    type="checkbox"
+                                    checked={status}
+                                    onChange={handleCheckboxChange}
+                                    disabled={!isAddressAvailable}
+                                    style={{ transform: "scale(1.5)", marginLeft: "10px" }}
+                                />
+                            </label>
+                        </div>
+                        <div className="d-flex justify-content-between mt-4">
+                            <ArgonButton onClick={handleModalClose}>Trở lại</ArgonButton>
+                            <ArgonButton className="btn btn-primary" onClick={handleComplete}>
+                                Hoàn thành
+                            </ArgonButton>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div className="d-flex justify-content-between mt-4">
-              <ArgonButton className="btn btn-light" onClick={() => onClose()}>
-                Trở Lại
-              </ArgonButton>
-              <ArgonButton className="btn btn-primary" onClick={handleComplete}>
-                Hoàn thành
-              </ArgonButton>
-            </div>
-          </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 Backup.propTypes = {
-  show: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
+    show: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired,
 };
 
 export default Backup;
