@@ -202,15 +202,22 @@ const VoucherList = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [voucherResponse, usedVoucherResponse] = await Promise.all([
-                    VoucherService.getAllVouchers(),
-                    VoucherService.getUsedVouchersByAccount(accountId),
-                ]);
+                if (accountId) {
+                    const [voucherResponse, usedVoucherResponse] = await Promise.all([
+                        VoucherService.getAllVouchers(),
+                        VoucherService.getUsedVouchersByAccount(accountId),
+                    ]);
+                    const activeVouchers = voucherResponse.data.filter(voucher => voucher.isActive);
 
-                const activeVouchers = voucherResponse.data.filter(voucher => voucher.isActive);
+                    setVouchers(activeVouchers);
+                    setUsedVouchers(usedVoucherResponse.data);
+                } else {
+                    const voucherResponse = await VoucherService.getAllVouchers();
+                    const activeVouchers = voucherResponse.data.filter(voucher => voucher.isActive);
 
-                setVouchers(activeVouchers);
-                setUsedVouchers(usedVoucherResponse.data);
+                    setVouchers(activeVouchers);
+                    setUsedVouchers([]);
+                }
             } catch (error) {
                 console.error("Error fetching data:", error);
             } finally {
@@ -218,9 +225,7 @@ const VoucherList = () => {
             }
         };
 
-        if (accountId) {
-            fetchData();
-        }
+        fetchData();
     }, [accountId]);
 
     const availableVouchers = vouchers.filter(voucher =>

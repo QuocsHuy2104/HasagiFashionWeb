@@ -188,7 +188,7 @@ const HistoryOrderDetail = () => {
                   <h5 className="mb-1" style={{ fontWeight: "bold", fontSize: "24px", color: "#343a40", marginLeft: '-15px' }}>Quay lại</h5>
                 </div>
                 <div style={styles.progressContainer}>
-                  {status !== 'Đã hủy' && steps.map((step, index) => (
+                  {status !== 'Đã hủy' && status !== "Chờ hoàn tiền" && steps.map((step, index) => (
                     <div key={index} style={styles.step}>
                       <div
                         style={{
@@ -226,7 +226,7 @@ const HistoryOrderDetail = () => {
                     </div>
                   ))}
                 </div>
-                {status === "Đã hủy" && (
+                {(status === "Đã hủy" || status === "Chờ hoàn tiền") && (
                   <Box
                     display="flex"
                     flexDirection="column"
