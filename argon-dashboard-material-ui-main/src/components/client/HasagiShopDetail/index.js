@@ -405,38 +405,38 @@ function ShopDetail() {
                 </div>
                 <div className="row px-xl-5">
                     <div className="col">
-                        <div className="bg-light p-30">
+                        <div className="bg-light" style={{ marginBottom: "-50px" }}>
                             <div className="nav nav-tabs mb-4">
                                 <a
                                     className={`nav-item nav-link text-dark ${activeTab === 'tab-pane-1' ? 'active' : ''}`}
                                     onClick={() => handleTabClick('tab-pane-1')}
                                 >
-                                    Description
+                                    Chi tiết sản phẩm
                                 </a>
                                 <a
                                     className={`nav-item nav-link text-dark ${activeTab === 'tab-pane-2' ? 'active' : ''}`}
                                     onClick={() => handleTabClick('tab-pane-2')}
                                 >
-                                    Information
+                                    Mô tả sản phẩm
                                 </a>
                                 <a
                                     className={`nav-item nav-link text-dark ${activeTab === 'tab-pane-3' ? 'active' : ''}`}
                                     onClick={() => handleTabClick('tab-pane-3')}
                                 >
-                                    Reviews ({reviews.length})
+                                    Đánh giá ({reviews.length})
                                 </a>
                             </div>
                             <div className="tab-content">
                                 <div className={`tab-pane fade ${activeTab === 'tab-pane-1' ? 'show active' : ''}`} id="tab-pane-1">
-                                    <h4 className="mb-3">Product Description</h4>
-                                    <p>Eos no lorem eirmod diam diam, eos elitr et gubergren diam sea...</p>
+                                    <p>Danh mục: Áo</p>
+                                    <p>Kho: 100</p>
+                                    <p>Thương hiệu: Gucci</p>
                                 </div>
                                 <div className={`tab-pane fade ${activeTab === 'tab-pane-2' ? 'show active' : ''}`} id="tab-pane-2">
-                                    <h4 className="mb-3">Additional Information</h4>
-                                    <p>Eos no lorem eirmod diam diam, eos elitr et gubergren diam sea...</p>
+                                <p>{product.description}</p>
                                 </div>
                                 <div className={`tab-pane fade ${activeTab === 'tab-pane-3' ? 'show active' : ''}`} id="tab-pane-3">
-                                <ReviewList />
+                                    <ReviewList />
                                 </div>
                             </div>
                         </div>
