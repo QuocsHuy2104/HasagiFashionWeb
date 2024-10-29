@@ -22,11 +22,14 @@ const MenuProps = {
 };
 
 export default function MultipleSelectCheckmarks({ model, selectModel, onChange, nameTag }) {
+    const [selectedValues, setSelectedValues] = React.useState(selectModel || []);
+
     const handleChange = (event) => {
         const {
             target: { value },
         } = event;
         const newSelectModel = typeof value === 'string' ? value.split(',') : value;
+        setSelectedValues(newSelectModel);
 
         if (typeof onChange === 'function') {
             onChange(newSelectModel);
@@ -34,27 +37,26 @@ export default function MultipleSelectCheckmarks({ model, selectModel, onChange,
     };
 
     return (
-        <FormControl sx={{ width: { xs: '100%', sm: '100%' } }}>  {/* Full width on small screens, fixed on larger */}
+        <FormControl sx={{ width: { xs: '100%', sm: '100%' } }}>  {/* Full width on small screens, fixed on larger */} 
             <InputLabel id="demo-multiple-checkbox-label">{nameTag}</InputLabel>
             <Select
                 labelId="demo-multiple-checkbox-label"
                 id="demo-multiple-checkbox"
                 multiple
-                value={selectModel}
+                value={selectedValues} 
                 onChange={handleChange}
-                input={<OutlinedInput label="Roles" />}
+                input={<OutlinedInput label={nameTag} />} 
                 renderValue={(selected) => selected.join(', ')}
                 MenuProps={MenuProps}
             >
                 {model.map((children) => (
-                    <MenuItem key={children.name} value={model.name} sx={{ margin: '5px 0' }}>
-                        <Checkbox checked={selectModel.indexOf(children.name) > -1} />
+                    <MenuItem key={children.name} value={children.name} sx={{ margin: '5px 0' }}>
+                        <Checkbox checked={selectedValues.indexOf(children.name) > -1} />
                         <ListItemText primary={children.name} />
                     </MenuItem>
                 ))}
             </Select>
         </FormControl>
-
     );
 }
 

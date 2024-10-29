@@ -92,10 +92,6 @@ const AuthorsTableData = ({ onEditClick, searchTerm = "", selectedRoles = [] }) 
 
     setAccounts(updatedAccounts);
 
-    // Log account details
-    console.log("Account ID:", account.id);
-    console.log("Delete status:", account.delete);
-
     // Make API call to update dismissal status
     AccountService.dismissalAccount(account.id)
       .then((res) => {

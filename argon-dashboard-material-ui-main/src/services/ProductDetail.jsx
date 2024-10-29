@@ -1,7 +1,7 @@
 import apiClient from "config/axiosConfig";
 
 const ShopDetailService = {
-    getAllShopDetail: () => apiClient.get('/cart/totalQuantity',{
+    getAllShopDetail: () => apiClient.get('/cart/totalQuantity', {
         withCredentials: true
     }),
 
@@ -16,7 +16,7 @@ const ShopDetailService = {
 
     addToCart: ({ accountId, colorId, sizeId, quantity, productId, price }) =>
         apiClient.post('/cart/add', {
-            accountId,  
+            accountId,
             colorId,
             sizeId,
             quantity,
@@ -33,10 +33,10 @@ const ShopDetailService = {
         apiClient.post('/favorites', {
             productId
         }, { withCredentials: true }),
-    
+
     removeFromFavorites: (productId) =>
-        apiClient.delete(`/favorites/${productId}`, { 
-            withCredentials: true 
+        apiClient.delete(`/favorites/${productId}`, {
+            withCredentials: true
         }),
 };
 

@@ -65,6 +65,7 @@ import SignUp from "layouts/authentication/sign-up";
 import Complete from "components/client/HasagiComplete";
 import History from "components/client/HasagiHistory";
 import HistoryOrderDetail from "components/client/HasagiHistoryDetail";
+import ProductDetail from "layouts/manage/productDetail";
 
 const routes = [
   {
@@ -128,6 +129,13 @@ const routes = [
     route: "/manage/product",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
     component: <Product />,
+  },
+  {
+    name: "Manage Product Detail",
+    key: "product-detail",
+    route: "/manage/product-detail",
+    icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
+    component: <ProductDetail />,
   },
   {
     type: "route",
@@ -248,7 +256,7 @@ const routes = [
     showInSidenav: true,
   },
   {
-    // type: "route",
+    // type: "route", 
     name: "Contact",
     key: "contact",
     route: "/Contact",
@@ -279,7 +287,7 @@ const routes = [
     route: "/Complete",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
     component: <Complete />,
-    showInSidenav: true, 
+    showInSidenav: true,
   },
   {
     // type: "route",
@@ -287,8 +295,8 @@ const routes = [
     key: "history",
     route: "/History",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
-    component: <History/>,
-    showInSidenav: true, 
+    component: <History />,
+    showInSidenav: true,
   },
   {
     // type: "route",
@@ -296,8 +304,8 @@ const routes = [
     key: "historyorderdetail",
     route: "/history-order/:orderId",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
-    component: <HistoryOrderDetail/>,
-    showInSidenav: true, 
+    component: <HistoryOrderDetail />,
+    showInSidenav: true,
   },
 ];
 

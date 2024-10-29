@@ -66,7 +66,8 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                     backgroundColor: '#F9F9F9',
                     padding: '5px',
                     borderRadius: '50%'
-                }} />
+                }}
+            />
 
             {hover && (
                 <>
