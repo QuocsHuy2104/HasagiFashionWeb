@@ -44,9 +44,6 @@ const Cart = () => {
             setCartItems(cartResponse.data);
             setAccountExists(addressResponse.data.exists);
             setAddress(addressResponse.data.addressId);
-            console.log("Cart Response:", cartResponse.data);
-            console.log("Address Response:", addressResponse.data);
-
         } catch (error) {
             console.error("Error fetching data:", error);
         } finally {
@@ -78,7 +75,6 @@ const Cart = () => {
             });
         } catch (error) {
             console.error("Error updating quantity:", error);
-
         }
     };
 
@@ -146,7 +142,6 @@ const Cart = () => {
             setSelectAll(false);
             toast.success("Xóa sản phẩm thành công.");
         } catch (error) {
-            console.error("Error deleting items:", error);
             toast.error("Có lỗi xảy ra khi xóa sản phẩm.");
         }
     };

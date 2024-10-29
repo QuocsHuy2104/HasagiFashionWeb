@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
 import "components/client/assets/css/style.css";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCcVisa, faCcMastercard, faCcAmex } from '@fortawesome/free-brands-svg-icons';
 import ArgonButton from "components/ArgonButton";
 import AddressSelection from "components/client/HasagiBackup1";
 import axios from 'axios';
@@ -107,7 +105,7 @@ const Checkout = () => {
         try {
             const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee', {
                 headers: {
-                    'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f'
+                    'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d'
                 },
                 params: {
                     from_district_id: XuanKhanhDistrictID,

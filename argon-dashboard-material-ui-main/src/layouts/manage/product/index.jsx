@@ -21,7 +21,8 @@ import InputAdornment from '@mui/material/InputAdornment';
 import { FormControl, InputLabel, MenuItem, Select, Checkbox, ListItemText, OutlinedInput } from '@mui/material';
 import MultipleSelectCheckmarks from "./selectTag"
 import Footer from "../../../examples/Footer";
-
+import ColorService from "services/ColorServices";
+import SizeService from "services/SizeServices";
 import BrandService from "../../../services/BrandServices";
 import CategoriesService from "../../../services/CategoryServices";
 import ProductService from "../../../services/ProductServices";

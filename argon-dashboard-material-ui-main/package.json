@@ -33,6 +33,8 @@
     "@mui/x-data-grid": "^7.18.0",
     "@pathofdev/react-tag-input": "1.0.7",
     "@react-oauth/google": "^0.12.1",
+    "@tensorflow-models/mobilenet": "^2.1.1",
+    "@tensorflow/tfjs": "^4.22.0",
     "@testing-library/jest-dom": "5.16.5",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "^13.5.0",

@@ -1,30 +1,19 @@
+import { Link } from "react-router-dom"; // Ensure you have this import
 import PropTypes from "prop-types";
 import Card from "@mui/material/Card";
-import MuiLink from "@mui/material/Link";
+
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
+
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+
 import { useState } from "react";
-import ProductPopup from "components/client/HasagiPopup";
 
-function HasagiCard2({ image, name, id, price, sale = 0 }) {
-
+function HasagiCard2({ image, name, id, importPrice, sale }) {
     const [hover, setHover] = useState(false);
-    const [isPopupOpen, setIsPopupOpen] = useState(false);
-    const [selectedProductId, setSelectedProductId] = useState(null);
-
-    const handleOpenPopup = () => {
-        console.log(`Opening popup for product ID: ${id}`);
-        setSelectedProductId(id);
-        setIsPopupOpen(true);
-    };
-
-    const handleClosePopup = () => {
-        setIsPopupOpen(false);
-        setSelectedProductId(null);
-    };
+    const discountedPrice = (importPrice * (1 - sale / 100)).toFixed(0);
 
     return (
         <Card
@@ -49,7 +38,8 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                     position: 'absolute',
                     top: 15,
                     left: 15,
-                    fontSize: '13px'
+                    fontSize: '13px',
+                     zIndex: '1200'
                 }}
             >
                 -{sale}%
@@ -64,13 +54,15 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                     right: 15,
                     backgroundColor: '#F9F9F9',
                     padding: '5px',
-                    borderRadius: '50%'
-                }} />
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                     zIndex: '1200'
+                }} 
+            />
 
             {hover && (
                 <>
                     <SearchOutlinedIcon
-                        onClick={handleOpenPopup}
                         sx={{
                             width: '2em',
                             height: '2em',
@@ -80,10 +72,10 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                             backgroundColor: '#F9F9F9',
                             padding: '5px',
                             borderRadius: '50%',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                             zIndex: '1200'
                         }}
                     />
-
                     <ShoppingCartIcon
                         sx={{
                             width: '2em',
@@ -94,13 +86,13 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                             backgroundColor: '#F9F9F9',
                             padding: '5px',
                             borderRadius: '50%',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            zIndex: '1200'
                         }}
                     />
                 </>
             )}
-
-            <MuiLink href={`/ShopDetail?id=${id}`} target="_blank" rel="noreferrer">
+            <Link to={`/ShopDetail?id=${id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                 <ArgonBox
                     mt={2}
                     mx={2}
@@ -115,13 +107,15 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                         component="img"
                         src={image}
                         alt={name}
-                        height="275px"
+                        height="480px"
                         width="auto"
                         borderRadius="lg"
                         style={{
                             transition: 'transform 0.3s ease',
                             transform: hover ? 'scale(1.1)' : 'scale(1)',
                             overflow: 'hidden',
+                            height: '400px',
+                            width: '100%'
                         }}
                     />
                 </ArgonBox>
@@ -129,36 +123,51 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                 <ArgonTypography variant="h5" component="p" color="text" my={2}>{name}</ArgonTypography>
 
                 <ArgonBox display="flex" alignItems="center">
-                    <ArgonTypography
-                        variant="body2"
-                        component="p"
-                        color="secondary"
-                        style={{ textDecoration: 'line-through' }}
-                    >
-                        {price} VNĐ
-                    </ArgonTypography>
+                    {sale > 0 && (
+                        <>
+                            <ArgonTypography
+                                variant="body2"
+                                component="p"
+                                color="secondary"
+                                style={{ textDecoration: 'line-through' }}
+                            >
+                                {importPrice} VNĐ
+                            </ArgonTypography>
 
-                    <ArgonTypography
-                        variant="subtitle2"
-                        component="p"
-                        color="error"
-                        style={{ marginLeft: '8px' }}
-                    >
-                        {price} VNĐ
-                    </ArgonTypography>
+                            <ArgonTypography
+                                variant="subtitle2"
+                                component="p"
+                                color="error"
+                                style={{ marginLeft: '8px' }}
+                            >
+                                {discountedPrice} VNĐ
+                            </ArgonTypography>
+                        </>
+                    )}
+                    {sale === 0 && (
+                        <ArgonTypography
+                            variant="subtitle2"
+                            component="p"
+                            color="error"
+                        >
+                            {importPrice} VNĐ
+                        </ArgonTypography>
+                    )}
                 </ArgonBox>
-            </MuiLink>
-
-            <ProductPopup open={isPopupOpen} handleClose={handleClosePopup} id={selectedProductId} />
+            </Link>
         </Card>
     );
 }
 
+HasagiCard2.defaultProps = {
+    sale: 0
+};
+
 HasagiCard2.propTypes = {
     image: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
-    id: PropTypes.number.isRequired,
-    price: PropTypes.string.isRequired,
+    id: PropTypes.string.isRequired,
+    importPrice: PropTypes.number.isRequired,
     sale: PropTypes.number.isRequired,
 };
 

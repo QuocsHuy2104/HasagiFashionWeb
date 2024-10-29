@@ -11,12 +11,10 @@ import ArgonTypography from 'components/ArgonTypography';
 import logo from 'components/client/assets/images/logo-ct-dark.png';
 import ArgonAvatar from 'components/ArgonAvatar';
 import useCartQuantity from "../HasagiQuantity/useCartQuantity";
-
 import PersonIcon from '@mui/icons-material/Person';
 import ReorderIcon from '@mui/icons-material/Reorder';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
-
+import { faShoppingCart, faCamera } from '@fortawesome/free-solid-svg-icons';
 import CategoriesService from 'services/CategoryServices';
 import BrandsService from 'services/BrandServices';
 import { jwtDecode } from 'jwt-decode';
@@ -59,9 +57,20 @@ export default function Header(props) {
     const handleSearchChange = (event) => {
         const value = event.target.value;
         setSearchTerm(value);
-        onSearch(value); 
+        onSearch(value);
     };
 
+    const handleImageSearch = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const fileName = file.name;
+            const productName = fileName.substring(0, fileName.lastIndexOf('.'));
+            
+            setSearchTerm(productName);
+            onSearch(file); 
+        }
+    };
+    
     useEffect(() => {
         fetchTotalQuantity();
     }, [fetchTotalQuantity]);
@@ -247,11 +256,26 @@ export default function Header(props) {
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 opacity: 1,
+                                                marginRight: '15px'
                                             }}
                                         >
                                             <FontAwesomeIcon icon={faMicrophone} style={{ fontSize: '1.5rem', color: '#333' }} /> {/* Adjust color if needed */}
                                         </button>
+                                        <label htmlFor="image-upload" style={{ cursor: 'pointer', marginLeft: '10px' }}>
+                                            <FontAwesomeIcon
+                                                icon={faCamera}
+                                                style={{ fontSize: '1.5rem', color: '#333', cursor: 'pointer', paddingLeft: '10px' }}
+                                            />
+                                            <input
+                                                id="image-upload"
+                                                type="file"
+                                                accept="uploads/*"
+                                                style={{ display: 'none' }}
+                                                onChange={handleImageSearch}
+                                            />
+                                        </label>
                                     </ArgonBox>
+                                    
 
                                 </ArgonBox>
 

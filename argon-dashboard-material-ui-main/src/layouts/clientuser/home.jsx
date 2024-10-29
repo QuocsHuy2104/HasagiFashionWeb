@@ -31,10 +31,13 @@ function Home() {
     const categoryPages = [];
     const [searchTerm, setSearchTerm] = useState("");
     const [time, setTime] = useState({ hours: 1, minutes: 26, seconds: 9 });
+    const [searchHistory, setSearchHistory] = useState([]);
 
     const handleSearch = (term) => {
         setSearchTerm(term);
         setCurrentPage(1);
+        setSearchHistory((prev) => [...prev, term]);
+
     };
     React.useEffect(() => {
         const fetchData = async () => {
@@ -87,7 +90,7 @@ function Home() {
 
     const filteredProducts = products.filter(product => {
         const matchesCategory = selectedCategory === "" || product.categoryId === Number(selectedCategory);
-        const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearchTerm = typeof searchTerm === "string" && product.name.toLowerCase().includes(searchTerm.toLowerCase());
         return matchesCategory && matchesSearchTerm;;
     });
     const indexOfLastProduct = currentPage * productsPerPage;
@@ -144,23 +147,23 @@ function Home() {
                     }}
                 >
                     <ArgonBox
-                            borderRadius='lg'
-                            p='25px 25px 10px'
-                            sx={{
-                                background: 'linear-gradient(to bottom, #2D0798, #fcc419)'
-                            }}>
-                            <ArgonBox
-                                display='flex'
-                                justifyContent='center'
-                                alignItems='center'
-                                flexWrap='wrap'
-                                mb={4}
-                            >
-                                <ArgonTypography variant='h2'>
-                                    <ArgonBox component='img' src='https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/home_fsale_image.png?1713464283843' />
-                                </ArgonTypography>
-                            </ArgonBox>
+                        borderRadius='lg'
+                        p='25px 25px 10px'
+                        sx={{
+                            background: 'linear-gradient(to bottom, #2D0798, #fcc419)'
+                        }}>
+                        <ArgonBox
+                            display='flex'
+                            justifyContent='center'
+                            alignItems='center'
+                            flexWrap='wrap'
+                            mb={4}
+                        >
+                            <ArgonTypography variant='h2'>
+                                <ArgonBox component='img' src='https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/home_fsale_image.png?1713464283843' />
+                            </ArgonTypography>
                         </ArgonBox>
+                    </ArgonBox>
                     <h5 className="mb-3 d-flex align-items-center py-3" style={{
                         color: "#e63946",
                         fontWeight: "bold",
@@ -243,24 +246,24 @@ function Home() {
 
             <CouponList />
             <div className="container-fluid pt-4">
-    <Typography variant="h2" className="section-title position-relative text-uppercase mx-xl-5 mb-4">
-        <span className="bg-secondary pr-3">Danh mục</span>
-    </Typography>
-    <Grid container spacing={2} className="px-xl-5 pb-3 grid-container">
-        {categories.map((category, index) => (
-            <div className="cat-item d-flex align-items-center mb-4" key={index}>
-                <div className="overflow-hidden" style={{ width: "100px", height: "100px" }}>
-                    <img className="img-fluid" src={category.image || aboutImage3} alt={category.name || "Category"} />
-                </div>
-                <div className="flex-fill pl-3">
-                    <Typography variant="h4">{category.name || "Category Name"}</Typography>
-                </div>
+                <Typography variant="h2" className="section-title position-relative text-uppercase mx-xl-5 mb-4">
+                    <span className="bg-secondary pr-3">Danh mục</span>
+                </Typography>
+                <Grid container spacing={2} className="px-xl-5 pb-3 grid-container">
+                    {categories.map((category, index) => (
+                        <div className="cat-item d-flex align-items-center mb-4" key={index}>
+                            <div className="overflow-hidden" style={{ width: "100px", height: "100px" }}>
+                                <img className="img-fluid" src={category.image || aboutImage3} alt={category.name || "Category"} />
+                            </div>
+                            <div className="flex-fill pl-3">
+                                <Typography variant="h4">{category.name || "Category Name"}</Typography>
+                            </div>
+                        </div>
+                    ))}
+                </Grid>
             </div>
-        ))}
-    </Grid>
-</div>
 
-           
+
             <div className="container-fluid pt-4 pb-3">
                 <h2 className="section-title position-relative text-uppercase mx-xl-5 mb-4">
                     <span className="bg-secondary pr-3">Sản phẩm</span>
@@ -304,7 +307,7 @@ function Home() {
                     ))}
                     <div className="col-12" style={{ marginTop: "-30px" }}>
                         <nav>
-                            <ul className="pagination justify-content-center" style={{marginBottom: '10px'}}>
+                            <ul className="pagination justify-content-center" style={{ marginBottom: '10px' }}>
                                 <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
                                     <a className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
                                         <i className="ni ni-bold-left" />
@@ -328,7 +331,7 @@ function Home() {
                 </div>
             </div>
             <div className="container-fluid pt-4">
-               
+
                 <BrandCarousel />
             </div>
             <Coupon />
