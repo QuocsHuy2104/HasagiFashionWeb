@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import { DataGrid } from '@mui/x-data-grid';
-import ProductDetailService from 'services/ProductDetailServices';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import PropTypes from 'prop-types';
 
 const columns = [
     { field: 'id', headerName: 'ID', width: 90 },
@@ -33,22 +33,7 @@ const columns = [
     },
 ];
 
-export default function DataGridDemo({ id }) {
-    const [items, setItems] = React.useState([]);
-
-    React.useEffect(() => {
-        const fetchProductDetails = async () => {
-            try {
-                const resp = await ProductDetailService.getAllByProductId(id);
-                setItems(resp.data);
-            } catch (err) {
-                console.error(err);
-            }
-        };
-
-        fetchProductDetails();
-    }, [id]);
-
+export default function DataGridDemo({ items }) {
     const rows = items.map(item => ({
         id: item.id,
         quantity: item.quantity,
@@ -72,7 +57,28 @@ export default function DataGridDemo({ id }) {
                 pageSizeOptions={[5]}
                 checkboxSelection
                 disableRowSelectionOnClick
+                disableColumnFilter
+                disableColumnSelector
+                disableDensitySelector
+                slots={{ toolbar: GridToolbar }}
+                slotProps={{
+                    toolbar: {
+                        showQuickFilter: true,
+                    },
+                }}
             />
         </Box>
     );
 }
+
+DataGridDemo.propTypes = {
+    items: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.number.isRequired,
+            quantity: PropTypes.number.isRequired,
+            price: PropTypes.number.isRequired,
+            createDate: PropTypes.string.isRequired,
+            createBy: PropTypes.string.isRequired,
+        })
+    ).isRequired,
+};

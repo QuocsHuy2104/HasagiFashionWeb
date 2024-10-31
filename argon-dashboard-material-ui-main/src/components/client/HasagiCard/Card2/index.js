@@ -10,7 +10,6 @@ import { useState } from "react";
 import ProductPopup from "components/client/HasagiPopup";
 
 function HasagiCard2({ image, name, id, price, sale = 0 }) {
-    console.log('Product ID:', id);
 
     const [hover, setHover] = useState(false);
     const [isPopupOpen, setIsPopupOpen] = useState(false);

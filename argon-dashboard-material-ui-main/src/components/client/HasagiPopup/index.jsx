@@ -109,13 +109,13 @@ export default function ProductPopup({ open, handleClose, id }) {
                                 {pd.importPrice !== undefined ? (
                                     <ArgonBox display="flex" alignItems="center" gap={2}>
                                         <ArgonTypography variant="h5" sx={{ textDecoration: 'line-through' }} color="light">
-                                            {pd.importPrice.toLocaleString()}₫
+                                            {pd.importPrice}₫
                                         </ArgonTypography>
                                         <ArgonTypography variant="h4" color="error" fontWeight="bold">
                                             {
                                                 pd.sale === 0
-                                                    ? `${pd.importPrice.toLocaleString()}₫`
-                                                    : `${(pd.importPrice * (pd.sale / 100)).toLocaleString()}₫`
+                                                    ? `${pd.importPrice}₫`
+                                                    : `${(pd.importPrice * (pd.sale / 100))}₫`
                                             }
                                         </ArgonTypography>
                                         {

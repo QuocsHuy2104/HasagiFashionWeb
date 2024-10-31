@@ -49,7 +49,6 @@ function FeaturedProducts() {
                         </ArgonTypography>
                     ) : (
                         products.map((product) => {
-                            console.log(product.id);
                             return (
                                 <ArgonBox key={product.id} mx={1} mb={2} style={{ flex: '1 0 23%', maxWidth: '23%' }}>
                                     <HasagiCard2

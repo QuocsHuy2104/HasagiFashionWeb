@@ -21,8 +21,8 @@ const MenuProps = {
     },
 };
 
-export default function MultipleSelectCheckmarks({ model, selectModel, onChange, nameTag }) {
-    const [selectedValues, setSelectedValues] = React.useState(selectModel || []);
+export default function MultipleSelectCheckmarks({ model, selectModel = [], onChange, nameTag }) {
+    const [selectedValues, setSelectedValues] = React.useState(selectModel);
 
     const handleChange = (event) => {
         const {
@@ -37,21 +37,21 @@ export default function MultipleSelectCheckmarks({ model, selectModel, onChange,
     };
 
     return (
-        <FormControl sx={{ width: { xs: '100%', sm: '100%' } }}>  {/* Full width on small screens, fixed on larger */} 
+        <FormControl sx={{ width: { xs: '100%', sm: '100%' } }}>
             <InputLabel id="demo-multiple-checkbox-label">{nameTag}</InputLabel>
             <Select
                 labelId="demo-multiple-checkbox-label"
                 id="demo-multiple-checkbox"
                 multiple
-                value={selectedValues} 
+                value={selectedValues}
                 onChange={handleChange}
-                input={<OutlinedInput label={nameTag} />} 
+                input={<OutlinedInput label={nameTag} />}
                 renderValue={(selected) => selected.join(', ')}
                 MenuProps={MenuProps}
             >
                 {model.map((children) => (
-                    <MenuItem key={children.name} value={children.name} sx={{ margin: '5px 0' }}>
-                        <Checkbox checked={selectedValues.indexOf(children.name) > -1} />
+                    <MenuItem key={children.id} value={children.id} sx={{ margin: '5px 0' }}>
+                        <Checkbox checked={selectedValues.indexOf(children.id) > -1} />
                         <ListItemText primary={children.name} />
                     </MenuItem>
                 ))}
@@ -63,14 +63,11 @@ export default function MultipleSelectCheckmarks({ model, selectModel, onChange,
 MultipleSelectCheckmarks.propTypes = {
     model: PropTypes.arrayOf(
         PropTypes.shape({
+            id: PropTypes.string.isRequired,  // Ensure 'id' is defined here
             name: PropTypes.string.isRequired,
         })
     ).isRequired,
     selectModel: PropTypes.arrayOf(PropTypes.string),
     onChange: PropTypes.func.isRequired,
     nameTag: PropTypes.string.isRequired,
-};
-
-MultipleSelectCheckmarks.defaultProps = {
-    selectModel: [],
 };

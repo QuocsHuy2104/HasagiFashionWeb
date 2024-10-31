@@ -159,16 +159,13 @@ function Product() {
             );
         });
     };
-
-
+    
     const handleApiError = (error) => {
         const errorMsg = error.response && error.response.data
             ? error.response.data.message || "An error occurred while saving the product."
             : error.message || "An unexpected error occurred.";
         toast.error(`Error: ${errorMsg}`);
     };
-
-
 
     const resetForm = () => {
         setFormData({
