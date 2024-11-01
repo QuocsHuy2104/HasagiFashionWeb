@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { Button, Form, FormGroup, Label } from "reactstrap";
 import "components/client/assets/css/phanloai1.css";
-import Cookies from "js-cookie";
+import CartService from "../../../services/CartService";
 
-const ColorSelectionModal = ({ show, onClose, onColorSelect, onSizeSelect, productId, cartDetailId }) => {
+const ColorSelectionModal = ({ show, onClose, onColorSelect, onSizeSelect, productId, cartDetailId, colorId, sizeId }) => {
     const [colors, setColors] = useState([]);
     const [selectedColor, setSelectedColor] = useState(null);
     const [sizes, setSizes] = useState([]);
@@ -26,9 +26,9 @@ const ColorSelectionModal = ({ show, onClose, onColorSelect, onSizeSelect, produ
             const uniqueColors = [...new Map(data.colors.map(color => [color.id, color])).values()];
             const uniqueSizes = [...new Map(data.sizes.map(size => [size.id, size])).values()];
             setColors(uniqueColors);
-            setSelectedColor(uniqueColors[0] || null);
+            setSelectedColor(colorId||null);
             setSizes(uniqueSizes);
-            setSelectedSize(uniqueSizes[0] || null);
+            setSelectedSize(sizeId||null);
             setError(null);
         } catch (error) {
             console.error("Error fetching product options:", error);
@@ -45,27 +45,20 @@ const ColorSelectionModal = ({ show, onClose, onColorSelect, onSizeSelect, produ
     };
 
     const handleFormSubmit = async (e) => {
+        console.log(`Updating cart with: cartDetailId=${cartDetailId}, colorId=${selectedColor}, sizeId=${selectedSize}, productId=${productId}`);
+
         e.preventDefault();
-        const accountId = Cookies.get('accountId');
         if (selectedColor && selectedSize) {
             try {
-                const response = await fetch(`http://localhost:3000/api/cart/updateOfOption/${cartDetailId}?colorId=${selectedColor.id}&sizeId=${selectedSize.id}&productId=${productId}&accountId=${accountId}`, {
-                    method: 'PUT',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-                if (!response.ok) throw new Error("Failed to update product option");
-                const result = await response.text();
-                setSuccess(result);
+                const response = await CartService.getCartUpdate(cartDetailId, selectedColor, selectedSize, productId);
+                setSuccess(response);
                 setError(null);
                 onColorSelect(selectedColor);
                 onSizeSelect(selectedSize);
                 onClose();
             } catch (error) {
                 setError(error.message || "Failed to update product option");
-                console.log("Error fetching product options:", error);
+                console.log("Error during cart update:", error);
                 setSuccess(null);
             }
         } else {
@@ -108,8 +101,10 @@ const ColorSelectionModal = ({ show, onClose, onColorSelect, onSizeSelect, produ
                                     {colors.map((color) => (
                                         <Button
                                             key={color.id}
-                                            className={`color-box ${selectedColor?.id === color.id ? 'selected' : ''}`}
-                                            onClick={() => setSelectedColor(color)}
+                                            className={`color-box ${selectedColor === color.id ? 'selected' : ''}`}
+                                            onClick={() =>
+                                                setSelectedColor(color.id)
+                                            }
                                         >
                                             {color.name}
                                         </Button>
@@ -122,8 +117,8 @@ const ColorSelectionModal = ({ show, onClose, onColorSelect, onSizeSelect, produ
                                     {sizes.map((size) => (
                                         <Button
                                             key={size.id}
-                                            className={`color-box ${selectedSize?.id === size.id ? 'selected' : ''}`}
-                                            onClick={() => setSelectedSize(size)}
+                                            className={`color-box ${selectedSize === size.id ? 'selected' : ''}`}
+                                            onClick={() => setSelectedSize(size.id)}
                                         >
                                             {size.name}
                                         </Button>
@@ -151,6 +146,8 @@ ColorSelectionModal.propTypes = {
     onSizeSelect: PropTypes.func.isRequired,
     productId: PropTypes.number.isRequired,
     cartDetailId: PropTypes.number.isRequired,
+    colorId: PropTypes.number.isRequired,
+    sizeId: PropTypes.number.isRequired,
 };
 
 export default ColorSelectionModal;

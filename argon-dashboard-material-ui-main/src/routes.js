@@ -35,7 +35,7 @@
 
 // Argon Dashboard 2 MUI layouts
 import Dashboard from "layouts/dashboard";
-import Profile from "layouts/profile";
+import Profile from "components/client/HasagiProfile";
 import Color from "layouts/manage/color";
 import Size from "layouts/manage/size";
 import Status from "layouts/manage/status";
@@ -101,7 +101,6 @@ const routes = [
     route: "/profile",
     icon: <ArgonBox component="i" color="dark" fontSize="14px" className="ni ni-single-02" />,
     component: <Profile />,
-    showInSidenav: true,
   },
   { type: "title", title: "Management pages", key: "manage-pages" },
   {
@@ -296,7 +295,7 @@ const routes = [
     route: "/Complete",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
     component: <Complete />,
-    showInSidenav: true, 
+    showInSidenav: true,
   },
   {
     // type: "route",
@@ -304,8 +303,8 @@ const routes = [
     key: "history",
     route: "/History",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
-    component: <History/>,
-    showInSidenav: true, 
+    component: <History />,
+    showInSidenav: true,
   },
   {
     // type: "route",
@@ -313,8 +312,8 @@ const routes = [
     key: "historyorderdetail",
     route: "/history-order/:orderId",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
-    component: <HistoryOrderDetail/>,
-    showInSidenav: true, 
+    component: <HistoryOrderDetail />,
+    showInSidenav: true,
   },
 ];
 

@@ -13,8 +13,8 @@ import reviewsService from "services/ReviewsServices";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar as solidStar } from '@fortawesome/free-solid-svg-icons';
 import { faStar as regularStar } from '@fortawesome/free-regular-svg-icons';
-import { Modal, Box } from '@mui/material';
 import ReviewList from "../HasagiReview/reviewList";
+import aboutImage from "layouts/assets/img/h1.jpg";
 
 function ShopDetail() {
     const [product, setProduct] = useState(null);
@@ -30,9 +30,6 @@ function ShopDetail() {
     const [favoriteCount, setFavoriteCount] = useState(0);
     const navigate = useNavigate();
     const [reviews, setReviews] = useState([]);
-    const [selectedStar, setSelectedStar] = useState(null);
-    const [open, setOpen] = useState(false);
-    const [mediaUrl, setMediaUrl] = useState('');
 
     const fetchReviews = async (productId) => {
         try {
@@ -51,6 +48,15 @@ function ShopDetail() {
             setReviews([]);
         }
     };
+
+    const calculateAverageStars = () => {
+        if (reviews.length === 0) return 0;
+
+        const totalStars = reviews.reduce((sum, review) => sum + review.star, 0);
+        return (totalStars / reviews.length).toFixed(1);
+    };
+
+    const averageStars = calculateAverageStars();
 
     useEffect(() => {
         const query = new URLSearchParams(location.search);
@@ -246,6 +252,41 @@ function ShopDetail() {
         setActiveTab(tabId);
     };
 
+    const renderStars = (average) => {
+        const fullStars = Math.floor(average);
+        const partialStar = average % 1;
+        const emptyStars = 5 - fullStars - (partialStar > 0 ? 1 : 0);
+
+        return (
+            <div style={{ display: 'flex', gap: '5px' }}>
+                {Array.from({ length: fullStars }).map((_, index) => (
+                    <FontAwesomeIcon key={`full-${index}`} icon={solidStar} style={{ color: 'orange', fontSize: '20px' }} />
+                ))}
+
+                {partialStar > 0 && (
+                    <div style={{ position: 'relative', width: '24px', overflow: 'hidden' }}>
+
+                        <FontAwesomeIcon icon={regularStar} style={{ color: '#ccc', fontSize: '20px', position: 'absolute', width: '100%', height: '100%' }} />
+                        <div
+                            style={{
+                                position: 'absolute',
+                                width: '100%',
+                                height: '100%',
+                                clipPath: `inset(0 ${100 - partialStar * 100}% 0 0)`,
+                            }}
+                        >
+                            <FontAwesomeIcon icon={solidStar} style={{ color: 'orange', fontSize: '20px', width: '100%', height: '100%', marginBottom: '8px' }} />
+                        </div>
+                    </div>
+                )}
+
+                {Array.from({ length: emptyStars }).map((_, index) => (
+                    <FontAwesomeIcon key={`empty-${index}`} icon={regularStar} style={{ color: '#ccc', fontSize: '20px' }} />
+                ))}
+            </div>
+        );
+    };
+
     if (!product) return <div></div>;
 
     return (
@@ -260,7 +301,7 @@ function ShopDetail() {
             <HasagiNav />
             <ToastContainer />
             <div className="container-fluid">
-                <div className="row px-xl-5 py-5">
+                <div className="row px-xl-5" style={{marginTop: "90px"}}>
                     <div className="col-12">
                         <nav className="breadcrumb bg-light mb-30">
                             <a className="breadcrumb-item text-dark" href="/feature-section">Trang chủ</a>
@@ -271,27 +312,104 @@ function ShopDetail() {
                 </div>
             </div>
             <div className="container-fluid pb-5" style={{ maxWidth: "1400px" }}>
-                <div className="row px-xl-5">
+                <div className="row px-xl-5" style={{marginLeft: "10px"}}>
                     <div className="col-lg-5 mb-30">
-                        <div className="product-thumbnail">
-                            <img src={product.image} alt="" className="product-thumbnail-img" />
+                        <div className="product-thumbnail" style={{ textAlign: 'center'}}>
+                            {/* Main Image */}
+                            <img src={product.image} alt="Product" className="product-thumbnail-img" style={{ width: '100%', maxWidth: '450px', maxHeight: "450px" }} />
+                            {/* Thumbnail Gallery */}
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '10px' }}>
+                                {[aboutImage, aboutImage, aboutImage, aboutImage].map((thumbnail, index) => (
+                                    <img
+                                        key={index}
+                                        src={thumbnail}
+                                        alt={`Thumbnail ${index + 1}`}
+                                        style={{
+                                            width: '106px',
+                                            height: '100px',
+                                            cursor: 'pointer',
+                                            border: '1px solid #ddd',
+                                            borderRadius: '4px',
+                                        }}
+                                        onClick={() => setMainImage(thumbnail)} // Optional: Click to set as main image
+                                    />
+                                ))}
+                            </div>
                         </div>
                     </div>
-                    <div className="col-lg-7 h-auto mb-30">
-                        <div className="h-100 bg-light p-30 pt-4">
+                    <div className="col-lg-7 mb-30" style={{marginLeft: "-20px"}}>
+                        <div className="h-100 bg-white p-30 pt-4">
                             <h3 className="font-weight-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>{product.name}</h3>
-                            <div className="d-flex mb-3">
-                                <div className="text-primary mr-3">
-                                    <small className="fas fa-star"></small>
-                                    <small className="fas fa-star"></small>
-                                    <small className="fas fa-star"></small>
-                                    <small className="fas fa-star-half-alt"></small>
-                                    <small className="far fa-star"></small>
+                            <div className="d-flex align-items-center mb-3">
+                                {/* Phần hiển thị số sao và sao */}
+                                <div className="d-flex align-items-center">
+                                    <span
+                                        style={{
+                                            color: '#555',
+                                            fontWeight: 'bold',
+                                            marginRight: '5px',
+                                            textDecoration: 'underline'
+                                        }}
+                                    >
+                                        {averageStars}
+                                    </span>
+                                    <div>
+                                        {renderStars(averageStars)}
+                                    </div>
                                 </div>
-                                <small className="pt-1">(99 Reviews)</small>
+
+                                {/* Đường phân cách */}
+                                <div
+                                    style={{
+                                        height: '16px',
+                                        width: '1px',
+                                        backgroundColor: '#ddd',
+                                        margin: '0 10px',
+                                    }}
+                                />
+
+                                {/* Phần hiển thị số lượng đánh giá */}
+                                <div className="d-flex align-items-center">
+                                    <span
+                                        style={{
+                                            fontWeight: 'bold',
+                                            marginRight: '3px',
+                                            textDecoration: 'underline'
+                                        }}
+                                    >
+                                        {reviews.length}
+                                    </span>
+                                    <small>Đánh Giá</small>
+                                </div>
                             </div>
-                            <h3 className="font-weight-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>{totalPrice}</h3>
-                            <h3 className="font-medium-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>Số lượng: {product.importQuantity || "N/A"}</h3>
+
+                            <h3
+                                style={{
+                                    fontFamily: `"Times New Roman", Times, serif`,
+                                    color: "red",
+                                    fontSize: "30px",
+                                    fontWeight: "bold",
+                                    position: "relative",
+                                    display: "inline-block",
+                                    marginLeft: "15px"
+                                }}
+                            >
+                                <span
+                                    style={{
+                                        textDecoration: "underline",
+                                        fontSize: "18px",
+                                        fontWeight: "normal",
+                                        position: "absolute",
+                                        top: 0,
+                                        left: "-10px",
+                                    }}
+                                >
+                                    đ
+                                </span>
+                                {new Intl.NumberFormat("vi-VN").format(totalPrice)}
+                            </h3>
+
+                            <h3 className="font-medium-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>{product.importQuantity || "N/A"} sản phẩm có sẵn</h3>
                             <div className="d-flex mb-3" id="size-input-list">
                                 <strong className="text-dark mr-3">Sizes:</strong>
                                 {product.sizes.length > 0 ? (
@@ -342,13 +460,14 @@ function ShopDetail() {
                             </div>
 
                             <div className="d-flex align-items-center mb-4 pt-1">
+                                <strong className="text-dark mr-3">Số lượng:</strong>
                                 <div className="input-group quantity mr-3" style={{ width: '130px' }}>
                                     <div className="input-group-btn">
                                         <button
                                             className="btn btn-primary btn-minus"
                                             onClick={() => setQuantity(quantity - 1)}
                                             disabled={quantity <= 1}
-                                            style={{ marginRight: '5px' }}
+                                            style={{ marginRight: '5px', backgroundColor: "#ffb524"}}
                                         >
                                             <i className="fa fa-minus"></i>
                                         </button>
@@ -356,7 +475,7 @@ function ShopDetail() {
                                     <input
                                         id="inputAmount"
                                         type="text"
-                                        className="form-control bg-secondary border-0 text-center"
+                                        className="form-control bg-white border-0 text-center"
                                         value={quantity}
                                         readOnly
                                     />
@@ -364,7 +483,7 @@ function ShopDetail() {
                                         <button
                                             className="btn btn-primary btn-plus"
                                             onClick={() => setQuantity(quantity + 1)}
-                                            style={{ marginLeft: '5px' }}
+                                            style={{ marginLeft: '5px', backgroundColor: "#ffb524" }}
                                         >
                                             <i className="fa fa-plus"></i>
                                         </button>
@@ -372,10 +491,10 @@ function ShopDetail() {
                                 </div>
                             </div>
                             <div className="d-flex align-items-center py-1">
-                                <button id="cartBtn" onClick={handleAddToCart} className="btn btn-primary px-3 mr-2">
+                                <button id="cartBtn" onClick={handleAddToCart} className="btn btn-warning px-3 mr-2">
                                     <i className="fa fa-shopping-cart mr-1"></i> Add To Cart
                                 </button>
-                                <button className="btn btn-primary px-3" onClick={handleByNow}>
+                                <button className="btn btn-warning px-3" onClick={handleByNow}>
                                     Mua ngay
                                 </button>
                             </div>
@@ -402,7 +521,7 @@ function ShopDetail() {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div >
                 <div className="row px-xl-5">
                     <div className="col">
                         <div className="bg-light" style={{ marginBottom: "-50px" }}>
@@ -428,12 +547,12 @@ function ShopDetail() {
                             </div>
                             <div className="tab-content">
                                 <div className={`tab-pane fade ${activeTab === 'tab-pane-1' ? 'show active' : ''}`} id="tab-pane-1">
-                                    <p>Danh mục: Áo</p>
-                                    <p>Kho: 100</p>
-                                    <p>Thương hiệu: Gucci</p>
+                                    <p>Danh mục: {product.category}</p>
+                                    <p>Kho: {product.importQuantity || "N/A"}</p>
+                                    <p>Thương hiệu: {product.trademark}</p>
                                 </div>
                                 <div className={`tab-pane fade ${activeTab === 'tab-pane-2' ? 'show active' : ''}`} id="tab-pane-2">
-                                <p>{product.description}</p>
+                                    <p>{product.description}</p>
                                 </div>
                                 <div className={`tab-pane fade ${activeTab === 'tab-pane-3' ? 'show active' : ''}`} id="tab-pane-3">
                                     <ReviewList />
@@ -442,7 +561,7 @@ function ShopDetail() {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div >
             <Footer />
         </>
     )

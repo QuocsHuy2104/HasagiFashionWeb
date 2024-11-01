@@ -5,7 +5,7 @@ import "components/client/assets/css/style.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCcVisa, faCcMastercard, faCcAmex } from '@fortawesome/free-brands-svg-icons';
 import ArgonButton from "components/ArgonButton";
-import AddressSelection from "components/client/HasagiBackup1";
+import AddressSelection from "components/client/HasagiBackup/index1";
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -58,12 +58,6 @@ const Checkout = () => {
         fetchAddress();
         const cartItemsBackup = JSON.parse(localStorage.getItem('cartItemsBackup')) || [];
         setCartItems(cartItemsBackup);
-        // const intervalId = setInterval(() => {
-        //     fetchAddress();
-        // }, 3000);
-        // return () => {
-        //     clearInterval(intervalId);
-        // };
     }, []);
 
     useEffect(() => {
@@ -119,9 +113,9 @@ const Checkout = () => {
                 },
                 params: {
                     from_district_id: XuanKhanhDistrictID,
-                    from_ward_code:"550113",
+                    from_ward_code: "550113",
                     to_district_id: address.districtCode,
-                    to_ward_code:address.wardCode,
+                    to_ward_code: address.wardCode,
                     weight: 1000,
                     length: 10,
                     width: 10,
@@ -264,41 +258,41 @@ const Checkout = () => {
             quantity: item.quantity,
             price: item.price,
         }));
-    
+
         const productDetailIdSelected = selectedItems.map(item => item.id);
 
 
-        const payStatusDirect = 'Chưa thanh toán'; 
-        const voucherId = selectedVoucher ? selectedVoucher.id : null; 
+        const payStatusDirect = 'Chưa thanh toán';
+        const voucherId = selectedVoucher ? selectedVoucher.id : null;
         const checkoutDataDirect = {
             addressDTO,
             cartDetails: cartDetailsDTO,
             payMethod: selectedPayment,
             payStatus: payStatusDirect,
-            voucherId: voucherId, 
+            voucherId: voucherId,
             shippingFree: shipFee.total,
             fullName: `${address.address}, ${getAddressNameById(address.wardCode, wards, 'ward')}, ${getAddressNameById(address.districtCode, districts, 'district')}, ${getAddressNameById(address.provinceID, provinces, 'province')}`,
             productDetailIdSelected: productDetailIdSelected
         };
-        const payStatusBank = 'Đã thanh toán'; 
+        const payStatusBank = 'Đã thanh toán';
         const checkoutDataBank = {
             addressDTO,
             cartDetails: cartDetailsDTO,
             payMethod: selectedPayment,
             payStatus: payStatusBank,
-            voucherId: voucherId, 
+            voucherId: voucherId,
             shippingFree: shipFee.total,
             fullName: `${address.address}, ${getAddressNameById(address.wardCode, wards, 'ward')}, ${getAddressNameById(address.districtCode, districts, 'district')}, ${getAddressNameById(address.provinceID, provinces, 'province')}`,
             productDetailIdSelected: productDetailIdSelected
         };
-     
-      
 
-        setIsLoading(true); 
+
+
+        setIsLoading(true);
         try {
             let response;
             if (selectedPayment === 'Direct Check') {
-           response=   await CheckoutService.postCheckout(addressId,checkoutDataDirect);
+                response = await CheckoutService.postCheckout(addressId, checkoutDataDirect);
 
                 if (response.status === 200) {
                     await handleRemoveItems();
@@ -315,7 +309,7 @@ const Checkout = () => {
                     toast.error("Có lỗi xảy ra khi đặt hàng.");
                 }
             } else if (selectedPayment === 'Bank Transfer') {
-                response=   await CheckoutService.postCheckout(addressId,checkoutDataBank);
+                response = await CheckoutService.postCheckout(addressId, checkoutDataBank);
                 if (response.data.paymentUrl) {
                     localStorage.setItem('address1', JSON.stringify(addressDTO));
                     localStorage.setItem('orderDetails1', JSON.stringify(cartDetailsDTO));
@@ -351,13 +345,10 @@ const Checkout = () => {
     const [accountId, setAccountId] = useState(Cookies.get('accountId')); // Initialize accountId from cookies
 
     useEffect(() => {
-        // Fetch all vouchers
         const fetchVouchers = async () => {
             try {
-                // Fetch all vouchers
                 const response = await VoucherService.getAllVouchers();
 
-                // Filter out only active vouchers
                 const activeVouchers = response.data.filter(voucher => voucher.isActive);
 
                 setVouchers(activeVouchers);
@@ -381,7 +372,7 @@ const Checkout = () => {
 
         fetchVouchers();
         fetchUsedVouchers();
-    }, [accountId]); // Add accountId as a dependency to trigger re-fetching when it changes
+    }, [accountId]);
 
     const [appliedVoucherId, setAppliedVoucherId] = useState(null);
     const handleApplyVoucher = (voucher) => {
@@ -407,7 +398,7 @@ const Checkout = () => {
             <Navbar />
             <div className="container-fluid">
                 <div className="row px-xl-5">
-                    <div className="header py-3">
+                    <div className="header" style={{marginTop: "-30px"}}>
                         <button className="back-button" onClick={() => goBack()}>
                             <i className="ni ni-bold-left" />
                         </button>
@@ -440,7 +431,7 @@ const Checkout = () => {
                                         </div>
                                         <div className="d-flex align-items-center">
                                             <button
-                                                className="btn btn-outline-primary btn-sm ml-2"
+                                                className="btn btn-outline-warning btn-sm ml-2"
                                                 style={{ fontWeight: 'bold', fontSize: '0.9rem', marginRight: '15px' }}
                                                 onClick={() => setShowModal(true)}
                                             >

@@ -9,7 +9,7 @@ import { Carousel } from 'react-bootstrap';
 const HasagiCau = () => {
 
     return (
-        <div className="container-fluid mb-3 py-3">
+        <div className="container-fluid mb-3" style={{marginTop: "-30px"}}>
             <div className="row px-xl-5">
                 <div className="col-lg-8">
                     <div id="header-carousel" className="carousel slide carousel-fade mb-30 mb-lg-0">

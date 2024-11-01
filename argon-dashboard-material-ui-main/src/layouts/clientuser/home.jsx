@@ -215,11 +215,11 @@ function Home() {
                                             </Link>
                                             
                                             <div className="d-flex align-items-center justify-content-center mb-1">
-                                                <small className="fa fa-star text-primary mr-1"></small>
-                                                <small className="fa fa-star text-primary mr-1"></small>
-                                                <small className="fa fa-star text-primary mr-1"></small>
-                                                <small className="fa fa-star text-primary mr-1"></small>
-                                                <small className="fa fa-star text-primary mr-1"></small>
+                                                <small className="fa fa-star text-warning mr-1"></small>
+                                                <small className="fa fa-star text-warning mr-1"></small>
+                                                <small className="fa fa-star text-warning mr-1"></small>
+                                                <small className="fa fa-star text-warning mr-1"></small>
+                                                <small className="fa fa-star text-warning mr-1"></small>
                                                 <small>({product.rating || 99})</small>
                                             </div>
                                         </div>
@@ -234,7 +234,7 @@ function Home() {
             <CouponList />
             <div className="container-fluid pt-4">
                 <Typography variant="h2" className="section-title position-relative text-uppercase mx-xl-5 mb-4">
-                    <span className="bg-secondary pr-3">Danh mục</span>
+                    <span className="bg-white pr-3">Danh mục</span>
                 </Typography>
                 <Grid container spacing={2} className="px-xl-5 pb-3">
                     {categories.map((category, index) => (
@@ -254,7 +254,7 @@ function Home() {
             <div
                 className="container-fluid pt-4">
                 <Typography variant="h2" className="section-title position-relative text-uppercase mx-xl-5 mb-4">
-                    <span className="bg-secondary pr-3">Thương hiệu</span>
+                    <span className="bg-white pr-3">Thương hiệu</span>
                 </Typography>
                 <Grid container spacing={2} className="px-xl-5 pb-3">
                     {brands.map((brand, index) => (
@@ -273,7 +273,7 @@ function Home() {
             </div>
             <div className="container-fluid pt-4 pb-3">
                 <h2 className="section-title position-relative text-uppercase mx-xl-5 mb-4">
-                    <span className="bg-secondary pr-3">Sản phẩm</span>
+                    <span className="bg-white pr-3">Sản phẩm</span>
                 </h2>
                 <div className="row px-xl-5">
                     {currentProducts.map((product, index) => (
@@ -294,11 +294,11 @@ function Home() {
                                     </Link>
                                     
                                     <div className="d-flex align-items-center justify-content-center mb-1">
-                                        <small className="fa fa-star text-primary mr-1"></small>
-                                        <small className="fa fa-star text-primary mr-1"></small>
-                                        <small className="fa fa-star text-primary mr-1"></small>
-                                        <small className="fa fa-star text-primary mr-1"></small>
-                                        <small className="fa fa-star text-primary mr-1"></small>
+                                        <small className="fa fa-star text-warning mr-1"></small>
+                                        <small className="fa fa-star text-warning mr-1"></small>
+                                        <small className="fa fa-star text-warning mr-1"></small>
+                                        <small className="fa fa-star text-warning mr-1"></small>
+                                        <small className="fa fa-star text-warning mr-1"></small>
                                         <small>({product.rating || 99})</small>
                                     </div>
                                 </div>

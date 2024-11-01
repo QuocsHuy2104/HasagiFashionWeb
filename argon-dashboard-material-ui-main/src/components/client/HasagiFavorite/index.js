@@ -78,11 +78,11 @@ const Favorite = () => {
                       </h5>
                     </div>
                     <div className="d-flex align-items-center justify-content-center mb-1">
-                      <small className="fa fa-star text-primary mr-1"></small>
-                      <small className="fa fa-star text-primary mr-1"></small>
-                      <small className="fa fa-star text-primary mr-1"></small>
-                      <small className="fa fa-star text-primary mr-1"></small>
-                      <small className="fa fa-star text-primary mr-1"></small>
+                      <small className="fa fa-star text-warning mr-1"></small>
+                      <small className="fa fa-star text-warning mr-1"></small>
+                      <small className="fa fa-star text-warning mr-1"></small>
+                      <small className="fa fa-star text-warning mr-1"></small>
+                      <small className="fa fa-star text-warning mr-1"></small>
                       <small>({99})</small>
                     </div>
                   </div>

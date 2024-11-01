@@ -119,7 +119,8 @@ const Navbar = () => {
     
 
     return (
-        <div className="container-fluid justify-content-between align-items-center py-5">
+        <div className="container-fluid justify-content-between align-items-center py-5"
+        style={{ marginTop: "2.86%" }}>
             <nav className="navbar navbar-expand-lg p-0" style={navbarStyle}>
                 <div className="collapse navbar-collapse">
                     <ul className="nav-menu" style={navMenuStyle}>

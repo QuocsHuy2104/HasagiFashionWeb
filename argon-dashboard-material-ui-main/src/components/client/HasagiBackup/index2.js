@@ -6,7 +6,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import "components/client/assets/css/phanloai1.css";
 import Select from "react-select";
-import AddressSelection from '../HasagiBackup1';
+import AddressSelection from './index1';
 import AddressService from '../../../services/AddressServices';
 
 const Backup = ({ show, onClose, onAddressUpdated }) => {

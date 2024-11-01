@@ -1,65 +1,72 @@
-
 /*** Spinner Start ***/
 .centered-container {
     display: flex;
     justify-content: center;
-    padding: 20px; /* Adjust padding as needed */
-  }
-  
-  .search-wrapper {
+    padding: 20px;
+    /* Adjust padding as needed */
+}
+
+.search-wrapper {
     display: flex;
     align-items: center;
-  }
+}
 
-  .navbar-nav .nav-item {
-    margin-right: 20px; /* Adjust this value to control spacing */
-  }
-  
-  /* Remove margin from the last nav item */
-  .navbar-nav .nav-item:last-child {
+.navbar-nav .nav-item {
+    margin-right: 20px;
+    /* Adjust this value to control spacing */
+}
+
+/* Remove margin from the last nav item */
+.navbar-nav .nav-item:last-child {
     margin-right: 0;
-  }
-  
-  /* Adjust spacing between dropdown and other nav items */
-  .navbar-nav .dropdown {
-    margin-left: 20px; /* Adjust this value to control spacing */
-  }
-  
-  /* Ensure dropdown menu items have appropriate padding */
-  .dropdown-menu {
-    padding: 10px 0; /* Adjust this value to control padding */
-  }
-  
+}
+
+/* Adjust spacing between dropdown and other nav items */
+.navbar-nav .dropdown {
+    margin-left: 20px;
+    /* Adjust this value to control spacing */
+}
+
+/* Ensure dropdown menu items have appropriate padding */
+.dropdown-menu {
+    padding: 10px 0;
+    /* Adjust this value to control padding */
+}
+
 .centered-container {
     display: flex;
     justify-content: center;
-    padding: 20px; /* Adjust padding as needed */
-  }
-  
-  .search-wrapper {
+    padding: 20px;
+    /* Adjust padding as needed */
+}
+
+.search-wrapper {
     display: flex;
     align-items: center;
-  }
+}
 
-  .navbar-nav .nav-item {
-    margin-right: 20px; /* Adjust this value to control spacing */
-  }
-  
-  /* Remove margin from the last nav item */
-  .navbar-nav .nav-item:last-child {
+.navbar-nav .nav-item {
+    margin-right: 20px;
+    /* Adjust this value to control spacing */
+}
+
+/* Remove margin from the last nav item */
+.navbar-nav .nav-item:last-child {
     margin-right: 0;
-  }
-  
-  /* Adjust spacing between dropdown and other nav items */
-  .navbar-nav .dropdown {
-    margin-left: 20px; /* Adjust this value to control spacing */
-  }
-  
-  /* Ensure dropdown menu items have appropriate padding */
-  .dropdown-menu {
-    padding: 10px 0; /* Adjust this value to control padding */
-  }
-  
+}
+
+/* Adjust spacing between dropdown and other nav items */
+.navbar-nav .dropdown {
+    margin-left: 20px;
+    /* Adjust this value to control spacing */
+}
+
+/* Ensure dropdown menu items have appropriate padding */
+.dropdown-menu {
+    padding: 10px 0;
+    /* Adjust this value to control padding */
+}
+
 /*** Spinner ***/
 #spinner {
     opacity: 0;
@@ -73,6 +80,7 @@
     visibility: visible;
     opacity: 1;
 }
+
 /*** Spinner End ***/
 
 .back-to-top {
@@ -143,6 +151,7 @@
     background: var(--bs-primary);
     border: 1px solid var(--bs-primary);
 }
+
 /*** Topbar Start ***/
 
 /*** Navbar ***/
@@ -186,9 +195,12 @@
 }
 
 .dropdown .dropdown-menu a:hover {
-    background: rgba(13, 110, 253, 0.2); /* Sử dụng màu primary nhẹ hơn với opacity */
-    color: rgba(255, 255, 255, 0.8); /* Màu trắng nhẹ hơn */
+    background: rgba(13, 110, 253, 0.2);
+    /* Sử dụng màu primary nhẹ hơn với opacity */
+    color: rgba(255, 255, 255, 0.8);
+    /* Màu trắng nhẹ hơn */
 }
+
 .navbar .nav-item:hover .dropdown-menu {
     transform: rotateX(0deg);
     visibility: visible;
@@ -251,7 +263,7 @@
         border-style: dotted;
         z-index: 999;
     }
-    
+
     .sticky-top.navbar-light {
         position: fixed;
         background: var(--bs-light);
@@ -301,6 +313,7 @@
         display: none;
     }
 }
+
 /*** Carousel Hero Header Start ***/
 /* .carousel-header {
     position: relative;
@@ -485,6 +498,7 @@
         padding: 60px 0 60px 0;
     }
 }
+
 /*** Single Page Hero Header End ***/
 
 
@@ -528,13 +542,14 @@
 .feature .feature-item:hover a.btn:hover {
     color: var(--bs-primary) !important;
 }
+
 /*** Features End ***/
 
 /*** About Start ***/
 .about .about-img {
     position: relative;
     padding-bottom: 30px;
-    margin-top: 30px; 
+    margin-top: 30px;
     margin-left: 30px;
 }
 
@@ -575,22 +590,27 @@
     margin-left: -30px;
     border-radius: 10px;
 }
+
 /*** About End ***/
 .icon-large {
-    font-size: 2rem; /* Adjust the size as needed */
+    font-size: 2rem;
+    /* Adjust the size as needed */
 }
 
 .pagination {
     display: flex;
     justify-content: center;
-    margin-top: 2rem; /* Adjust top margin */
-    margin-bottom: -8rem; /* Adjust bottom margin */
+    margin-top: 2rem;
+    /* Adjust top margin */
+    margin-bottom: -8rem;
+    /* Adjust bottom margin */
 }
 
 .pagination a {
     display: inline-block;
     padding: 0.5rem 1rem;
-    margin: 0 0.25rem; /* Spacing between pagination items */
+    margin: 0 0.25rem;
+    /* Spacing between pagination items */
     border: 1px solid #ddd;
     border-radius: 5px;
     text-decoration: none;
@@ -600,61 +620,86 @@
 }
 
 .pagination a:hover {
-    background-color: #ff9800; /* Hover background color (orange) */
-    background-color: #ff9800; /* Hover background color (orange) */
-    color: #fff; /* Hover text color */
-    border-color: #ff9800; /* Border color (orange) */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow on hover */
+    background-color: #ff9800;
+    /* Hover background color (orange) */
+    background-color: #ff9800;
+    /* Hover background color (orange) */
+    color: #fff;
+    /* Hover text color */
+    border-color: #ff9800;
+    /* Border color (orange) */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Add shadow on hover */
 }
 
 .pagination a:active {
-    background-color: #ff9800; /* Clicked background color (orange) */
-    color: #fff; /* Clicked text color */
-    border-color: #ff9800; /* Border color when clicked (orange) */
-    transform: scale(0.95); /* Slightly shrink the button on click for effect */
-    border-color: #ff9800; /* Border color (orange) */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow on hover */
+    background-color: #ff9800;
+    /* Clicked background color (orange) */
+    color: #fff;
+    /* Clicked text color */
+    border-color: #ff9800;
+    /* Border color when clicked (orange) */
+    transform: scale(0.95);
+    /* Slightly shrink the button on click for effect */
+    border-color: #ff9800;
+    /* Border color (orange) */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Add shadow on hover */
 }
 
 .pagination a:active {
-    background-color: #ff9800; /* Clicked background color (orange) */
-    color: #fff; /* Clicked text color */
-    border-color: #ff9800; /* Border color when clicked (orange) */
-    transform: scale(0.95); /* Slightly shrink the button on click for effect */
+    background-color: #ff9800;
+    /* Clicked background color (orange) */
+    color: #fff;
+    /* Clicked text color */
+    border-color: #ff9800;
+    /* Border color when clicked (orange) */
+    transform: scale(0.95);
+    /* Slightly shrink the button on click for effect */
 }
 
 .pagination a.active {
-    background-color: #ff9800; /* Active page background color (orange) */
-    color: #fff; 
+    background-color: #ff9800;
+    /* Active page background color (orange) */
+    color: #fff;
     border-color: #ff9800;
     cursor: default;
-    pointer-events: none; /* Prevent clicking on active page */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Slightly more prominent shadow for active */
-    background-color: #ff9800; /* Active page background color (orange) */
-    color: #fff; 
+    pointer-events: none;
+    /* Prevent clicking on active page */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    /* Slightly more prominent shadow for active */
+    background-color: #ff9800;
+    /* Active page background color (orange) */
+    color: #fff;
     border-color: #ff9800;
     cursor: default;
-    pointer-events: none; /* Prevent clicking on active page */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Slightly more prominent shadow for active */
+    pointer-events: none;
+    /* Prevent clicking on active page */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    /* Slightly more prominent shadow for active */
 }
 
 .pagination a.disabled {
-    color: #ccc; 
-    color: #ccc; 
+    color: #ccc;
+    color: #ccc;
     border-color: #ccc;
     cursor: not-allowed;
     pointer-events: none;
-    background-color: #f8f8f8; /* Optional: light background for disabled state */
+    background-color: #f8f8f8;
+    /* Optional: light background for disabled state */
     pointer-events: none;
-    background-color: #f8f8f8; /* Optional: light background for disabled state */
+    background-color: #f8f8f8;
+    /* Optional: light background for disabled state */
 }
 
-.pagination a:first-child, 
+.pagination a:first-child,
 .pagination a:last-child {
     font-size: 1.25rem;
-    padding: 0.75rem 1.25rem; /* Increase padding for larger click area */
+    padding: 0.75rem 1.25rem;
+    /* Increase padding for larger click area */
     font-size: 1.25rem;
-    padding: 0.75rem 1.25rem; /* Increase padding for larger click area */
+    padding: 0.75rem 1.25rem;
+    /* Increase padding for larger click area */
 }
 
 
@@ -703,7 +748,7 @@
 
 .service-item:hover .service-content p {
     color: var(--bs-white);
-} 
+}
 
 .service-item .service-btn {
     width: 80px;
@@ -728,6 +773,7 @@
     transform: rotate(360deg);
     color: var(--bs-primary) !important;
 }
+
 /*** Service End ***/
 
 
@@ -757,6 +803,7 @@
     align-items: center;
     justify-content: center;
 }
+
 /*** Counter End ***/
 
 
@@ -828,6 +875,7 @@
 .blog .blog-item:hover .blog-content a:hover {
     color: var(--bs-primary) !important;
 }
+
 /*** Blog End ***/
 
 /*** Team Start ***/
@@ -842,6 +890,7 @@
 .team .team-item .team-inner {
     transition: 0.5s;
 }
+
 .team .team-item:hover .team-inner {
     box-shadow: 0 0 45px rgba(0, 0, 0, 0.2);
 }
@@ -885,7 +934,7 @@
     position: absolute;
     bottom: 0;
     left: -100%;
-    border-bottom-left-radius: 0 !important; 
+    border-bottom-left-radius: 0 !important;
     border-top-left-radius: 0 !important;
     display: inline-flex;
     background: var(--bs-primary);
@@ -893,9 +942,10 @@
     z-index: 4;
 }
 
-.team .team-item:hover .team-inner .team-img .team-icon { 
-    left: -25px; 
+.team .team-item:hover .team-inner .team-img .team-icon {
+    left: -25px;
 }
+
 /*** Team End ***/
 
 
@@ -995,6 +1045,7 @@
         top: -30px;
     }
 }
+
 /*** testimonial End ***/
 
 /*** Footer Start ***/
@@ -1029,6 +1080,7 @@
 .footer .footer-item .footer-btn a:hover i {
     color: var(--bs-primary) !important;
 }
+
 /*** Footer End ***/
 
 /*** copyright Start ***/
@@ -1036,150 +1088,183 @@
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     background: var(--bs-dark);
 }
+
 /*** copyright end ***/
 
 
 footer {
-    background-color: #003366; /* Màu nền mới cho footer */
-    color: #e0e0e0; /* Màu chữ mới */
-    padding: 40px 20px; /* Padding trên và dưới, khoảng cách trái phải */
-    margin-right: 10px; /* Giảm khoảng cách bên phải */
-    margin-left: 10px; /* Giảm khoảng cách bên trái */
+    background-color: #003366;
+    /* Màu nền mới cho footer */
+    color: #e0e0e0;
+    /* Màu chữ mới */
+    padding: 40px 20px;
+    /* Padding trên và dưới, khoảng cách trái phải */
+    margin-right: 10px;
+    /* Giảm khoảng cách bên phải */
+    margin-left: 10px;
+    /* Giảm khoảng cách bên trái */
     height: 390px;
-  }
-  
-  /* Cập nhật khoảng cách của các box trong footer */
-  .footer-box {
-    margin-bottom: 20px; /* Giảm khoảng cách dưới mỗi box */
-    padding-left: 10px; /* Khoảng cách bên trái của từng box */
-  }
-  
-  /* Cập nhật kiểu dáng tiêu đề */
-  .footer-box .product-title {
-    font-size: 20px; /* Giảm kích thước tiêu đề */
+}
+
+/* Cập nhật khoảng cách của các box trong footer */
+.footer-box {
+    margin-bottom: 20px;
+    /* Giảm khoảng cách dưới mỗi box */
+    padding-left: 10px;
+    /* Khoảng cách bên trái của từng box */
+}
+
+/* Cập nhật kiểu dáng tiêu đề */
+.footer-box .product-title {
+    font-size: 20px;
+    /* Giảm kích thước tiêu đề */
     font-weight: 400;
     position: relative;
     padding-bottom: 15px;
-    color: #ffcc00; /* Màu tiêu đề mới */
-    margin-left: 0; /* Đảm bảo tiêu đề không có khoảng cách bên trái */
-  }
-  
-  /* Đường gạch dưới tiêu đề */
-  .footer-box .product-title:after {
+    color: #ffcc00;
+    /* Màu tiêu đề mới */
+    margin-left: 0;
+    /* Đảm bảo tiêu đề không có khoảng cách bên trái */
+}
+
+/* Đường gạch dưới tiêu đề */
+.footer-box .product-title:after {
     position: absolute;
     left: 0;
     bottom: 0;
     width: 20px;
     height: 2px;
-    background-color: #ffcc00; /* Màu của đường gạch dưới */
+    background-color: #ffcc00;
+    /* Màu của đường gạch dưới */
     content: '""';
-  }
-  
-  /* Cập nhật kiểu dáng văn bản */
-  .footer-box .product-description,
-  .footer-box .product-price,
-  .footer-box .btn-add-cart,
-  .footer-box .rating-stars {
-    color: #e0e0e0; /* Màu chữ mới */
+}
+
+/* Cập nhật kiểu dáng văn bản */
+.footer-box .product-description,
+.footer-box .product-price,
+.footer-box .btn-add-cart,
+.footer-box .rating-stars {
+    color: #e0e0e0;
+    /* Màu chữ mới */
     opacity: 0.9;
-    margin-left: 10px; /* Khoảng cách bên trái của văn bản */
-  }
-  
-  /* Cập nhật kiểu dáng nút thêm vào giỏ hàng */
-  .footer-box .btn-add-cart {
     margin-left: 10px;
-    padding: 10px 20px; /* Giảm kích thước nút */
-    border: 2px solid #ffcc00; /* Màu viền nút mới */
+    /* Khoảng cách bên trái của văn bản */
+}
+
+/* Cập nhật kiểu dáng nút thêm vào giỏ hàng */
+.footer-box .btn-add-cart {
+    margin-left: 10px;
+    padding: 10px 20px;
+    /* Giảm kích thước nút */
+    border: 2px solid #ffcc00;
+    /* Màu viền nút mới */
     border-radius: 50px;
     background-color: transparent;
-    color: #ffcc00; /* Màu chữ nút mới */
-    font-size: 14px; /* Giảm kích thước chữ */
+    color: #ffcc00;
+    /* Màu chữ nút mới */
+    font-size: 14px;
+    /* Giảm kích thước chữ */
     cursor: pointer;
     transition: color 0.3s, border-color 0.3s, transform 0.2s;
-  }
-  
-  /* Hiệu ứng hover của nút thêm vào giỏ hàng */
-  .footer-box .btn-add-cart:hover {
+}
+
+/* Hiệu ứng hover của nút thêm vào giỏ hàng */
+.footer-box .btn-add-cart:hover {
     background-color: #ffcc00;
     color: #003366;
     border-color: #ffcc00 !important;
     transform: scale(1.05);
-  }
-  
-  /* Hiệu ứng khi nhấn nút thêm vào giỏ hàng */
-  .footer-box .btn-add-cart:active {
+}
+
+/* Hiệu ứng khi nhấn nút thêm vào giỏ hàng */
+.footer-box .btn-add-cart:active {
     background-color: #e0e0e0;
     color: #003366;
     transform: scale(0.95);
-  }
-  
-  /* Cập nhật kiểu dáng sao đánh giá */
-  .footer-box .rating-stars {
+}
+
+/* Cập nhật kiểu dáng sao đánh giá */
+.footer-box .rating-stars {
     display: flex;
     justify-content: center;
     margin-top: 15px;
-  }
-  
-  .footer-box .star {
-    color: #ffc107; /* Màu sao mới */
-    font-size: 24px; /* Giảm kích thước sao */
-    margin: 0 6px; /* Giảm khoảng cách giữa các sao */
+}
+
+.footer-box .star {
+    color: #ffc107;
+    /* Màu sao mới */
+    font-size: 24px;
+    /* Giảm kích thước sao */
+    margin: 0 6px;
+    /* Giảm khoảng cách giữa các sao */
     transition: transform 0.3s, color 0.3s;
-  }
-  
-  /* Hiệu ứng hover của sao đánh giá */
-  .footer-box .star:hover,
-  .footer-box .star.active {
+}
+
+/* Hiệu ứng hover của sao đánh giá */
+.footer-box .star:hover,
+.footer-box .star.active {
     color: #ffca28;
     transform: scale(1.2);
-  }
-  
-  /* Cập nhật kiểu dáng phần đăng ký */
-  .footer-box.subscribe form {
+}
+
+/* Cập nhật kiểu dáng phần đăng ký */
+.footer-box.subscribe form {
     display: flex;
     align-items: center;
     border-radius: 5px;
-    padding-left: 10px; /* Khoảng cách bên trái của form đăng ký */
-  }
-  
-  /* Cập nhật kiểu dáng input email */
-  .footer-box.subscribe Input {
+    padding-left: 10px;
+    /* Khoảng cách bên trái của form đăng ký */
+}
+
+/* Cập nhật kiểu dáng input email */
+.footer-box.subscribe Input {
     border: none;
-    background-color: #004080; /* Màu nền input mới */
-    width: calc(100% - 60px); /* Chiều rộng của input để phù hợp với nút gửi */
+    background-color: #004080;
+    /* Màu nền input mới */
+    width: calc(100% - 60px);
+    /* Chiều rộng của input để phù hợp với nút gửi */
     padding: 12px;
     border-radius: 5px 0 0 5px;
     color: #fff;
-    margin-left: 0; /* Đảm bảo input không có khoảng cách bên trái */
-  }
-  
-  /* Cập nhật kiểu dáng nút gửi */
-  .footer-box.subscribe IconButton {
-    width: 60px; /* Chiều rộng của nút gửi */
+    margin-left: 0;
+    /* Đảm bảo input không có khoảng cách bên trái */
+}
+
+/* Cập nhật kiểu dáng nút gửi */
+.footer-box.subscribe IconButton {
+    width: 60px;
+    /* Chiều rộng của nút gửi */
     border: none;
-    background-color: #003366; /* Màu nền nút gửi mới */
-    color: #ffcc00; /* Màu chữ nút gửi mới */
+    background-color: #003366;
+    /* Màu nền nút gửi mới */
+    color: #ffcc00;
+    /* Màu chữ nút gửi mới */
     padding: 12px;
     border-radius: 0 5px 5px 0;
-  }
-  
-  /* Cập nhật phần bản quyền */
-  section {
-    border-top: 1px solid #004080; /* Màu đường viền mới */
+}
+
+/* Cập nhật phần bản quyền */
+section {
+    border-top: 1px solid #004080;
+    /* Màu đường viền mới */
     text-align: center;
-    padding: 12px 20px; /* Giảm padding trái và phải */
-    margin-left: 0; /* Đảm bảo phần bản quyền không có khoảng cách bên trái */
-  }
-  
-  section .copyright {
+    padding: 12px 20px;
+    /* Giảm padding trái và phải */
+    margin-left: 0;
+    /* Đảm bảo phần bản quyền không có khoảng cách bên trái */
+}
+
+section .copyright {
     color: #e0e0e0;
     opacity: 0.8;
-    font-size: 14px; /* Giảm kích thước chữ */
-    margin-left: 0; /* Đảm bảo copyright không có khoảng cách bên trái */
-  }
-  
-  
-  
+    font-size: 14px;
+    /* Giảm kích thước chữ */
+    margin-left: 0;
+    /* Đảm bảo copyright không có khoảng cách bên trái */
+}
+
+
+
 
 /*** Spinner Start ***/
 .product-container {
@@ -1187,41 +1272,47 @@ footer {
     border: 2px solid #ddd;
     border-radius: 4px;
     /* padding: 15px; Tăng padding */
-    margin: 15px; /* Tăng margin */
+    margin: 15px;
+    /* Tăng margin */
     transition: all 0.3s ease;
     background-color: #fff;
     position: relative;
-    max-width: 100%; /* Đảm bảo nó không vượt quá kích thước của container */
-  }
-  
-  .product-container:hover {
+    max-width: 100%;
+    /* Đảm bảo nó không vượt quá kích thước của container */
+}
+
+.product-container:hover {
     border-color: #007bff;
     background-color: #f8f9fa;
     box-shadow: 0 10px 20px rgba(242, 3, 3, 0.15);
     transform: translateY(-5px);
-  }
-  
-  .thumbnail-wrapper {
+}
+
+.thumbnail-wrapper {
     position: relative;
     overflow: hidden;
-    height: 300px; /* Hoặc chiều cao mong muốn của bạn */
-  }
-  
-  .thumbnail {
+    height: 300px;
+    /* Hoặc chiều cao mong muốn của bạn */
+}
+
+.thumbnail {
     width: 100%;
     /* height: 90%; */
     object-fit: cover;
     border-radius: 4px;
-    transition: transform 0.7s ease, box-shadow 1s ease; /* Tăng thời gian hiệu ứng chuyển đổi */
-  }
-  
-  .thumbnail:hover {
-    transform: scale(1.1); /* Phóng to hình ảnh */
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Thêm bóng mờ */
-  }
-  
-  
-  .btn-favorite {
+    transition: transform 0.7s ease, box-shadow 1s ease;
+    /* Tăng thời gian hiệu ứng chuyển đổi */
+}
+
+.thumbnail:hover {
+    transform: scale(1.1);
+    /* Phóng to hình ảnh */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    /* Thêm bóng mờ */
+}
+
+
+.btn-favorite {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -1231,58 +1322,60 @@ footer {
     color: red;
     font-size: 24px;
     transition: color 0.3s, transform 0.3s;
-  }
-  
-  .btn-favorite:hover {
+}
+
+.btn-favorite:hover {
     color: #ff6f61;
     transform: scale(1.2);
-  }
-  
-  .btn-favorite:active {
+}
+
+.btn-favorite:active {
     color: #c62828;
     transform: scale(1);
-  }
-  
-  .line {
+}
+
+.line {
     width: 100%;
     height: 4px;
     background: linear-gradient(to right, #007bff, #00c6ff);
     margin: 15px 0;
     border-radius: 2px;
-  }
-  
-  .product-content {
-    padding: 15px; /* Tăng padding */
-  }
-  
-  .product-title {
+}
+
+.product-content {
+    padding: 15px;
+    /* Tăng padding */
+}
+
+.product-title {
     font-size: 1.5rem;
     font-weight: bold;
     color: #333;
     margin-bottom: 8px;
-  }
-  
-  .product-description {
+}
+
+.product-description {
     font-size: 1rem;
     color: #666;
     margin-bottom: 12px;
-  }
-  
-  .price-and-buttons {
+}
+
+.price-and-buttons {
     display: flex;
     justify-content: center;
     align-items: center;
-  }
-  
-  .product-price {
+}
+
+.product-price {
     font-size: 1.25rem;
     font-weight: bold;
     color: #007bff;
     margin: 0;
-  }
-  
-  .btn-add-cart {
-    margin-left: 10px; /* Tăng khoảng cách giữa giá và nút */
+}
+
+.btn-add-cart {
+    margin-left: 10px;
+    /* Tăng khoảng cách giữa giá và nút */
     display: flex;
     align-items: center;
     padding: 5px 4px;
@@ -1295,40 +1388,40 @@ footer {
     cursor: pointer;
     transition: color 0.3s, border-color 0.3s, transform 0.2s;
     outline: none;
-  }
-  
-  .btn-add-cart:hover {
+}
+
+.btn-add-cart:hover {
     background-color: #ffb524;
     color: #0056b3;
     transform: scale(1.05);
     border-color: #ffb524 !important;
-  }
-  
-  .btn-add-cart:active {
+}
+
+.btn-add-cart:active {
     background-color: #e0e0e0;
     color: #0056b3;
     transform: scale(0.95);
-  }
-  
-  .btn-add-cart svg {
+}
+
+.btn-add-cart svg {
     margin-right: 8px;
-  }
-  
-  .rating-stars {
+}
+
+.rating-stars {
     display: flex;
     justify-content: center;
     margin-top: 10px;
-  }
-  
-  .star {
+}
+
+.star {
     color: #ffc107;
     font-size: 30px;
     margin: 0 5px;
     transition: transform 0.3s, color 0.3s;
-  }
-  
-  .star:hover,
-  .star.active {
+}
+
+.star:hover,
+.star.active {
     color: #ffca28;
     transform: scale(1.2);
-  }
+}

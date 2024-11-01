@@ -12,7 +12,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Link } from "react-router-dom";
 import Navbar from "../HasagiNavbar";
 import aboutImage from "layouts/assets/img/shopping.png";
-import CartService from"../../../services/CartService";
+import CartService from "../../../services/CartService";
 const Cart = () => {
     const [cartItems, setCartItems] = useState([]);
     const [address, setAddress] = useState(null);
@@ -38,7 +38,7 @@ const Cart = () => {
 
         try {
             const [cartResponse, addressResponse] = await Promise.all([
-              CartService.getCart(),
+                CartService.getCart(),
                 axios.get(`http://localhost:3000/api/addresses/exists?accountId=${accountId}`, { withCredentials: true })
             ]);
             setCartItems(cartResponse.data);
@@ -176,8 +176,8 @@ const Cart = () => {
     const toggleModal = (itemId) => {
         const currentItem = cartItems.find(item => item.cartdetailid === itemId);
         if (currentItem) {
-            setSelectedColor(currentItem.color);
-            setSelectedSize(currentItem.size);
+            setSelectedColor(currentItem.colorId);
+            setSelectedSize(currentItem.sizeId);
             setCurrentProductId(currentItem.productId);
             setCurrentCartDetailId(currentItem.cartdetailid);
             const cartSizesForColor = cartItems
@@ -216,7 +216,7 @@ const Cart = () => {
             )}
             <HasagiNav />
             <Navbar />
-            <div className="container-fluid py-2">
+            <div className="container-fluid" style={{ marginTop: "-30px" }}>
                 <div className="row px-xl-5">
                     <div className="col-lg-12 mb-5" id="tableAddCart">
                         <div className="header">
@@ -227,7 +227,7 @@ const Cart = () => {
                         </div>
                         {cartItems.length === 0 ? (
                             <div className="text-center py-3">
-                                <img src={aboutImage} style={{height: "60px", width: "60px"}}/>
+                                <img src={aboutImage} style={{ height: "60px", width: "60px" }} />
                                 <p style={{ fontSize: "18px", color: "#6c757d" }}>Giỏ hàng của bạn đang trống.</p>
                                 <button
                                     style={{
@@ -279,7 +279,7 @@ const Cart = () => {
                                                 />
                                             </td>
                                             <td className="align-middle" style={{ textAlign: "left", paddingLeft: "20px" }}>
-                                                <Link to={`/ShopDetail?id=${item.productId}`}>
+                                                <Link to={`/ShopDetail?id=${item.productId}`} style={{ color: "black" }}>
                                                     <img src={item.image} style={{ width: 60 }} alt={item.name} /> {item.name}
                                                 </Link>
                                             </td>
@@ -305,12 +305,12 @@ const Cart = () => {
                                                         width: "140px",
                                                         display: "flex",
                                                         alignItems: "center",
-                                                        justifyContent: "space-between", 
+                                                        justifyContent: "space-between",
                                                     }}
                                                 >
                                                     <div className="input-group-btn">
                                                         <button
-                                                            className="btn btn-primary btn-minus"
+                                                            className="btn btn-warning btn-minus"
                                                             onClick={() => handleQuantityChange(item.cartdetailid, -1)}
                                                             aria-label={`Decrease quantity of ${item.name}`}
                                                             style={{
@@ -340,7 +340,7 @@ const Cart = () => {
 
                                                     <div className="input-group-btn">
                                                         <button
-                                                            className="btn btn-primary btn-plus"
+                                                            className="btn btn-warning btn-plus"
                                                             onClick={() => handleQuantityChange(item.cartdetailid, 1)}
                                                             aria-label={`Increase quantity of ${item.name}`}
                                                             style={{
@@ -375,45 +375,45 @@ const Cart = () => {
 
                         )}
                         {cartItems.length > 0 && (
-                        <div className="d-flex align-items-center justify-content-between w-100 py-2">
-                            <div className="d-flex align-items-center" style={{ marginLeft: '30px' }}>
-                                <input
-                                    type="checkbox"
-                                    checked={selectAll}
-                                    onChange={handleSelectAllChange}
-                                    style={{ transform: "scale(1.5)", marginBottom: "0" }}
-                                />
-                                <label style={{ marginLeft: "5px", marginBottom: "0" }}>
-                                    Chọn Tất Cả ({countSelectedItems()})
-                                </label>
-                                <button
-                                    onClick={handleDeleteSelected}
-                                    className="btn"
-                                    style={{
-                                        backgroundColor: "transparent",
-                                        border: "none",
-                                        color: "black",
-                                        fontSize: "20px",
-                                        fontWeight: "normal",
-                                        marginLeft: "10px",
-                                    }}
-                                >
-                                    Xóa
-                                </button>
+                            <div className="d-flex align-items-center justify-content-between w-100 py-2">
+                                <div className="d-flex align-items-center" style={{ marginLeft: '30px' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={selectAll}
+                                        onChange={handleSelectAllChange}
+                                        style={{ transform: "scale(1.5)", marginBottom: "0" }}
+                                    />
+                                    <label style={{ marginLeft: "5px", marginBottom: "0" }}>
+                                        Chọn Tất Cả ({countSelectedItems()})
+                                    </label>
+                                    <button
+                                        onClick={handleDeleteSelected}
+                                        className="btn"
+                                        style={{
+                                            backgroundColor: "transparent",
+                                            border: "none",
+                                            color: "black",
+                                            fontSize: "20px",
+                                            fontWeight: "normal",
+                                            marginLeft: "10px",
+                                        }}
+                                    >
+                                        Xóa
+                                    </button>
+                                </div>
+                                <div className="d-flex align-items-center">
+                                    <h5 className="font-weight-medium mb-0">
+                                        Tổng thanh toán ({countSelectedItems()} sản phẩm): {total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                                    </h5>
+                                    <button
+                                        onClick={handleCheckout}
+                                        className="btn btn-warning rounded-pill d-inline-flex flex-shrink-0 py-1.5 px-4 ms-3"
+                                    >
+                                        Mua ngay
+                                    </button>
+                                </div>
                             </div>
-                            <div className="d-flex align-items-center">
-                                <h5 className="font-weight-medium mb-0">
-                                    Tổng thanh toán ({countSelectedItems()} sản phẩm): {total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-                                </h5>
-                                <button
-                                    onClick={handleCheckout}
-                                    className="btn btn-primary rounded-pill d-inline-flex flex-shrink-0 py-1.5 px-4 ms-3"
-                                >
-                                    Mua ngay
-                                </button>
-                            </div>
-                        </div>
-)}
+                        )}
                     </div>
                 </div>
             </div>
@@ -427,6 +427,8 @@ const Cart = () => {
                     onSizeSelect={handleSizeSelect}
                     productId={currentProductId}
                     cartDetailId={currentCartDetailId}
+                    colorId={selectedColor}
+                    sizeId={selectedSize}
                 />
             )}
             <Footer />
