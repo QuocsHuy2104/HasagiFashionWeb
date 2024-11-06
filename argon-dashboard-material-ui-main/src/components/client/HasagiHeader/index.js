@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import CssBaseline from '@mui/material/CssBaseline';
+import { Button, Input } from '@mui/material';
 import useScrollTrigger from '@mui/material/useScrollTrigger';
 import MuiLink from "@mui/material/Link";
 import Cookies from 'js-cookie';
@@ -18,7 +19,8 @@ import { faShoppingCart, faCamera } from '@fortawesome/free-solid-svg-icons';
 import CategoriesService from 'services/CategoryServices';
 import BrandsService from 'services/BrandServices';
 import { jwtDecode } from 'jwt-decode';
-import SearchIcon from '@mui/icons-material/Search';
+import * as cocoSsd from '@tensorflow-models/coco-ssd';
+import '@tensorflow/tfjs'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import InputBase from '@mui/material/InputBase';
 import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
@@ -60,21 +62,9 @@ export default function Header(props) {
         onSearch(value);
     };
 
-    const handleImageSearch = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            const fileName = file.name;
-            const productName = fileName.substring(0, fileName.lastIndexOf('.'));
-            
-            setSearchTerm(productName);
-            onSearch(file); 
-        }
-    };
-    
     useEffect(() => {
         fetchTotalQuantity();
     }, [fetchTotalQuantity]);
-
 
     const startVoiceSearch = (event) => {
         event.preventDefault();
@@ -169,68 +159,7 @@ export default function Header(props) {
                                         <ArgonTypography variant="h5">SẢN PHẨM</ArgonTypography>
                                     </MuiLink>
 
-                                    <MuiLink href="/new" sx={{ paddingRight: 3 }}>
-                                        <ArgonTypography variant="h5">MỚI</ArgonTypography>
-                                    </MuiLink>
 
-                                    <MuiLink href="/ao-thun" sx={{ paddingRight: 3 }}>
-                                        <ArgonTypography variant="h5">ÁO THUN NAM NỮ</ArgonTypography>
-                                    </MuiLink>
-
-                                    {/* Icons with Hover */}
-                                    <ArgonBox
-                                        display="flex"
-                                        px={2} height={110}
-                                        alignItems="center"
-                                        onMouseEnter={handleMouseEnter}
-                                        onMouseLeave={handleMouseLeave}
-                                        style={{ cursor: 'pointer' }}>
-                                        <ReorderIcon sx={{ fontSize: 30 }} />
-                                        <ExpandMoreIcon sx={{ fontSize: 30 }} />
-                                        {isHovering && (
-                                            <ArgonBox
-                                                sx={{
-                                                    position: 'absolute',
-                                                    boxShadow: '0px 4px 20px rgb(0, 0, 0, 0.2)',
-                                                    borderTop: '2px solid red',
-                                                    top: '85%',
-                                                    left: 0,
-                                                    p: 2,
-                                                }}
-                                                width='100%'
-                                                bgColor='secondary'
-                                                variant='gradient'
-                                            >
-
-                                                <ArgonBox
-                                                    display="grid"
-                                                    gridTemplateColumns="repeat(5, 1fr)"
-                                                    gap={2}
-                                                >
-                                                    <ArgonBox p={2} color='white' display='flex' flexDirection='column' >
-                                                        <MuiLink href='#'>Áo Thun Trơn</MuiLink>
-                                                        <MuiLink href='#'>Áo Thun Cổ Tròn</MuiLink>
-                                                        <MuiLink href='#'>Áo Thun In Hình</MuiLink>
-                                                    </ArgonBox>
-                                                    <ArgonBox p={2} border="1px solid lightgray" color='white' display='flex' flexDirection='column'>
-                                                        <MuiLink href='#'>Áo POLO Trơn</MuiLink>
-                                                        <MuiLink href='#'>Áo POLO In Hình</MuiLink>
-                                                        <MuiLink href='#'>Áo POLO dáng rộng</MuiLink>
-                                                        <MuiLink href='#'>Áo POLO dáng vừa</MuiLink>
-                                                    </ArgonBox>
-                                                    <ArgonBox p={2} border="1px solid lightgray" color='white' display='flex' flexDirection='column'>
-                                                        <ArgonTypography>Column 3</ArgonTypography>
-                                                    </ArgonBox>
-                                                    <ArgonBox p={2} border="1px solid lightgray" color='white' display='flex' flexDirection='column'>
-                                                        <ArgonTypography>Column 4</ArgonTypography>
-                                                    </ArgonBox>
-                                                    <ArgonBox p={2} border="1px solid lightgray" color='white' display='flex' flexDirection='column'>
-                                                        <ArgonTypography>Column 5</ArgonTypography>
-                                                    </ArgonBox>
-                                                </ArgonBox>
-                                            </ArgonBox>
-                                        )}
-                                    </ArgonBox>
                                     <ArgonBox display="flex" alignItems="center" sx={{ borderBottom: '1px solid #d2d2d2', position: 'relative', flexGrow: 1 }}>
                                         <InputBase
                                             placeholder="Tìm kiếm sản phẩm..."
@@ -271,11 +200,11 @@ export default function Header(props) {
                                                 type="file"
                                                 accept="uploads/*"
                                                 style={{ display: 'none' }}
-                                                onChange={handleImageSearch}
+                                              
                                             />
                                         </label>
                                     </ArgonBox>
-                                    
+
 
                                 </ArgonBox>
 

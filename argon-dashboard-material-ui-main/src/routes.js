@@ -250,6 +250,7 @@ const routes = [
     component: <Cart />,
     showInSidenav: true,
   },
+
   {
     // type: "route",
     name: "Contact",

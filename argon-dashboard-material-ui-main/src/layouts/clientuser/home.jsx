@@ -18,6 +18,7 @@ import ArgonBox from 'components/ArgonBox';
 import ArgonTypography from 'components/ArgonTypography';
 import ShopService from "services/ShopServices";
 import BrandCarousel from "./BrandCarousel";
+import ChatBoxComponent  from "../../components/client/HasagiChat";
 
 function Home() {
     const [currentPage, setCurrentPage] = useState(1);
@@ -132,7 +133,7 @@ function Home() {
                     </div>
                 </div>
             )}
-            <Header onSearch={handleSearch} />
+            <Header onSearch={handleSearch}/>
             < Navbar />
             <HasagiCau />
             <div className="col-lg-12 px-xl-5 py-3" style={{ top: "10px" }}>
@@ -335,6 +336,7 @@ function Home() {
                 <BrandCarousel />
             </div>
             <Coupon />
+            <ChatBoxComponent />
             <Footer />
         </>
     );
