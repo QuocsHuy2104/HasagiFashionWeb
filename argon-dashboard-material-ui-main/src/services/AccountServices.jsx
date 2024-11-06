@@ -10,7 +10,7 @@ const AccountService = {
     },
 
     saveAccount: (formData) => {
-        const url = formData.id
+        const url = formData.id 
             ? `/admin/account/${formData.id}`
             : "/admin/account";
         const method = formData.id ? "PUT" : "POST";

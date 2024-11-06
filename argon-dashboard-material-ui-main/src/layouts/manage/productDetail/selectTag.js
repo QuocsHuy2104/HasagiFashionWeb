@@ -21,54 +21,60 @@ const MenuProps = {
     },
 };
 
-export default function MultipleSelectCheckmarks({ model, selectModel, onChange, nameTag }) {
+export default function MultipleSelectCheckmarks({ model, selectModel = [], onChange, nameTag }) {
+    // Store the selected `id`s in `selectedIds`
+    const [selectedIds, setSelectedIds] = React.useState(selectModel);
+
     const handleChange = (event) => {
         const {
             target: { value },
         } = event;
-        const newSelectModel = typeof value === 'string' ? value.split(',') : value;
+
+        // Handle value as an array of ids
+        const newSelectedIds = typeof value === 'string' ? value.split(',') : value;
+        setSelectedIds(newSelectedIds);
 
         if (typeof onChange === 'function') {
-            onChange(newSelectModel);
+            onChange(newSelectedIds);
         }
     };
 
+    const selectedNames = selectedIds
+        .map(id => model.find(item => item.id === id)?.name)
+        .filter(name => name); 
+
     return (
-        <FormControl sx={{ width: { xs: '100%', sm: '100%' } }}>  {/* Full width on small screens, fixed on larger */}
+        <FormControl sx={{ width: { xs: '100%', sm: '100%' } }}>
             <InputLabel id="demo-multiple-checkbox-label">{nameTag}</InputLabel>
             <Select
                 labelId="demo-multiple-checkbox-label"
                 id="demo-multiple-checkbox"
                 multiple
-                value={selectModel}
+                value={selectedIds}
                 onChange={handleChange}
-                input={<OutlinedInput label="Roles" />}
-                renderValue={(selected) => selected.join(', ')}
+                input={<OutlinedInput label={nameTag} />}
+                renderValue={() => selectedNames.join(', ')}
                 MenuProps={MenuProps}
             >
-                {model.map((children) => (
-                    <MenuItem key={children.name} value={model.name} sx={{ margin: '5px 0' }}>
-                        <Checkbox checked={selectModel.indexOf(children.name) > -1} />
-                        <ListItemText primary={children.name} />
+                {model.map((item) => (
+                    <MenuItem key={item.id} value={item.id} sx={{ margin: '5px 0' }}>
+                        <Checkbox checked={selectedIds.indexOf(item.id) > -1} />
+                        <ListItemText primary={item.name} />
                     </MenuItem>
                 ))}
             </Select>
         </FormControl>
-
     );
 }
 
 MultipleSelectCheckmarks.propTypes = {
     model: PropTypes.arrayOf(
         PropTypes.shape({
+            id: PropTypes.number.isRequired,
             name: PropTypes.string.isRequired,
         })
     ).isRequired,
-    selectModel: PropTypes.arrayOf(PropTypes.string),
+    selectModel: PropTypes.arrayOf(PropTypes.number), 
     onChange: PropTypes.func.isRequired,
     nameTag: PropTypes.string.isRequired,
-};
-
-MultipleSelectCheckmarks.defaultProps = {
-    selectModel: [],
 };
