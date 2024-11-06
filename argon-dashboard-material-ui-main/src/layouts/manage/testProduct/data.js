@@ -9,10 +9,15 @@ import Box from '@mui/material/Box';
 
 const columns = [
     { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'name', headerName: 'Size', width: 130 },
+    { field: 'price', headerName: 'Giá', width: 100 },
+    { field: 'size.name', headerName: 'Size', width: 130 }, 
+    { field: 'color.name', headerName: 'Màu', width: 130 },
+    { field: 'quantity', headerName: 'Số lượng', width: 130 },
+    { field: 'priceSize', headerName: 'Giá kích cỡ', width: 120 },
+    { field: 'createdAt', headerName: 'Ngày tạo', width: 120 }, // Assuming you meant createdAt
 ];
 
-export default function DataTable({ sizes, onEditClick, onDeleteClick }) {
+export default function DataTable({ productDetails, onEditClick, onDeleteClick }) {
     const [selectedRows, setSelectedRows] = useState([]);
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
 
@@ -20,23 +25,25 @@ export default function DataTable({ sizes, onEditClick, onDeleteClick }) {
         setSelectedRows(newSelectionModel);
     };
 
-    const handleDelete = async () => {
-        if (selectedRows.length > 0) {
-            await onDeleteClick(selectedRows);
+    const handleEdit = () => {
+        if (selectedRows.length === 1) {
+            const selectedProductDT = productDetails.find((productDetail) => productDetail.id === selectedRows[0]);
+            onEditClick(selectedProductDT);
         }
     };
 
-    const handleEdit = () => {
-        if (selectedRows.length === 1) {
-            const selectedSize = sizes.find((size) => size.id === selectedRows[0]);
-            onEditClick(selectedSize);
+    const handleDelete = () => {
+        if (selectedRows.length > 0) {
+            onDeleteClick(selectedRows);
         }
     };
+
+    console.log('Product Details:', productDetails); // Debugging log
 
     return (
         <Paper sx={{ height: 400, width: '100%', position: 'relative' }}>
             <DataGrid
-                rows={sizes}
+                rows={productDetails}
                 columns={columns}
                 paginationModel={paginationModel}
                 onPaginationModelChange={setPaginationModel}
@@ -52,7 +59,7 @@ export default function DataTable({ sizes, onEditClick, onDeleteClick }) {
                         <EditIcon color="primary" />
                     </IconButton>
                     <IconButton onClick={handleDelete}>
-                        <DeleteIcon color="dark" />
+                        <DeleteIcon color="error" />
                     </IconButton>
                 </Box>
             )}
@@ -61,7 +68,7 @@ export default function DataTable({ sizes, onEditClick, onDeleteClick }) {
 }
 
 DataTable.propTypes = {
-    sizes: PropTypes.array.isRequired,
+    productDetails: PropTypes.array.isRequired,
     onEditClick: PropTypes.func.isRequired,
     onDeleteClick: PropTypes.func.isRequired,
 };

@@ -1,29 +1,31 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import PropTypes from "prop-types";
-import { toast } from "react-toastify";
+import { useNavigate } from 'react-router-dom';
 
 // Argon Dashboard 2 MUI components
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
 import ArgonAvatar from "components/ArgonAvatar";
-import ArgonBadge from "../../../components/ArgonBadge";
+import ArgonBadge from "components/ArgonBadge";
+
+import ProductService from "services/ProductServices";
 
 function Product({ image, name, importprice }) {
+    const defaultImage = "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930";
+    const imageUrl = image && image !== '' ? image : defaultImage;
+
     return (
         <ArgonBox display="flex" alignItems="center" px={1} py={0.5}>
             <ArgonBox mr={2}>
-                <ArgonAvatar src={image} alt={name} size="sm" variant="rounded" />
-
+                <ArgonAvatar src={imageUrl} alt={name} size="xxl" variant="rounded" />
             </ArgonBox>
             <ArgonBox display="flex" flexDirection="column">
                 <ArgonTypography variant="button" fontWeight="medium" color="textPrimary">
                     {name}
                 </ArgonTypography>
                 <ArgonTypography variant="caption" color="secondary" fontWeight="bold">
-                    {`$${importprice.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`}
+                    {importprice ? `${importprice}` : "0"}
                 </ArgonTypography>
-
             </ArgonBox>
         </ArgonBox>
     );
@@ -31,28 +33,21 @@ function Product({ image, name, importprice }) {
 
 Product.propTypes = {
     name: PropTypes.string.isRequired,
-    image: PropTypes.string.isRequired,
-    importprice: PropTypes.number.isRequired,
+    image: PropTypes.string,
+    importprice: PropTypes.number,
 };
 
-const ProductTable = ({ onEditClick }) => {
+const ProductTable = ({ onEditClick, setSelectedProduct }) => {
     const [products, setProducts] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [trademarks, setTrademarks] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [trademarkResponse, categoryResponse, productResponse] = await Promise.all([
-                    axios.get("http://localhost:8080/api/brand"),
-                    axios.get("http://localhost:8080/api/category"),
-                    axios.get("http://localhost:8080/api/product")
-                ]);
-                setTrademarks(trademarkResponse.data);
-                setCategories(categoryResponse.data);
-                setProducts(productResponse.data);
+                const productResponse = await ProductService.getAllProducts();
+                setProducts(productResponse.data || []);
             } catch (err) {
-                console.log(err);
+                console.error("Failed to fetch products:", err);
             }
         };
 
@@ -60,38 +55,77 @@ const ProductTable = ({ onEditClick }) => {
     }, []);
 
     const handleEditClick = (product) => {
-        onEditClick(product);
+        if (onEditClick) onEditClick(product);
     };
 
-    const deleteItem = async (id) => {
-        try {
-            await axios.delete(`http://localhost:8080/api/product/${id}`);
-            setProducts(products.filter(product => product.id !== id));
-            toast.success("Delete product successful");
-        } catch (error) {
-            console.error("There was an error deleting the item!", error);
+    const handleNavigateToProductDetail = (product) => {
+        if (setSelectedProduct) {
+            setSelectedProduct(product);
+            navigate('/manage/product-detail', { state: { product } });
         }
     };
 
+    const formatDate = (dateString) => {
+        if (!dateString) return "N/A";
+
+        const date = new Date(dateString);
+
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+
+        return `${day}-${month}-${year}\n${hours}:${minutes}`;
+    };
+
+    const formatNumber = (num) => {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    };
+
+    const formatImportPrice = (importPrice) => {
+        if (!importPrice) return "0đ"; // Default value if importPrice is not available
+
+        const prices = importPrice.split('-').map(price => {
+            const trimmedPrice = price.trim();
+            const numericPrice = parseFloat(trimmedPrice); // Convert string to number
+            const integerPrice = Math.floor(numericPrice); // Remove decimal places
+            return `${formatNumber(integerPrice)}đ`; // Format number and prefix with 'đ'
+        });
+
+        return prices.join(' - '); // Join formatted prices with ' - '
+    };
+
+
+
+
+
     const rows = products.map(product => ({
-        product: (
+        SanPham: (
             <Product
-                image={product.image ? product.image : "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/330px-No-Image-Placeholder.svg.png?20200912122019"}
-                name={product.name}
-                importprice={product.importPrice}
+                image={`http://localhost:3000/${product.image || "No_Image_Available.jpg"}`}
+                name={product.name || "Unknown Product"}
+                importprice={formatImportPrice(product.importPrice)}
             />
         ),
-        quantity: (
+        SoLuong: (
             <ArgonTypography variant="caption" color="secondary" fontWeight="medium">
-                {product.quantity === 0 ? "Sold out" : product.importQuantity}
+                {product.importQuantity > 0 ? product.importQuantity || "N/A" : "0"}
             </ArgonTypography>
         ),
-        category: (
+        NgayTao: (
+            <ArgonTypography variant="caption" color="secondary" fontWeight="medium">
+                {formatDate(product.createDate)}
+            </ArgonTypography>
+
+        ),
+        DanhMuc: (
             <ArgonBadge
                 variant="gradient"
-                badgeContent={categories.find(cate => product.categoryId === cate.id)?.name || "No category"}
+                badgeContent={product.categoryDTOResp?.name || "Unknown"}
                 color="primary"
-                size="xs"
+                size="sm"
                 sx={{
                     fontSize: "0.75rem",
                     textTransform: "capitalize",
@@ -100,21 +134,21 @@ const ProductTable = ({ onEditClick }) => {
                 }}
             />
         ),
-        brand: (
+        ThuongHieu: (
             <ArgonBadge
                 variant="gradient"
-                badgeContent={trademarks.find(brand => product.trademarkId === brand.id)?.name || "No brand"}
+                badgeContent={product.trademarkDTOResp?.name || "Unknown"}
                 color="info"
-                size="xs"
+                size="sm"
                 sx={{
-                    fontSize: "50px",
+                    fontSize: "0.75rem",
                     textTransform: "capitalize",
                     padding: "5px 10px",
                     borderRadius: "10px",
                 }}
             />
         ),
-        action: (
+        ThaoTac: (
             <ArgonBox display="flex" justifyContent="space-between" alignItems="center">
                 <ArgonTypography
                     px={1}
@@ -134,26 +168,11 @@ const ProductTable = ({ onEditClick }) => {
                 </ArgonTypography>
                 <ArgonTypography
                     px={1}
-                    component="a"
+                    component="span"
                     variant="caption"
                     color="primary"
                     fontWeight="medium"
-                    href={`/manage/product/${product.id}`}
-                    sx={{
-                        "&:hover": {
-                            textDecoration: "underline",
-                        },
-                    }}
-                >
-                    <i className="bi bi-info-circle"></i> Detail
-                </ArgonTypography>
-                <ArgonTypography
-                    px={1}
-                    component="span"
-                    variant="caption"
-                    color="error"
-                    fontWeight="medium"
-                    onClick={() => deleteItem(product.id)}
+                    onClick={() => handleNavigateToProductDetail(product)}
                     sx={{
                         cursor: "pointer",
                         "&:hover": {
@@ -161,7 +180,7 @@ const ProductTable = ({ onEditClick }) => {
                         },
                     }}
                 >
-                    <i className="bi bi-trash3"></i> Remove
+                    <i className="bi bi-info-circle"></i> Detail
                 </ArgonTypography>
             </ArgonBox>
         ),
@@ -169,11 +188,12 @@ const ProductTable = ({ onEditClick }) => {
 
     const authorsTableData = {
         columns: [
-            { name: "product", align: "left" },
-            { name: "quantity", align: "center" },
-            { name: "category", align: "center" },
-            { name: "brand", align: "center" },
-            { name: "action", align: "center" },
+            { name: "SanPham", align: "left" },
+            { name: "SoLuong", align: "center" },
+            { name: "NgayTao", align: "center" },
+            { name: "DanhMuc", align: "center" },
+            { name: "ThuongHieu", align: "center" },
+            { name: "ThaoTac", align: "center" },
         ],
         rows,
     };
@@ -183,6 +203,7 @@ const ProductTable = ({ onEditClick }) => {
 
 ProductTable.propTypes = {
     onEditClick: PropTypes.func.isRequired,
+    setSelectedProduct: PropTypes.func.isRequired,
 };
 
 export default ProductTable;

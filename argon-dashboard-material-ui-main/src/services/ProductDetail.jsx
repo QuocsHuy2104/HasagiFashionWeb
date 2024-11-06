@@ -1,14 +1,14 @@
 import apiClient from "config/axiosConfig";
 
 const ShopDetailService = {
-    getAllShopDetail: () => apiClient.get('/cart/totalQuantity',{
+    getAllShopDetail: () => apiClient.get('/cart/totalQuantity', {
         withCredentials: true
     }),
-  
+
 
     getCategoryDetail: (categoryId) => apiClient.get(`/category/${categoryId}`),
 
-    getProductDetail: (productId) => apiClient.get(`/product/${productId}`),
+    getProductDetail: (productId) => apiClient.get(`/admin/product/${productId}`),
 
     checkFavorite: (productId) => {
         return apiClient.get("/favorites/check", {
@@ -18,26 +18,26 @@ const ShopDetailService = {
     },
 
     getAllFavorites: () => apiClient.get('/favorites/count/account', {
-        withCredentials: true 
+        withCredentials: true
     }),
 
 
     getGotoFavorites: () => apiClient.get('/favorites/user', {
-        withCredentials: true 
+        withCredentials: true
     }),
 
-    
-    
-        addToCart: ({ colorId, sizeId, quantity, productId, price }) => {
-        return  apiClient.post('/cart/add', {
-                colorId,
-                sizeId,
-                quantity,
-                productId,
-                price
-            }, { withCredentials: true })
 
-        },
+
+    addToCart: ({ colorId, sizeId, quantity, productId, price }) => {
+        return apiClient.post('/cart/add', {
+            colorId,
+            sizeId,
+            quantity,
+            productId,
+            price
+        }, { withCredentials: true })
+
+    },
 
     getFavoritesCount: (productId) =>
         apiClient.get('/favorites/count', {
@@ -48,10 +48,10 @@ const ShopDetailService = {
         apiClient.post('/favorites', {
             productId
         }, { withCredentials: true }),
-    
+
     removeFromFavorites: (productId) =>
-        apiClient.delete(`/favorites/${productId}`, { 
-            withCredentials: true 
+        apiClient.delete(`/favorites/${productId}`, {
+            withCredentials: true
         }),
 };
 

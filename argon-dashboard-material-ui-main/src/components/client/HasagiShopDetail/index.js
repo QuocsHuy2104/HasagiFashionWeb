@@ -10,11 +10,8 @@ import { toast, ToastContainer } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import reviewsService from "services/ReviewsServices";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStar as solidStar } from '@fortawesome/free-solid-svg-icons';
-import { faStar as regularStar } from '@fortawesome/free-regular-svg-icons';
-import { Modal, Box } from '@mui/material';
 import ReviewList from "../HasagiReview/reviewList";
+
 
 function ShopDetail() {
     const [product, setProduct] = useState(null);
@@ -30,15 +27,18 @@ function ShopDetail() {
     const [favoriteCount, setFavoriteCount] = useState(0);
     const navigate = useNavigate();
     const [reviews, setReviews] = useState([]);
-    const [selectedStar, setSelectedStar] = useState(null);
-    const [open, setOpen] = useState(false);
-    const [mediaUrl, setMediaUrl] = useState('');
+
 
     const fetchReviews = async (productId) => {
+        if (!productId) {
+            console.error("Product ID is undefined");
+            return; // Kết thúc hàm nếu productId không hợp lệ
+        }
+    
         try {
             const productReviews = await reviewsService.getReviewsByProduct(productId);
             console.log('Fetched reviews for product:', productReviews);
-
+    
             if (Array.isArray(productReviews)) {
                 const sortedReviews = productReviews.sort((a, b) => b.star - a.star);
                 setReviews(sortedReviews);
@@ -51,18 +51,26 @@ function ShopDetail() {
             setReviews([]);
         }
     };
+    
 
     useEffect(() => {
         const query = new URLSearchParams(location.search);
         const productId = query.get('id');
-
+    
+        console.log("Product ID from URL:", productId); // Log để kiểm tra
+    
         if (productId) {
-            fetchReviews(productId);
+            console.log("Calling fetchReviews with productId:", productId); // Log để kiểm tra
+            fetchReviews(productId); 
+        } else {
+            console.error("Product ID is missing in the URL");
         }
     }, [location]);
+    
+
 
     const getUniqueSizes = (sizes) => {
-        return sizes.reduce((unique, size) => {
+        return (sizes || []).reduce((unique, size) => {
             if (!unique.some(item => item.id === size.id)) {
                 unique.push(size);
             }
@@ -70,7 +78,7 @@ function ShopDetail() {
         }, []);
     };
 
-    const getUniqueColors = (colors) => {
+    const getUniqueColors = (colors = []) => {
         return colors.reduce((unique, color) => {
             if (!unique.some(item => item.id === color.id)) {
                 unique.push(color);
@@ -78,6 +86,7 @@ function ShopDetail() {
             return unique;
         }, []);
     };
+
 
     const uniqueSizes = product ? getUniqueSizes(product.sizes) : [];
     const uniqueColors = product ? getUniqueColors(product.colors) : [];
@@ -436,7 +445,7 @@ function ShopDetail() {
                                     <p>Eos no lorem eirmod diam diam, eos elitr et gubergren diam sea...</p>
                                 </div>
                                 <div className={`tab-pane fade ${activeTab === 'tab-pane-3' ? 'show active' : ''}`} id="tab-pane-3">
-                                <ReviewList />
+                                    <ReviewList />
                                 </div>
                             </div>
                         </div>

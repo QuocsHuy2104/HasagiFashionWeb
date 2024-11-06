@@ -15,6 +15,7 @@ import CouponList from "components/client/HasagiVorcher";
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import ArgonBox from 'components/ArgonBox';
 import ArgonTypography from 'components/ArgonTypography';
+import HasagiAI from "components/client/HasagiAI";
 
 function Home() {
     const [currentPage, setCurrentPage] = useState(1);
@@ -141,23 +142,23 @@ function Home() {
                     }}
                 >
                     <ArgonBox
-                            borderRadius='lg'
-                            p='25px 25px 10px'
-                            sx={{
-                                background: 'linear-gradient(to bottom, #2D0798, #fcc419)'
-                            }}>
-                            <ArgonBox
-                                display='flex'
-                                justifyContent='center'
-                                alignItems='center'
-                                flexWrap='wrap'
-                                mb={4}
-                            >
-                                <ArgonTypography variant='h2'>
-                                    <ArgonBox component='img' src='https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/home_fsale_image.png?1713464283843' />
-                                </ArgonTypography>
-                            </ArgonBox>
+                        borderRadius='lg'
+                        p='25px 25px 10px'
+                        sx={{
+                            background: 'linear-gradient(to bottom, #2D0798, #fcc419)'
+                        }}>
+                        <ArgonBox
+                            display='flex'
+                            justifyContent='center'
+                            alignItems='center'
+                            flexWrap='wrap'
+                            mb={4}
+                        >
+                            <ArgonTypography variant='h2'>
+                                <ArgonBox component='img' src='https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/home_fsale_image.png?1713464283843' />
+                            </ArgonTypography>
                         </ArgonBox>
+                    </ArgonBox>
                     <h5 className="mb-3 d-flex align-items-center py-3" style={{
                         color: "#e63946",
                         fontWeight: "bold",
@@ -213,7 +214,7 @@ function Home() {
                                             <Link className="h6 text-decoration-none text-truncate">
                                                 {product.name || "Product Name Goes Here"}
                                             </Link>
-                                            
+
                                             <div className="d-flex align-items-center justify-content-center mb-1">
                                                 <small className="fa fa-star text-primary mr-1"></small>
                                                 <small className="fa fa-star text-primary mr-1"></small>
@@ -271,6 +272,10 @@ function Home() {
                     ))}
                 </Grid>
             </div>
+
+
+
+
             <div className="container-fluid pt-4 pb-3">
                 <h2 className="section-title position-relative text-uppercase mx-xl-5 mb-4">
                     <span className="bg-secondary pr-3">Sản phẩm</span>
@@ -292,7 +297,7 @@ function Home() {
                                     <Link className="h6 text-decoration-none text-truncate" to={`/ShopDetail?id=${product.id}`}>
                                         {product.name || "Product Name Goes Here"}
                                     </Link>
-                                    
+
                                     <div className="d-flex align-items-center justify-content-center mb-1">
                                         <small className="fa fa-star text-primary mr-1"></small>
                                         <small className="fa fa-star text-primary mr-1"></small>
@@ -330,6 +335,7 @@ function Home() {
                     </div>
                 </div>
             </div>
+            <HasagiAI />
             <Footer />
         </>
     );

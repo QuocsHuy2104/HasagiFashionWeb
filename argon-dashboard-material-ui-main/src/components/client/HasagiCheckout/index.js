@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
 import "components/client/assets/css/style.css";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCcVisa, faCcMastercard, faCcAmex } from '@fortawesome/free-brands-svg-icons';
 import ArgonButton from "components/ArgonButton";
 import AddressSelection from "components/client/HasagiBackup1";
 import axios from 'axios';
@@ -58,12 +56,6 @@ const Checkout = () => {
         fetchAddress();
         const cartItemsBackup = JSON.parse(localStorage.getItem('cartItemsBackup')) || [];
         setCartItems(cartItemsBackup);
-        // const intervalId = setInterval(() => {
-        //     fetchAddress();
-        // }, 3000);
-        // return () => {
-        //     clearInterval(intervalId);
-        // };
     }, []);
 
     useEffect(() => {

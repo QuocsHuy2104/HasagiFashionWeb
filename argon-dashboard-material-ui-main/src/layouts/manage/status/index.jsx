@@ -18,8 +18,8 @@ const slugify = (text) => {
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d") 
-    .replace(/Đ/g, "d") 
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "d")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 };
@@ -56,18 +56,18 @@ function Status() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     const data = {
       status: formData.status,
       slug: slugify(formData.status),  // Generate slug
     };
-    
+
     console.log("Slug being submitted:", data.slug);
-    
+
     try {
       let result;
       if (formData.id) {
-        result = await StatussService.updateStatus(formData.id, data); 
+        result = await StatussService.updateStatus(formData.id, data);
         setStatuss(statuss.map((status) => (status.id === result.data.id ? result.data : status)));
       } else {
         result = await StatussService.createStatus(data);
@@ -79,7 +79,7 @@ function Status() {
       toast.error(`Error: ${error.response ? error.response.data : error.message}`);
     }
   };
-  
+
 
   const resetForm = () => {
     setFormData({
@@ -116,7 +116,7 @@ function Status() {
   return (
     <DashboardLayout>
       <DashboardNavbar />
-     
+
       <ArgonBox mb={3}>
         <Card style={{ borderRadius: "100px" }}>
           <ArgonBox

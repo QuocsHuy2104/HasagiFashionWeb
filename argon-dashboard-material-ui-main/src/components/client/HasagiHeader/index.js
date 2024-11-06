@@ -25,7 +25,7 @@ const Header = ({ onSearch }) => {
     const handleSearchChange = (event) => {
         const value = event.target.value;
         setSearchTerm(value);
-        onSearch(value); // Gọi hàm tìm kiếm từ prop
+        onSearch(value); 
     };
 
     const handleMouseEnter = () => {
@@ -175,7 +175,7 @@ const Header = ({ onSearch }) => {
                                     alt="logo"
                                     style={styles.logo}
                                 />
-                                <span className="mt-5" style={{ fontWeight: 1000, color: "white"}}>Hasagi Fashion</span>
+                                <span className="mt-5" style={{ fontWeight: 1000, color: "white" }}>Hasagi Fashion</span>
                             </a>
                         )}
                     </div>
@@ -186,6 +186,7 @@ const Header = ({ onSearch }) => {
                             <a href="#about" className="nav-item nav-link" style={styles.navLink}>Giới Thiệu</a>
                             <a href="#contact" className="nav-item nav-link" style={styles.navLink}>Liên Hệ</a>
                             <a href="#faq" className="nav-item nav-link" style={styles.navLink}>Hỏi Đáp</a>
+                            <a href="/chatAI" className="nav-item nav-link" style={styles.navLink}>Chat AI</a>
                         </div>
                     </div>
 
@@ -278,7 +279,7 @@ const Header = ({ onSearch }) => {
 };
 
 Header.propTypes = {
-    onSearch: () => {}
+    onSearch: () => { }
 };
 
 export default Header;
