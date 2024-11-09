@@ -1,43 +1,63 @@
-import { React, useState } from "react";
+import React, { useState } from "react";
 import "./Profile.css";
 import Header from "../HasagiHeader";
 import Footer from "../HasagiFooter";
-import History from "../HasagiHistory";
-import Shop from "../HasagiShopDetail";
+import IndexHistory from "../HasagiMenuItemBackup/indexHisory";
+import AddressPage from "../HasagiAddress";
+import ChangePassword from "../HasagiChangePassword";
+import User from "../HasagiUser";
 
 const Profile = () => {
-  // State để theo dõi mục đang active
-  const [activeItem, setActiveItem] = useState("Tài Khoản Của Tôi");
+  const [activeItem, setActiveItem] = useState("Hồ Sơ");
+  const [expandedItem, setExpandedItem] = useState("Tài Khoản Của Tôi");
 
-  // Danh sách các mục trong sidebar
   const menuItems = [
-    { name: "Tài Khoản Của Tôi" },
-    { name: "Hồ Sơ" },
-    { name: "Ngân Hàng" },
-    { name: "Địa Chỉ" },
-    { name: "Đổi Mật Khẩu" },
+    { name: "Tài Khoản Của Tôi", hasSubItems: true },
+    { name: "Đơn Mua" },
     { name: "Cài Đặt Thông Báo" },
     { name: "Những Thiết Lập Riêng Tư" },
-    { name: "Đơn Mua" },
     { name: "Thông Báo" },
     { name: "Kho Voucher", isNew: true },
     { name: "Shopee Xu" },
   ];
 
-  const renderContent = () => {
-    switch (activeItem) {
-      case "Tài Khoản Của Tôi":
-        return;
-      case "Hồ Sơ":
-        return <Shop />;
-      case "Địa Chỉ":
-        return;
-      case "Đơn Mua":
-        return <History />;
-      default:
-        return;
+  const subMenuItems = [
+    { name: "Hồ Sơ", parent: "Tài Khoản Của Tôi" },
+    { name: "Địa Chỉ", parent: "Tài Khoản Của Tôi" },
+    { name: "Đổi Mật Khẩu", parent: "Tài Khoản Của Tôi" },
+  ];
+
+  const handleMenuItemClick = (item) => {
+    if (item.hasSubItems) {
+      setExpandedItem(item.name);
+      setActiveItem("Hồ Sơ");
+    } else {
+      setActiveItem(item.name);
+      setExpandedItem(item.parent || null);
     }
   };
+
+  const handleEditProfileClick = () => {
+    // Mở menu "Tài Khoản Của Tôi" và thiết lập hoạt động là "Hồ Sơ"
+    setExpandedItem("Tài Khoản Của Tôi");
+    setActiveItem("Hồ Sơ");
+  };
+
+  const renderContent = () => {
+    switch (activeItem) {
+      case "Hồ Sơ":
+        return <User />;
+      case "Địa Chỉ":
+        return <AddressPage />;
+      case "Đơn Mua":
+        return <IndexHistory />;
+      case "Đổi Mật Khẩu":
+        return <ChangePassword />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <>
       <div className="mb-5">
@@ -49,17 +69,37 @@ const Profile = () => {
             <div className="profile">
               <div className="profile-pic">C</div>
               <span className="username">cnglp273</span>
-              <button className="edit-profile">Sửa Hồ Sơ</button>
+              <button className="edit-profile" onClick={handleEditProfileClick}>
+                Sửa Hồ Sơ
+              </button>
             </div>
             <div className="menu">
               {menuItems.map((item) => (
-                <p
-                  key={item.name}
-                  className={activeItem === item.name ? "menu-item active" : "menu-item"}
-                  onClick={() => setActiveItem(item.name)}
-                >
-                  {item.name} {item.isNew && <span className="new">New</span>}
-                </p>
+                <React.Fragment key={item.name}>
+                  <p
+                    className={`menu-item ${activeItem === item.name && !item.hasSubItems ? "active" : ""
+                      }`}
+                    onClick={() => handleMenuItemClick(item)}
+                  >
+                    {item.name} {item.isNew && <span className="new">New</span>}
+                  </p>
+                  {item.hasSubItems && (
+                    <div className={`sub-menu ${expandedItem === item.name ? "open" : ""}`}>
+                      {subMenuItems
+                        .filter((subItem) => subItem.parent === item.name)
+                        .map((subItem) => (
+                          <p
+                            key={subItem.name}
+                            className={`menu-item ${activeItem === subItem.name ? "active sub-item" : "sub-item"
+                              }`}
+                            onClick={() => handleMenuItemClick(subItem)}
+                          >
+                            {subItem.name}
+                          </p>
+                        ))}
+                    </div>
+                  )}
+                </React.Fragment>
               ))}
             </div>
           </div>

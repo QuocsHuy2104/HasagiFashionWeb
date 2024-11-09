@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
 import "components/client/assets/css/style.css";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCcVisa, faCcMastercard, faCcAmex } from '@fortawesome/free-brands-svg-icons';
 import ArgonButton from "components/ArgonButton";
 import AddressSelection from "components/client/HasagiBackup/index1";
 import axios from 'axios';
@@ -11,7 +9,6 @@ import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
 import { ToastContainer, toast } from 'react-toastify';
-import Navbar from '../HasagiNavbar';
 import VoucherService from "../../../services/VoucherServices";
 import { Card, Container, Button } from "react-bootstrap";
 import CheckoutService from '../../../services/CheckoutServices';
@@ -357,8 +354,6 @@ const Checkout = () => {
             }
         };
 
-
-        // Fetch used vouchers for the account
         const fetchUsedVouchers = async () => {
             if (accountId) {
                 try {
@@ -381,6 +376,8 @@ const Checkout = () => {
     };
 
     const goBack = () => {
+
+        localStorage.removeItem('cartItemsBackup');
         navigate('/Cart');
     };
 
@@ -395,10 +392,9 @@ const Checkout = () => {
                 </div>
             )}
             <HasagiNav />
-            <Navbar />
             <div className="container-fluid">
                 <div className="row px-xl-5">
-                    <div className="header" style={{marginTop: "-30px"}}>
+                    <div className="header" style={{ marginTop: "100px" }}>
                         <button className="back-button" onClick={() => goBack()}>
                             <i className="ni ni-bold-left" />
                         </button>
@@ -448,38 +444,42 @@ const Checkout = () => {
                     </div>
                     <div className="col-lg-12">
                         <div className="bg-light p-30 mb-5" style={{ border: '1px solid #ddd', padding: '20px', borderRadius: '5px', marginLeft: "-10px", marginRight: "-10px" }}>
-                            <table className="table table-bordered table-hover border-bottom mb-2" style={{ backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
-                                <thead className="thead-light " style={{ fontWeight: 'bold', color: '#fff' }}>
+                            <table className="table" style={{ backgroundColor: '#f8f9fa', borderRadius: '8px', border: 'none', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                <thead className="thead-light" style={{ fontWeight: 'bold', color: '#fff', borderBottom: '1px solid #ddd' }}>
                                     <tr>
-                                        <th scope="col" className="text-left" style={{ width: "350px" }}>Sản phẩm</th>
-                                        <th scope="col" className="text-center" style={{ width: "250px" }}></th>
-                                        <th scope="col" className="text-center">Đơn giá</th>
-                                        <th scope="col" className="text-center">Số lượng</th>
-                                        <th scope="col" className="text-center">Thành tiền</th>
+                                        <th scope="col" className="text-left" style={{ width: "350px", padding: '8px 16px', color: "black" }}>Sản phẩm</th>
+                                        <th scope="col" className="text-center" style={{ width: "250px", padding: '8px 16px' }}></th>
+                                        <th scope="col" className="text-center" style={{ padding: '8px 16px', color: "gray", }}>Đơn giá</th>
+                                        <th scope="col" className="text-center" style={{ padding: '8px 16px', color: "gray" }}>Số lượng</th>
+                                        <th scope="col" className="text-center" style={{ padding: '8px 16px', color: "gray" }}>Thành tiền</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {cartItems.map((item, index) => (
-                                        <tr key={index} style={{ verticalAlign: 'middle' }}>
-                                            <td>
+                                        <tr key={index} style={{ verticalAlign: 'middle', borderBottom: '1px solid #ddd' }}>
+                                            <td style={{ padding: '8px 16px' }}>
                                                 <div className="d-flex align-items-center">
                                                     <img src={item.image} style={{ width: 60, marginRight: '15px', borderRadius: '5px' }} alt="Product" />
                                                     <span style={{ fontWeight: 'medium' }}>{item.name}</span>
                                                 </div>
                                             </td>
-                                            <td className='py-4'>
+                                            <td className='py-4' style={{ padding: '8px 16px' }}>
                                                 <div>Loại: <span style={{ fontWeight: 'medium' }}>{item.color}</span>, <span style={{ fontWeight: 'medium' }}>{item.size}</span></div>
                                             </td>
-                                            <td style={{ fontWeight: 'medium' }} className="text-center py-4">{item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
-                                            <td className="text-center py-4">
-                                                <span style={{ fontWeight: 'medium' }}>{item.quantity}</span>
+                                            <td className='py-4' style={{ padding: '8px 16px' }}>
+                                            <div><span style={{ fontWeight: 'medium'}}>{item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span></div>
                                             </td>
-                                            <td style={{ fontWeight: 'medium' }} className="text-center py-4">{item.total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
+                                            <td className='py-4' style={{ padding: '8px 16px' }}>
+                                            <div><span style={{ fontWeight: 'medium' }}>{item.quantity}</span></div>
+                                                
+                                            </td>
+                                            <td className='py-4' style={{ padding: '8px 16px' }}>
+                                            <div><span style={{ fontWeight: 'medium' }}>{(item.price * item.quantity).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span></div>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
-
                         </div>
                     </div>
                     <div className="col-lg-12">

@@ -23,7 +23,7 @@ const HistoryOrderDetail = () => {
   const [payMethod, setPayMethod] = useState('');
   const [orderDate, setOrderDate] = useState('');
   const [voucherPrice, setVoucherPrice] = useState('');
-  const [cancelReason , setCancelReason] =  useState('');
+  const [cancelReason, setCancelReason] = useState('');
 
   useEffect(() => {
     const accountId = Cookies.get('accountId');
@@ -326,8 +326,27 @@ const HistoryOrderDetail = () => {
                         <Typography variant="body2" color="textSecondary" style={{ color: "black" }}>
                           Số lượng: {item.productQuantity}
                         </Typography>
-                        <Typography variant="body2" color="textSecondary" style={{ marginLeft: "710px", color: "red" }}>
-                          đ{new Intl.NumberFormat('vi-VN').format(item.productPrice)}
+                        <Typography variant="body2" color="textSecondary" style={{
+                          color: "#ee4d2d",
+                          fontSize: "16px",
+                          position: "relative",
+                          display: "inline-block",
+                          marginLeft: "710px"
+                        }}
+                        >
+                          <span
+                            style={{
+                              textDecoration: "underline",
+                              fontSize: "13px",
+                              fontWeight: "normal",
+                              position: "absolute",
+                              top: 0,
+                              left: "-10px",
+                            }}
+                          >
+                            đ
+                          </span>
+                          {new Intl.NumberFormat('vi-VN').format(item.productPrice)}
                         </Typography>
                       </Box>
                     </Box>
@@ -341,7 +360,7 @@ const HistoryOrderDetail = () => {
                     marginTop: "-10px",
                   }}
                 />
-                  {status !== 'Đã hủy' && status !== "Chờ hoàn tiền" && (
+                {status !== 'Đã hủy' && status !== "Chờ hoàn tiền" && (
                   <>
                     <TableContainer
                       component={Paper}
@@ -358,9 +377,24 @@ const HistoryOrderDetail = () => {
                             </TableCell>
                             <TableCell
                               align="right"
-                              style={{ padding: '12px 16px', border: '1px solid #ddd' }}
+                              style={{
+                                color: "black",
+                                fontSize: "16px",
+                                position: "relative",
+                              }}
                             >
-                              đ{formattedTotalSubtotal}
+                              <span
+                                style={{
+                                  textDecoration: "underline",
+                                  fontSize: "12px",
+                                  fontWeight: "normal",
+                                  position: "absolute",
+                                  left: "288px",
+                                }}
+                              >
+                                đ
+                              </span>
+                              {new Intl.NumberFormat('vi-VN', { minimumFractionDigits: 3 }).format(formattedTotalSubtotal).replace(/,/g, '.')}
                             </TableCell>
                           </TableRow>
                           <TableRow style={{ border: '1px solid #ddd' }}>
@@ -372,11 +406,25 @@ const HistoryOrderDetail = () => {
                             </TableCell>
                             <TableCell
                               align="right"
-                              style={{ padding: '12px 16px', border: '1px solid #ddd' }}
+                              style={{
+                                color: "black",
+                                fontSize: "16px",
+                                position: "relative",
+                              }}
                             >
-                              đ{new Intl.NumberFormat('vi-VN').format(shippingFee)}
+                              <span
+                                style={{
+                                  textDecoration: "underline",
+                                  fontSize: "12px",
+                                  fontWeight: "normal",
+                                  position: "absolute",
+                                  left: "294px",
+                                }}
+                              >
+                                đ
+                              </span>
+                              {new Intl.NumberFormat('vi-VN').format(shippingFee)}
                             </TableCell>
-
                           </TableRow>
                           {voucherPrice !== 0 && (
                             <TableRow style={{ border: '1px solid #ddd' }}>
@@ -387,12 +435,26 @@ const HistoryOrderDetail = () => {
                                 Giảm giá
                               </TableCell>
                               <TableCell
-                                align="right"
-                                style={{ padding: '12px 16px', border: '1px solid #ddd' }}
+                              align="right"
+                              style={{
+                                color: "black",
+                                fontSize: "16px",
+                                position: "relative",
+                              }}
+                            >
+                              <span
+                                style={{
+                                  textDecoration: "underline",
+                                  fontSize: "12px",
+                                  fontWeight: "normal",
+                                  position: "absolute",
+                                  left: "296px",
+                                }}
                               >
-                                -đ{formattedDiscountedTotal}
-                              </TableCell>
-
+                                đ
+                              </span>
+                              {new Intl.NumberFormat('vi-VN', { minimumFractionDigits: 3 }).format(formattedDiscountedTotal).replace(/,/g, '.')}
+                            </TableCell>
                             </TableRow>
                           )}
                           <TableRow style={{ border: '1px solid #ddd' }}>
@@ -404,9 +466,24 @@ const HistoryOrderDetail = () => {
                             </TableCell>
                             <TableCell
                               align="right"
-                              style={{ padding: '12px 16px', color: '#f5222d', fontWeight: 'bold', border: '1px solid #ddd' }}
+                              style={{
+                                color: "red",
+                                fontSize: "16px",
+                                position: "relative",
+                              }}
                             >
-                              ₫{formattedFinalTotal}
+                              <span
+                                style={{
+                                  textDecoration: "underline",
+                                  fontSize: "12px",
+                                  fontWeight: "normal",
+                                  position: "absolute",
+                                  left: "288px",
+                                }}
+                              >
+                                đ
+                              </span>
+                              {new Intl.NumberFormat('vi-VN', { minimumFractionDigits: 3 }).format(formattedFinalTotal).replace(/,/g, '.')}
                             </TableCell>
                           </TableRow>
                         </TableBody>
@@ -439,7 +516,7 @@ const HistoryOrderDetail = () => {
                     </TableContainer>
                   </>
                 )}
-              {(status === "Đã hủy" || status === "Chờ hoàn tiền") && (
+                {(status === "Đã hủy" || status === "Chờ hoàn tiền") && (
                   <>
                     <TableContainer
                       component={Paper}
@@ -481,7 +558,7 @@ const HistoryOrderDetail = () => {
                               align="right"
                               style={{ fontWeight: 'bold', padding: '12px 16px', border: '1px solid #ddd' }}
                             >
-                            Lý do hủy
+                              Lý do hủy
                             </TableCell>
                             <TableCell
                               align="right"

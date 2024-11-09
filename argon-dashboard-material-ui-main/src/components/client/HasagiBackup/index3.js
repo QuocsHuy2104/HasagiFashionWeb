@@ -4,10 +4,6 @@ import "components/client/assets/css/phanloai1.css";
 import ArgonInput from "components/ArgonInput";
 import ArgonButton from "components/ArgonButton";
 import axios from "axios";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
-import Box from "@mui/material/Box";
-import Cookies from "js-cookie";
 import Select from "react-select";
 import AddressService from '../../../services/AddressServices';
 
@@ -25,7 +21,7 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
     const [wards, setWards] = useState([]);
     const wrapperRef = useRef(null);
     const [errors, setErrors] = useState({});
-    const [isSubmitted, setIsSubmitted] = useState(false); // New state variable
+    const [isSubmitted, setIsSubmitted] = useState(false);
 
     const validateForm = () => {
         const newErrors = {};
@@ -53,10 +49,9 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
         }
 
         setErrors(newErrors);
-        return Object.keys(newErrors).length === 0; // Return true if no errors
+        return Object.keys(newErrors).length === 0;
     };
 
-    // In your return statement, add error messages for the province, district, and ward selections
     {
         isSubmitted && errors.selectedProvince && (
             <div className="text-danger">{errors.selectedProvince}</div>
@@ -77,7 +72,7 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
     const handleInputClick = (field) => {
         setErrors((prevErrors) => ({
             ...prevErrors,
-            [field]: "", // Clear error when input is clicked
+            [field]: "",
         }));
     };
 
@@ -92,7 +87,7 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
 
     const handleFullNameBlur = () => {
         if (isSubmitted) {
-            validateForm(); // Validate only when the field loses focus
+            validateForm(); 
         }
     };
 
@@ -100,7 +95,6 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
         const value = e.target.value;
         setNumBerPhone(value);
 
-        // Clear the specific error on change
         if (isSubmitted) {
             setErrors((prevErrors) => ({ ...prevErrors, numberPhone: "" }));
         }
@@ -108,7 +102,7 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
 
     const handleNumberPhoneBlur = () => {
         if (isSubmitted) {
-            validateForm(); // Validate only when the field loses focus
+            validateForm(); 
         }
     };
 
@@ -123,7 +117,7 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
 
     const handleAddressBlur = () => {
         if (isSubmitted) {
-            validateForm(); // Validate only when the field loses focus
+            validateForm(); 
         }
     };
 
@@ -224,7 +218,7 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
     }, [selectedDistrict]);
 
     const handleComplete = async () => {
-        setIsSubmitted(true); // Set submitted state to true
+        setIsSubmitted(true); 
 
         const isValid = validateForm();
         if (!isValid) return;
@@ -266,19 +260,16 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
         setErrors((prevErrors) => ({ ...prevErrors, selectedDistrict: "" }));
     };
 
-    //chọn tỉnh thành phố
     const provinceOptions = provinces.map((province) => ({
         value: province.ProvinceID,
         label: province.ProvinceName,
     }));
 
-    //chọn quận/huyện
     const districtOptions = districts.map((district) => ({
         value: district.DistrictID,
         label: district.DistrictName,
     }));
 
-    //phường xã
     const wardOptions = wards.map((ward) => ({
         value: ward.WardCode,
         label: ward.WardName,
@@ -298,8 +289,68 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
     };
 
     const handleModalClose = () => {
-        resetForm(); // Reset form data
-        onClose(); // Close the modal
+        resetForm(); 
+        onClose(); 
+    };
+
+    const customStylesProvince = {
+        menuList: (provided) => ({
+            ...provided,
+            maxHeight: "225px",
+            overflowY: "auto", 
+        }),
+        menuListScroll: {
+            "::-webkit-scrollbar": {
+                width: "6px",
+            },
+            "::-webkit-scrollbar-thumb": {
+                backgroundColor: "#888",
+                borderRadius: "4px",
+            },
+            "::-webkit-scrollbar-thumb:hover": {
+                backgroundColor: "#555",
+            },
+        },
+    };
+
+    const customStylesDistrict = {
+        menuList: (provided) => ({
+            ...provided,
+            maxHeight: "160px", 
+            overflowY: "auto", 
+        }),
+        menuListScroll: {
+            "::-webkit-scrollbar": {
+                width: "6px",
+            },
+            "::-webkit-scrollbar-thumb": {
+                backgroundColor: "#888",
+                borderRadius: "4px",
+            },
+            "::-webkit-scrollbar-thumb:hover": {
+                backgroundColor: "#555",
+            },
+        },
+    };
+
+    const customStylesWard = {
+        menuList: (provided) => ({
+            ...provided,
+            maxHeight: "100px",
+            overflowY: "auto",
+        }),
+        menuListScroll: {
+            "::-webkit-scrollbar": {
+                width: "6px",
+            },
+            "::-webkit-scrollbar-thumb": {
+                backgroundColor: "#888",
+                borderRadius: "4px",
+            },
+            "::-webkit-scrollbar-thumb:hover": {
+                backgroundColor: "#555",
+            },
+        },
     };
 
     if (!show) return null;
@@ -321,9 +372,9 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
                                     placeholder="Họ và tên"
                                     value={fullName}
                                     onChange={handleFullNameChange}
-                                    onBlur={handleFullNameBlur} // Validate on blur
+                                    onBlur={handleFullNameBlur} 
                                     onClick={() => handleInputClick("fullName")}
-                                    onFocus={() => handleInputClick("fullName")} // Xóa lỗi khi focus vào input
+                                    onFocus={() => handleInputClick("fullName")}
                                     className={errors.fullName ? "border-danger" : ""}
                                     style={{
                                         color: errors.fullName ? 'red' : 'black',
@@ -341,7 +392,7 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
                                     placeholder="Số điện thoại"
                                     value={numberPhone}
                                     onChange={handleNumberPhoneChange}
-                                    onBlur={handleNumberPhoneBlur} // Validate on blur
+                                    onBlur={handleNumberPhoneBlur} 
                                     onClick={() => handleInputClick("numberPhone")}
                                     onFocus={() => handleInputClick("numberPhone")}
                                     className={errors.numberPhone ? "border-danger" : ""}
@@ -361,9 +412,9 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
                                     placeholder="Địa chỉ cụ thể"
                                     value={address}
                                     onChange={handleAddressChange}
-                                    onBlur={handleAddressBlur} // Validate on blur
+                                    onBlur={handleAddressBlur}
                                     onClick={() => handleInputClick("address")}
-                                    onFocus={() => handleInputClick("address")} // Xóa lỗi khi focus vào input
+                                    onFocus={() => handleInputClick("address")}
                                     className={errors.address ? "border-danger" : ""}
                                     style={{
                                         color: errors.address ? 'red' : 'black',
@@ -376,6 +427,7 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
                             </div>
                             <div className="col-md-12 form-group">
                                 <Select
+                                    styles={customStylesProvince}
                                     placeholder="Chọn tỉnh/thành phố"
                                     className="province-select"
                                     value={provinceOptions.find((option) => option.value == selectedProvince)}
@@ -392,6 +444,7 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
                             </div>
                             <div className="col-md-12 form-group">
                                 <Select
+                                    styles={customStylesDistrict}
                                     className="district-select"
                                     value={districtOptions.find((option) => option.value == selectedDistrict)}
                                     onChange={(selectedOption) => {
@@ -409,6 +462,7 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
                             </div>
                             <div className="col-md-12 form-group">
                                 <Select
+                                    styles={customStylesWard}
                                     className="ward-select"
                                     value={wardOptions.find((option) => option.value === selectedWard)}
                                     onChange={(selectedOption) => {

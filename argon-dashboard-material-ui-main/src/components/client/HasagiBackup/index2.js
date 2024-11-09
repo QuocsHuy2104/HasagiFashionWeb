@@ -3,27 +3,26 @@ import PropTypes from "prop-types";
 import ArgonInput from "components/ArgonInput";
 import ArgonButton from "components/ArgonButton";
 import axios from "axios";
-import Cookies from "js-cookie";
 import "components/client/assets/css/phanloai1.css";
 import Select from "react-select";
 import AddressSelection from './index1';
 import AddressService from '../../../services/AddressServices';
 
-const Backup = ({ show, onClose, onAddressUpdated }) => {
+const Backup2 = ({ show, onClose, onAddressUpdated }) => {
     const [fullName, setFullName] = useState('');
     const [numberPhone, setNumBerPhone] = useState('');
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
-    const [selectedProvince, setSelectedProvince] = useState(null); // Thêm state này
-    const [selectedDistrict, setSelectedDistrict] = useState(null); // Thêm state này
-    const [selectedWard, setSelectedWard] = useState(null); // Thêm state này
+    const [selectedProvince, setSelectedProvince] = useState(null); 
+    const [selectedDistrict, setSelectedDistrict] = useState(null); 
+    const [selectedWard, setSelectedWard] = useState(null);
     const [status, setStatus] = useState(false);
     const [showAddressSelection, setShowAddressSelection] = useState(false);
     const [isAddressAvailable, setIsAddressAvailable] = useState(true);
     const [address, setAddress] = useState('');
     const [errors, setErrors] = useState({});
-    const [isSubmitted, setIsSubmitted] = useState(false); // New state variable
+    const [isSubmitted, setIsSubmitted] = useState(false); 
 
     const validateForm = () => {
         const newErrors = {};
@@ -51,10 +50,9 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
         }
 
         setErrors(newErrors);
-        return Object.keys(newErrors).length === 0; // Return true if no errors
+        return Object.keys(newErrors).length === 0; 
     };
 
-    // In your return statement, add error messages for the province, district, and ward selections
     {
         isSubmitted && errors.selectedProvince && (
             <div className="text-danger">{errors.selectedProvince}</div>
@@ -75,7 +73,7 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
     const handleInputClick = (field) => {
         setErrors((prevErrors) => ({
             ...prevErrors,
-            [field]: "", // Clear error when input is clicked
+            [field]: "", 
         }));
     };
 
@@ -90,7 +88,7 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
 
     const handleFullNameBlur = () => {
         if (isSubmitted) {
-            validateForm(); // Validate only when the field loses focus
+            validateForm();
         }
     };
 
@@ -98,7 +96,6 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
         const value = e.target.value;
         setNumBerPhone(value);
 
-        // Clear the specific error on change
         if (isSubmitted) {
             setErrors((prevErrors) => ({ ...prevErrors, numberPhone: "" }));
         }
@@ -106,7 +103,7 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
 
     const handleNumberPhoneBlur = () => {
         if (isSubmitted) {
-            validateForm(); // Validate only when the field loses focus
+            validateForm();
         }
     };
 
@@ -121,7 +118,7 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
 
     const handleAddressBlur = () => {
         if (isSubmitted) {
-            validateForm(); // Validate only when the field loses focus
+            validateForm();
         }
     };
 
@@ -148,8 +145,6 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
         setSelectedProvince(provinceId);
         setSelectedDistrict("");
         setSelectedWard("");
-
-        // Clear the error for the province selection
         setErrors((prevErrors) => ({ ...prevErrors, selectedProvince: "" }));
 
         try {
@@ -158,7 +153,7 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
                 {
                     headers: {
                         Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d",
-                    },
+                    }, 
                     params: { province_id: provinceId },
                 }
             );
@@ -228,7 +223,7 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
         try {
             await AddressService.createAddress(formData);
             onClose();
-            await AddressService.getAllAddress(); 
+            await AddressService.getAllAddress();
             onAddressUpdated();
             <AddressSelection show={showAddressSelection} onClose={() => setShowAddressSelection(false)} />
         } catch (error) {
@@ -256,6 +251,69 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
         value: ward.WardCode,
         label: ward.WardName,
     }));
+
+    const customStylesProvince = {
+        menuList: (provided) => ({
+            ...provided,
+            maxHeight: "250px", // Chiều cao tối đa của danh sách dropdown
+            overflowY: "auto", // Bật thanh cuộn dọc
+        }),
+        // Tùy chỉnh thanh cuộn trên trình duyệt hỗ trợ Webkit (Chrome, Edge, Safari)
+        menuListScroll: {
+            "::-webkit-scrollbar": {
+                width: "6px",
+            },
+            "::-webkit-scrollbar-thumb": {
+                backgroundColor: "#888",
+                borderRadius: "4px",
+            },
+            "::-webkit-scrollbar-thumb:hover": {
+                backgroundColor: "#555",
+            },
+        },
+    };
+
+    const customStylesDistrict = {
+        menuList: (provided) => ({
+            ...provided,
+            maxHeight: "190px", // Chiều cao tối đa của danh sách dropdown
+            overflowY: "auto", // Bật thanh cuộn dọc
+        }),
+        // Tùy chỉnh thanh cuộn trên trình duyệt hỗ trợ Webkit (Chrome, Edge, Safari)
+        menuListScroll: {
+            "::-webkit-scrollbar": {
+                width: "6px",
+            },
+            "::-webkit-scrollbar-thumb": {
+                backgroundColor: "#888",
+                borderRadius: "4px",
+            },
+            "::-webkit-scrollbar-thumb:hover": {
+                backgroundColor: "#555",
+            },
+        },
+    };
+
+    const customStylesWard = {
+        menuList: (provided) => ({
+            ...provided,
+            maxHeight: "130px", // Chiều cao tối đa của danh sách dropdown
+            overflowY: "auto", // Bật thanh cuộn dọc
+        }),
+        // Tùy chỉnh thanh cuộn trên trình duyệt hỗ trợ Webkit (Chrome, Edge, Safari)
+        menuListScroll: {
+            "::-webkit-scrollbar": {
+                width: "6px",
+            },
+            "::-webkit-scrollbar-thumb": {
+                backgroundColor: "#888",
+                borderRadius: "4px",
+            },
+            "::-webkit-scrollbar-thumb:hover": {
+                backgroundColor: "#555",
+            },
+        },
+    };
 
     if (!show) return null;
 
@@ -331,6 +389,7 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
                             </div>
                             <div className="col-md-12 form-group">
                                 <Select
+                                styles={customStylesProvince}
                                     placeholder="Chọn tỉnh/thành phố"
                                     value={provinceOptions.find((option) => option.value === selectedProvince)}
                                     onChange={(option) => {
@@ -345,6 +404,7 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
                             </div>
                             <div className="col-md-12 form-group">
                                 <Select
+                                styles={customStylesDistrict}
                                     placeholder="Chọn quận/huyện"
                                     value={districtOptions.find((option) => option.value === selectedDistrict)}
                                     onChange={(option) => {
@@ -360,6 +420,7 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
                             </div>
                             <div className="col-md-12 form-group">
                                 <Select
+                                styles={customStylesWard}
                                     placeholder="Chọn phường/xã"
                                     value={wardOptions.find((option) => option.value === selectedWard)}
                                     onChange={(option) => {
@@ -396,10 +457,10 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
     );
 };
 
-Backup.propTypes = {
+Backup2.propTypes = {
     show: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
     onAddressUpdated: PropTypes.func.isRequired,
 };
 
-export default Backup;
+export default Backup2;

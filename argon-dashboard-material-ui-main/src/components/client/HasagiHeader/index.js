@@ -96,8 +96,6 @@ const Header = ({ onSearch }) => {
                 ]);
                 const reversedCartData = cartResponse.data.reverse();
                 setCartProducts(reversedCartData);
-                console.log("Reversed Cart Response:", reversedCartData);
-                console.log("Address Response:", addressResponse.data);
             } catch (error) {
                 console.error("Error fetching data:", error);
             }

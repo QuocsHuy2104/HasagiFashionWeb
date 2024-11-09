@@ -3,7 +3,6 @@ import aboutImage3 from "layouts/assets/img/cat-1.jpg";
 import aboutImage5 from "layouts/assets/img/product-1.jpg";
 import { Grid, Typography } from "@mui/material";
 import Header from "../../components/client/HasagiHeader";
-import Navbar from "components/client/HasagiNavbar";
 import HasagiCau from "../../components/client/HasagiCarousel";
 import Footer from "../../components/client/HasagiFooter";
 import Cookies from "js-cookie";
@@ -127,7 +126,6 @@ function Home() {
                 </div>
             )}
             <Header onSearch={handleSearch} />
-            < Navbar />
             <HasagiCau />
             <div className="col-lg-12 px-xl-5" style={{ top: "-25px" }}>
                 <div className="bg-light p-3 d-flex flex-column"
@@ -193,7 +191,6 @@ function Home() {
                             Xem tất cả {'>'}
                         </Link>
                     </h5>
-
 
                     <div className="container-fluid pb-3">
                         <div className="row px-xl-5">

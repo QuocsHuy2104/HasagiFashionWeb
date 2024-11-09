@@ -1,0 +1,30 @@
+@keyframes customFadeInDown {
+    0% {
+      opacity: 0;
+      transform: translateY(-50px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes customFadeInUp {
+    0% {
+      opacity: 0;
+      transform: translateY(50px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .customFadeInDown {
+    animation: customFadeInDown 1s ease-out forwards;
+  }
+  
+  .customFadeInUp {
+    animation: customFadeInUp 1s ease-out forwards;
+  }
+  
