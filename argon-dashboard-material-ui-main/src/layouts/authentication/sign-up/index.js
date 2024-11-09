@@ -1,17 +1,11 @@
 import React, { useState } from "react";
 import Card from "@mui/material/Card";
 import { Link, useNavigate } from "react-router-dom";
-
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
 import ArgonButton from "components/ArgonButton";
 import ArgonInput from "components/ArgonInput";
-
 import CoverLayout from "layouts/authentication/components/CoverLayout";
-import Socials from "layouts/authentication/components/Socials";
-import Separator from "layouts/authentication/components/Separator";
-
-import AccountService from "services/AccountServices";
 
 const bgImage =
   "https://raw.githubusercontent.com/creativetimofficial/public-assets/master/argon-dashboard-pro/assets/img/signup-cover.jpg";
@@ -110,8 +104,8 @@ function Cover() {
 
   return (
     <CoverLayout
-      title="Welcome!"
-      description="Use these great form templates to log in or create new accounts in your project for free."
+      title="Xin chào!"
+      description="Nếu bạn chưa có tài khoản thì hãy tạo tài khoản tại đây."
       image={bgImage}
       imgPosition="top"
       button={{ color: "dark", variant: "gradient" }}

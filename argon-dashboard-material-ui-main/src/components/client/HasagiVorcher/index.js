@@ -73,7 +73,7 @@ const Voucher = ({ voucher }) => {
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                         }}
->
+                    >
                         Mã: {voucher.code}
                     </ArgonBox>
                     <ArgonBox
@@ -158,7 +158,7 @@ const CustomPrevArrow = ({ onClick }) => (
             zIndex: 1,
             cursor: "pointer",
             fontSize: "28px",
-transition: "transform 0.2s ease-in-out",
+            transition: "transform 0.2s ease-in-out",
             "&:hover": {
                 transform: "scale(1.2)",
             },
@@ -272,7 +272,7 @@ const VoucherList = () => {
         <>
             <div className="container-fluid pt-3">
                 <Typography variant="h2" className="section-title position-relative text-uppercase mx-xl-5 mb-3">
-<span className="bg-secondary pr-3">VOUCHER</span>
+                    <span className="bg-white pr-3">VOUCHER</span>
                 </Typography>
             </div>
 

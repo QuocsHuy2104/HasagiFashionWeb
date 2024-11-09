@@ -2,16 +2,13 @@ import React, { useState, useEffect } from 'react';
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
 import "components/client/assets/css/style.css";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCcVisa, faCcMastercard, faCcAmex } from '@fortawesome/free-brands-svg-icons';
 import ArgonButton from "components/ArgonButton";
-import AddressSelection from "components/client/HasagiBackup1";
+import AddressSelection from "components/client/HasagiBackup/index1";
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
 import { ToastContainer, toast } from 'react-toastify';
-import Navbar from '../HasagiNavbar';
 import VoucherService from "../../../services/VoucherServices";
 import { Card, Container, Button } from "react-bootstrap";
 import CheckoutService from '../../../services/CheckoutServices';
@@ -58,12 +55,6 @@ const Checkout = () => {
         fetchAddress();
         const cartItemsBackup = JSON.parse(localStorage.getItem('cartItemsBackup')) || [];
         setCartItems(cartItemsBackup);
-        // const intervalId = setInterval(() => {
-        //     fetchAddress();
-        // }, 3000);
-        // return () => {
-        //     clearInterval(intervalId);
-        // };
     }, []);
 
     useEffect(() => {
@@ -119,9 +110,9 @@ const Checkout = () => {
                 },
                 params: {
                     from_district_id: XuanKhanhDistrictID,
-                    from_ward_code:"550113",
+                    from_ward_code: "550113",
                     to_district_id: address.districtCode,
-                    to_ward_code:address.wardCode,
+                    to_ward_code: address.wardCode,
                     weight: 1000,
                     length: 10,
                     width: 10,
@@ -264,41 +255,41 @@ const Checkout = () => {
             quantity: item.quantity,
             price: item.price,
         }));
-    
+
         const productDetailIdSelected = selectedItems.map(item => item.id);
 
 
-        const payStatusDirect = 'Chưa thanh toán'; 
-        const voucherId = selectedVoucher ? selectedVoucher.id : null; 
+        const payStatusDirect = 'Chưa thanh toán';
+        const voucherId = selectedVoucher ? selectedVoucher.id : null;
         const checkoutDataDirect = {
             addressDTO,
             cartDetails: cartDetailsDTO,
             payMethod: selectedPayment,
             payStatus: payStatusDirect,
-            voucherId: voucherId, 
+            voucherId: voucherId,
             shippingFree: shipFee.total,
             fullName: `${address.address}, ${getAddressNameById(address.wardCode, wards, 'ward')}, ${getAddressNameById(address.districtCode, districts, 'district')}, ${getAddressNameById(address.provinceID, provinces, 'province')}`,
             productDetailIdSelected: productDetailIdSelected
         };
-        const payStatusBank = 'Đã thanh toán'; 
+        const payStatusBank = 'Đã thanh toán';
         const checkoutDataBank = {
             addressDTO,
             cartDetails: cartDetailsDTO,
             payMethod: selectedPayment,
             payStatus: payStatusBank,
-            voucherId: voucherId, 
+            voucherId: voucherId,
             shippingFree: shipFee.total,
             fullName: `${address.address}, ${getAddressNameById(address.wardCode, wards, 'ward')}, ${getAddressNameById(address.districtCode, districts, 'district')}, ${getAddressNameById(address.provinceID, provinces, 'province')}`,
             productDetailIdSelected: productDetailIdSelected
         };
-     
-      
 
-        setIsLoading(true); 
+
+
+        setIsLoading(true);
         try {
             let response;
             if (selectedPayment === 'Direct Check') {
-           response=   await CheckoutService.postCheckout(addressId,checkoutDataDirect);
+                response = await CheckoutService.postCheckout(addressId, checkoutDataDirect);
 
                 if (response.status === 200) {
                     await handleRemoveItems();
@@ -315,7 +306,7 @@ const Checkout = () => {
                     toast.error("Có lỗi xảy ra khi đặt hàng.");
                 }
             } else if (selectedPayment === 'Bank Transfer') {
-                response=   await CheckoutService.postCheckout(addressId,checkoutDataBank);
+                response = await CheckoutService.postCheckout(addressId, checkoutDataBank);
                 if (response.data.paymentUrl) {
                     localStorage.setItem('address1', JSON.stringify(addressDTO));
                     localStorage.setItem('orderDetails1', JSON.stringify(cartDetailsDTO));
@@ -351,13 +342,10 @@ const Checkout = () => {
     const [accountId, setAccountId] = useState(Cookies.get('accountId')); // Initialize accountId from cookies
 
     useEffect(() => {
-        // Fetch all vouchers
         const fetchVouchers = async () => {
             try {
-                // Fetch all vouchers
                 const response = await VoucherService.getAllVouchers();
 
-                // Filter out only active vouchers
                 const activeVouchers = response.data.filter(voucher => voucher.isActive);
 
                 setVouchers(activeVouchers);
@@ -366,8 +354,6 @@ const Checkout = () => {
             }
         };
 
-
-        // Fetch used vouchers for the account
         const fetchUsedVouchers = async () => {
             if (accountId) {
                 try {
@@ -381,7 +367,7 @@ const Checkout = () => {
 
         fetchVouchers();
         fetchUsedVouchers();
-    }, [accountId]); // Add accountId as a dependency to trigger re-fetching when it changes
+    }, [accountId]);
 
     const [appliedVoucherId, setAppliedVoucherId] = useState(null);
     const handleApplyVoucher = (voucher) => {
@@ -390,6 +376,8 @@ const Checkout = () => {
     };
 
     const goBack = () => {
+
+        localStorage.removeItem('cartItemsBackup');
         navigate('/Cart');
     };
 
@@ -404,10 +392,9 @@ const Checkout = () => {
                 </div>
             )}
             <HasagiNav />
-            <Navbar />
             <div className="container-fluid">
                 <div className="row px-xl-5">
-                    <div className="header py-3">
+                    <div className="header" style={{ marginTop: "100px" }}>
                         <button className="back-button" onClick={() => goBack()}>
                             <i className="ni ni-bold-left" />
                         </button>
@@ -440,7 +427,7 @@ const Checkout = () => {
                                         </div>
                                         <div className="d-flex align-items-center">
                                             <button
-                                                className="btn btn-outline-primary btn-sm ml-2"
+                                                className="btn btn-outline-warning btn-sm ml-2"
                                                 style={{ fontWeight: 'bold', fontSize: '0.9rem', marginRight: '15px' }}
                                                 onClick={() => setShowModal(true)}
                                             >
@@ -457,38 +444,42 @@ const Checkout = () => {
                     </div>
                     <div className="col-lg-12">
                         <div className="bg-light p-30 mb-5" style={{ border: '1px solid #ddd', padding: '20px', borderRadius: '5px', marginLeft: "-10px", marginRight: "-10px" }}>
-                            <table className="table table-bordered table-hover border-bottom mb-2" style={{ backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
-                                <thead className="thead-light " style={{ fontWeight: 'bold', color: '#fff' }}>
+                            <table className="table" style={{ backgroundColor: '#f8f9fa', borderRadius: '8px', border: 'none', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                <thead className="thead-light" style={{ fontWeight: 'bold', color: '#fff', borderBottom: '1px solid #ddd' }}>
                                     <tr>
-                                        <th scope="col" className="text-left" style={{ width: "350px" }}>Sản phẩm</th>
-                                        <th scope="col" className="text-center" style={{ width: "250px" }}></th>
-                                        <th scope="col" className="text-center">Đơn giá</th>
-                                        <th scope="col" className="text-center">Số lượng</th>
-                                        <th scope="col" className="text-center">Thành tiền</th>
+                                        <th scope="col" className="text-left" style={{ width: "350px", padding: '8px 16px', color: "black" }}>Sản phẩm</th>
+                                        <th scope="col" className="text-center" style={{ width: "250px", padding: '8px 16px' }}></th>
+                                        <th scope="col" className="text-center" style={{ padding: '8px 16px', color: "gray", }}>Đơn giá</th>
+                                        <th scope="col" className="text-center" style={{ padding: '8px 16px', color: "gray" }}>Số lượng</th>
+                                        <th scope="col" className="text-center" style={{ padding: '8px 16px', color: "gray" }}>Thành tiền</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {cartItems.map((item, index) => (
-                                        <tr key={index} style={{ verticalAlign: 'middle' }}>
-                                            <td>
+                                        <tr key={index} style={{ verticalAlign: 'middle', borderBottom: '1px solid #ddd' }}>
+                                            <td style={{ padding: '8px 16px' }}>
                                                 <div className="d-flex align-items-center">
                                                     <img src={item.image} style={{ width: 60, marginRight: '15px', borderRadius: '5px' }} alt="Product" />
                                                     <span style={{ fontWeight: 'medium' }}>{item.name}</span>
                                                 </div>
                                             </td>
-                                            <td className='py-4'>
+                                            <td className='py-4' style={{ padding: '8px 16px' }}>
                                                 <div>Loại: <span style={{ fontWeight: 'medium' }}>{item.color}</span>, <span style={{ fontWeight: 'medium' }}>{item.size}</span></div>
                                             </td>
-                                            <td style={{ fontWeight: 'medium' }} className="text-center py-4">{item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
-                                            <td className="text-center py-4">
-                                                <span style={{ fontWeight: 'medium' }}>{item.quantity}</span>
+                                            <td className='py-4' style={{ padding: '8px 16px' }}>
+                                            <div><span style={{ fontWeight: 'medium'}}>{item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span></div>
                                             </td>
-                                            <td style={{ fontWeight: 'medium' }} className="text-center py-4">{item.total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
+                                            <td className='py-4' style={{ padding: '8px 16px' }}>
+                                            <div><span style={{ fontWeight: 'medium' }}>{item.quantity}</span></div>
+                                                
+                                            </td>
+                                            <td className='py-4' style={{ padding: '8px 16px' }}>
+                                            <div><span style={{ fontWeight: 'medium' }}>{(item.price * item.quantity).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span></div>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
-
                         </div>
                     </div>
                     <div className="col-lg-12">

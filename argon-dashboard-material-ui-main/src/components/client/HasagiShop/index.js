@@ -137,7 +137,7 @@ function Shop() {
                 <div className="row px-xl-5">
                     <div className="col-3">
                         <h5 className="section-title position-relative text-uppercase mb-3">
-                            <span className="bg-secondary pr-3">Lọc theo:</span>
+                            <span className="bg-white pr-3">Lọc theo:</span>
                         </h5>
                         <div className="sort-options d-flex flex-column">
                             <label className="mt-2">
@@ -226,11 +226,11 @@ function Shop() {
                                                 </h5>
                                             </div>
                                             <div className="d-flex align-items-center justify-content-center mb-1">
-                                                <small className="fa fa-star text-primary mr-1"></small>
-                                                <small className="fa fa-star text-primary mr-1"></small>
-                                                <small className="fa fa-star text-primary mr-1"></small>
-                                                <small className="fa fa-star text-primary mr-1"></small>
-                                                <small className="fa fa-star text-primary mr-1"></small>
+                                                <small className="fa fa-star text-warning mr-1"></small>
+                                                <small className="fa fa-star text-warning mr-1"></small>
+                                                <small className="fa fa-star text-warning mr-1"></small>
+                                                <small className="fa fa-star text-warning mr-1"></small>
+                                                <small className="fa fa-star text-warning mr-1"></small>
                                                 <small>({product.rating || 99})</small>
                                             </div>
                                         </div>

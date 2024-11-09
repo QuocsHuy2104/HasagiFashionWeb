@@ -3,64 +3,73 @@ import aboutImage4 from "layouts/assets/img/offer-1.jpg";
 import aboutImage from "layouts/assets/img/h1.jpg";
 import aboutImage1 from "layouts/assets/img/h2.jpg";
 import aboutImage2 from "layouts/assets/img/carousel-3.jpg";
-import 'layouts/assets/css/style.css';
-import { Carousel } from 'react-bootstrap';
+import "layouts/assets/css/style.css";
+import "./Carousel.css";
+import { Carousel } from "react-bootstrap";
 
 const HasagiCau = () => {
-
     return (
-        <div className="container-fluid mb-3 py-3">
+        <div className="container-fluid mb-3" style={{marginTop: "100px"}}>
             <div className="row px-xl-5">
                 <div className="col-lg-8">
                     <div id="header-carousel" className="carousel slide carousel-fade mb-30 mb-lg-0">
-                        <Carousel
-                            interval={2000}
-                            indicators={true}
-                        >
-                            <Carousel.Item style={{ height: '420px' }}>
+                        <Carousel interval={2000} indicators={true}>
+                            <Carousel.Item style={{ height: "420px" }}>
                                 <img
                                     className="d-block w-100"
                                     src={aboutImage}
                                     alt="First slide"
-                                    style={{ objectFit: 'cover', height: '100%' }}
+                                    style={{ objectFit: "cover", height: "100%" }}
                                 />
-                                <Carousel.Caption className="d-flex flex-column align-items-center justify-content-center">
-                                    <div style={{ maxWidth: '700px'}}>
-                                        <h1 className="display-4 text-white mb-3 animate__animated animate__fadeInDown">Men Fashion</h1>
-                                        <p className="mx-md-5 px-5 animate__animated animate__bounceIn">
-                                            Phong cách thời trang không bị lỗi thời, thường mang tính trang trọng và tinh tế.
+                                <Carousel.Caption
+                                    className="d-flex flex-column align-items-center justify-content-center"
+                                    style={{ right: 0, bottom: 0, left: 0 }}
+                                >
+                                    <div style={{ maxWidth: "700px" }}>
+                                        <h1 className="display-4 text-white mb-3 customFadeInDown">Men Fashion</h1>
+                                        <p className="mx-md-5 px-5 customFadeInUp">
+                                            Phong cách thời trang không bị lỗi thời, thường mang tính trang trọng và tinh
+                                            tế.
                                         </p>
                                     </div>
                                 </Carousel.Caption>
                             </Carousel.Item>
-                            <Carousel.Item style={{ height: '420px' }}>
+                            <Carousel.Item style={{ height: "420px" }}>
                                 <img
                                     className="d-block w-100"
                                     src={aboutImage1}
                                     alt="Second slide"
-                                    style={{ objectFit: 'cover', height: '100%' }}
+                                    style={{ objectFit: "cover", height: "100%" }}
                                 />
-                                <Carousel.Caption className="d-flex flex-column align-items-center justify-content-center">
-                                    <div style={{ maxWidth: '700px' }}>
-                                        <h1 className="display-4 text-white mb-3 animate__animated animate__fadeInDown">Women Fashion</h1>
-                                        <p className="mx-md-5 px-5 animate__animated animate__bounceIn">
-                                            Phong cách thời trang tự do, phóng khoáng với cảm hứng từ nghệ thuật dân gian và thiên nhiên.
+                                <Carousel.Caption
+                                    className="d-flex flex-column align-items-center justify-content-center"
+                                    style={{ right: 0, bottom: 0, left: 0 }}
+                                >
+                                    <div style={{ maxWidth: "700px" }}>
+                                        <h1 className="display-4 text-white mb-3 customFadeInDown">Women Fashion</h1>
+                                        <p className="mx-md-5 px-5 customFadeInUp">
+                                            Phong cách thời trang tự do, phóng khoáng với cảm hứng từ nghệ thuật dân gian
+                                            và thiên nhiên.
                                         </p>
                                     </div>
                                 </Carousel.Caption>
                             </Carousel.Item>
-                            <Carousel.Item style={{ height: '420px' }}>
+                            <Carousel.Item style={{ height: "420px" }}>
                                 <img
                                     className="d-block w-100"
                                     src={aboutImage2}
                                     alt="Third slide"
-                                    style={{ objectFit: 'cover', height: '100%' }}
+                                    style={{ objectFit: "cover", height: "100%" }}
                                 />
-                                <Carousel.Caption className="d-flex flex-column align-items-center justify-content-center">
-                                    <div style={{ maxWidth: '700px' }}>
-                                        <h1 className="display-4 text-white mb-3 animate__animated animate__fadeInDown">Kids Fashion</h1>
-                                        <p className="mx-md-5 px-5 animate__animated animate__bounceIn">
-                                            Phong cách thời trang dành cho trẻ em với sự thoải mái và linh hoạt trong các hoạt động hàng ngày.
+                                <Carousel.Caption
+                                    className="d-flex flex-column align-items-center justify-content-center"
+                                    style={{ right: 0, bottom: 0, left: 0 }}
+                                >
+                                    <div style={{ maxWidth: "700px" }}>
+                                        <h1 className="display-4 text-white mb-3 customFadeInDown">Kids Fashion</h1>
+                                        <p className="mx-md-5 px-5 customFadeInUp">
+                                            Phong cách thời trang dành cho trẻ em với sự thoải mái và linh hoạt trong các
+                                            hoạt động hàng ngày.
                                         </p>
                                     </div>
                                 </Carousel.Caption>
@@ -87,6 +96,6 @@ const HasagiCau = () => {
             </div>
         </div>
     );
-}
+};
 
 export default HasagiCau;

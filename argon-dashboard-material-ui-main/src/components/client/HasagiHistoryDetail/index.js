@@ -1,26 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Box, Tabs, Tab, Paper, Button, Grid, Typography, RadioGroup, FormControlLabel, Radio } from "@mui/material";
-import ArgonButton from "components/ArgonButton";
+import { Box, Paper, Grid, Typography } from "@mui/material";
 import ArgonBox from "components/ArgonBox";
-import ArgonTypography from "components/ArgonTypography";
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
 import Cookies from "js-cookie";
-import CloseIcon from '@mui/icons-material/Close';
-import IconButton from '@mui/material/IconButton';
-// import reviewsService from 'services/ReviewsServices';
-import StarIcon from '@mui/icons-material/Star';
-import StarBorderIcon from '@mui/icons-material/StarBorder';
-import PhotoCamera from '@mui/icons-material/PhotoCamera'; // Biểu tượng máy ảnh
-import Videocam from '@mui/icons-material/Videocam'; // Biểu tượng máy quay phim
-import { Snackbar } from '@mui/material';
-import aboutImage from "layouts/assets/img/h1.jpg";
 import { Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faReceipt, faWallet, faTruck, faBoxOpen, faStar, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
-import axios from 'axios';
+import { faReceipt, faTruck, faBoxOpen, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 import { format } from "date-fns";
 
 const HistoryOrderDetail = () => {
@@ -34,6 +22,9 @@ const HistoryOrderDetail = () => {
   const [fullNameAdd, setFullNameAdd] = useState('');
   const [payMethod, setPayMethod] = useState('');
   const [orderDate, setOrderDate] = useState('');
+  const [voucherPrice, setVoucherPrice] = useState('');
+  const [cancelReason, setCancelReason] = useState('');
+
   useEffect(() => {
     const accountId = Cookies.get('accountId');
     if (!accountId) {
@@ -66,6 +57,9 @@ const HistoryOrderDetail = () => {
               ? format(new Date(orderDate), "HH:mm dd-MM-yyyy")
               : "Date not available";
             setOrderDate(formattedOrderDate);
+
+            setVoucherPrice(data[0].voucher);
+            setCancelReason(data[0].reason)
             console.log("Shipping Fee:", fee);
 
             setFullNameAdd(data[0].name);
@@ -86,16 +80,27 @@ const HistoryOrderDetail = () => {
     return <div>{error}</div>;
   }
 
-
   const subtotalList = orderDetails.map(item => item.productPrice * item.productQuantity);
   const totalSubtotal = subtotalList.reduce((total, subtotal) => total + subtotal, 0);
+
+
+  const discountRate = voucherPrice ? voucherPrice / 100 : 0;
+  const discountedSubtotal = totalSubtotal * (1 - discountRate);
+
+  const finalTotal = discountedSubtotal + shippingFee;
+
+  const diccount = totalSubtotal * voucherPrice / 100;
 
   const formattedTotalSubtotal = new Intl.NumberFormat('vi-VN', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 3
   }).format(totalSubtotal);
 
-  const finalTotal = totalSubtotal + shippingFee;
+  const formattedDiscountedTotal = new Intl.NumberFormat('vi-VN', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 3
+  }).format(diccount);
+
   const formattedFinalTotal = new Intl.NumberFormat('vi-VN', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 3
@@ -181,12 +186,33 @@ const HistoryOrderDetail = () => {
           <Grid container spacing={2}>
             <Grid xs={12}>
               <Paper elevation={3} style={{ padding: "16px", position: "relative" }}>
-                <div className="header" style={{ paddingTop: "10px" }}>
-                  <button className="back-button" onClick={goBack}>
-                    <i className="ni ni-bold-left" />
+                <div className="header" style={{ display: "flex", alignItems: "center", paddingTop: "10px" }}>
+                  <button className="back-button" onClick={goBack} style={{ border: "none", background: "none", padding: 0 }}>
+                    <i className="ni ni-bold-left" style={{ fontSize: "24px", color: "#343a40" }} />
                   </button>
-                  <h5 className="mb-1" style={{ fontWeight: "bold", fontSize: "24px", color: "#343a40", marginLeft: '-15px' }}>Quay lại</h5>
+                  <h5 className="mb-1" style={{ fontWeight: "bold", fontSize: "24px", color: "#343a40", marginLeft: "-15px", marginTop: "-5px" }}>
+                    Trở lại
+                  </h5>
+                  {(status === "Đã hủy" || status === "Chờ hoàn tiền") && (
+                    <span style={{ marginLeft: "auto", fontSize: "15px", color: "#6c757d" }}>
+                      Yêu cầu vào:     {orderDate}
+                    </span>
+                  )}
+                  {(status !== 'Đã hủy' && status !== "Chờ hoàn tiền") && (
+                    <span style={{ marginLeft: "auto", fontSize: "18px", color: "#ed4600c9" }}>
+                      {status}
+                    </span>
+                  )}
                 </div>
+                {(status !== 'Đã hủy' && status !== "Chờ hoàn tiền") && (
+                  <section
+                    style={{
+                      borderTop: '2px dashed rgba(128, 128, 128, 0.4)',
+                      margin: '10px 0',
+                      marginTop: "10px",
+                    }}
+                  />
+                )}
                 <div style={styles.progressContainer}>
                   {status !== 'Đã hủy' && status !== "Chờ hoàn tiền" && steps.map((step, index) => (
                     <div key={index} style={styles.step}>
@@ -227,27 +253,40 @@ const HistoryOrderDetail = () => {
                   ))}
                 </div>
                 {(status === "Đã hủy" || status === "Chờ hoàn tiền") && (
-                  <Box
-                    display="flex"
-                    flexDirection="column"
-                    alignItems="flex-start"
-                    style={{
-                      backgroundColor: "#fff9e6", // Light yellow background
-                      padding: "8px 16px",
-                    }}
-                  >
-                    <Typography variant="body1">
-                      <h4>Đã hủy đơn hàng</h4>
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      color="textSecondary"
-                      style={{ fontSize: "20px" }}
+                  <>
+                    <section
+                      style={{
+                        borderTop: "2px dashed rgba(128, 128, 128, 0.4)",
+                        marginTop: "-20px",
+                      }}
+                    />
+                    <Box
+                      display="flex"
+                      flexDirection="column"
+                      alignItems="flex-start"
+                      style={{
+                        backgroundColor: "#fff9e6", // Light yellow background
+                        padding: "12px 16px",
+                        marginTop: "-10px",
+                        borderRadius: "8px", // Bo góc cho hộp
+                        width: "100%", // Đảm bảo hộp kéo dài hết chiều ngang
+                        boxSizing: "border-box", // Đảm bảo padding không vượt quá chiều rộng hộp
+                      }}
                     >
-                      vào 20:48 22-10-2024.
-                    </Typography>
-                  </Box>
+                      <Typography variant="h4" style={{ marginBottom: "4px", color: "#dc3545" }}>
+                        Đã hủy đơn hàng
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        color="textSecondary"
+                        style={{ fontSize: "16px", lineHeight: "1.5" }}
+                      >
+                        vào     {orderDate}
+                      </Typography>
+                    </Box>
+                  </>
                 )}
+
                 <section
                   style={{
                     borderTop: '2px dashed rgba(128, 128, 128, 0.4)',
@@ -287,8 +326,27 @@ const HistoryOrderDetail = () => {
                         <Typography variant="body2" color="textSecondary" style={{ color: "black" }}>
                           Số lượng: {item.productQuantity}
                         </Typography>
-                        <Typography variant="body2" color="textSecondary" style={{ marginLeft: "710px", color: "red" }}>
-                          đ{new Intl.NumberFormat('vi-VN').format(item.productPrice)}
+                        <Typography variant="body2" color="textSecondary" style={{
+                          color: "#ee4d2d",
+                          fontSize: "16px",
+                          position: "relative",
+                          display: "inline-block",
+                          marginLeft: "710px"
+                        }}
+                        >
+                          <span
+                            style={{
+                              textDecoration: "underline",
+                              fontSize: "13px",
+                              fontWeight: "normal",
+                              position: "absolute",
+                              top: 0,
+                              left: "-10px",
+                            }}
+                          >
+                            đ
+                          </span>
+                          {new Intl.NumberFormat('vi-VN').format(item.productPrice)}
                         </Typography>
                       </Box>
                     </Box>
@@ -302,7 +360,7 @@ const HistoryOrderDetail = () => {
                     marginTop: "-10px",
                   }}
                 />
-                {status !== "Đã hủy" && (
+                {status !== 'Đã hủy' && status !== "Chờ hoàn tiền" && (
                   <>
                     <TableContainer
                       component={Paper}
@@ -319,9 +377,24 @@ const HistoryOrderDetail = () => {
                             </TableCell>
                             <TableCell
                               align="right"
-                              style={{ padding: '12px 16px', border: '1px solid #ddd' }}
+                              style={{
+                                color: "black",
+                                fontSize: "16px",
+                                position: "relative",
+                              }}
                             >
-                              đ{formattedTotalSubtotal}
+                              <span
+                                style={{
+                                  textDecoration: "underline",
+                                  fontSize: "12px",
+                                  fontWeight: "normal",
+                                  position: "absolute",
+                                  left: "288px",
+                                }}
+                              >
+                                đ
+                              </span>
+                              {new Intl.NumberFormat('vi-VN', { minimumFractionDigits: 3 }).format(formattedTotalSubtotal).replace(/,/g, '.')}
                             </TableCell>
                           </TableRow>
                           <TableRow style={{ border: '1px solid #ddd' }}>
@@ -333,11 +406,57 @@ const HistoryOrderDetail = () => {
                             </TableCell>
                             <TableCell
                               align="right"
-                              style={{ padding: '12px 16px', border: '1px solid #ddd' }}
+                              style={{
+                                color: "black",
+                                fontSize: "16px",
+                                position: "relative",
+                              }}
                             >
-                              đ{new Intl.NumberFormat('vi-VN').format(shippingFee)}
+                              <span
+                                style={{
+                                  textDecoration: "underline",
+                                  fontSize: "12px",
+                                  fontWeight: "normal",
+                                  position: "absolute",
+                                  left: "294px",
+                                }}
+                              >
+                                đ
+                              </span>
+                              {new Intl.NumberFormat('vi-VN').format(shippingFee)}
                             </TableCell>
                           </TableRow>
+                          {voucherPrice !== 0 && (
+                            <TableRow style={{ border: '1px solid #ddd' }}>
+                              <TableCell
+                                align="right"
+                                style={{ fontWeight: 'bold', padding: '12px 16px', border: '1px solid #ddd' }}
+                              >
+                                Giảm giá
+                              </TableCell>
+                              <TableCell
+                              align="right"
+                              style={{
+                                color: "black",
+                                fontSize: "16px",
+                                position: "relative",
+                              }}
+                            >
+                              <span
+                                style={{
+                                  textDecoration: "underline",
+                                  fontSize: "12px",
+                                  fontWeight: "normal",
+                                  position: "absolute",
+                                  left: "296px",
+                                }}
+                              >
+                                đ
+                              </span>
+                              {new Intl.NumberFormat('vi-VN', { minimumFractionDigits: 3 }).format(formattedDiscountedTotal).replace(/,/g, '.')}
+                            </TableCell>
+                            </TableRow>
+                          )}
                           <TableRow style={{ border: '1px solid #ddd' }}>
                             <TableCell
                               align="right"
@@ -347,9 +466,24 @@ const HistoryOrderDetail = () => {
                             </TableCell>
                             <TableCell
                               align="right"
-                              style={{ padding: '12px 16px', color: '#f5222d', fontWeight: 'bold', border: '1px solid #ddd' }}
+                              style={{
+                                color: "red",
+                                fontSize: "16px",
+                                position: "relative",
+                              }}
                             >
-                              ₫{formattedFinalTotal}
+                              <span
+                                style={{
+                                  textDecoration: "underline",
+                                  fontSize: "12px",
+                                  fontWeight: "normal",
+                                  position: "absolute",
+                                  left: "288px",
+                                }}
+                              >
+                                đ
+                              </span>
+                              {new Intl.NumberFormat('vi-VN', { minimumFractionDigits: 3 }).format(formattedFinalTotal).replace(/,/g, '.')}
                             </TableCell>
                           </TableRow>
                         </TableBody>
@@ -382,7 +516,7 @@ const HistoryOrderDetail = () => {
                     </TableContainer>
                   </>
                 )}
-                {status === "Đã hủy" && (
+                {(status === "Đã hủy" || status === "Chờ hoàn tiền") && (
                   <>
                     <TableContainer
                       component={Paper}
@@ -401,7 +535,8 @@ const HistoryOrderDetail = () => {
                               align="right"
                               style={{ padding: '12px 16px', border: '1px solid #ddd', width: '370px' }}
                             >
-                              COD
+                              {payMethod === 'Thanh toán khi nhận hàng' ? 'COD' : payMethod}
+
                             </TableCell>
                           </TableRow>
                           <TableRow style={{ border: '1px solid #ddd' }}>
@@ -415,7 +550,21 @@ const HistoryOrderDetail = () => {
                               align="right"
                               style={{ padding: '12px 16px', border: '1px solid #ddd' }}
                             >
-                              7945700590
+                              {orderId}
+                            </TableCell>
+                          </TableRow>
+                          <TableRow style={{ border: '1px solid #ddd' }}>
+                            <TableCell
+                              align="right"
+                              style={{ fontWeight: 'bold', padding: '12px 16px', border: '1px solid #ddd' }}
+                            >
+                              Lý do hủy
+                            </TableCell>
+                            <TableCell
+                              align="right"
+                              style={{ padding: '12px 16px', border: '1px solid #ddd' }}
+                            >
+                              {cancelReason}
                             </TableCell>
                           </TableRow>
                         </TableBody>

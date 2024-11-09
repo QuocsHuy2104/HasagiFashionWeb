@@ -3,7 +3,6 @@ import aboutImage3 from "layouts/assets/img/cat-1.jpg";
 import aboutImage5 from "layouts/assets/img/product-1.jpg";
 import { Grid, Typography } from "@mui/material";
 import Header from "../../components/client/HasagiHeader";
-import Navbar from "components/client/HasagiNavbar";
 import HasagiCau from "../../components/client/HasagiCarousel";
 import Footer from "../../components/client/HasagiFooter";
 import Cookies from "js-cookie";
@@ -127,7 +126,6 @@ function Home() {
                 </div>
             )}
             <Header onSearch={handleSearch} />
-            < Navbar />
             <HasagiCau />
             <div className="col-lg-12 px-xl-5" style={{ top: "-25px" }}>
                 <div className="bg-light p-3 d-flex flex-column"
@@ -194,7 +192,6 @@ function Home() {
                         </Link>
                     </h5>
 
-
                     <div className="container-fluid pb-3">
                         <div className="row px-xl-5">
                             {products.map((product, index) => (
@@ -215,11 +212,11 @@ function Home() {
                                             </Link>
                                             
                                             <div className="d-flex align-items-center justify-content-center mb-1">
-                                                <small className="fa fa-star text-primary mr-1"></small>
-                                                <small className="fa fa-star text-primary mr-1"></small>
-                                                <small className="fa fa-star text-primary mr-1"></small>
-                                                <small className="fa fa-star text-primary mr-1"></small>
-                                                <small className="fa fa-star text-primary mr-1"></small>
+                                                <small className="fa fa-star text-warning mr-1"></small>
+                                                <small className="fa fa-star text-warning mr-1"></small>
+                                                <small className="fa fa-star text-warning mr-1"></small>
+                                                <small className="fa fa-star text-warning mr-1"></small>
+                                                <small className="fa fa-star text-warning mr-1"></small>
                                                 <small>({product.rating || 99})</small>
                                             </div>
                                         </div>
@@ -234,7 +231,7 @@ function Home() {
             <CouponList />
             <div className="container-fluid pt-4">
                 <Typography variant="h2" className="section-title position-relative text-uppercase mx-xl-5 mb-4">
-                    <span className="bg-secondary pr-3">Danh mục</span>
+                    <span className="bg-white pr-3">Danh mục</span>
                 </Typography>
                 <Grid container spacing={2} className="px-xl-5 pb-3">
                     {categories.map((category, index) => (
@@ -254,7 +251,7 @@ function Home() {
             <div
                 className="container-fluid pt-4">
                 <Typography variant="h2" className="section-title position-relative text-uppercase mx-xl-5 mb-4">
-                    <span className="bg-secondary pr-3">Thương hiệu</span>
+                    <span className="bg-white pr-3">Thương hiệu</span>
                 </Typography>
                 <Grid container spacing={2} className="px-xl-5 pb-3">
                     {brands.map((brand, index) => (
@@ -273,7 +270,7 @@ function Home() {
             </div>
             <div className="container-fluid pt-4 pb-3">
                 <h2 className="section-title position-relative text-uppercase mx-xl-5 mb-4">
-                    <span className="bg-secondary pr-3">Sản phẩm</span>
+                    <span className="bg-white pr-3">Sản phẩm</span>
                 </h2>
                 <div className="row px-xl-5">
                     {currentProducts.map((product, index) => (
@@ -294,11 +291,11 @@ function Home() {
                                     </Link>
                                     
                                     <div className="d-flex align-items-center justify-content-center mb-1">
-                                        <small className="fa fa-star text-primary mr-1"></small>
-                                        <small className="fa fa-star text-primary mr-1"></small>
-                                        <small className="fa fa-star text-primary mr-1"></small>
-                                        <small className="fa fa-star text-primary mr-1"></small>
-                                        <small className="fa fa-star text-primary mr-1"></small>
+                                        <small className="fa fa-star text-warning mr-1"></small>
+                                        <small className="fa fa-star text-warning mr-1"></small>
+                                        <small className="fa fa-star text-warning mr-1"></small>
+                                        <small className="fa fa-star text-warning mr-1"></small>
+                                        <small className="fa fa-star text-warning mr-1"></small>
                                         <small>({product.rating || 99})</small>
                                     </div>
                                 </div>

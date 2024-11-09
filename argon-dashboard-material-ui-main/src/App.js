@@ -125,6 +125,7 @@ export default function App() {
   && pathname !== "/Favorite"
   && pathname !== "/Complete"
   && pathname !== "/History"
+  && pathname !== "/profile" 
   && !pathname.startsWith("/history-order/");
   ;
 

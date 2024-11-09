@@ -1,29 +1,27 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
+import "components/client/assets/css/phanloai1.css";
 import ArgonInput from "components/ArgonInput";
 import ArgonButton from "components/ArgonButton";
 import axios from "axios";
-import Cookies from "js-cookie";
-import "components/client/assets/css/phanloai1.css";
 import Select from "react-select";
-import AddressSelection from '../HasagiBackup1';
 import AddressService from '../../../services/AddressServices';
 
-const Backup = ({ show, onClose, onAddressUpdated }) => {
-    const [fullName, setFullName] = useState('');
-    const [numberPhone, setNumBerPhone] = useState('');
+const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
+    const [fullName, setFullName] = useState("");
+    const [numberPhone, setNumBerPhone] = useState("");
+    const [address, setAddress] = useState("");
+    const [selectedProvince, setSelectedProvince] = useState(null);
+    const [selectedDistrict, setSelectedDistrict] = useState(null);
+    const [selectedWard, setSelectedWard] = useState(null);
+    const [status, setStatus] = useState(false);
+    const [showTabs, setShowTabs] = useState(false);
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
-    const [selectedProvince, setSelectedProvince] = useState(null); // Thêm state này
-    const [selectedDistrict, setSelectedDistrict] = useState(null); // Thêm state này
-    const [selectedWard, setSelectedWard] = useState(null); // Thêm state này
-    const [status, setStatus] = useState(false);
-    const [showAddressSelection, setShowAddressSelection] = useState(false);
-    const [isAddressAvailable, setIsAddressAvailable] = useState(true);
-    const [address, setAddress] = useState('');
+    const wrapperRef = useRef(null);
     const [errors, setErrors] = useState({});
-    const [isSubmitted, setIsSubmitted] = useState(false); // New state variable
+    const [isSubmitted, setIsSubmitted] = useState(false);
 
     const validateForm = () => {
         const newErrors = {};
@@ -51,10 +49,9 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
         }
 
         setErrors(newErrors);
-        return Object.keys(newErrors).length === 0; // Return true if no errors
+        return Object.keys(newErrors).length === 0;
     };
 
-    // In your return statement, add error messages for the province, district, and ward selections
     {
         isSubmitted && errors.selectedProvince && (
             <div className="text-danger">{errors.selectedProvince}</div>
@@ -75,7 +72,7 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
     const handleInputClick = (field) => {
         setErrors((prevErrors) => ({
             ...prevErrors,
-            [field]: "", // Clear error when input is clicked
+            [field]: "",
         }));
     };
 
@@ -90,7 +87,7 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
 
     const handleFullNameBlur = () => {
         if (isSubmitted) {
-            validateForm(); // Validate only when the field loses focus
+            validateForm(); 
         }
     };
 
@@ -98,7 +95,6 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
         const value = e.target.value;
         setNumBerPhone(value);
 
-        // Clear the specific error on change
         if (isSubmitted) {
             setErrors((prevErrors) => ({ ...prevErrors, numberPhone: "" }));
         }
@@ -106,7 +102,7 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
 
     const handleNumberPhoneBlur = () => {
         if (isSubmitted) {
-            validateForm(); // Validate only when the field loses focus
+            validateForm(); 
         }
     };
 
@@ -121,44 +117,66 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
 
     const handleAddressBlur = () => {
         if (isSubmitted) {
-            validateForm(); // Validate only when the field loses focus
+            validateForm(); 
+        }
+    };
+
+    const fetchAddressById = async () => {
+        try {
+            if (addressId) {
+                const response = await axios.get(`http://localhost:3000/api/addresses/${addressId}`);
+                const addressData = response.data;
+                setFullName(addressData.fullName);
+                setNumBerPhone(addressData.numberPhone);
+                setAddress(addressData.address);
+                setSelectedProvince(addressData.provinceID);
+                setSelectedDistrict(addressData.districtCode);
+                setSelectedWard(addressData.wardCode);
+                setStatus(addressData.status);
+            }
+        } catch (error) {
+            console.error("Error fetching address:", error);
         }
     };
 
     useEffect(() => {
-        const fetchProvinces = async () => {
-            try {
-                const response = await axios.get(
-                    "https://online-gateway.ghn.vn/shiip/public-api/master-data/province",
-                    {
-                        headers: {
-                            Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d",
-                        },
-                    }
-                );
-                setProvinces(response.data.data);
-            } catch (error) {
-                console.error("Error fetching provinces:", error);
+        if (addressId) {
+            fetchAddressById();
+        }
+    }, [addressId]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+                setShowTabs(false);
             }
         };
-        fetchProvinces();
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
     }, []);
 
-    const handleProvinceChange = async (provinceId) => {
-        setSelectedProvince(provinceId);
-        setSelectedDistrict("");
-        setSelectedWard("");
+    const fetchProvinces = async () => {
+        try {
+            const response = await axios.get(
+                "https://online-gateway.ghn.vn/shiip/public-api/master-data/province",
+                {
+                    headers: { Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d" },
+                }
+            );
+            setProvinces(response.data.data);
+        } catch (error) {
+            console.error("Error fetching provinces:", error);
+        }
+    };
 
-        // Clear the error for the province selection
-        setErrors((prevErrors) => ({ ...prevErrors, selectedProvince: "" }));
-
+    const fetchDistricts = async (provinceId) => {
         try {
             const response = await axios.get(
                 "https://online-gateway.ghn.vn/shiip/public-api/master-data/district",
                 {
-                    headers: {
-                        Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d",
-                    },
+                    headers: { Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d" },
                     params: { province_id: provinceId },
                 }
             );
@@ -168,20 +186,12 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
         }
     };
 
-    const handleDistrictChange = async (districtId) => {
-        setSelectedDistrict(districtId);
-        setSelectedWard("");
-
-        // Clear the error for the district selection
-        setErrors((prevErrors) => ({ ...prevErrors, selectedDistrict: "" }));
-
+    const fetchWards = async (districtId) => {
         try {
             const response = await axios.get(
                 "https://online-gateway.ghn.vn/shiip/public-api/master-data/ward",
                 {
-                    headers: {
-                        Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d",
-                    },
+                    headers: { Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d" },
                     params: { district_id: districtId },
                 }
             );
@@ -192,26 +202,23 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
     };
 
     useEffect(() => {
-        const checkUserAddresses = async () => {
-            try {
-                const addressCheckResponse = await axios.get('http://localhost:3000/api/addresses/account', { withCredentials: true });
-                const userHasAddresses = addressCheckResponse.data.length > 0;
-                if (!userHasAddresses) {
-                    setStatus(true);
-                    setIsAddressAvailable(false);
-                } else {
-                    setIsAddressAvailable(true);
-                }
-            } catch (error) {
-                console.error("Error checking user addresses:", error);
-            }
-        };
-        checkUserAddresses();
+        fetchProvinces();
     }, []);
 
+    useEffect(() => {
+        if (selectedProvince) {
+            fetchDistricts(selectedProvince);
+        }
+    }, [selectedProvince]);
+
+    useEffect(() => {
+        if (selectedDistrict) {
+            fetchWards(selectedDistrict);
+        }
+    }, [selectedDistrict]);
 
     const handleComplete = async () => {
-        setIsSubmitted(true); // Set submitted state to true
+        setIsSubmitted(true); 
 
         const isValid = validateForm();
         if (!isValid) return;
@@ -223,39 +230,128 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
             districtCode: selectedDistrict,
             wardCode: selectedWard,
             status,
-            address: address,
+            address,
         };
         try {
-            await AddressService.createAddress(formData);
+            await AddressService.updateAddress(addressId, formData);
             onClose();
-            await AddressService.getAllAddress(); 
             onAddressUpdated();
-            <AddressSelection show={showAddressSelection} onClose={() => setShowAddressSelection(false)} />
         } catch (error) {
             console.error("Error submitting address:", error);
         }
     };
+
     const handleCheckboxChange = (event) => {
         setStatus(event.target.checked);
     };
 
-    //chọn tỉnh thành phố
+    const handleProvinceChange = (provinceId) => {
+        setSelectedProvince(provinceId);
+        setSelectedDistrict("");
+        setSelectedWard("");
+        fetchDistricts(provinceId);
+        setErrors((prevErrors) => ({ ...prevErrors, selectedProvince: "" }));
+    };
+
+    const handleDistrictChange = (id) => {
+        setSelectedDistrict(id);
+        setSelectedWard("");
+        fetchWards(id);
+        setErrors((prevErrors) => ({ ...prevErrors, selectedDistrict: "" }));
+    };
+
     const provinceOptions = provinces.map((province) => ({
         value: province.ProvinceID,
         label: province.ProvinceName,
     }));
 
-    //chọn quận/huyện
     const districtOptions = districts.map((district) => ({
         value: district.DistrictID,
         label: district.DistrictName,
     }));
 
-    //phường xã
     const wardOptions = wards.map((ward) => ({
         value: ward.WardCode,
         label: ward.WardName,
     }));
+
+    const resetForm = () => {
+        setFullName("");
+        setNumBerPhone("");
+        setAddress("");
+        setSelectedProvince("");
+        setSelectedDistrict("");
+        setSelectedWard("");
+        setErrors({});
+        setIsSubmitted(false);
+        setDistricts([]);
+        setWards([]);
+    };
+
+    const handleModalClose = () => {
+        resetForm(); 
+        onClose(); 
+    };
+
+    const customStylesProvince = {
+        menuList: (provided) => ({
+            ...provided,
+            maxHeight: "225px",
+            overflowY: "auto", 
+        }),
+        menuListScroll: {
+            "::-webkit-scrollbar": {
+                width: "6px",
+            },
+            "::-webkit-scrollbar-thumb": {
+                backgroundColor: "#888",
+                borderRadius: "4px",
+            },
+            "::-webkit-scrollbar-thumb:hover": {
+                backgroundColor: "#555",
+            },
+        },
+    };
+
+    const customStylesDistrict = {
+        menuList: (provided) => ({
+            ...provided,
+            maxHeight: "160px", 
+            overflowY: "auto", 
+        }),
+        menuListScroll: {
+            "::-webkit-scrollbar": {
+                width: "6px",
+            },
+            "::-webkit-scrollbar-thumb": {
+                backgroundColor: "#888",
+                borderRadius: "4px",
+            },
+            "::-webkit-scrollbar-thumb:hover": {
+                backgroundColor: "#555",
+            },
+        },
+    };
+
+    const customStylesWard = {
+        menuList: (provided) => ({
+            ...provided,
+            maxHeight: "100px",
+            overflowY: "auto",
+        }),
+        menuListScroll: {
+            "::-webkit-scrollbar": {
+                width: "6px",
+            },
+            "::-webkit-scrollbar-thumb": {
+                backgroundColor: "#888",
+                borderRadius: "4px",
+            },
+            "::-webkit-scrollbar-thumb:hover": {
+                backgroundColor: "#555",
+            },
+        },
+    };
 
     if (!show) return null;
 
@@ -264,10 +360,10 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
             <div className="modal1-dialog">
                 <div className="modal1-content">
                     <div className="modal1-header">
-                        <h5 className="modal1-title">Địa chỉ mới</h5>
+                        <h5 className="modal1-title">Cập nhật địa chỉ</h5>
                         <button type="button" className="btn-close" onClick={onClose}></button>
                     </div>
-                    <div className="modal1-body p-4">
+                    <div className="modal-body p-4" ref={wrapperRef}>
                         <div className="row">
                             <div className="col-md-6 form-group">
                                 <ArgonInput
@@ -276,9 +372,9 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
                                     placeholder="Họ và tên"
                                     value={fullName}
                                     onChange={handleFullNameChange}
-                                    onBlur={handleFullNameBlur} // Validate on blur
+                                    onBlur={handleFullNameBlur} 
                                     onClick={() => handleInputClick("fullName")}
-                                    onFocus={() => handleInputClick("fullName")} // Xóa lỗi khi focus vào input
+                                    onFocus={() => handleInputClick("fullName")}
                                     className={errors.fullName ? "border-danger" : ""}
                                     style={{
                                         color: errors.fullName ? 'red' : 'black',
@@ -296,7 +392,7 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
                                     placeholder="Số điện thoại"
                                     value={numberPhone}
                                     onChange={handleNumberPhoneChange}
-                                    onBlur={handleNumberPhoneBlur} // Validate on blur
+                                    onBlur={handleNumberPhoneBlur} 
                                     onClick={() => handleInputClick("numberPhone")}
                                     onFocus={() => handleInputClick("numberPhone")}
                                     className={errors.numberPhone ? "border-danger" : ""}
@@ -316,9 +412,9 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
                                     placeholder="Địa chỉ cụ thể"
                                     value={address}
                                     onChange={handleAddressChange}
-                                    onBlur={handleAddressBlur} // Validate on blur
+                                    onBlur={handleAddressBlur}
                                     onClick={() => handleInputClick("address")}
-                                    onFocus={() => handleInputClick("address")} // Xóa lỗi khi focus vào input
+                                    onFocus={() => handleInputClick("address")}
                                     className={errors.address ? "border-danger" : ""}
                                     style={{
                                         color: errors.address ? 'red' : 'black',
@@ -331,13 +427,16 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
                             </div>
                             <div className="col-md-12 form-group">
                                 <Select
+                                    styles={customStylesProvince}
                                     placeholder="Chọn tỉnh/thành phố"
-                                    value={provinceOptions.find((option) => option.value === selectedProvince)}
-                                    onChange={(option) => {
-                                        handleProvinceChange(option.value)
+                                    className="province-select"
+                                    value={provinceOptions.find((option) => option.value == selectedProvince)}
+                                    onChange={(selectedOption) => {
+                                        handleProvinceChange(selectedOption.value);
                                         setErrors((prevErrors) => ({ ...prevErrors, selectedProvince: "" }));
                                     }}
                                     options={provinceOptions}
+                                    isSearchable
                                 />
                                 {isSubmitted && errors.selectedProvince && (
                                     <div className="text-danger">{errors.selectedProvince}</div>
@@ -345,14 +444,17 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
                             </div>
                             <div className="col-md-12 form-group">
                                 <Select
-                                    placeholder="Chọn quận/huyện"
-                                    value={districtOptions.find((option) => option.value === selectedDistrict)}
-                                    onChange={(option) => {
-                                        handleDistrictChange(option.value);
+                                    styles={customStylesDistrict}
+                                    className="district-select"
+                                    value={districtOptions.find((option) => option.value == selectedDistrict)}
+                                    onChange={(selectedOption) => {
+                                        handleDistrictChange(selectedOption.value);
                                         setErrors((prevErrors) => ({ ...prevErrors, selectedDistrict: "" }));
                                     }}
                                     options={districtOptions}
+                                    placeholder="Chọn quận/huyện"
                                     isDisabled={!selectedProvince}
+                                    isSearchable
                                 />
                                 {isSubmitted && errors.selectedDistrict && (
                                     <div className="text-danger">{errors.selectedDistrict}</div>
@@ -360,31 +462,39 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
                             </div>
                             <div className="col-md-12 form-group">
                                 <Select
-                                    placeholder="Chọn phường/xã"
+                                    styles={customStylesWard}
+                                    className="ward-select"
                                     value={wardOptions.find((option) => option.value === selectedWard)}
-                                    onChange={(option) => {
-                                        setSelectedWard(option.value);
+                                    onChange={(selectedOption) => {
+                                        setSelectedWard(selectedOption.value);
                                         setErrors((prevErrors) => ({ ...prevErrors, selectedWard: "" }));
                                     }}
                                     options={wardOptions}
+                                    placeholder="Chọn phường/xã"
                                     isDisabled={!selectedDistrict}
+                                    isSearchable
                                 />
                                 {isSubmitted && errors.selectedWard && (
                                     <div className="text-danger">{errors.selectedWard}</div>
                                 )}
                             </div>
-                            <label style={{ marginLeft: "10px", marginBottom: "0" }}>Đặt làm địa chỉ mặc định
-                                <input
-                                    type="checkbox"
-                                    checked={status}
-                                    onChange={handleCheckboxChange}
-                                    disabled={!isAddressAvailable}
-                                    style={{ transform: "scale(1.5)", marginBottom: "0", marginLeft: "10px" }}
-                                />
-                            </label>
+                            {!status && (
+                                <label style={{ marginLeft: "10px", marginBottom: "0" }}>
+                                    Đặt làm địa chỉ mặc định
+                                    <input
+                                        type="checkbox"
+                                        checked={status}
+                                        onChange={handleCheckboxChange}
+                                        style={{ transform: "scale(1.5)", marginBottom: "0", marginLeft: "10px" }}
+                                    />
+
+                                </label>
+                            )}
                         </div>
                         <div className="d-flex justify-content-between mt-4">
-                            <ArgonButton onClick={onClose}>Trở lại</ArgonButton>
+                            <ArgonButton className="btn btn-light" onClick={handleModalClose}>
+                                Trở Lại
+                            </ArgonButton>
                             <ArgonButton className="btn btn-primary" onClick={handleComplete}>
                                 Hoàn thành
                             </ArgonButton>
@@ -396,10 +506,11 @@ const Backup = ({ show, onClose, onAddressUpdated }) => {
     );
 };
 
-Backup.propTypes = {
+Backup3.propTypes = {
     show: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
     onAddressUpdated: PropTypes.func.isRequired,
+    addressId: PropTypes.string.isRequired,
 };
 
-export default Backup;
+export default Backup3;

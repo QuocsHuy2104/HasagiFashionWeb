@@ -10,9 +10,8 @@ import Cookies from "js-cookie";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Link } from "react-router-dom";
-import Navbar from "../HasagiNavbar";
 import aboutImage from "layouts/assets/img/shopping.png";
-import CartService from"../../../services/CartService";
+import CartService from "../../../services/CartService";
 const Cart = () => {
     const [cartItems, setCartItems] = useState([]);
     const [address, setAddress] = useState(null);
@@ -38,7 +37,7 @@ const Cart = () => {
 
         try {
             const [cartResponse, addressResponse] = await Promise.all([
-              CartService.getCart(),
+                CartService.getCart(),
                 axios.get(`http://localhost:3000/api/addresses/exists?accountId=${accountId}`, { withCredentials: true })
             ]);
             setCartItems(cartResponse.data);
@@ -176,8 +175,8 @@ const Cart = () => {
     const toggleModal = (itemId) => {
         const currentItem = cartItems.find(item => item.cartdetailid === itemId);
         if (currentItem) {
-            setSelectedColor(currentItem.color);
-            setSelectedSize(currentItem.size);
+            setSelectedColor(currentItem.colorId);
+            setSelectedSize(currentItem.sizeId);
             setCurrentProductId(currentItem.productId);
             setCurrentCartDetailId(currentItem.cartdetailid);
             const cartSizesForColor = cartItems
@@ -215,8 +214,7 @@ const Cart = () => {
                 </div>
             )}
             <HasagiNav />
-            <Navbar />
-            <div className="container-fluid py-2">
+            <div className="container-fluid" style={{ marginTop: "100px" }}>
                 <div className="row px-xl-5">
                     <div className="col-lg-12 mb-5" id="tableAddCart">
                         <div className="header">
@@ -227,7 +225,7 @@ const Cart = () => {
                         </div>
                         {cartItems.length === 0 ? (
                             <div className="text-center py-3">
-                                <img src={aboutImage} style={{height: "60px", width: "60px"}}/>
+                                <img src={aboutImage} style={{ height: "60px", width: "60px" }} />
                                 <p style={{ fontSize: "18px", color: "#6c757d" }}>Giỏ hàng của bạn đang trống.</p>
                                 <button
                                     style={{
@@ -246,10 +244,10 @@ const Cart = () => {
                             </div>
 
                         ) : (
-                            <table className="table table-hover table-bordered text-center mb-0">
-                                <thead className="bg-primary text-white">
+                            <table className="table text-center mb-0" style={{ borderCollapse: "separate", borderSpacing: "0 8px" }}>
+                                <thead className="bg-primary text-white" style={{ fontSize: "14px" }}>
                                     <tr>
-                                        <th scope="col" style={{ width: "5%", textAlign: "center", padding: "10px", fontWeight: "bold" }}>
+                                        <th scope="col" style={{ width: "5%", textAlign: "center", padding: "10px", border: "none" }}>
                                             <input
                                                 type="checkbox"
                                                 checked={selectAll}
@@ -258,19 +256,18 @@ const Cart = () => {
                                                 style={{ transform: "scale(1.5)" }}
                                             />
                                         </th>
-                                        <th scope="col" style={{ width: "20%", textAlign: "left", padding: "10px", fontWeight: "bold" }}>Sản Phẩm</th>
-                                        <th scope="col" style={{ width: "25%", padding: "10px", fontWeight: "bold" }}></th>
-                                        <th scope="col" style={{ width: "10%", textAlign: "center", padding: "10px", fontWeight: "bold" }}>Đơn Giá</th>
-                                        <th scope="col" style={{ width: "15%", textAlign: "center", padding: "10px", fontWeight: "bold" }}>Số Lượng</th>
-                                        <th scope="col" style={{ width: "10%", textAlign: "center", padding: "10px", fontWeight: "bold" }}>Tổng</th>
-                                        <th scope="col" style={{ width: "10%", textAlign: "center", padding: "10px", fontWeight: "bold" }}>Thao tác</th>
+                                        <th scope="col" style={{ width: "20%", textAlign: "left", padding: "10px", border: "none"}}>Sản Phẩm</th>
+                                        <th scope="col" style={{ width: "25%", padding: "10px", border: "none" }}></th>
+                                        <th scope="col" style={{ width: "10%", textAlign: "center", padding: "10px", border: "none", color: "gray"  }}>Đơn Giá</th>
+                                        <th scope="col" style={{ width: "15%", textAlign: "center", padding: "10px", border: "none", color: "gray"  }}>Số Lượng</th>
+                                        <th scope="col" style={{ width: "10%", textAlign: "center", padding: "10px", border: "none", color: "gray" }}>Tổng</th>
+                                        <th scope="col" style={{ width: "10%", textAlign: "center", padding: "10px", border: "none", color: "gray"  }}>Thao tác</th>
                                     </tr>
                                 </thead>
-
-                                <tbody className="align-middle">
-                                    {cartItems.map(item => (
-                                        <tr key={item.cartdetailid}>
-                                            <td className="align-middle">
+                                <tbody className="align-middle" style={{ fontSize: "14px" }}>
+                                    {cartItems.map(item => (     
+                                        <tr key={item.cartdetailid} style={{ backgroundColor: "#f8f9fa", borderRadius: "10px", marginBottom: "8px" }}>
+                                            <td className="align-middle" style={{ border: "none" }}>
                                                 <input
                                                     type="checkbox"
                                                     checked={item.selected}
@@ -278,12 +275,12 @@ const Cart = () => {
                                                     style={{ transform: "scale(1.5)" }}
                                                 />
                                             </td>
-                                            <td className="align-middle" style={{ textAlign: "left", paddingLeft: "20px" }}>
-                                                <Link to={`/ShopDetail?id=${item.productId}`}>
+                                            <td className="align-middle" style={{ textAlign: "left", paddingLeft: "20px", border: "none" }}>
+                                                <Link to={`/ShopDetail?id=${item.productId}`} style={{ color: "black" }}>
                                                     <img src={item.image} style={{ width: 60 }} alt={item.name} /> {item.name}
                                                 </Link>
                                             </td>
-                                            <td className="align-middle">
+                                            <td className="align-middle" style={{ border: "none" }}>
                                                 <button
                                                     onClick={() => toggleModal(item.cartdetailid)}
                                                     style={{
@@ -291,65 +288,61 @@ const Cart = () => {
                                                         border: 'none',
                                                         color: 'black',
                                                         cursor: 'pointer'
-                                                    }}>
+                                                    }}
+                                                >
                                                     Phân Loại Hàng: <br />
                                                     {item.color || "Chưa chọn màu"} , {item.size || "Chưa chọn kích thước"}
                                                 </button>
                                             </td>
-
-                                            <td className="align-middle">{item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
-                                            <td className="align-middle">
+                                            <td className="align-middle" style={{ border: "none" }}>{item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
+                                            <td className="align-middle" style={{ border: "none" }}>
                                                 <div
                                                     className="input-group quantity mx-auto"
                                                     style={{
-                                                        width: "140px",
+                                                        width: "120px",
                                                         display: "flex",
                                                         alignItems: "center",
-                                                        justifyContent: "space-between", 
+                                                        justifyContent: "space-between",
                                                     }}
                                                 >
                                                     <div className="input-group-btn">
                                                         <button
-                                                            className="btn btn-primary btn-minus"
+                                                            className="btn btn-warning btn-minus"
                                                             onClick={() => handleQuantityChange(item.cartdetailid, -1)}
                                                             aria-label={`Decrease quantity of ${item.name}`}
                                                             style={{
-                                                                width: "35px",
-                                                                height: "35px",
+                                                                width: "30px",
+                                                                height: "30px",
                                                                 display: "flex",
                                                                 alignItems: "center",
                                                                 justifyContent: "center",
-                                                                marginLeft: "5px",
                                                             }}
                                                         >
                                                             <i className="fa fa-minus"></i>
                                                         </button>
                                                     </div>
-
                                                     <input
                                                         type="text"
                                                         className="form-control form-control-sm text-center"
                                                         value={item.quantity}
                                                         readOnly
                                                         style={{
-                                                            maxWidth: "50px",
-                                                            height: "35px",
+                                                            maxWidth: "40px",
+                                                            height: "30px",
                                                             margin: "0 5px",
                                                         }}
                                                     />
-
                                                     <div className="input-group-btn">
                                                         <button
-                                                            className="btn btn-primary btn-plus"
+                                                            className="btn btn-warning btn-plus"
                                                             onClick={() => handleQuantityChange(item.cartdetailid, 1)}
                                                             aria-label={`Increase quantity of ${item.name}`}
                                                             style={{
-                                                                width: "35px",
-                                                                height: "35px",
+                                                                width: "30px",
+                                                                height: "30px",
                                                                 display: "flex",
                                                                 alignItems: "center",
                                                                 justifyContent: "center",
-                                                                marginRight: "4px",
                                                             }}
                                                         >
                                                             <i className="fa fa-plus"></i>
@@ -357,9 +350,8 @@ const Cart = () => {
                                                     </div>
                                                 </div>
                                             </td>
-
-                                            <td className="align-middle">{(item.price * item.quantity).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
-                                            <td className="align-middle">
+                                            <td className="align-middle" style={{ border: "none" }}>{(item.price * item.quantity).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
+                                            <td className="align-middle" style={{ border: "none" }}>
                                                 <button
                                                     onClick={() => handleRemoveItem(item.cartdetailid)}
                                                     className="btn btn-danger"
@@ -373,47 +365,48 @@ const Cart = () => {
                                 </tbody>
                             </table>
 
+
                         )}
                         {cartItems.length > 0 && (
-                        <div className="d-flex align-items-center justify-content-between w-100 py-2">
-                            <div className="d-flex align-items-center" style={{ marginLeft: '30px' }}>
-                                <input
-                                    type="checkbox"
-                                    checked={selectAll}
-                                    onChange={handleSelectAllChange}
-                                    style={{ transform: "scale(1.5)", marginBottom: "0" }}
-                                />
-                                <label style={{ marginLeft: "5px", marginBottom: "0" }}>
-                                    Chọn Tất Cả ({countSelectedItems()})
-                                </label>
-                                <button
-                                    onClick={handleDeleteSelected}
-                                    className="btn"
-                                    style={{
-                                        backgroundColor: "transparent",
-                                        border: "none",
-                                        color: "black",
-                                        fontSize: "20px",
-                                        fontWeight: "normal",
-                                        marginLeft: "10px",
-                                    }}
-                                >
-                                    Xóa
-                                </button>
+                            <div className="d-flex align-items-center justify-content-between w-100 py-2">
+                                <div className="d-flex align-items-center" style={{ marginLeft: '30px' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={selectAll}
+                                        onChange={handleSelectAllChange}
+                                        style={{ transform: "scale(1.5)", marginBottom: "0" }}
+                                    />
+                                    <label style={{ marginLeft: "5px", marginBottom: "0" }}>
+                                        Chọn Tất Cả ({countSelectedItems()})
+                                    </label>
+                                    <button
+                                        onClick={handleDeleteSelected}
+                                        className="btn"
+                                        style={{
+                                            backgroundColor: "transparent",
+                                            border: "none",
+                                            color: "black",
+                                            fontSize: "20px",
+                                            fontWeight: "normal",
+                                            marginLeft: "10px",
+                                        }}
+                                    >
+                                        Xóa
+                                    </button>
+                                </div>
+                                <div className="d-flex align-items-center">
+                                    <h5 className="font-weight-medium mb-0">
+                                        Tổng thanh toán ({countSelectedItems()} sản phẩm): {total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                                    </h5>
+                                    <button
+                                        onClick={handleCheckout}
+                                        className="btn btn-warning rounded-pill d-inline-flex flex-shrink-0 py-1.5 px-4 ms-3"
+                                    >
+                                        Mua ngay
+                                    </button>
+                                </div>
                             </div>
-                            <div className="d-flex align-items-center">
-                                <h5 className="font-weight-medium mb-0">
-                                    Tổng thanh toán ({countSelectedItems()} sản phẩm): {total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-                                </h5>
-                                <button
-                                    onClick={handleCheckout}
-                                    className="btn btn-primary rounded-pill d-inline-flex flex-shrink-0 py-1.5 px-4 ms-3"
-                                >
-                                    Mua ngay
-                                </button>
-                            </div>
-                        </div>
-)}
+                        )}
                     </div>
                 </div>
             </div>
@@ -427,6 +420,8 @@ const Cart = () => {
                     onSizeSelect={handleSizeSelect}
                     productId={currentProductId}
                     cartDetailId={currentCartDetailId}
+                    colorId={selectedColor}
+                    sizeId={selectedSize}
                 />
             )}
             <Footer />

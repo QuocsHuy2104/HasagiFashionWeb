@@ -8,7 +8,7 @@ import Cookies from "js-cookie";
 import "components/client/assets/css/phanloai1.css";
 import Select from "react-select";
 import AddressService from '../../../services/AddressServices';
-
+import { useLocation } from 'react-router-dom';
 const Backup = ({ show, onClose }) => {
     const [fullName, setFullName] = useState("");
     const [numberPhone, setNumBerPhone] = useState("");
@@ -24,6 +24,7 @@ const Backup = ({ show, onClose }) => {
     const [errors, setErrors] = useState({});
     const [isSubmitted, setIsSubmitted] = useState(false); // New state variable
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handleCheckboxChange = (event) => {
         setStatus(event.target.checked);
@@ -78,7 +79,7 @@ const Backup = ({ show, onClose }) => {
     const handleInputClick = (field) => {
         setErrors((prevErrors) => ({
             ...prevErrors,
-            [field]: "", 
+            [field]: "",
         }));
     };
 
@@ -109,7 +110,7 @@ const Backup = ({ show, onClose }) => {
 
     const handleNumberPhoneBlur = () => {
         if (isSubmitted) {
-            validateForm(); 
+            validateForm();
         }
     };
 
@@ -127,6 +128,7 @@ const Backup = ({ show, onClose }) => {
             validateForm(); // Validate only when the field loses focus
         }
     };
+
 
     useEffect(() => {
         const fetchProvinces = async () => {
@@ -188,7 +190,8 @@ const Backup = ({ show, onClose }) => {
     };
 
     const handleComplete = async () => {
-        setIsSubmitted(true); 
+        setIsSubmitted(true);
+        const isMenuPage = location.pathname === '/profile' || location.pathname === '/History';
 
         const isValid = validateForm();
         if (!isValid) return;
@@ -202,14 +205,18 @@ const Backup = ({ show, onClose }) => {
             districtCode: selectedDistrict,
             wardCode: selectedWard,
         };
-        
+
         try {
             const response = await AddressService.createAddressFirst(formData);
-        
+
             if (response && response.data && response.data.id) {
-                const newAddressId = response.data.id;
-                onClose();
-                navigate(`/Checkout?id=${newAddressId}`);
+                if (!isMenuPage) {
+                    const newAddressId = response.data.id;
+                    onClose();
+                    navigate(`/Checkout?id=${newAddressId}`);
+                } else {
+                    onClose();
+                }
             } else {
                 console.log("Invalid response structure or missing ID:", response);
                 alert("Không thể lưu địa chỉ. Vui lòng thử lại.");
@@ -217,13 +224,13 @@ const Backup = ({ show, onClose }) => {
         } catch (error) {
             console.error("Error submitting address:", error);
             alert("Không thể lưu địa chỉ. Vui lòng thử lại.");
-        }        
+        }
     };
 
     useEffect(() => {
         const checkUserAddresses = async () => {
-            try {             
-                const response = await AddressService.getAllAddress(); 
+            try {
+                const response = await AddressService.getAllAddress();
                 const userHasAddresses = response.data.length > 0;
                 setIsAddressAvailable(userHasAddresses);
                 if (!userHasAddresses) setStatus(true);
@@ -267,7 +274,68 @@ const Backup = ({ show, onClose }) => {
         resetForm(); // Reset form data
         onClose(); // Close the modal
     };
+    const customStylesProvince = {
+        menuList: (provided) => ({
+            ...provided,
+            maxHeight: "250px", // Chiều cao tối đa của danh sách dropdown
+            overflowY: "auto", // Bật thanh cuộn dọc
+        }),
+        // Tùy chỉnh thanh cuộn trên trình duyệt hỗ trợ Webkit (Chrome, Edge, Safari)
+        menuListScroll: {
+            "::-webkit-scrollbar": {
+                width: "6px",
+            },
+            "::-webkit-scrollbar-thumb": {
+                backgroundColor: "#888",
+                borderRadius: "4px",
+            },
+            "::-webkit-scrollbar-thumb:hover": {
+                backgroundColor: "#555",
+            },
+        },
+    };
 
+    const customStylesDistrict = {
+        menuList: (provided) => ({
+            ...provided,
+            maxHeight: "190px", // Chiều cao tối đa của danh sách dropdown
+            overflowY: "auto", // Bật thanh cuộn dọc
+        }),
+        // Tùy chỉnh thanh cuộn trên trình duyệt hỗ trợ Webkit (Chrome, Edge, Safari)
+        menuListScroll: {
+            "::-webkit-scrollbar": {
+                width: "6px",
+            },
+            "::-webkit-scrollbar-thumb": {
+                backgroundColor: "#888",
+                borderRadius: "4px",
+            },
+            "::-webkit-scrollbar-thumb:hover": {
+                backgroundColor: "#555",
+            },
+        },
+    };
+
+    const customStylesWard = {
+        menuList: (provided) => ({
+            ...provided,
+            maxHeight: "130px", // Chiều cao tối đa của danh sách dropdown
+            overflowY: "auto", // Bật thanh cuộn dọc
+        }),
+        // Tùy chỉnh thanh cuộn trên trình duyệt hỗ trợ Webkit (Chrome, Edge, Safari)
+        menuListScroll: {
+            "::-webkit-scrollbar": {
+                width: "6px",
+            },
+            "::-webkit-scrollbar-thumb": {
+                backgroundColor: "#888",
+                borderRadius: "4px",
+            },
+            "::-webkit-scrollbar-thumb:hover": {
+                backgroundColor: "#555",
+            },
+        },
+    };
     if (!show) return null;
 
     return (
@@ -342,6 +410,7 @@ const Backup = ({ show, onClose }) => {
                             </div>
                             <div className="col-md-12 form-group">
                                 <Select
+                                    styles={customStylesProvince}
                                     placeholder="Chọn tỉnh/thành phố"
                                     value={provinceOptions.find((option) => option.value === selectedProvince)}
                                     onChange={(option) => {
@@ -357,6 +426,7 @@ const Backup = ({ show, onClose }) => {
                             </div>
                             <div className="col-md-12 form-group">
                                 <Select
+                                    styles={customStylesDistrict}
                                     placeholder="Chọn quận/huyện"
                                     value={districtOptions.find((option) => option.value === selectedDistrict)}
                                     onChange={(option) => {
@@ -373,6 +443,7 @@ const Backup = ({ show, onClose }) => {
                             </div>
                             <div className="col-md-12 form-group">
                                 <Select
+                                    styles={customStylesWard}
                                     placeholder="Chọn phường/xã"
                                     value={wardOptions.find((option) => option.value === selectedWard)}
                                     onChange={(option) => {

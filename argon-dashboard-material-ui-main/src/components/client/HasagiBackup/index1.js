@@ -3,16 +3,14 @@ import PropTypes from "prop-types";
 import ArgonButton from "components/ArgonButton";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import Backup3 from '../HasagiBackup3';
-import Backup2 from '../HasagiBackup2';
-import Cookies from "js-cookie";
+import Backup3 from './index3';
+import Backup2 from './index2';
 import { ToastContainer, toast } from 'react-toastify';
 import AddressService from '../../../services/AddressServices';
 
 const AddressSelection = ({ show, onClose }) => {
     const [address, setAddress] = useState([]);
     const [selectedAddress, setSelectedAddress] = useState(null);
-    const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState({});
     const [wards, setWards] = useState({});
     const [loading, setLoading] = useState(true);
@@ -20,9 +18,8 @@ const AddressSelection = ({ show, onClose }) => {
     const [showBackup1, setShowBackup1] = useState(false);
     const [backupAddress, setBackupAddress] = useState(null);
     const navigate = useNavigate();
- 
+
     const fetchAddress = async () => {
- 
         try {
             setLoading(true);
             const response = await AddressService.getAllAddress(); 

@@ -27,7 +27,7 @@ import ArgonTypography from "components/ArgonTypography";
 import DefaultNavbar from "examples/Navbars/DefaultNavbar";
 import PageLayout from "examples/LayoutContainers/PageLayout";
 
-function IllustrationLayout({ color, header, title, description, button, illustration, children }) {
+function IllustrationLayout({ color, header, title, description, illustration, children }) {
   return (
     <PageLayout background="white">
       <DefaultNavbar
@@ -132,8 +132,7 @@ IllustrationLayout.propTypes = {
   color: PropTypes.oneOf(["primary", "secondary", "info", "success", "warning", "error", "dark"]),
   header: PropTypes.node,
   title: PropTypes.string,
-  description: PropTypes.string,
-  button: PropTypes.object,
+  description: PropTypes.string,   
   children: PropTypes.node.isRequired,
   illustration: PropTypes.shape({
     image: PropTypes.string,
