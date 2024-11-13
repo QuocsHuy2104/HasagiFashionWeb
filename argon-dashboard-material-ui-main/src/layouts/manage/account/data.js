@@ -113,10 +113,12 @@ const AuthorsTableData = ({ onEditClick, searchTerm = "", selectedRoles = [] }) 
   };
 
   const filteredAccounts = selectedRoles.length > 0
-    ? filteredBySearch.filter((account) =>
-      account.roleName.some((role) => selectedRoles.includes(role.name))
+    ? filteredBySearch.filter(
+      (account) =>
+        (account.roleName || []).some((role) => selectedRoles.includes(role.name))
     )
     : filteredBySearch;
+
 
   const rows = filteredAccounts.map((account) => {
     const accountRoles = (account.roleName || [])

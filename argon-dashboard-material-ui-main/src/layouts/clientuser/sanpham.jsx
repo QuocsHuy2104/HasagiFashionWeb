@@ -52,7 +52,7 @@ function FeaturedProducts() {
                             return (
                                 <ArgonBox key={product.id} mx={1} mb={2} style={{ flex: '1 0 23%', maxWidth: '23%' }}>
                                     <HasagiCard2
-                                        image={product.image}
+                                        image={product.image || 'https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930'}
                                         name={product.name}
                                         id={product.id}
                                         price={product.importPrice}

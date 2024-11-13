@@ -16,7 +16,6 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
     const [selectedProductId, setSelectedProductId] = useState(null);
 
     const handleOpenPopup = () => {
-        console.log(`Opening popup for product ID: ${id}`);
         setSelectedProductId(id);
         setIsPopupOpen(true);
     };
@@ -40,6 +39,57 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                 overflow: 'hidden'
             }}
         >
+
+
+            <MuiLink href={`ShopDetails/${id}`} target="_blank" rel="noreferrer">
+                <ArgonBox
+                    mt={2}
+                    mx={2}
+                    style={{
+                        overflow: 'hidden',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                >
+                    <ArgonBox
+                        component="img"
+                        src={image}
+                        alt={name}
+                        height="275px"
+                        width="auto"
+                        borderRadius="lg"
+                        style={{
+                            transition: 'transform 0.3s ease',
+                            transform: hover ? 'scale(1.1)' : 'scale(1)',
+                            overflow: 'hidden',
+                        }}
+                    />
+                </ArgonBox>
+
+                <ArgonTypography variant="h5" component="p" color="text" my={2}>{name}</ArgonTypography>
+
+                <ArgonBox display="flex" alignItems="center">
+                    <ArgonTypography
+                        variant="body2"
+                        component="p"
+                        color="secondary"
+                        style={{ textDecoration: 'line-through' }}
+                    >
+                        {price} VNĐ
+                    </ArgonTypography>
+
+                    <ArgonTypography
+                        variant="subtitle2"
+                        component="p"
+                        color="error"
+                        style={{ marginLeft: '8px' }}
+                    >
+                        {price} VNĐ
+                    </ArgonTypography>
+                </ArgonBox>
+            </MuiLink>
+
             <ArgonBox
                 color='white'
                 bgColor='error'
@@ -100,56 +150,6 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                     />
                 </>
             )}
-
-            <MuiLink href={`ShopDetails/${id}`} target="_blank" rel="noreferrer">
-                <ArgonBox
-                    mt={2}
-                    mx={2}
-                    style={{
-                        overflow: 'hidden',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }}
-                >
-                    <ArgonBox
-                        component="img"
-                        src={image}
-                        alt={name}
-                        height="275px"
-                        width="auto"
-                        borderRadius="lg"
-                        style={{
-                            transition: 'transform 0.3s ease',
-                            transform: hover ? 'scale(1.1)' : 'scale(1)',
-                            overflow: 'hidden',
-                        }}
-                    />
-                </ArgonBox>
-
-                <ArgonTypography variant="h5" component="p" color="text" my={2}>{name}</ArgonTypography>
-
-                <ArgonBox display="flex" alignItems="center">
-                    <ArgonTypography
-                        variant="body2"
-                        component="p"
-                        color="secondary"
-                        style={{ textDecoration: 'line-through' }}
-                    >
-                        {price} VNĐ
-                    </ArgonTypography>
-
-                    <ArgonTypography
-                        variant="subtitle2"
-                        component="p"
-                        color="error"
-                        style={{ marginLeft: '8px' }}
-                    >
-                        {price} VNĐ
-                    </ArgonTypography>
-                </ArgonBox>
-            </MuiLink>
-
             <ProductPopup open={isPopupOpen} handleClose={handleClosePopup} id={selectedProductId} />
         </Card>
     );

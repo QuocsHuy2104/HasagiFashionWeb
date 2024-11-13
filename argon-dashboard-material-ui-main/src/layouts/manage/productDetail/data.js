@@ -73,7 +73,7 @@ export default function DataGridDemo({ items, onEdit, onDelete }) {
                                             label="Edit"
                                             onClick={() => {
                                                 onEdit(params.row);
-                                                handleClose(params.id); 
+                                                handleClose(params.id);
                                             }}
                                         />
                                     </ListItemButton>
@@ -104,8 +104,8 @@ export default function DataGridDemo({ items, onEdit, onDelete }) {
         quantity: item.quantity,
         price: item.price,
         priceSize: item.priceSize,
-        colorsDTO: item.colorsDTO.name,
-        sizesDTOResponse: item.sizesDTOResponse.name,
+        colorsDTO: item.colorsDTO?.name || 'N/A',
+        sizesDTOResponse: item.sizesDTOResponse?.name || 'N/A', 
         subDescription: item.subDescription,
         createDate: item.createDate,
         createBy: item.createBy,
@@ -144,10 +144,10 @@ DataGridDemo.propTypes = {
             createDate: PropTypes.string.isRequired,
             createBy: PropTypes.string.isRequired,
             colorsDTO: PropTypes.shape({
-                name: PropTypes.string.isRequired,
+                name: PropTypes.string,
             }).isRequired,
             sizesDTOResponse: PropTypes.shape({
-                name: PropTypes.string.isRequired,
+                name: PropTypes.string,
             }).isRequired,
             subDescription: PropTypes.string.isRequired,
         })

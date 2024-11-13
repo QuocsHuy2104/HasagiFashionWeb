@@ -41,11 +41,11 @@ function ProductDetail() {
     const [dialogOpen, setDialogOpen] = React.useState(false);
 
     const handleOpenDialog = () => {
-      setDialogOpen(true);
+        setDialogOpen(true);
     };
-  
+
     const handleCloseDialog = () => {
-      setDialogOpen(false);
+        setDialogOpen(false);
     };
 
     const handleEditClick = (row) => {
@@ -53,6 +53,15 @@ function ProductDetail() {
         setSelectedRow(row);
         handleOpenDialog();
     };
+
+    const refreshData = async () => {
+        try {
+          const detailRes = await ProductDetailService.getAllByProductId(product.id);
+          setProductDetails(detailRes.data);
+        } catch (error) {
+          console.error('Error refreshing product details:', error);
+        }
+      };
 
     const handleDeleteClick = async (row) => {
         try {
@@ -463,7 +472,7 @@ function ProductDetail() {
                     </Card>
                 </ArgonBox>
             </ArgonBox>
-            <ProductFormDialog open={dialogOpen} onClose={handleCloseDialog} colors={colors} sizes={sizes}   initialData={selectedRow} />
+            <ProductFormDialog open={dialogOpen} onClose={handleCloseDialog} colors={colors} sizes={sizes} initialData={selectedRow}  productID={product.id} refreshData={refreshData} />
             <ToastContainer />
         </DashboardLayout>
     );
