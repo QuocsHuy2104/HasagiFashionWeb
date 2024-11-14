@@ -220,16 +220,6 @@ function ProductDetail() {
             isValid = false;
         }
 
-        if (selectedSize.length === 0) {
-            toast.error('Bạn chưa chọn size.');
-            isValid = false;
-        }
-
-        if (selectedColor.length === 0) {
-            toast.error('Bạn chưa chọn màu sắc.');
-            isValid = false;
-        }
-
         return isValid;
     };
 
@@ -379,6 +369,26 @@ function ProductDetail() {
                                             }}
                                         />
                                     </ArgonBox>
+
+                                    <ArgonBox mb={3}>
+                                        <ArgonInput
+                                            type="number"
+                                            placeholder={errors.quantity ? errors.quantity : "Quantity"}
+                                            name="quantity"
+                                            size="large"
+                                            fullWidth
+                                            value={formData.quantity}
+                                            onChange={handleChange}
+                                            inputProps={{ min: 0 }}
+                                            sx={{
+                                                borderColor: errors.quantity ? 'red' : 'Gainsboro',
+                                                borderWidth: '0.5px',
+                                                borderStyle: 'solid',
+                                                width: '100%',
+                                            }}
+                                        />
+                                    </ArgonBox>
+
                                     <ArgonBox
                                         mb={3}
                                         display="flex"

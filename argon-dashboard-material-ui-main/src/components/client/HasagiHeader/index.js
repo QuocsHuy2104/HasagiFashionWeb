@@ -2,11 +2,10 @@ import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { jwtDecode } from 'jwt-decode';
 import useCartQuantity from "../HasagiQuantity";
-import 'layouts/assets/css/style.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'components/client/assets/js/script';
 import 'components/client/assets/js/plugins';
-import logo from 'components/client/assets/images/Hasagi.png';
+import logo from 'components/client/assets/images/logo.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-regular-svg-icons';
 import { faHeart } from '@fortawesome/free-regular-svg-icons';
@@ -14,6 +13,7 @@ import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
 import useFavoriteCount from "../HasagiFavoriteCount";
 import { useNavigate } from 'react-router-dom';
+import { Dropdown, Button, Badge } from 'react-bootstrap';
 
 const Header = ({ onSearch }) => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -21,11 +21,20 @@ const Header = ({ onSearch }) => {
     const [searchTerm, setSearchTerm] = useState("");
     const { favoriteCount } = useFavoriteCount();
     const navigate = useNavigate();
+    // Tạo state để quản lý việc mở/đóng dropdown
+    const [isOpen, setIsOpen] = useState(false);
+
+    // Hàm để toggle dropdown
+    const toggleDropdown = () => {
+        setIsOpen(prevState => !prevState);
+    };
+
+
 
     const handleSearchChange = (event) => {
         const value = event.target.value;
         setSearchTerm(value);
-        onSearch(value); 
+        onSearch(value);
     };
 
     const handleMouseEnter = () => {
@@ -91,20 +100,74 @@ const Header = ({ onSearch }) => {
             position = false;
         }
 
-    // Inline styles
+    const [scrolling, setScrolling] = useState(false);
+    const handleScroll = () => {
+        if (window.scrollY > 50) {
+            setScrolling(true);
+        } else {
+            setScrolling(false);
+        }
+    };
+
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll);
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
+
+
     const styles = {
+        // topNav: {
+        //     backgroundColor: 'gold',  // Nền đen
+        //     color: 'black',  // Chữ vàng
+        //     padding: '10px 0',
+        // },
+        // text: {
+        //     color: 'black',  // Màu chữ vàng
+        //     fontSize: '16px',
+        //     margin: '0 10px 0 0',  // Khoảng cách bên phải giữa các thẻ p
+        // },
+        // socialLinks: {
+        //     display: 'flex',
+        //     gap: '15px',
+        // },
+        // socialLink: {
+        //     color: 'black',
+        //     fontSize: '18px',
+        //     transition: 'color 0.3s ease',
+        // },
+        // socialLinkHover: {
+        //     color: '#fff',  // Màu icon khi hover
+        // },
+        // row: {
+        //     display: 'flex',
+        //     justifyContent: 'space-between',
+        //     alignItems: 'center',
+        //     with: '880px'
+        // },
+        // colAuto: {
+        //     flex: '0 0 auto',
+        //     display: 'flex',
+        //     alignItems: 'right', 
+
+        // },
+        // colText: {
+        //     display: 'flex',
+        //     alignItems: 'center',
+        // },
+
         header: {
-            backgroundColor: 'black',
-            padding: '1rem',
             position: 'fixed',
             top: 0,
-            left: 0,
-            right: 0,
+            width: '100%',
             zIndex: 1000,
+            backgroundColor: 'black',
+            transition: 'top 0.1s ease',
         },
         logo: {
             marginLeft: "50px",
-            width: '50px',
+            width: '150px',
             height: '50px',
         },
         navLink: {
@@ -151,11 +214,49 @@ const Header = ({ onSearch }) => {
             transition: 'background-color 0.3s ease, box-shadow 0.3s ease',
             position: 'relative',
         },
+
+
     };
 
     return (
         <>
-            <div className="container-fluid bg-secondary">
+            <div className="container-fluid bg-secondary px-0" data-bs-spy="scroll" data-bs-target="navbar">
+                {/* <nav className="top-nav" id="home" style={styles.topNav}>
+                    <Container className="mx-5">
+                        <Row style={styles.row}>
+                            <Col xs="auto" style={styles.colAuto}>
+                                <div style={styles.colText}>
+                                    <p style={styles.text}>
+                                        <FaEnvelope />
+                                        <span style={{ marginRight: '50px' }}> hasagifashion@gmail.com</span>
+                                    </p>
+                                    <p style={styles.text}>
+                                        <FaPhoneAlt />
+                                        <span>+84 917 465 863</span>
+                                    </p>
+                                </div>
+                            </Col>
+
+                            <Col xs="auto" style={styles.colAuto}>
+                                <div className="social-links" style={styles.socialLinks}>
+                                        <a href="#" style={styles.socialLink}>
+                                            <BsFacebook />
+                                        </a>
+                                        <a href="#" style={styles.socialLink}>
+                                            <BsTiktok />
+                                        </a>
+                                        <a href="#" style={styles.socialLink}>
+                                            <BsInstagram />
+                                        </a>
+                                        <a href="#" style={styles.socialLink}>
+                                            <BsYoutube />
+                                        </a>
+                                </div>
+                            </Col>
+                        </Row>
+                    </Container>
+                </nav> */}
+
                 <header className="navbar navbar-expand-lg" style={styles.header}>
                     <div className="main-logo">
                         {position === true ? (
@@ -166,7 +267,6 @@ const Header = ({ onSearch }) => {
                                     className="img-fluid"
                                     style={styles.logo}
                                 />
-                                <span className="mt-5" style={{ fontWeight: 1000, color: "white" }}>Hasagi Fashion</span>
                             </a>
                         ) : (
                             <a href="/#" className="navbar-brand">
@@ -175,7 +275,6 @@ const Header = ({ onSearch }) => {
                                     alt="logo"
                                     style={styles.logo}
                                 />
-                                <span className="mt-5" style={{ fontWeight: 1000, color: "white" }}>Hasagi Fashion</span>
                             </a>
                         )}
                     </div>
@@ -186,7 +285,81 @@ const Header = ({ onSearch }) => {
                             <a href="#about" className="nav-item nav-link" style={styles.navLink}>Giới Thiệu</a>
                             <a href="#contact" className="nav-item nav-link" style={styles.navLink}>Liên Hệ</a>
                             <a href="#faq" className="nav-item nav-link" style={styles.navLink}>Hỏi Đáp</a>
-                            <a href="/chatAI" className="nav-item nav-link" style={styles.navLink}>Chat AI</a>
+                            <a href="/chatbot" className="nav-item nav-link" style={styles.navLink}>Chat bot</a>
+
+
+                            <div style={{ position: 'relative', display: 'inline-block' }}>
+                                <Button
+                                    variant="secondary"
+                                    onClick={toggleDropdown}
+                                    style={{
+                                        padding: '12px 24px',
+                                        borderRadius: '30px',
+                                        backgroundColor: '#007bff',
+                                        color: '#fff',
+                                        border: '1px solid #007bff',
+                                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                                        cursor: 'pointer',
+                                        fontWeight: 'bold',
+                                        fontSize: '14px',
+                                        transition: 'all 0.3s ease',
+                                        marginLeft: '40px'
+                                    }}
+                                    onMouseEnter={(e) => e.target.style.backgroundColor = '#0056b3'}
+                                    onMouseLeave={(e) => e.target.style.backgroundColor = '#007bff'}
+                                >
+                                    Dropdown
+                                </Button>
+
+                                {/* Dropdown Menu */}
+                                {isOpen && (
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            top: '45px',
+                                            left: '60%',
+                                            transform: 'translateX(-50%)',
+                                            marginTop: '10px',
+                                            padding: '10px 0',
+                                            width: '200px',
+                                            borderRadius: '12px',
+                                            backgroundColor: '#fff',
+                                            border: '1px solid white',
+                                            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+                                            zIndex: 999,
+                                            opacity: 1,
+                                            transition: 'all 0.3s ease',
+                                        }}
+                                    >
+                                        <span
+                                            style={{
+                                                content: '""',
+                                                position: 'absolute',
+                                                top: '-8px',
+                                                left: '50%',
+                                                transform: 'translateX(-50%)',
+                                                width: '0',
+                                                height: '0',
+                                                borderLeft: '8px solid transparent',
+                                                borderRight: '8px solid transparent',
+                                                borderBottom: '8px solid #fff',
+                                            }}
+                                        />
+                                        <ul className="flex flex-col gap-2 text-gray-700">
+                                            <li className="cursor-pointer hover:bg-gray-100 px-4 py-2 rounded-md text-sm transition duration-200 ease-in-out">
+                                                Option 1
+                                            </li>
+                                            <li className="cursor-pointer hover:bg-gray-100 px-4 py-2 rounded-md text-sm transition duration-200 ease-in-out">
+                                                Option 2
+                                            </li>
+                                            <li className="cursor-pointer hover:bg-gray-100 px-4 py-2 rounded-md text-sm transition duration-200 ease-in-out">
+                                                Option 3
+                                            </li>
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
+
                         </div>
                     </div>
 
@@ -274,6 +447,8 @@ const Header = ({ onSearch }) => {
                     </div>
                 </header>
             </div>
+
+
         </>
     );
 };

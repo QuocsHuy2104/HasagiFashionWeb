@@ -1,7 +1,7 @@
 import React from "react";
 import "layouts/assets/css/style.css";
 import "bootstrap";
-import logoImage from 'components/client/assets/images/Hasagi.png';
+import logoImage from 'components/client/assets/images/logo.png';
 import aboutImage from "components/client/assets/images/payment.png";
 import { FaFacebookF, FaTwitter, FaYoutube, FaLinkedinIn, FaTiktok } from 'react-icons/fa';
 

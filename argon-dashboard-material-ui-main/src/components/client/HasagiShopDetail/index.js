@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
 import 'layouts/assets/css/style.css';
 import HasagiNav from "components/client/HasagiHeader";
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import Footer from "components/client/HasagiFooter";
 import cartService from "../../../services/ProductDetail";
 import Cookies from "js-cookie";
@@ -20,25 +20,26 @@ function ShopDetail() {
     const [selectedColor, setSelectedColor] = useState(null);
     const [selectedSize, setSelectedSize] = useState(null);
     const [totalPrice, setTotalPrice] = useState(0);
-    const location = useLocation();
     const [isFavorite, setIsFavorite] = useState(false);
+    const location = useLocation();
     const query = new URLSearchParams(location.search);
     const productId = query.get('id');
     const [favoriteCount, setFavoriteCount] = useState(0);
     const navigate = useNavigate();
     const [reviews, setReviews] = useState([]);
+    const [quantityPDT, setQuantityPDT] = useState([]);
 
 
     const fetchReviews = async (productId) => {
         if (!productId) {
             console.error("Product ID is undefined");
-            return; // Kết thúc hàm nếu productId không hợp lệ
+            return;
         }
-    
+
         try {
             const productReviews = await reviewsService.getReviewsByProduct(productId);
             console.log('Fetched reviews for product:', productReviews);
-    
+
             if (Array.isArray(productReviews)) {
                 const sortedReviews = productReviews.sort((a, b) => b.star - a.star);
                 setReviews(sortedReviews);
@@ -51,22 +52,22 @@ function ShopDetail() {
             setReviews([]);
         }
     };
-    
+
 
     useEffect(() => {
         const query = new URLSearchParams(location.search);
         const productId = query.get('id');
-    
-        console.log("Product ID from URL:", productId); // Log để kiểm tra
-    
+
+        console.log("Product ID from URL:", productId);
+
         if (productId) {
-            console.log("Calling fetchReviews with productId:", productId); // Log để kiểm tra
-            fetchReviews(productId); 
+            console.log("Calling fetchReviews with productId:", productId);
+            fetchReviews(productId);
         } else {
             console.error("Product ID is missing in the URL");
         }
     }, [location]);
-    
+
 
 
     const getUniqueSizes = (sizes) => {
@@ -147,8 +148,6 @@ function ShopDetail() {
             console.error("Error checking favorite status:", error);
         }
     };
-
-
     const fetchProductDetail = async () => {
         const accountId = Cookies.get('accountId');
         if (!accountId) {
@@ -157,12 +156,25 @@ function ShopDetail() {
         }
         try {
             if (!productId) throw new Error("Product ID is missing");
-            const response = await cartService.getProductDetail(productId);
+
+            const response = await cartService.getProductDetail({
+                productId,
+                sizeId: selectedSize || null
+            });
+
             const productData = response.data;
+            if (!productData) {
+                throw new Error("Product data is missing in response");
+            }
+
             console.log("Fetched Product Data:", productData);
 
+            // Sử dụng giá trị mặc định nếu `importPrice` hoặc `importQuantity` không hợp lệ
             setProduct(productData);
-            setTotalPrice(productData.importPrice);
+            setTotalPrice(productData.importPrice ?? 0); // Giá mặc định là 0 nếu `importPrice` là null
+            console.log("Total Price Set To:", productData.importPrice ?? 0);
+            setQuantityPDT(productData.importQuantity ?? 1); // Số lượng mặc định là 1 nếu `importQuantity` là null hoặc 0
+
             const countRSN = await fetchFavoriteCount(productId);
             setFavoriteCount(countRSN);
             checkFavoriteStatus(productId);
@@ -172,9 +184,17 @@ function ShopDetail() {
     };
 
     useEffect(() => {
-        fetchProductDetail();
-        fetchReviews();
-    }, [productId]);
+        if (productId) {
+            fetchProductDetail();
+        }
+    }, [productId, selectedSize]);
+
+    useEffect(() => {
+        if (productId) {
+
+            fetchReviews();
+        }
+    }, [productId])
 
     const fetchPrice = async (productId, colorId, sizeId) => {
         try {

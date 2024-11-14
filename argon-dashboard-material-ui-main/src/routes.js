@@ -48,6 +48,7 @@ import Product from "layouts/manage/product";
 import Review from "layouts/manage/review";
 import Test from "./layouts/manage/testProduct";
 import ProductDetail from "./layouts/manage/productDetail";
+import Voucher from "layouts/manage/voucher";
 // Argon Dashboard 2 MUI components
 import ArgonBox from "components/ArgonBox";
 import Category from "layouts/manage/category";
@@ -66,8 +67,8 @@ import SignUp from "layouts/authentication/sign-up";
 import Complete from "components/client/HasagiComplete";
 import History from "components/client/HasagiHistory";
 import HistoryOrderDetail from "components/client/HasagiHistoryDetail";
-import Voucher from "layouts/manage/voucher";
 import ChatAI from "components/client/HasagiAI/index";
+import ChatBot from "components/client/HasagiChatBot/index";
 
 
 const routes = [
@@ -283,6 +284,14 @@ const routes = [
     component: <ChatAI />,
     showInSidenav: true,
   },
+  {
+    name: "ChatBot",
+    key: "chatbot",
+    route: "/chatbot",
+    component: <ChatBot />,
+    showInSidenav: true,
+  },
+
   {
     // type: "route",
     name: "Cart",

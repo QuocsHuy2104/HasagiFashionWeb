@@ -7,9 +7,8 @@ import 'layouts/assets/css/style.css';
 import { Carousel } from 'react-bootstrap';
 
 const HasagiCau = () => {
-
     return (
-        <div className="container-fluid mb-3 py-3">
+        <div className="container-fluid mb-3 py-3" style={{ marginTop: "60px" }}>
             <div className="row px-xl-5">
                 <div className="col-lg-8">
                     <div id="header-carousel" className="carousel slide carousel-fade mb-30 mb-lg-0">
@@ -25,7 +24,7 @@ const HasagiCau = () => {
                                     style={{ objectFit: 'cover', height: '100%' }}
                                 />
                                 <Carousel.Caption className="d-flex flex-column align-items-center justify-content-center">
-                                    <div style={{ maxWidth: '700px'}}>
+                                    <div style={{ maxWidth: '700px' }}>
                                         <h1 className="display-4 text-white mb-3 animate__animated animate__fadeInDown">Men Fashion</h1>
                                         <p className="mx-md-5 px-5 animate__animated animate__bounceIn">
                                             Phong cách thời trang không bị lỗi thời, thường mang tính trang trọng và tinh tế.

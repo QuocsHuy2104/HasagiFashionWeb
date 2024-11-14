@@ -9,9 +9,8 @@ import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
 import { ToastContainer, toast } from 'react-toastify';
-import Navbar from '../HasagiNavbar';
 import VoucherService from "../../../services/VoucherServices";
-import { Card, Container, Button } from "react-bootstrap";
+import { Card, Container, Button, Row, Col } from "react-bootstrap";
 import CheckoutService from '../../../services/CheckoutServices';
 const Checkout = () => {
     const [selectedPayment, setSelectedPayment] = useState('');
@@ -31,6 +30,11 @@ const Checkout = () => {
     const navigate = useNavigate();
     const [shipFee, setShipFee] = useState(null);
     const [selectedVoucher, setSelectedVoucher] = useState(null);
+    const [vouchers, setVouchers] = useState([]);
+    const [usedVouchers, setUsedVouchers] = useState([]);
+    const [accountId, setAccountId] = useState(Cookies.get('accountId'));
+    const [showVouchers, setShowVouchers] = useState(false);
+
 
     useEffect(() => {
         setTimeout(() => {
@@ -111,9 +115,9 @@ const Checkout = () => {
                 },
                 params: {
                     from_district_id: XuanKhanhDistrictID,
-                    from_ward_code:"550113",
+                    from_ward_code: "550113",
                     to_district_id: address.districtCode,
-                    to_ward_code:address.wardCode,
+                    to_ward_code: address.wardCode,
                     weight: 1000,
                     length: 10,
                     width: 10,
@@ -256,41 +260,41 @@ const Checkout = () => {
             quantity: item.quantity,
             price: item.price,
         }));
-    
+
         const productDetailIdSelected = selectedItems.map(item => item.id);
 
 
-        const payStatusDirect = 'Chưa thanh toán'; 
-        const voucherId = selectedVoucher ? selectedVoucher.id : null; 
+        const payStatusDirect = 'Chưa thanh toán';
+        const voucherId = selectedVoucher ? selectedVoucher.id : null;
         const checkoutDataDirect = {
             addressDTO,
             cartDetails: cartDetailsDTO,
             payMethod: selectedPayment,
             payStatus: payStatusDirect,
-            voucherId: voucherId, 
+            voucherId: voucherId,
             shippingFree: shipFee.total,
             fullName: `${address.address}, ${getAddressNameById(address.wardCode, wards, 'ward')}, ${getAddressNameById(address.districtCode, districts, 'district')}, ${getAddressNameById(address.provinceID, provinces, 'province')}`,
             productDetailIdSelected: productDetailIdSelected
         };
-        const payStatusBank = 'Đã thanh toán'; 
+        const payStatusBank = 'Đã thanh toán';
         const checkoutDataBank = {
             addressDTO,
             cartDetails: cartDetailsDTO,
             payMethod: selectedPayment,
             payStatus: payStatusBank,
-            voucherId: voucherId, 
+            voucherId: voucherId,
             shippingFree: shipFee.total,
             fullName: `${address.address}, ${getAddressNameById(address.wardCode, wards, 'ward')}, ${getAddressNameById(address.districtCode, districts, 'district')}, ${getAddressNameById(address.provinceID, provinces, 'province')}`,
             productDetailIdSelected: productDetailIdSelected
         };
-     
-      
 
-        setIsLoading(true); 
+
+
+        setIsLoading(true);
         try {
             let response;
             if (selectedPayment === 'Direct Check') {
-           response=   await CheckoutService.postCheckout(addressId,checkoutDataDirect);
+                response = await CheckoutService.postCheckout(addressId, checkoutDataDirect);
 
                 if (response.status === 200) {
                     await handleRemoveItems();
@@ -307,7 +311,7 @@ const Checkout = () => {
                     toast.error("Có lỗi xảy ra khi đặt hàng.");
                 }
             } else if (selectedPayment === 'Bank Transfer') {
-                response=   await CheckoutService.postCheckout(addressId,checkoutDataBank);
+                response = await CheckoutService.postCheckout(addressId, checkoutDataBank);
                 if (response.data.paymentUrl) {
                     localStorage.setItem('address1', JSON.stringify(addressDTO));
                     localStorage.setItem('orderDetails1', JSON.stringify(cartDetailsDTO));
@@ -337,10 +341,6 @@ const Checkout = () => {
         const year = date.getFullYear();
         return `${day}-${month}-${year}`;
     };
-
-    const [vouchers, setVouchers] = useState([]);
-    const [usedVouchers, setUsedVouchers] = useState([]);
-    const [accountId, setAccountId] = useState(Cookies.get('accountId')); // Initialize accountId from cookies
 
     useEffect(() => {
         // Fetch all vouchers
@@ -373,7 +373,7 @@ const Checkout = () => {
 
         fetchVouchers();
         fetchUsedVouchers();
-    }, [accountId]); // Add accountId as a dependency to trigger re-fetching when it changes
+    }, [accountId]); 
 
     const [appliedVoucherId, setAppliedVoucherId] = useState(null);
     const handleApplyVoucher = (voucher) => {
@@ -396,7 +396,6 @@ const Checkout = () => {
                 </div>
             )}
             <HasagiNav />
-            <Navbar />
             <div className="container-fluid">
                 <div className="row px-xl-5">
                     <div className="header py-3">
@@ -519,110 +518,126 @@ const Checkout = () => {
                                                 người mua sẽ thanh toán tiền mặt (tiền đặt hàng) cho người giao hàng ngay tại thời điểm nhận hàng.</p>
                                         </div>
                                     )}
-                                    <Container className="my-4">
-                                        {vouchers.length > 0 ? (
-                                            (() => {
-                                                const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
-                                                // Lọc ra các voucher chưa sử dụng
-                                                const applicableVouchers = vouchers
-                                                    .filter(voucher =>
-                                                        totalAmount >= voucher.minimumOrderValue &&
-                                                        !usedVouchers.some(usedVoucher => usedVoucher.id === voucher.id)
-                                                    )
-                                                    .map(voucher => ({
-                                                        ...voucher,
-                                                        discountAmount: (totalAmount * voucher.discountPercentage) / 100,
-                                                    }))
-                                                    .sort((a, b) => b.discountAmount - a.discountAmount);
+                                    <Container className="my-1 mx-0">
+                                        {showVouchers && (
+                                            vouchers.length > 0 ? (
+                                                (() => {
+                                                    const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
-                                                return applicableVouchers.map(voucher => (
-                                                    <Card
-                                                        key={voucher.id}
-                                                        className="text-center mb-4 border-0"
-                                                        style={{
-                                                            border: '2px solid #FFD700',
-                                                            backgroundColor: appliedVoucherId === voucher.id ? '#d3d3d3' : '#fef5e3', // Màu nền xám nếu đã áp dụng
-                                                            color: appliedVoucherId === voucher.id ? '#808080' : '#000', // Màu chữ xám nếu đã áp dụng
-                                                            borderRadius: '12px',
-                                                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                                                            padding: '12px',
-                                                            transition: 'transform 0.2s, box-shadow 0.2s',
-                                                            flexWrap: 'nowrap',
-                                                        }}
-                                                        onMouseEnter={(e) => {
-                                                            e.currentTarget.style.transform = 'scale(1.02)';
-                                                            e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.3)';
-                                                        }}
-                                                        onMouseLeave={(e) => {
-                                                            e.currentTarget.style.transform = 'scale(1)';
-                                                            e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.2)';
-                                                        }}
-                                                    >
-                                                        <Card.Body>
-                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                                <span style={{
-                                                                    background: appliedVoucherId === voucher.id
-                                                                        ? 'linear-gradient(to right, #d3d3d3, #a9a9a9)' // Màu nền xám nếu đã áp dụng
-                                                                        : 'linear-gradient(to right, #FFD700, #FFA500)', // Màu nền vàng nếu chưa áp dụng                       
-                                                                    color: '#000',
-                                                                    padding: '4px 8px',
-                                                                    borderRadius: '10px',
-                                                                    fontWeight: 'bold',
-                                                                    fontSize: '1.2rem',
-                                                                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                                                                }}>
-                                                                    VOUCHER
-                                                                </span>
-                                                                <h3 style={{ fontSize: '2rem', color: appliedVoucherId === voucher.id ? '#808080' : '#FF4500', margin: '0' }}>Giảm {voucher.discountPercentage}%</h3>
-                                                            </div>
-                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
-                                                                <Card.Title
-                                                                    style={{
-                                                                        fontSize: '1.5rem',
-                                                                        color: appliedVoucherId === voucher.id ? '#808080' : '#FF4500',
-                                                                        margin: '0',
-                                                                        fontWeight: 700 // Thay đổi độ dày chữ (600 là độ dày cho chữ in đậm)
-                                                                    }}
-                                                                >
-                                                                    Mã: {voucher.code}
-                                                                </Card.Title>
+                                                    const applicableVouchers = vouchers
+                                                        .filter(voucher =>
+                                                            totalAmount >= voucher.minimumOrderValue &&
+                                                            !usedVouchers.some(usedVoucher => usedVoucher.id === voucher.id)
+                                                        )
+                                                        .map(voucher => ({
+                                                            ...voucher,
+                                                            discountAmount: (totalAmount * voucher.discountPercentage) / 100,
+                                                        }))
+                                                        .sort((a, b) => b.discountAmount - a.discountAmount);
 
-                                                                {appliedVoucherId === voucher.id ? (
-                                                                    <Button variant="secondary" style={{ marginLeft: '10px', padding: '10px 20px', fontSize: '1rem' }}>
-                                                                        Đã áp dụng
-                                                                    </Button>
-                                                                ) : (
-                                                                    <Button
-                                                                        variant="warning"
-                                                                        onClick={() => {
-                                                                            handleApplyVoucher(voucher);
-                                                                            setAppliedVoucherId(voucher.id); // Cập nhật trạng thái voucher đã áp dụng
+                                                    return (
+                                                        <Row>
+                                                            {applicableVouchers.map((voucher, index) => (
+                                                                <Col key={voucher.id} md={6} className="mb-2 px-1" >
+                                                                    <Card
+                                                                        className="text-center border-0"
+                                                                        style={{
+                                                                            backgroundColor: appliedVoucherId === voucher.id ? '#d3d3d3' : '#fef5e3',
+                                                                            color: appliedVoucherId === voucher.id ? '#808080' : '#000',
+                                                                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                                                                            transition: 'transform 0.2s, box-shadow 0.2s',
+                                                                            flexWrap: 'nowrap',
                                                                         }}
-                                                                        style={{ marginLeft: '10px', padding: '10px 20px', fontSize: '1rem', background: 'linear-gradient(to right, #FF7F50, #FF4500)', color: 'white' }}
+                                                                        onMouseEnter={(e) => {
+                                                                            e.currentTarget.style.transform = 'scale(1.02)';
+                                                                            e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.3)';
+                                                                        }}
+                                                                        onMouseLeave={(e) => {
+                                                                            e.currentTarget.style.transform = 'scale(1)';
+                                                                            e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.2)';
+                                                                        }}
                                                                     >
-                                                                        Áp dụng
-                                                                    </Button>
-                                                                )}
-                                                            </div>
-                                                            <Card.Text style={{ fontSize: '1rem', color: '#6c757d', marginTop: '10px', textAlign: 'left' }}>
-                                                                Giảm {voucher.discountPercentage}% khi hóa đơn từ {voucher.minimumOrderValue}đ
-                                                                <div style={{ marginTop: '5px' }}>
-                                                                    HSD: {formatDate(voucher.endDate)}
-                                                                </div>
-                                                            </Card.Text>
-                                                        </Card.Body>
-                                                    </Card>
-                                                ));
-                                            })()
-                                        ) : (
-                                            <Card className="text-center mb-4">
-                                                <Card.Body>
-                                                    <Card.Text>No vouchers available</Card.Text>
-                                                </Card.Body>
-                                            </Card>
+
+                                                                        <Card.Body className='py-3'>
+                                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                                <span style={{
+                                                                                    background: appliedVoucherId === voucher.id
+                                                                                        ? 'linear-gradient(to right, #d3d3d3, #a9a9a9)'
+                                                                                        : 'linear-gradient(to right, #FFD700, #FFA500)',
+                                                                                    color: '#000',
+                                                                                    padding: '2px 4px',
+                                                                                    borderRadius: '8px',
+                                                                                    fontWeight: 'bold',
+                                                                                    fontSize: '0.85rem',
+                                                                                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                                                                                }}>
+                                                                                    VOUCHER
+                                                                                </span>
+                                                                                <h3 style={{ fontSize: '1.2rem', color: appliedVoucherId === voucher.id ? '#808080' : '#FF4500', margin: '0' }}>Giảm {voucher.discountPercentage}%</h3>
+                                                                            </div>
+                                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                                <Card.Title
+                                                                                    style={{
+                                                                                        fontSize: '1rem',
+                                                                                        color: appliedVoucherId === voucher.id ? '#808080' : '#FF4500',
+                                                                                        margin: '0',
+                                                                                        fontWeight: 600
+                                                                                    }}
+                                                                                >
+                                                                                    <span style={{ fontWeight: 'bold' }}> Mã: {voucher.code}</span>
+                                                                                </Card.Title>
+
+                                                                                {appliedVoucherId === voucher.id ? (
+                                                                                    <Button
+                                                                                        variant="secondary"
+                                                                                        style={{ marginLeft: '8px', padding: '6px 14px', fontSize: '0.8rem' }}
+                                                                                        onClick={() => {
+                                                                                            setAppliedVoucherId(null);
+                                                                                            setSelectedVoucher(null); // Cập nhật selectedVoucher về null để số tiền giảm về 0
+                                                                                        }}
+                                                                                    >
+                                                                                        Bỏ áp dụng
+                                                                                    </Button>
+
+                                                                                ) : (
+                                                                                    <Button
+                                                                                        variant="warning"
+                                                                                        onClick={() => {
+                                                                                            // Áp dụng voucher
+                                                                                            handleApplyVoucher(voucher);
+                                                                                            setAppliedVoucherId(voucher.id);  // Cập nhật voucher đang được áp dụng
+                                                                                        }}
+                                                                                        style={{ marginLeft: '8px', padding: '6px 14px', fontSize: '0.8rem', background: 'linear-gradient(to right, #FF7F50, #FF4500)', color: 'white' }}
+                                                                                    >
+                                                                                        Áp dụng
+                                                                                    </Button>
+                                                                                )}
+
+                                                                            </div>
+                                                                            <Card.Text style={{ fontSize: '0.8rem', color: '#6c757d', textAlign: 'left' }}>
+                                                                                Giảm {voucher.discountPercentage}% khi hóa đơn từ {voucher.minimumOrderValue}đ
+                                                                                <div style={{ marginTop: '4px', fontSize: '0.75rem' }}>
+                                                                                    HSD: {formatDate(voucher.endDate)}
+                                                                                </div>
+                                                                            </Card.Text>
+                                                                        </Card.Body>
+                                                                    </Card>
+                                                                </Col>
+                                                            ))}
+                                                        </Row>
+                                                    );
+                                                })()
+                                            ) : (
+                                                <Card className="text-center mb-4">
+                                                    <Card.Body>
+                                                        <Card.Text>No vouchers available</Card.Text>
+                                                    </Card.Body>
+                                                </Card>
+                                            )
                                         )}
                                     </Container>
+
                                 </div>
                                 <div className="col-lg-5">
                                     {selectedPayment === 'Direct Check' && (
@@ -642,6 +657,14 @@ const Checkout = () => {
                                             </ArgonButton>
                                         </div>
                                     )}
+                                    <Button
+                                        onClick={() => setShowVouchers(prevState => !prevState)}
+                                        className="mb-3"
+                                        style={{ backgroundColor: 'yellow', color: 'black' }} // Màu nền vàng và chữ đen
+                                    >
+                                        {showVouchers ? 'Ẩn' : 'Áp dụng voucher'}
+                                    </Button>
+
                                     <div className="border-bottom pt-4" style={{ padding: '0 20px' }}>
                                         <div className="d-flex justify-content-between mb-3">
                                             <h6 className="font-weight-medium" style={{ fontSize: '1.2rem' }}>Tổng tiền hàng</h6>
@@ -697,7 +720,7 @@ const Checkout = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div >
             <Footer />
             {showBackup && <AddressSelection show={showBackup} onClose={handleAddressChange} addressId={addressId} />}
             <AddressSelection show={showModal} onClose={handleAddressModalClose} />

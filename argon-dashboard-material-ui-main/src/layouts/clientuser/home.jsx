@@ -3,7 +3,6 @@ import aboutImage3 from "layouts/assets/img/cat-1.jpg";
 import aboutImage5 from "layouts/assets/img/product-1.jpg";
 import { Grid, Typography } from "@mui/material";
 import Header from "../../components/client/HasagiHeader";
-import Navbar from "components/client/HasagiNavbar";
 import HasagiCau from "../../components/client/HasagiCarousel";
 import Footer from "../../components/client/HasagiFooter";
 import Cookies from "js-cookie";
@@ -15,7 +14,7 @@ import CouponList from "components/client/HasagiVorcher";
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import ArgonBox from 'components/ArgonBox';
 import ArgonTypography from 'components/ArgonTypography';
-import HasagiAI from "components/client/HasagiAI";
+import ChatBot from "components/client/HasagiChatBot";
 
 function Home() {
     const [currentPage, setCurrentPage] = useState(1);
@@ -128,25 +127,21 @@ function Home() {
                 </div>
             )}
             <Header onSearch={handleSearch} />
-            < Navbar />
             <HasagiCau />
             <div className="col-lg-12 px-xl-5" style={{ top: "-25px" }}>
                 <div className="bg-light p-3 d-flex flex-column"
                     style={{
                         border: "1px solid #ddd",
-                        padding: "20px",
                         borderRadius: "5px",
-                        marginLeft: "10px",
-                        marginRight: "10px",
-                        marginBottom: "20px",
                     }}
                 >
                     <ArgonBox
                         borderRadius='lg'
                         p='25px 25px 10px'
-                        sx={{
-                            background: 'linear-gradient(to bottom, #2D0798, #fcc419)'
-                        }}>
+                    // sx={{
+                    //     background: 'linear-gradient(to bottom, #2D0798, #fcc419)'
+                    // }}
+                    >
                         <ArgonBox
                             display='flex'
                             justifyContent='center'
@@ -155,7 +150,7 @@ function Home() {
                             mb={4}
                         >
                             <ArgonTypography variant='h2'>
-                                <ArgonBox component='img' src='https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/home_fsale_image.png?1713464283843' />
+                                <ArgonBox component='img' src='https://m.yodycdn.com/fit-in/filters:format(webp)/products/Frame%201000007467.png' />
                             </ArgonTypography>
                         </ArgonBox>
                     </ArgonBox>
@@ -335,7 +330,7 @@ function Home() {
                     </div>
                 </div>
             </div>
-            <HasagiAI />
+            <ChatBot />
             <Footer />
         </>
     );

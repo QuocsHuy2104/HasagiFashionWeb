@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { TextField, CircularProgress, IconButton, Box, Typography, Avatar, Modal } from '@mui/material';
-import { Send, ChatBubble, Mic, Face, AccountCircle, HeadsetMic, Speech, Chat } from '@mui/icons-material';
+import { CircularProgress, IconButton, Box, Typography, Avatar, Modal } from '@mui/material';
+import { Send, Mic } from '@mui/icons-material';
 import { styled } from '@mui/system';
 import CategoryService from '../../../services/CategoryServices';
 import BrandService from '../../../services/BrandServices';
@@ -77,6 +77,7 @@ const MessageBubble = styled(Typography)(({ sender }) => ({
     backgroundColor: sender === 'user' ? '#1976d2' : '#f1f1f1',
     wordBreak: 'break-word',
     fontSize: '14px',
+    whiteSpace: 'pre-wrap',
 }));
 
 const ChatInputContainer = styled(Box)(({ theme }) => ({
@@ -120,7 +121,7 @@ function App() {
 
     useEffect(() => {
         const welcomeMessage = {
-            text: 'Xin chào! Tôi có thể giúp gì cho bạn?',
+            text: 'Xin chào! Tôi là trợ lý ảo Hasagi, tôi có thể giúp gì cho bạn?',
             sender: 'ai',
             timestamp: new Date().toLocaleTimeString(),
         };
@@ -304,7 +305,11 @@ function App() {
                     },
                 }}
             >
-                <HeadsetMic fontSize="large" />
+                <Avatar
+                    alt="Logo"
+                    src="https://cdn-icons-png.flaticon.com/128/6231/6231457.png"
+                    sx={{ width: 40, height: 40 }}
+                />
             </IconButton>
 
             <Modal open={isModalOpen} onClose={toggleModal} aria-labelledby="chat-modal">
@@ -312,7 +317,7 @@ function App() {
                     <Header>
                         <Avatar
                             alt="Logo"
-                            src="https://example.com/logo.png"
+                            src="https://cdn-icons-png.flaticon.com/128/8943/8943377.png"
                             sx={{ width: 40, height: 40 }}
                         />
                         <Logo>Chat Bot</Logo>
@@ -323,7 +328,7 @@ function App() {
                                 {message.sender === 'ai' && (
                                     <Avatar
                                         alt="Bot Avatar"
-                                        src="https://png.pngtree.com/png-clipart/20190905/original/pngtree-ai-white-technology-robot-head-material-png-image_4512310.jpg"
+                                        src="https://cdn-icons-png.flaticon.com/128/5226/5226034.png"
                                         sx={{ width: 40, height: 40, marginRight: 1 }}
                                     />
                                 )}
@@ -338,17 +343,31 @@ function App() {
 
 
                     <ChatInputContainer component="form" onSubmit={generateAnswer}>
-                        <TextField
-                            placeholder="Type your message..."
+                        <input
+                            type="text"
+                            placeholder="Nhập tin nhắn..."
                             value={question}
                             onChange={(e) => setQuestion(e.target.value)}
-                            multiline
-                            minRows={1} // Số dòng tối thiểu
-                            maxRows={5} // Số dòng tối đa
-                            fullWidth
-                            variant="outlined" // Kiểu hiển thị
-
+                            style={{
+                                width: '100%',
+                                padding: '4px 8px', // Giảm padding để chiều cao nhỏ lại
+                                borderRadius: '5px', // Bo góc
+                                border: '1px solid #ccc', // Viền xám
+                                outline: 'none', // Loại bỏ viền xanh khi chọn
+                                fontSize: '14px', // Thu nhỏ font chữ trong input
+                                height: '40px', // Điều chỉnh chiều cao
+                                boxSizing: 'border-box' // Đảm bảo padding không ảnh hưởng đến kích thước
+                            }}
                         />
+                        <style>
+                            {`
+            input[type="text"]::placeholder {
+                font-size: 16px; /* Font chữ nhỏ hơn cho placeholder */
+                color: #aaa; /* Màu xám nhạt cho placeholder */
+            }
+        `}
+                        </style>
+
                         <IconButton
                             onClick={handleMicrophoneToggle}
                             color={listening ? 'primary' : 'default'}
@@ -371,6 +390,7 @@ function App() {
                             {loading ? <CircularProgress size={24} /> : <Send />}
                         </StyledIconButton>
                     </ChatInputContainer>
+
                 </ChatContentWrapper>
             </Modal>
 
