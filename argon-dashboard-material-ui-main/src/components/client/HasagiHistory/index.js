@@ -11,6 +11,13 @@ const History = () => {
   const [activeItem, setActiveItem] = useState("Đơn Mua");
   const [expandedItem, setExpandedItem] = useState(null);
 
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href); 
+    window.onpopstate = () => {
+        window.history.pushState(null, "", window.location.href);
+    };
+}, []);
+
   const menuItems = [
     { name: "Tài Khoản Của Tôi", hasSubItems: true },
     { name: "Cài Đặt Thông Báo" },

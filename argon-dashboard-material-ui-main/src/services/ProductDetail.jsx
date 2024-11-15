@@ -4,7 +4,7 @@ const ShopDetailService = {
     getAllShopDetail: () => apiClient.get('/cart/totalQuantity',{
         withCredentials: true
     }),
-  
+
 
     getCategoryDetail: (categoryId) => apiClient.get(`/category/${categoryId}`),
 

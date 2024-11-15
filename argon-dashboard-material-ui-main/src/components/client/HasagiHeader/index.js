@@ -6,7 +6,7 @@ import "layouts/assets/css/style.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "components/client/assets/js/script";
 import "components/client/assets/js/plugins";
-import logo from "components/client/assets/images/Hasagi.png";
+import logo from "components/client/assets/images/logo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-regular-svg-icons";
 import { faHeart } from "@fortawesome/free-regular-svg-icons";
@@ -17,15 +17,16 @@ import { useNavigate } from "react-router-dom";
 import CartService from "../../../services/CartService";
 import axios from "axios";
 import aboutImage5 from "layouts/assets/img/product-1.jpg";
+import ProfileServices from "services/ProfileServices";
 
 const Header = ({ onSearch }) => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [cartDropdownOpen, setCartDropdownOpen] = useState(false);
     const { totalQuantity, fetchTotalQuantity } = useCartQuantity();
-    //const { cartProducts, fetchCartItems } = useListCart([]);
     const [cartProducts, setCartProducts] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const { favoriteCount } = useFavoriteCount();
+    const [username, setUsername] = useState("");
     const navigate = useNavigate();
 
     const handleSearchChange = (event) => {
@@ -34,12 +35,19 @@ const Header = ({ onSearch }) => {
         onSearch(value); // Gọi hàm tìm kiếm từ prop
     };
 
+    let timeoutId;
+    let timeoutIdCard;
+
     const handleMouseEnter = () => {
-        setDropdownOpen(true);
+        clearTimeout(timeoutId); // Xóa bỏ timeout nếu có
+        setDropdownOpen(true); // Mở dropdown
     };
 
     const handleMouseLeave = () => {
-        setDropdownOpen(false);
+        // Trì hoãn việc ẩn dropdown
+        timeoutId = setTimeout(() => {
+            setDropdownOpen(false);
+        }, 200); // 200ms delay trước khi ẩn dropdown
     };
 
     const startVoiceSearch = (event) => {
@@ -83,12 +91,11 @@ const Header = ({ onSearch }) => {
             const accountId = Cookies.get("accountId");
 
             if (!accountId) {
-                //navigate(`/authentication/sign-in`);
                 return;
             }
 
             try {
-                const [cartResponse, addressResponse] = await Promise.all([
+                const [cartResponse] = await Promise.all([
                     CartService.getCart(),
                     axios.get(`http://localhost:3000/api/addresses/exists?accountId=${accountId}`, {
                         withCredentials: true,
@@ -105,11 +112,14 @@ const Header = ({ onSearch }) => {
     }, []);
 
     const handleCartMouseEnter = () => {
+        clearTimeout(timeoutIdCard); // Xóa bỏ timeout nếu có
         setCartDropdownOpen(true);
     };
 
     const handleCartMouseLeave = () => {
-        setCartDropdownOpen(false);
+        timeoutIdCard = setTimeout(() => {
+            setCartDropdownOpen(false);
+        }, 200);
     };
 
     useEffect(() => { }, [fetchTotalQuantity()]);
@@ -138,24 +148,27 @@ const Header = ({ onSearch }) => {
             zIndex: 1000,
         },
         logo: {
-            marginLeft: "50px",
-            width: "50px",
+            marginLeft: "0px",
+            width: "180px",
             height: "50px",
         },
         navLink: {
             fontSize: "16px",
             fontWeight: "500",
             color: "white",
-            marginLeft: "40px",
+            marginLeft: "30px",
             transition: "color 0.3s ease-in-out",
         },
         formControl: {
             border: "1px solid #ddd",
             padding: "10px 20px",
             fontSize: "14px",
-            width: "300px",
+            width: "350px",
         },
         searchButton: {
+            height: "35px",
+            marginTop: "-0px",
+            marginLeft: "-45px",
             backgroundColor: "white",
             borderColor: "white",
             color: "black",
@@ -174,8 +187,8 @@ const Header = ({ onSearch }) => {
             width: "20px",
             height: "20px",
             borderRadius: "50%",
-            backgroundColor: "#007678",
-            color: "white",
+            backgroundColor: "#ffd333",
+            color: "black",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -188,6 +201,15 @@ const Header = ({ onSearch }) => {
         },
     };
 
+    const fetchUserData = async () => {
+            const profileData = await ProfileServices.getProfile();
+            setUsername(profileData.username || "");
+    };
+
+    useEffect(() => {
+        fetchUserData();
+    }, []);
+
     return (
         <>
             <div className="container-fluid bg-secondary">
@@ -196,16 +218,10 @@ const Header = ({ onSearch }) => {
                         {position === true ? (
                             <a href="/dashboard" className="navbar-brand">
                                 <img src={logo} alt="logo" className="img-fluid" style={styles.logo} />
-                                <span className="mt-5" style={{ fontWeight: 1000, color: "white" }}>
-                                    Hasagi Fashion
-                                </span>
                             </a>
                         ) : (
                             <a href="/#" className="navbar-brand">
                                 <img src={logo} alt="logo" style={styles.logo} />
-                                <span className="mt-5" style={{ fontWeight: 1000, color: "white" }}>
-                                    Hasagi Fashion
-                                </span>
                             </a>
                         )}
                     </div>
@@ -226,10 +242,13 @@ const Header = ({ onSearch }) => {
                             <a href="#faq" className="nav-item nav-link" style={styles.navLink}>
                                 Hỏi Đáp
                             </a>
+                            <a href="/chatBot" className="nav-item nav-link" style={styles.navLink}>
+                                Chat Bot
+                            </a>
                         </div>
                     </div>
 
-                    <div className="d-flex align-items-center" style={{ paddingRight: "38px" }}>
+                    <div className="d-flex align-items-center" style={{ paddingRight: "35px" }}>
                         <form className="d-flex form-search" role="search" style={{ marginRight: "20px" }}>
                             <input
                                 type="search"
@@ -253,7 +272,7 @@ const Header = ({ onSearch }) => {
                         <ul className="d-flex justify-content-end list-unstyled m-0">
                             <li
                                 className="user-menu dropdown"
-                                style={{ marginRight: "10px" }}
+                                style={{ marginRight: "10px", position: "relative" }}
                                 onMouseEnter={handleMouseEnter}
                                 onMouseLeave={handleMouseLeave}
                             >
@@ -262,13 +281,44 @@ const Header = ({ onSearch }) => {
                                     style={{
                                         ...styles.userIcon,
                                         ...(dropdownOpen ? styles.userIconHover : {}),
+                                        display: "flex",
+                                        flexDirection: "row", // Xếp ảnh và tên trên cùng một hàng
+                                        alignItems: "center", // Canh giữa dọc
                                     }}
                                 >
-                                    <FontAwesomeIcon icon={faUser} className="icon" style={styles.icon} />
+                                    {user == null ? (
+                                        <FontAwesomeIcon icon={faUser} className="icon" style={styles.icon} />
+                                    ) : (
+                                        <>
+                                            <img
+                                                src={user.profileImageUrl || aboutImage5} // URL ảnh người dùng
+                                                alt="User Avatar"
+                                                style={{
+                                                    width: "24px", // Kích thước nhỏ gọn của ảnh
+                                                    height: "24px",
+                                                    borderRadius: "50%",
+                                                    marginRight: "10px",
+                                                }}
+                                            />
+                                            <span style={{ fontSize: "14px", color: "white", whiteSpace: "nowrap" }}>
+                                                Xin chào, {username}
+                                            </span>
+                                        </>
+                                    )}
                                 </a>
+
                                 <ul
                                     className={`dropdown-menu icon-user ${dropdownOpen ? "show" : ""}`}
-                                    style={{ marginLeft: "-150%", marginTop: "20%" }}
+                                    style={{
+                                        position: "absolute",
+                                        top: "100%", // Đặt ngay bên dưới icon
+                                        left: "50%",
+                                        transform: "translateX(-50%)", // Căn giữa với icon
+                                        marginTop: "5px",
+                                        zIndex: 1,
+                                    }}
+                                    onMouseEnter={handleMouseEnter} // Giữ menu mở khi di chuột vào dropdown
+                                    onMouseLeave={handleMouseLeave}
                                 >
                                     {user == null ? (
                                         <>
@@ -304,23 +354,11 @@ const Header = ({ onSearch }) => {
                                     )}
                                 </ul>
                             </li>
+
                             {user && (
                                 <>
-                                    <li>
-                                        <a
-                                            href="/Favorite"
-                                            style={{ position: "relative", padding: "10px", textDecoration: "none" }}
-                                        >
-                                            <FontAwesomeIcon icon={faHeart} className="icon" style={styles.icon} />
-                                            {favoriteCount > 0 && (
-                                                <span className="badge" style={styles.badge}>
-                                                    {favoriteCount}
-                                                </span>
-                                            )}
-                                        </a>
-                                    </li>
                                     <li
-                                        style={{ position: "relative" }}
+                                        style={{ position: "relative", marginTop: "2%" }}
                                         onMouseEnter={handleCartMouseEnter}
                                         onMouseLeave={handleCartMouseLeave}
                                     >
@@ -342,7 +380,7 @@ const Header = ({ onSearch }) => {
                                                 className="dropdown-menu"
                                                 style={{
                                                     position: "absolute",
-                                                    marginTop: "20%",
+                                                    marginTop: "12%",
                                                     top: "100%",
                                                     marginLeft: "-700%",
                                                     width: "900%",
@@ -350,74 +388,94 @@ const Header = ({ onSearch }) => {
                                                     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
                                                     overflowY: "auto",
                                                     display: "block",
+                                                    zIndex: 1000,
                                                 }}
                                             >
                                                 {cartProducts.length > 0 && (
-                                                    <h6 style={{ padding: "10px", marginLeft: "2%,"}}>Sản Phẩm Mới Thêm</h6>
+                                                    <h6 style={{ padding: "10px", marginLeft: "2%" }}>Sản Phẩm Mới Thêm</h6>
                                                 )}
 
+                                                {/* Các phần tử khác trong dropdown */}
                                                 <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
+                                                    {/* Các sản phẩm trong giỏ hàng */}
                                                     {cartProducts.length > 0 ? (
-                                                        cartProducts.map((product, index) => (
-                                                            <li
-                                                                key={index}
-                                                                onClick={() => navigate(`/ShopDetail?id=${product.id}`)}
-                                                                style={{
-                                                                    display: "flex",
-                                                                    alignItems: "center",
-                                                                    padding: "10px 0",
-                                                                    borderBottom: "1px solid #ddd",
-                                                                    transition: "background-color 0.3s",
-                                                                    cursor: "pointer",
-                                                                    justifyContent: "space-between",
-                                                                }}
-                                                                onMouseEnter={(e) => {
-                                                                    e.currentTarget.style.backgroundColor = "#f0f0f0";
-                                                                }}
-                                                                onMouseLeave={(e) => {
-                                                                    e.currentTarget.style.backgroundColor = "transparent";
-                                                                }}
-                                                            >
-                                                                <img
-                                                                    src={product.image}
-                                                                    alt={product.name}
+                                                        <>
+                                                            {cartProducts.slice(0, 4).map((product, index) => (
+                                                                <li
+                                                                    key={index}
+                                                                    onClick={() => navigate(`/ShopDetail?id=${product.id}`)}
                                                                     style={{
-                                                                        marginLeft: "4%",
-                                                                        marginRight: "10px",
-                                                                        objectFit: "cover",
-                                                                        borderRadius: "5px",
-                                                                        width: "15%",
-                                                                        height: "15%",
+                                                                        display: "flex",
+                                                                        alignItems: "center",
+                                                                        padding: "10px 0",
+                                                                        borderBottom: "1px solid #ddd",
+                                                                        transition: "background-color 0.3s",
+                                                                        cursor: "pointer",
+                                                                        justifyContent: "space-between",
                                                                     }}
-                                                                />
-                                                                <div style={{ flex: 1, overflow: "hidden", whiteSpace: "nowrap" }}>
-                                                                    <span
-                                                                        style={{
-                                                                            fontSize: "16px",
-                                                                            fontWeight: "normal",
-                                                                            overflow: "hidden",
-                                                                            textOverflow: "ellipsis",
-                                                                            display: "block", // Thay đổi từ inline-block thành block
-                                                                            maxWidth: "90%", // Giới hạn chiều rộng tối đa của span
-                                                                        }}
-                                                                    >
-                                                                        {product.name.length > 10
-                                                                            ? `${product.name.substring(0, 25)}...` // Cắt ở 10 ký tự
-                                                                            : product.name}
-                                                                    </span>
-                                                                </div>
-                                                                <div
-                                                                    style={{
-                                                                        color: "red",
-                                                                        fontSize: "16px",
-                                                                        textAlign: "right",
-                                                                        marginRight: "5%",
+                                                                    onMouseEnter={(e) => {
+                                                                        e.currentTarget.style.backgroundColor = "#f0f0f0";
+                                                                    }}
+                                                                    onMouseLeave={(e) => {
+                                                                        e.currentTarget.style.backgroundColor = "transparent";
                                                                     }}
                                                                 >
-                                                                    <span>{product.price.toLocaleString()}đ</span>
-                                                                </div>
-                                                            </li>
-                                                        ))
+                                                                    <img
+                                                                        src={product.image}
+                                                                        alt={product.name}
+                                                                        style={{
+                                                                            marginLeft: "4%",
+                                                                            marginRight: "10px",
+                                                                            objectFit: "cover",
+                                                                            borderRadius: "5px",
+                                                                            width: "15%",
+                                                                            height: "15%",
+                                                                        }}
+                                                                    />
+                                                                    <div
+                                                                        style={{ flex: 1, overflow: "hidden", whiteSpace: "nowrap" }}
+                                                                    >
+                                                                        <span
+                                                                            style={{
+                                                                                fontSize: "16px",
+                                                                                fontWeight: "normal",
+                                                                                overflow: "hidden",
+                                                                                textOverflow: "ellipsis",
+                                                                                display: "block",
+                                                                                maxWidth: "90%",
+                                                                            }}
+                                                                        >
+                                                                            {product.name.length > 25
+                                                                                ? `${product.name.substring(0, 25).trim()}...`
+                                                                                : product.name}
+                                                                        </span>
+                                                                    </div>
+                                                                    <span
+                                                                        style={{
+                                                                            textDecoration: "underline",
+                                                                            fontSize: "10px",
+                                                                            fontWeight: "normal",
+                                                                            transform: "translateY(-1px)",
+                                                                            display: "inline-block",
+                                                                            color: "red",
+                                                                        }}
+                                                                    >
+                                                                        đ
+                                                                    </span>
+                                                                    <span
+                                                                        style={{
+                                                                            marginLeft: "1px",
+                                                                            color: "red",
+                                                                            fontSize: "16px",
+                                                                            textAlign: "right",
+                                                                            marginRight: "5%",
+                                                                        }}
+                                                                    >
+                                                                        {new Intl.NumberFormat("vi-VN").format(product.price)}
+                                                                    </span>
+                                                                </li>
+                                                            ))}
+                                                        </>
                                                     ) : (
                                                         <li className="text-center" style={{ padding: "20%" }}>
                                                             Giỏ hàng trống
@@ -425,26 +483,74 @@ const Header = ({ onSearch }) => {
                                                     )}
                                                 </ul>
 
-                                                {/* Show the button only if there are products in the cart */}
+                                                {/* Nút "Xem Giỏ Hàng" */}
                                                 {cartProducts.length > 0 && (
-                                                    <button
-                                                        onClick={() => navigate("/Cart")}
+                                                    <div
                                                         style={{
-                                                            marginTop: "10px",
-                                                            width: "40%",
-                                                            padding: "8px",
-                                                            backgroundColor: "#ffb524",
-                                                            color: "#fff",
-                                                            border: "none",
-                                                            borderRadius: "4px",
-                                                            marginLeft: "200px"
+                                                            display: "flex",
+                                                            justifyContent: "space-between",
+                                                            alignItems: "center",
+                                                            padding: "10px 0",
                                                         }}
                                                     >
-                                                        Xem Giỏ Hàng
-                                                    </button>
+                                                        {cartProducts.length > 4 && (
+                                                            <span
+                                                                style={{
+                                                                    fontSize: "15px",
+                                                                    color: "#333",
+                                                                    marginLeft: "6%",
+                                                                    marginTop: "3%",
+                                                                }}
+                                                            >
+                                                                {cartProducts.length - 4} sản phẩm khác
+                                                            </span>
+                                                        )}
+                                                        <button
+                                                            onClick={() => navigate("/Cart")}
+                                                            style={{
+                                                                backgroundColor: "#f4511e",
+                                                                color: "white",
+                                                                fontSize: "13px",
+                                                                fontWeight: "bold",
+                                                                padding: "8px",
+                                                                border: "none",
+                                                                borderRadius: "5px",
+                                                                cursor: "pointer",
+                                                                transition: "background-color 0.3s",
+                                                                marginLeft: "auto",
+                                                                marginRight: "4%",
+                                                                marginBottom: "-3%",
+                                                            }}
+                                                            onMouseEnter={(e) => {
+                                                                e.currentTarget.style.backgroundColor = "#d84315";
+                                                            }}
+                                                            onMouseLeave={(e) => {
+                                                                e.currentTarget.style.backgroundColor = "#f4511e";
+                                                            }}
+                                                        >
+                                                            Xem Giỏ Hàng
+                                                        </button>
+                                                    </div>
                                                 )}
                                             </div>
                                         )}
+                                    </li>
+                                    <li style={{ marginTop: "2%", marginRight: "-30px", marginLeft: "10px" }}>
+                                        <a
+                                            href="/Favorite"
+                                            style={{
+                                                position: "relative",
+                                                padding: "10px",
+                                                textDecoration: "none",
+                                            }}
+                                        >
+                                            <FontAwesomeIcon icon={faHeart} className="icon" style={styles.icon} />
+                                            {favoriteCount > 0 && (
+                                                <span className="badge" style={styles.badge}>
+                                                    {favoriteCount}
+                                                </span>
+                                            )}
+                                        </a>
                                     </li>
                                 </>
                             )}

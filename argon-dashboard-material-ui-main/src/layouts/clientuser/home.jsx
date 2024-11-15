@@ -14,6 +14,7 @@ import CouponList from "components/client/HasagiVorcher";
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import ArgonBox from 'components/ArgonBox';
 import ArgonTypography from 'components/ArgonTypography';
+import ChatBot from "components/client/HasagiChatBot";
 
 function Home() {
     const [currentPage, setCurrentPage] = useState(1);
@@ -38,7 +39,6 @@ function Home() {
                 setIsLoading(false);
             }, 700);
         };
-        console.log('AccountId from cookie:', Cookies.get('accountId'));
         fetchData();
     }, []);
 
@@ -52,7 +52,6 @@ function Home() {
                 const response = await ProductService.getAllProducts();
                 setProducts(Array.isArray(response.data) ? response.data : []);
             } catch (error) {
-                console.error("Error fetching products:", error);
                 setProducts([]);
             }
         };
@@ -62,7 +61,6 @@ function Home() {
                 const response = await CategoryService.getAllCategories();
                 setCategories(Array.isArray(response.data) ? response.data : []);
             } catch (error) {
-                console.error("Error fetching categories:", error);
                 setCategories([]);
             }
         };
@@ -328,6 +326,7 @@ function Home() {
                 </div>
             </div>
             <Footer />
+            <ChatBot/>
         </>
     );
 }

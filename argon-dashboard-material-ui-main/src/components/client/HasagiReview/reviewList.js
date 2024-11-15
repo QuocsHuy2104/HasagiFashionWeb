@@ -12,6 +12,7 @@ const ReviewList = () => {
     const [open, setOpen] = useState(false);
     const [mediaUrl, setMediaUrl] = useState('');
     const [expandedReviewId, setExpandedReviewId] = useState(null);
+    const [showOnlyWithMedia, setShowOnlyWithMedia] = useState(false);
 
     const handleToggleExpand = (reviewId) => {
         setExpandedReviewId(expandedReviewId === reviewId ? null : reviewId);
@@ -91,13 +92,13 @@ const ReviewList = () => {
         return (
             <div style={{ display: 'flex', gap: '5px' }}>
                 {Array.from({ length: fullStars }).map((_, index) => (
-                    <FontAwesomeIcon key={`full-${index}`} icon={solidStar} style={{ color: 'orange', fontSize: '24px' }} />
+                    <FontAwesomeIcon key={`full-${index}`} icon={solidStar} style={{ color: 'orange', fontSize: '25px' }} />
                 ))}
 
                 {partialStar > 0 && (
-                    <div style={{ position: 'relative', width: '24px', height: '24px', overflow: 'hidden' }}>
+                    <div style={{ position: 'relative', width: '28px', height: '28px', overflow: 'hidden', marginTop: '-1px' }}>
 
-                        <FontAwesomeIcon icon={regularStar} style={{ color: '#ccc', fontSize: '24px', position: 'absolute', width: '100%', height: '100%' }} />
+                        <FontAwesomeIcon icon={regularStar} style={{ color: '#ccc', fontSize: '25px', position: 'absolute', width: '100%', height: '100%' }} />
                         <div
                             style={{
                                 position: 'absolute',
@@ -106,13 +107,13 @@ const ReviewList = () => {
                                 clipPath: `inset(0 ${100 - partialStar * 100}% 0 0)`,
                             }}
                         >
-                            <FontAwesomeIcon icon={solidStar} style={{ color: 'orange', fontSize: '24px', width: '100%', height: '100%', marginBottom: '8px' }} />
+                            <FontAwesomeIcon icon={solidStar} style={{ color: 'orange', fontSize: '25px', width: '100%', height: '100%', marginBottom: '8px' }} />
                         </div>
                     </div>
                 )}
 
                 {Array.from({ length: emptyStars }).map((_, index) => (
-                    <FontAwesomeIcon key={`empty-${index}`} icon={regularStar} style={{ color: '#ccc', fontSize: '24px' }} />
+                    <FontAwesomeIcon key={`empty-${index}`} icon={regularStar} style={{ color: '#ccc', fontSize: '25px' }} />
                 ))}
             </div>
         );
@@ -123,43 +124,70 @@ const ReviewList = () => {
 
     return (
         <div>
-            <span style={{ color: '#555', fontWeight: 'bold' }}>{averageStars} trên 5</span>
-            <div style={{ fontSize: '24px', color: 'orange', marginBottom: '10px' }}>
-                {renderStars(averageStars)}
-            </div>
-            <div>
-                <button
-                    onClick={() => setSelectedStar(null)}
-                    style={{
-                        marginRight: '5px',
-                        padding: '5px 10px',
-                        backgroundColor: !selectedStar ? '#ccc' : '#fff',
-                        border: '1px solid #ccc',
-                        borderRadius: '5px',
-                    }}
-                >
-                    Tất cả ({reviews.length})
-                </button>
-                {[5, 4, 3, 2, 1].map((star) => (
+            <span style={{ color: '#555', marginRight: '10px', fontSize: '40px', fontWeight: 'bold' }}>
+                {averageStars}
+            </span>trên 5
+
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ color: 'orange', marginBottom: '10px', marginRight: '10px' }}>
+                    {renderStars(averageStars)}
+                </div>
+                <div>
                     <button
-                        key={star}
-                        onClick={() => setSelectedStar(star)}
+                        onClick={() => setSelectedStar(null)}
                         style={{
                             marginRight: '5px',
                             padding: '5px 10px',
-                            backgroundColor: selectedStar === star ? '#ccc' : '#fff',
+                            backgroundColor: '#fff',
                             border: '1px solid #ccc',
                             borderRadius: '5px',
+                            color: !selectedStar ? 'red' : '#000',
                         }}
                     >
-                        {star} ⭐ ({countReviewsByStar(star)})
+                        Tất cả ({reviews.length})
                     </button>
-                ))}
+                    {[5, 4, 3, 2, 1].map((star) => (
+                        <button
+                            key={star}
+                            onClick={() => setSelectedStar(star)}
+                            style={{
+                                marginRight: '5px',
+                                padding: '5px 10px',
+                                backgroundColor: '#fff',
+                                borderRadius: '5px',
+                                border: selectedStar === star ? '1px solid red' : '1px solid #ccc',
+                                color: selectedStar === star ? 'red' : '#000',
+                            }}
+                        >
+                            {star} sao ({countReviewsByStar(star)})
+                        </button>
+                    ))}
+                    <button
+                        style={{
+                            marginRight: '5px',
+                            padding: '5px 10px',
+                            backgroundColor: '#fff', // Color remains the same when active
+                            borderRadius: '5px',
+                            border: showOnlyWithMedia ? '1px solid red' : '1px solid #ccc',
+                            color: showOnlyWithMedia ? 'red' : '#000',
+                        }}
+                        onClick={() => setShowOnlyWithMedia(!showOnlyWithMedia)} // Toggle media filter
+                    >
+                        Có hình ảnh/video
+                    </button>
+                </div>
             </div>
+
 
             <ul style={{ listStyle: 'none', padding: 0 }}>
                 {reviews
                     .filter((review) => (selectedStar ? review.star === selectedStar : true))
+                    .filter((review) => {
+                        const matchesStarFilter = selectedStar ? review.star === selectedStar : true;
+                        const matchesMediaFilter = showOnlyWithMedia ? (review.imageUrl || review.videoUrl) : true;
+                        return matchesStarFilter && matchesMediaFilter;
+                    })
+
                     .map((review) => (
                         <li key={review.id} style={{ borderBottom: '1px solid #ccc', padding: '10px 0' }}>
                             <div style={{ display: 'flex' }}>
@@ -173,9 +201,10 @@ const ReviewList = () => {
 
                                 <div style={{ flex: '1' }}>
                                     <strong style={{ fontSize: '18px' }}>{review.fullName}</strong>
-                                    <div style={{ color: 'orange', fontSize: '18px' }}>
+                                    <div style={{ color: 'orange', fontSize: '14px', fontSize: '14px !important' }}>
                                         {renderStars(review.star)}
                                     </div>
+
                                     <p style={{ color: '#999', fontSize: '14px' }}>
                                         {formatDate(review.createdAt)} | Phân loại hàng: {review.color}, {review.size}
                                     </p>
@@ -267,7 +296,6 @@ const ReviewList = () => {
                                             )}
                                         </Box>
                                     </Modal>
-
                                 </div>
                             </div>
                         </li>

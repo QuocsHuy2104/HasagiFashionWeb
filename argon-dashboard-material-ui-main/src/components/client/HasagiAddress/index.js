@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import axios from 'axios';
-import { ToastContainer, toast } from 'react-toastify';
-import AddressService from '../../../services/AddressServices';
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import AddressService from "../../../services/AddressServices";
 import Backup3 from "../HasagiBackup/index3";
 import Backup2 from "../HasagiBackup/index2";
 import Backup from "../HasagiBackup/index";
 import Cookies from "js-cookie";
+import Swal from "sweetalert2";
 const AddressPage = () => {
   const [address, setAddress] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -19,55 +20,63 @@ const AddressPage = () => {
   const [showBackupModal, setShowBackupModal] = useState(false);
   const fetchAddress = async () => {
     try {
-      const accountId = Cookies.get('accountId');
+      const accountId = Cookies.get("accountId");
       const response = await AddressService.getAllAddress();
-      const addressReponse = await axios.get(`http://localhost:3000/api/addresses/exists?accountId=${accountId}`, { withCredentials: true })
+      const addressReponse = await axios.get(
+        `http://localhost:3000/api/addresses/exists?accountId=${accountId}`,
+        { withCredentials: true }
+      );
       setAccountExists(addressReponse.data.exists);
       let addresses = response.data;
 
       for (const addr of addresses) {
-
-        const provinceData = await axios.get(`https://online-gateway.ghn.vn/shiip/public-api/master-data/province`, {
-          headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' }
-        });
-        const province = provinceData.data.data.find(p => p.ProvinceID === Number(addr.provinceID));
-        addr.provinceName = province ? province.ProvinceName : 'Không xác định';
-        const districtData = await axios.get(`https://online-gateway.ghn.vn/shiip/public-api/master-data/district`, {
-          headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' },
-          params: { province_id: addr.provinceID }
-        });
-        const district = districtData.data.data.find(d => d.DistrictID === Number(addr.districtCode));
-        addr.districtName = district ? district.DistrictName : 'Không xác định';
-        const wardData = await axios.get(`https://online-gateway.ghn.vn/shiip/public-api/master-data/ward`, {
-          headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' },
-          params: { district_id: addr.districtCode }
-        });
-        const ward = wardData.data.data.find(w => w.WardCode === String(addr.wardCode));
-        addr.wardName = ward ? ward.WardName : 'Không xác định';
+        const provinceData = await axios.get(
+          `https://online-gateway.ghn.vn/shiip/public-api/master-data/province`,
+          {
+            headers: { Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d" },
+          }
+        );
+        const province = provinceData.data.data.find(
+          (p) => p.ProvinceID === Number(addr.provinceID)
+        );
+        addr.provinceName = province ? province.ProvinceName : "Không xác định";
+        const districtData = await axios.get(
+          `https://online-gateway.ghn.vn/shiip/public-api/master-data/district`,
+          {
+            headers: { Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d" },
+            params: { province_id: addr.provinceID },
+          }
+        );
+        const district = districtData.data.data.find(
+          (d) => d.DistrictID === Number(addr.districtCode)
+        );
+        addr.districtName = district ? district.DistrictName : "Không xác định";
+        const wardData = await axios.get(
+          `https://online-gateway.ghn.vn/shiip/public-api/master-data/ward`,
+          {
+            headers: { Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d" },
+            params: { district_id: addr.districtCode },
+          }
+        );
+        const ward = wardData.data.data.find((w) => w.WardCode === String(addr.wardCode));
+        addr.wardName = ward ? ward.WardName : "Không xác định";
       }
 
-      const defaultAddress = addresses.find(addr => addr.status);
+      const defaultAddress = addresses.find((addr) => addr.status);
       if (defaultAddress) {
-        addresses = [defaultAddress, ...addresses.filter(addr => addr.id !== defaultAddress.id)];
+        addresses = [defaultAddress, ...addresses.filter((addr) => addr.id !== defaultAddress.id)];
         setSelectedAddress(defaultAddress.id);
       }
       setAddress(addresses);
     } catch (error) {
       console.error("Error fetching addresses:", error);
     } finally {
-
     }
   };
 
   useEffect(() => {
     fetchAddress();
-    const intervalId = setInterval(() => {
-      fetchAddress();
-    }, 3000);
-    return () => {
-      clearInterval(intervalId);
-    };
-  });
+  }, []);
 
   const handleAddressUpdated = () => {
     fetchAddress();
@@ -75,7 +84,7 @@ const AddressPage = () => {
 
   useEffect(() => {
     if (selectedAddress) {
-      const selectedAddr = address.find(addr => addr.id === selectedAddress);
+      const selectedAddr = address.find((addr) => addr.id === selectedAddress);
       if (selectedAddr) {
         if (!districts[selectedAddr.provinceID]) {
           fetchDistricts(selectedAddr.provinceID);
@@ -87,53 +96,35 @@ const AddressPage = () => {
     }
   }, [selectedAddress]);
 
-
-
-  const handleDeleteAddress = async (id) => {
-    try {
-      const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa địa chỉ này?");
-      if (!confirmDelete) return;
-
-      const payload = {};
-      await AddressService.removeAddress(id);
-      fetchAddress();
-      toast.success('Xóa địa chỉ thành công!');
-    } catch (error) {
-      toast.error('Xóa địa chỉ thất bại!');
-    }
-  };
-
   const handleAddressUpdate = (id) => {
-
     setBackupAddress(id);
     setShowBackup(true);
-
   };
 
   const handleAddAddress = () => {
     if (!accountExists) {
       setShowBackupModal(true);
     } else {
-
       setShowBackup1(true);
     }
   };
 
   const handleCloseBackupModal = () => {
     setShowBackupModal(false);
-  }
-
-
+  };
 
   const fetchDistricts = async (provinceId) => {
     try {
-      const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/district', {
-        headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' },
-        params: { province_id: provinceId }
-      });
-      setDistricts(prev => ({ ...prev, [provinceId]: response.data.data }));
+      const response = await axios.get(
+        "https://online-gateway.ghn.vn/shiip/public-api/master-data/district",
+        {
+          headers: { Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d" },
+          params: { province_id: provinceId },
+        }
+      );
+      setDistricts((prev) => ({ ...prev, [provinceId]: response.data.data }));
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === "development") {
         console.error("Error fetching districts:", error);
       }
     }
@@ -141,14 +132,17 @@ const AddressPage = () => {
 
   const fetchWards = async (districtId) => {
     try {
-      const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/ward', {
-        headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' },
-        params: { district_id: districtId }
-      });
-      setWards(prev => ({ ...prev, [districtId]: response.data.data }));
+      const response = await axios.get(
+        "https://online-gateway.ghn.vn/shiip/public-api/master-data/ward",
+        {
+          headers: { Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d" },
+          params: { district_id: districtId },
+        }
+      );
+      setWards((prev) => ({ ...prev, [districtId]: response.data.data }));
     } catch (error) {
       // Only log the error in development mode
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === "development") {
         console.error("Error fetching wards:", error);
       }
     }
@@ -239,6 +233,48 @@ const AddressPage = () => {
     },
   };
 
+  const handleDeleteAddress = async (id) => {
+    const swalWithBootstrapButtons = Swal.mixin({
+      customClass: {
+        confirmButton: "btn btn-success mx-2",
+        cancelButton: "btn btn-danger mx-2",
+      },
+      buttonsStyling: false,
+    });
+
+    const result = await swalWithBootstrapButtons.fire({
+      title: "Bạn chắc chắn xóa địa chỉ này?",
+      text: "Hành động này không thể hoàn tác!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Có, xóa nó!",
+      cancelButtonText: "Không, hủy!",
+      reverseButtons: true,
+      scrollbarPadding: false,
+      didOpen: () => {
+        document.body.style.overflowY = "auto";
+        document.body.style.padding = "0";
+      },
+      willClose: () => {
+        document.body.style.overflowY = "auto";
+        document.body.style.padding = "0";
+      },
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await AddressService.removeAddress(id);
+
+        fetchAddress();
+        swalWithBootstrapButtons.fire("Đã xóa!", "Địa chỉ đã được xóa.", "success");
+      } catch (error) {
+        swalWithBootstrapButtons.fire("Thất bại!", "Không thể xóa địa chỉ.", "error");
+      }
+    }
+    document.body.style.padding = "0";
+    document.body.style.overflowY = "auto";
+  };
+
   return (
     <>
       <ToastContainer />
@@ -264,26 +300,41 @@ const AddressPage = () => {
                 <span>{address.fullName}</span>
                 <span style={styles.phone}>| {address.numberPhone}</span>
                 <br />
-                <span style={{ color: "#888" }}>{address.address},
-                  {address.wardName},
-                  {address.districtName},
-                  {address.provinceName}</span>
+                <span style={{ color: "#888" }}>
+                  {address.address},{address.wardName},{address.districtName},{address.provinceName}
+                </span>
                 {address.status && <div style={styles.defaultLabel}>Mặc định</div>}
               </div>
               <div style={styles.actionContainer}>
-                <span style={styles.actionLinks} onClick={() => handleAddressUpdate(address.id)}>Cập nhật</span>
-                <span
-                  style={{
-                    ...styles.actionLinks,
-                    color: !address.status ? "red" : "inherit",
-                    cursor: address.status ? "not-allowed" : "pointer"
-                  }}
-                  onClick={() => address.status || handleDeleteAddress(address.id)}
-                >
-                  Xóa
-                </span>
-                <br />
                 {!address.isDefault && (
+                  <span
+                    style={{
+                      ...styles.actionLinks,
+                      position: "relative",
+                      top: address.status ? "40px" : "", // Sử dụng `top` để đẩy nút xuống theo ý muốn
+                    }}
+                    onClick={() => handleAddressUpdate(address.id)}
+                  >
+                    Cập nhật
+                  </span>
+                )}
+
+                {!address.status && (
+                  <span
+                    style={{
+                      ...styles.actionLinks,
+                      cursor: address.status ? "not-allowed" : "pointer",
+                      color: "red",
+                    }}
+                    onClick={() => address.status || handleDeleteAddress(address.id)}
+                  >
+                    Xóa
+                  </span>
+                )}
+
+                <br />
+
+                {!address.status && (
                   <button style={styles.setDefaultButton}>Thiết lập mặc định</button>
                 )}
               </div>
@@ -306,7 +357,13 @@ const AddressPage = () => {
           addressId={backupAddress}
         />
       )}
-      {showBackup1 && <Backup2 show={showBackup1} onClose={() => setShowBackup1(false)} onAddressUpdated={handleAddressUpdated} />}
+      {showBackup1 && (
+        <Backup2
+          show={showBackup1}
+          onClose={() => setShowBackup1(false)}
+          onAddressUpdated={handleAddressUpdated}
+        />
+      )}
       <Backup show={showBackupModal} onClose={handleCloseBackupModal} />
     </>
   );

@@ -8,8 +8,9 @@ import ArgonButton from "../../../components/ArgonButton";
 import ArgonBox from "../../../components/ArgonBox";
 import ArgonTypography from "../../../components/ArgonTypography";
 import ReviewsService from "../../../services/ReviewsServices";
-import { toast } from "react-toastify";
 import { CheckCircle, Cancel } from '@mui/icons-material';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 function Review() {
@@ -67,10 +68,10 @@ function Review() {
                 result = await ReviewsService.feedBackReview(formData.id, formDataToSend);
                 setReviews(reviews.map(review => review.id === result.data.id ? result.data : review));
 
-                toast.success("Admin response saved successfully");
+                toast.success("Phản hồi đánh giá thành công!");
                 resetForm();
             } else {
-                toast.error("ID is required to update the review.");
+                toast.error("Phản hồi đánh giá không thành công");
                 return;
             }
         } catch (error) {
@@ -107,6 +108,7 @@ function Review() {
 
     return (
         <DashboardLayout>
+            <ToastContainer />
             <DashboardNavbar />
             <ArgonBox py={3}>
                 <ArgonBox mb={3}>

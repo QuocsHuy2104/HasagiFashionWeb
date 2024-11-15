@@ -21,9 +21,6 @@ function Order() {
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
-  const [provinces, setProvinces] = useState([]);
-  const [districtsByProvince, setDistrictsByProvince] = useState({});
-  const [wardsByDistrict, setWardsByDistrict] = useState({});
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   useEffect(() => {

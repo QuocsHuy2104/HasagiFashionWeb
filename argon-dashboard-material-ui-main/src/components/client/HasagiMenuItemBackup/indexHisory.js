@@ -30,6 +30,8 @@ import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import reviewsService from "services/ReviewsServices";
+import Swal from "sweetalert2";
+
 const indexHistory = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +49,7 @@ const indexHistory = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
-
+  const [orderDetailId, setOrderDetailId] = useState(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [star, setStar] = useState(5);
@@ -165,7 +167,6 @@ const indexHistory = () => {
     window.scrollTo(0, 0);
   }, [searchQuery]);
 
-
   const getOrderCount = (status) => {
     return orders.filter((order) => order.statusSlug === status).length;
   };
@@ -186,6 +187,9 @@ const indexHistory = () => {
     setSelectedProduct(product);
     setShowReviewModal(true);
     console.log(product);
+    const orderDetailId = product?.orderDetailId;
+    setOrderDetailId(orderDetailId);
+    console.log("Selected OrderDetailId:", orderDetailId);
   };
 
   const handleClose = () => setShowReviewModal(false);
@@ -230,10 +234,16 @@ const indexHistory = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    document.body.style.padding = "0";
+    if (!orderDetailId) {
+      alert("Order Detail ID không hợp lệ!");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("star", star);
     formData.append("comment", comment);
-    formData.append("orderDetailId", selectedProduct.orderDetailId); // Thêm productId vào formData
+    formData.append("orderDetailId", orderDetailId);
 
     if (image) {
       formData.append("image", image);
@@ -243,20 +253,72 @@ const indexHistory = () => {
     }
 
     try {
+      const swal = Swal.fire({
+        title: "Đang xử lý...",
+        width: 500,
+        height: 300,
+        padding: "1em",
+        color: "white",
+        background: "transparent", // Không có nền trắng khi xử lý
+        showConfirmButton: false, // Không hiển thị nút xác nhận trong khi spinner
+        allowOutsideClick: false, // Không cho phép đóng khi nhấp ra ngoài
+        customClass: {
+          popup: "custom-popup", // Thêm lớp tùy chỉnh cho modal
+        },
+        didOpen: () => {
+          const popup = document.querySelector(".swal2-popup");
+          document.body.style.padding = "0";
+          popup.style.overflow = "hidden"; // Ẩn thanh cuộn
+        },
+        willClose: () => {
+          document.body.style.padding = "0";
+        },
+      });
+
+      // Sau khi tạo review, trì hoãn 2 giây
       const response = await reviewsService.createReview(formData);
       console.log("Review created successfully:", response);
-      // Reset fields after successful submission
+
+      // Cập nhật nội dung modal sau khi hoàn thành
+      setTimeout(() => {
+        swal.update({
+          title: "Thành công!",
+          html: "Đánh giá thành công!",
+          icon: "success",
+          color: "black",
+          showConfirmButton: true,
+          customClass: {
+            popup: "custom-popup", // Thêm lớp tùy chỉnh khi cập nhật modal
+          },
+          didOpen: () => {
+            const popup = document.querySelector(".swal2-popup");
+            // Sau khi hoàn tất, ẩn thanh cuộn
+            document.body.style.padding = "0";
+            popup.style.overflow = "hidden"; // Ẩn thanh cuộn nếu không muốn nó xuất hiện
+          },
+          willClose: () => {
+            document.body.style.padding = "0";
+          },
+          background: "#fff", // Đặt lại nền trắng sau khi xử lý xong
+        });
+        setShowReviewModal(false);
+      }, 2000); // Sau 2 giây
+
+      // Reset các input và trạng thái
       setStar(5);
       setComment("");
       resetImageInput();
       resetVideoInput();
-      setSnackbarMessage("Đánh giá đã được gửi thành công!");
-      setOpenSnackbar(true);
-      handleClose();
     } catch (error) {
-      console.error("Error creating review:", error.response.data);
-      alert("Có lỗi xảy ra khi tạo đánh giá. Vui lòng kiểm tra thông tin và thử lại.");
+      console.error("Error creating review:", error);
+      const errorMessage = error.response?.data?.message || "Có lỗi xảy ra khi tạo đánh giá.";
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: errorMessage,
+      });
     }
+    document.body.style.padding = "0";
   };
 
   useEffect(() => {
@@ -274,7 +336,7 @@ const indexHistory = () => {
         setSearchStyle({
           position: "fixed",
           width: "66.66%",
-          top: "21.5%",
+          top: "23.11%",
           border: "none",
           fontSize: "14px",
           backgroundColor: "#f0f0f0",
@@ -352,6 +414,14 @@ const indexHistory = () => {
     setOpenSnackbar(false);
   };
 
+  useEffect(() => {
+    if (showReviewModal) {
+      document.body.style.overflowY = "auto";
+      document.body.style.padding = "0";
+    } else {
+      document.body.style.overflowY = "auto";
+    }
+  }, [showReviewModal]);
 
   return (
     <>
@@ -494,8 +564,7 @@ const indexHistory = () => {
                       <section
                         style={{
                           border: "none",
-                          borderTop:
-                            "2px dashed rgba(128, 128, 128, 0.4)",
+                          borderTop: "2px dashed rgba(128, 128, 128, 0.4)",
                           margin: "10px 0",
                         }}
                       />
@@ -537,10 +606,7 @@ const indexHistory = () => {
                                   Phân loại hàng: {product.color}, {product.size}
                                 </Typography>
                                 <Box display="flex" justifyContent="space-between">
-                                  <Typography
-                                    variant="body2"
-                                    style={{ color: "black" }}
-                                  >
+                                  <Typography variant="body2" style={{ color: "black" }}>
                                     Số lượng: {product.productQuantity}
                                   </Typography>
                                   <Typography
@@ -550,7 +616,7 @@ const indexHistory = () => {
                                       fontSize: "16px",
                                       position: "relative",
                                       display: "inline-block",
-                                      marginLeft: "680px"
+                                      marginLeft: "680px",
                                     }}
                                   >
                                     <span
@@ -565,7 +631,7 @@ const indexHistory = () => {
                                     >
                                       đ
                                     </span>
-                                    {new Intl.NumberFormat('vi-VN').format(product.productPrice)}
+                                    {new Intl.NumberFormat("vi-VN").format(product.productPrice)}
                                   </Typography>
                                 </Box>
                               </Box>
@@ -623,7 +689,7 @@ const indexHistory = () => {
                           >
                             đ
                           </span>
-                          {new Intl.NumberFormat('vi-VN').format(order.amount)}
+                          {new Intl.NumberFormat("vi-VN").format(order.amount)}
                         </Typography>
                       </div>
                       <Box display="flex" justifyContent="flex-end" mt={2}>
@@ -639,7 +705,11 @@ const indexHistory = () => {
                           <MuiButton
                             variant="contained"
                             onClick={() => handleStatusComplete(order.id)}
-                            style={{ marginRight: "10px", backgroundColor: "green", color: "white" }}
+                            style={{
+                              marginRight: "10px",
+                              backgroundColor: "green",
+                              color: "white",
+                            }}
                           >
                             Hoàn thành
                           </MuiButton>
@@ -647,7 +717,11 @@ const indexHistory = () => {
                           <MuiButton
                             variant="contained"
                             onClick={() => fetchHandleBuyNow(order.id)}
-                            style={{ marginRight: "10px", backgroundColor: "#ee4d2d", color: "white" }}
+                            style={{
+                              marginRight: "10px",
+                              backgroundColor: "#ee4d2d",
+                              color: "white",
+                            }}
                           >
                             Mua lại
                           </MuiButton>
@@ -657,7 +731,11 @@ const indexHistory = () => {
                           <MuiButton
                             variant="contained"
                             href={`/history-order/${order.id}`}
-                            style={{ marginRight: "10px", backgroundColor: "white", color: "black" }}
+                            style={{
+                              marginRight: "10px",
+                              backgroundColor: "white",
+                              color: "black",
+                            }}
                           >
                             Xem chi tiết hủy đơn
                           </MuiButton>
@@ -665,7 +743,11 @@ const indexHistory = () => {
                           <MuiButton
                             variant="contained"
                             href={`/history-order/${order.id}`}
-                            style={{ marginRight: "10px", backgroundColor: "white", color: "black" }}
+                            style={{
+                              marginRight: "10px",
+                              backgroundColor: "white",
+                              color: "black",
+                            }}
                           >
                             Xem chi tiết hóa đơn
                           </MuiButton>
@@ -710,7 +792,7 @@ const indexHistory = () => {
           </Box>
         </MuiModal>
         {selectedProduct && (
-          <BootstrapModal show={showReviewModal} size="lg">
+          <BootstrapModal show={showReviewModal} size="lg" centered>
             <BootstrapModal.Body>
               <div
                 style={{
@@ -932,9 +1014,8 @@ const indexHistory = () => {
             </BootstrapModal.Body>
           </BootstrapModal>
         )}
-      </div >
-
+      </div>
     </>
   );
-}
+};
 export default indexHistory;
