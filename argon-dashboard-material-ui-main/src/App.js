@@ -126,6 +126,7 @@ export default function App() {
     && pathname !== "/History"
     && pathname !== "/chatAI"
     && pathname !== "/chatbot"
+    && pathname !== "/review-image"
     && !pathname.startsWith("/history-order/");
   ;
 

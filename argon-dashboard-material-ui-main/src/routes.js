@@ -69,6 +69,7 @@ import History from "components/client/HasagiHistory";
 import HistoryOrderDetail from "components/client/HasagiHistoryDetail";
 import ChatAI from "components/client/HasagiAI/index";
 import ChatBot from "components/client/HasagiChatBot/index";
+import Testhasa from "components/client/testhasa";
 
 
 const routes = [
@@ -291,7 +292,13 @@ const routes = [
     component: <ChatBot />,
     showInSidenav: true,
   },
-
+  {
+    name: "Testhasa",
+    key: "testhasa",
+    route: "/review-image",
+    component: <Testhasa />,
+    showInSidenav: true,
+  },
   {
     // type: "route",
     name: "Cart",

@@ -286,6 +286,7 @@ const Header = ({ onSearch }) => {
                             <a href="#contact" className="nav-item nav-link" style={styles.navLink}>Liên Hệ</a>
                             <a href="#faq" className="nav-item nav-link" style={styles.navLink}>Hỏi Đáp</a>
                             <a href="/chatbot" className="nav-item nav-link" style={styles.navLink}>Chat bot</a>
+                            <a href="/review-image" className="nav-item nav-link" style={styles.navLink}>Test</a>
 
 
                             <div style={{ position: 'relative', display: 'inline-block' }}>
