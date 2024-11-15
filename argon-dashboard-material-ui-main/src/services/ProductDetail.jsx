@@ -5,24 +5,45 @@ const ShopDetailService = {
         withCredentials: true
     }),
 
+
     getCategoryDetail: (categoryId) => apiClient.get(`/category/${categoryId}`),
 
-    getProductDetail: (productId) => apiClient.get(`/product/${productId}`),
+    getProductDetail: ({ productId, sizeId }) => {
+        const url = sizeId ? `/webShopDetail/${productId}?selectedSizeId=${sizeId}` : `/webShopDetail/${productId}`;
 
-    checkFavorite: (productId) => apiClient.get("/favorites/check", {
-        params: { productId },
+        console.log("Requesting URL:", url);
+
+        return apiClient.get(url);
+    },
+
+    checkFavorite: (productId) => {
+        return apiClient.get("/favorites/check", {
+            params: { productId },
+            withCredentials: true
+        });
+    },
+
+    getAllFavorites: () => apiClient.get('/favorites/count/account', {
         withCredentials: true
     }),
 
-    addToCart: ({ accountId, colorId, sizeId, quantity, productId, price }) =>
-        apiClient.post('/cart/add', {
-            accountId,
+
+    getGotoFavorites: () => apiClient.get('/favorites/user', {
+        withCredentials: true
+    }),
+
+
+
+    addToCart: ({ colorId, sizeId, quantity, productId, price }) => {
+        return apiClient.post('/cart/add', {
             colorId,
             sizeId,
             quantity,
             productId,
             price
-        }, { withCredentials: true }),
+        }, { withCredentials: true })
+
+    },
 
     getFavoritesCount: (productId) =>
         apiClient.get('/favorites/count', {

@@ -1,10 +1,28 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ArgonBox from "components/ArgonBox";
 import ArgonButton from "components/ArgonButton";
-import { Grid, Typography } from "@mui/material";
-import DiscountIcon from "@mui/icons-material/LocalOffer"; // Icon for decorative touch
+import { CircularProgress, Typography } from "@mui/material";
+import DiscountIcon from "@mui/icons-material/LocalOffer";
+import VoucherService from "../../../services/VoucherServices";
+import Cookies from "js-cookie";
+import PropTypes from "prop-types";
+import Slider from "react-slick";
 
-const CouponCard = () => {
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+
+const Voucher = ({ voucher }) => {
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    };
+
     return (
         <ArgonBox
             sx={{
@@ -12,30 +30,25 @@ const CouponCard = () => {
                 borderRadius: "12px",
                 padding: "15px",
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
                 maxWidth: "480px",
-                margin: "10px",
+                margin: "10px 5px",
                 backgroundColor: "#FFF8E1",
                 boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                flexWrap: "nowrap",
             }}
         >
-            {/* Left Section with Icon and Text */}
-            <ArgonBox sx={{ display: "flex", alignItems: "center" }}>
-                {/* Decorative Icon */}
+            <ArgonBox sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
                 <DiscountIcon
                     sx={{
                         color: "#FF4500",
-                        fontSize: "32px", // Reduced icon size
+                        fontSize: "32px",
                         marginRight: "10px",
                         marginLeft: "-10px",
                         marginTop: "-80px",
-                        flexShrink: 0, // Prevents the icon from shrinking
+                        flexShrink: 0,
                     }}
                 />
-
-                {/* Coupon Info */}
-                <div>
+                <ArgonBox sx={{ overflow: "hidden", textOverflow: "ellipsis" }}>
                     <ArgonBox
                         sx={{
                             background: "linear-gradient(to right, #FFD700, #FFA500)",
@@ -44,29 +57,62 @@ const CouponCard = () => {
                             fontWeight: "bold",
                             display: "inline-block",
                             borderRadius: "8px",
-                            fontSize: "12px", // Reduced font size for coupon label
+                            fontSize: "12px",
                             marginBottom: "4px",
+                            whiteSpace: "nowrap",
                         }}
                     >
-                        COUPON
+                        VOUCHER
                     </ArgonBox>
-
-                    <ArgonBox sx={{ fontWeight: "bold", fontSize: "14px", color: "#FF4500" }}>
-                        Mã: F1SHOES
+                    <ArgonBox
+                        sx={{
+                            fontWeight: "bold",
+                            fontSize: "14px",
+                            color: "#FF4500",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                        }}
+>
+                        Mã: {voucher.code}
                     </ArgonBox>
-
-                    <ArgonBox sx={{ fontSize: "10px", color: "#333", marginTop: "3px" }}>
-                        Giảm 10% khi mua 1 sản phẩm
+                    <ArgonBox
+                        sx={{
+                            fontSize: "12px",
+                            color: "#333",
+                            marginTop: "3px",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                        }}
+                    >
+                        Giảm {voucher.discountPercentage}% khi hóa đơn từ {voucher.minimumOrderValue}đ
                     </ArgonBox>
-                </div>
-            </ArgonBox>
-
-            {/* Right Section with Discount and Button */}
-            <ArgonBox sx={{ textAlign: "right" }}>
-                <ArgonBox sx={{ fontSize: "20px", fontWeight: "bold", color: "#FF4500" }}>
-                    Giảm 10%
+                    <ArgonBox
+                        sx={{
+                            fontSize: "12px",
+                            color: "#333",
+                            marginTop: "3px",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                        }}
+                    >
+                        HSD: {formatDate(voucher.endDate)}
+                    </ArgonBox>
                 </ArgonBox>
-
+            </ArgonBox>
+            <ArgonBox sx={{ textAlign: "right", flexShrink: 0 }}>
+                <ArgonBox
+                    sx={{
+                        fontSize: "20px",
+                        fontWeight: "bold",
+                        color: "#FF4500",
+                        whiteSpace: "nowrap",
+                    }}
+                >
+                    Giảm {voucher.discountPercentage}%
+                </ArgonBox>
                 <ArgonButton
                     sx={{
                         backgroundColor: "#FF4500",
@@ -76,8 +122,9 @@ const CouponCard = () => {
                         marginTop: "8px",
                         padding: "6px 12px",
                         borderRadius: "6px",
-                        fontSize: "12px", // Reduced button text size
+                        fontSize: "12px",
                         boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+                        whiteSpace: "nowrap",
                         "&:hover": {
                             background: "linear-gradient(to right, #FF4500, #FF6347)",
                         },
@@ -90,31 +137,162 @@ const CouponCard = () => {
     );
 };
 
-const CouponList = () => {
+Voucher.propTypes = {
+    voucher: PropTypes.shape({
+        code: PropTypes.string.isRequired,
+        discountPercentage: PropTypes.number.isRequired,
+        minimumOrderValue: PropTypes.number.isRequired,
+        endDate: PropTypes.string.isRequired,
+    }).isRequired,
+};
+
+
+
+const CustomPrevArrow = ({ onClick }) => (
+    <ArrowBackIosIcon
+        onClick={onClick}
+        sx={{
+            position: "absolute",
+            top: "-20px",
+            right: "100px",
+            zIndex: 1,
+            cursor: "pointer",
+            fontSize: "28px",
+transition: "transform 0.2s ease-in-out",
+            "&:hover": {
+                transform: "scale(1.2)",
+            },
+        }}
+    />
+);
+
+CustomPrevArrow.propTypes = {
+    onClick: PropTypes.func.isRequired,
+};
+
+const CustomNextArrow = ({ onClick }) => (
+    <ArrowForwardIosIcon
+        onClick={onClick}
+        sx={{
+            position: "absolute",
+            top: "-20px",
+            right: "80px",
+            zIndex: 1,
+            cursor: "pointer",
+            fontSize: "28px",
+            transition: "transform 0.2s ease-in-out",
+            "&:hover": {
+                transform: "scale(1.2)",
+            },
+        }}
+    />
+);
+
+CustomNextArrow.propTypes = {
+    onClick: PropTypes.func.isRequired,
+};
+
+
+const VoucherList = () => {
+    const [vouchers, setVouchers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [usedVouchers, setUsedVouchers] = useState([]);
+    const accountId = Cookies.get('accountId');
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                if (accountId) {
+                    const [voucherResponse, usedVoucherResponse] = await Promise.all([
+                        VoucherService.getAllVouchers(),
+                        VoucherService.getUsedVouchersByAccount(accountId),
+                    ]);
+                    const activeVouchers = voucherResponse.data.filter(voucher => voucher.isActive);
+
+                    setVouchers(activeVouchers);
+                    setUsedVouchers(usedVoucherResponse.data);
+                } else {
+                    const voucherResponse = await VoucherService.getAllVouchers();
+                    const activeVouchers = voucherResponse.data.filter(voucher => voucher.isActive);
+
+                    setVouchers(activeVouchers);
+                    setUsedVouchers([]);
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [accountId]);
+
+    const availableVouchers = vouchers.filter(voucher =>
+        !usedVouchers.some(usedVoucher => usedVoucher.id === voucher.id)
+    );
+
+    const sliderSettings = {
+        infinite: false,
+        speed: 500,
+        slidesToShow: Math.min(4, availableVouchers.length),
+        slidesToScroll: 1,
+        nextArrow: <CustomNextArrow />,
+        prevArrow: <CustomPrevArrow />,
+        responsive: [
+            {
+                breakpoint: 1024,
+                settings: {
+                    slidesToShow: Math.min(3, availableVouchers.length),
+                },
+            },
+            {
+                breakpoint: 600,
+                settings: {
+                    slidesToShow: Math.min(2, availableVouchers.length),
+                },
+            },
+            {
+                breakpoint: 480,
+                settings: {
+                    slidesToShow: Math.min(1, availableVouchers.length),
+                },
+            },
+        ],
+    };
+
+
+    if (loading) {
+        return <CircularProgress />;
+    }
+
+
+
     return (
         <>
-            <div
-                className="container-fluid pt-3">
+            <div className="container-fluid pt-3">
                 <Typography variant="h2" className="section-title position-relative text-uppercase mx-xl-5 mb-3">
-                    <span className="bg-secondary pr-3">VORCHER</span>
+<span className="bg-secondary pr-3">VOUCHER</span>
                 </Typography>
             </div>
-            <Grid container spacing={2} justifyContent="center" className="px-xl-5 pb-3">
-                <Grid item xs={12} sm={6} md={3}>
-                    <CouponCard />
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                    <CouponCard />
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                    <CouponCard />
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                    <CouponCard />
-                </Grid>
-            </Grid>
+
+            <div style={{ position: "relative" }}>
+                <Slider {...sliderSettings} className="px-xl-5 pb-3">
+                    {availableVouchers.length === 0 ? (
+                        <Typography variant="h6">Không có voucher nào.</Typography>
+                    ) : (
+                        availableVouchers.map(voucher => (
+                            <div key={voucher.id}>
+                                <Voucher voucher={voucher} />
+                            </div>
+                        ))
+                    )}
+                </Slider>
+            </div>
         </>
     );
 };
 
-export default CouponList;
+
+
+export default VoucherList;

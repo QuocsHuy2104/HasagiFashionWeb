@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
 import ArgonAvatar from "components/ArgonAvatar";
-import ArgonBadge from "../../../components/ArgonBadge";
+import ArgonBadge from "components/ArgonBadge";
 
 import ProductService from "services/ProductServices";
 
@@ -24,18 +24,17 @@ function Product({ image, name, importprice }) {
                     {name}
                 </ArgonTypography>
                 <ArgonTypography variant="caption" color="secondary" fontWeight="bold">
-                    {importprice} VNĐ
+                    {importprice ? `${importprice}` : "0"}
                 </ArgonTypography>
             </ArgonBox>
         </ArgonBox>
     );
 }
 
-
 Product.propTypes = {
     name: PropTypes.string.isRequired,
-    image: PropTypes.string.isRequired,
-    importprice: PropTypes.string.isRequired,
+    image: PropTypes.string,
+    importprice: PropTypes.number,
 };
 
 const ProductTable = ({ onEditClick, setSelectedProduct }) => {
@@ -46,9 +45,9 @@ const ProductTable = ({ onEditClick, setSelectedProduct }) => {
         const fetchData = async () => {
             try {
                 const productResponse = await ProductService.getAllProducts();
-                setProducts(productResponse.data);
+                setProducts(productResponse.data || []);
             } catch (err) {
-                console.log(err);
+                console.error("Failed to fetch products:", err);
             }
         };
 
@@ -56,39 +55,75 @@ const ProductTable = ({ onEditClick, setSelectedProduct }) => {
     }, []);
 
     const handleEditClick = (product) => {
-        onEditClick(product);
+        if (onEditClick) onEditClick(product);
     };
 
     const handleNavigateToProductDetail = (product) => {
-        setSelectedProduct(product);
-        navigate('/manage/product-detail', { state: { product } });
+        if (setSelectedProduct) {
+            setSelectedProduct(product);
+            navigate('/manage/product-detail', { state: { product } });
+        }
     };
-    
+
+    const formatDate = (dateString) => {
+        if (!dateString) return "N/A";
+
+        const date = new Date(dateString);
+
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+
+        return `${day}-${month}-${year}\n${hours}:${minutes}`;
+    };
+
+    const formatNumber = (num) => {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    };
+
+    const formatImportPrice = (importPrice) => {
+        if (!importPrice) return "0đ"; // Default value if importPrice is not available
+
+        const prices = importPrice.split('-').map(price => {
+            const trimmedPrice = price.trim();
+            const numericPrice = parseFloat(trimmedPrice); // Convert string to number
+            const integerPrice = Math.floor(numericPrice); // Remove decimal places
+            return `${formatNumber(integerPrice)}đ`; // Format number and prefix with 'đ'
+        });
+
+        return prices.join(' - '); // Join formatted prices with ' - '
+    };
+
+
+
+
 
     const rows = products.map(product => ({
-        product: (
+        SanPham: (
             <Product
-                image={product.image && product.image !== '' 
-                    ? product.image 
-                    : "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930"}
-                name={product.name}
-                importprice={product.importPrice}
+                image={`http://localhost:3000/${product.image || "No_Image_Available.jpg"}`}
+                name={product.name || "Unknown Product"}
+                importprice={formatImportPrice(product.importPrice)}
             />
         ),
-        quantity: (
+        SoLuong: (
             <ArgonTypography variant="caption" color="secondary" fontWeight="medium">
-                {product.quantity === 0 ? "Sold out" : product.importQuantity}
+                {product.importQuantity > 0 ? product.importQuantity || "N/A" : "0"}
             </ArgonTypography>
         ),
-        createDate: (
+        NgayTao: (
             <ArgonTypography variant="caption" color="secondary" fontWeight="medium">
-                {product.createDate}
+                {formatDate(product.createDate)}
             </ArgonTypography>
+
         ),
-        category: (
+        DanhMuc: (
             <ArgonBadge
                 variant="gradient"
-                badgeContent={product.categoryDTOResp.name}
+                badgeContent={product.categoryDTOResp?.name || "Unknown"}
                 color="primary"
                 size="sm"
                 sx={{
@@ -99,21 +134,21 @@ const ProductTable = ({ onEditClick, setSelectedProduct }) => {
                 }}
             />
         ),
-        brand: (
+        ThuongHieu: (
             <ArgonBadge
                 variant="gradient"
-                badgeContent={product.trademarkDTOResp.name}
+                badgeContent={product.trademarkDTOResp?.name || "Unknown"}
                 color="info"
                 size="sm"
                 sx={{
-                    fontSize: "50px",
+                    fontSize: "0.75rem",
                     textTransform: "capitalize",
                     padding: "5px 10px",
                     borderRadius: "10px",
                 }}
             />
         ),
-        action: (
+        ThaoTac: (
             <ArgonBox display="flex" justifyContent="space-between" alignItems="center">
                 <ArgonTypography
                     px={1}
@@ -147,42 +182,28 @@ const ProductTable = ({ onEditClick, setSelectedProduct }) => {
                 >
                     <i className="bi bi-info-circle"></i> Detail
                 </ArgonTypography>
-                <ArgonTypography
-                    px={1}
-                    component="span"
-                    variant="caption"
-                    color="error"
-                    fontWeight="medium"
-                    onClick={() => deleteItem(product.id)}
-                    sx={{
-                        cursor: "pointer",
-                        "&:hover": {
-                            textDecoration: "underline",
-                        },
-                    }}
-                >
-                    <i className="bi bi-trash3"></i> Remove
-                </ArgonTypography>
             </ArgonBox>
         ),
     }));
 
     const authorsTableData = {
         columns: [
-            { name: "product", align: "left" },
-            { name: "quantity", align: "center" },
-            { name: "createDate", align: "center" },
-            { name: "category", align: "center" },
-            { name: "brand", align: "center" },
-            { name: "action", align: "center" },
+            { name: "SanPham", align: "left" },
+            { name: "SoLuong", align: "center" },
+            { name: "NgayTao", align: "center" },
+            { name: "DanhMuc", align: "center" },
+            { name: "ThuongHieu", align: "center" },
+            { name: "ThaoTac", align: "center" },
         ],
         rows,
     };
 
     return authorsTableData;
 };
+
 ProductTable.propTypes = {
     onEditClick: PropTypes.func.isRequired,
+    setSelectedProduct: PropTypes.func.isRequired,
 };
 
 export default ProductTable;

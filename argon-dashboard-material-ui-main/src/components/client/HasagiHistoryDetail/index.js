@@ -1,24 +1,44 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { Modal, Box, Tabs, Tab, Paper, Button, Grid, Typography, RadioGroup, FormControlLabel, Radio } from "@mui/material";
+import ArgonButton from "components/ArgonButton";
+import ArgonBox from "components/ArgonBox";
+import ArgonTypography from "components/ArgonTypography";
+import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
 import Cookies from "js-cookie";
+import CloseIcon from '@mui/icons-material/Close';
+import IconButton from '@mui/material/IconButton';
+// import reviewsService from 'services/ReviewsServices';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import PhotoCamera from '@mui/icons-material/PhotoCamera'; // Biểu tượng máy ảnh
+import Videocam from '@mui/icons-material/Videocam'; // Biểu tượng máy quay phim
+import { Snackbar } from '@mui/material';
+import aboutImage from "layouts/assets/img/h1.jpg";
+import { Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faReceipt, faWallet, faTruck, faBoxOpen, faStar, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
+import axios from 'axios';
+import { format } from "date-fns";
 
 const HistoryOrderDetail = () => {
-  const { orderId } = useParams(); // Get the orderId from the URL parameters
+  const { orderId } = useParams();
   const [orderDetails, setOrderDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [shippingFee, setShippingFee] = useState(0); // State to store shipping fee
+  const [shippingFee, setShippingFee] = useState(0);
   const [status, setStatus] = useState(null);
   const navigate = useNavigate();
   const [fullNameAdd, setFullNameAdd] = useState('');
-
+  const [payMethod, setPayMethod] = useState('');
+  const [orderDate, setOrderDate] = useState('');
   useEffect(() => {
     const accountId = Cookies.get('accountId');
     if (!accountId) {
-        navigate(`/authentication/sign-in`);
-        return;
+      navigate(`/authentication/sign-in`);
+      return;
     }
     if (orderId) {
       fetch(`http://localhost:8080/api/history-order/${orderId}`)
@@ -32,10 +52,22 @@ const HistoryOrderDetail = () => {
           setOrderDetails(data);
           if (data.length > 0) {
             const fee = data[0].shippingFee;
+
             setShippingFee(fee);
             const orderStatus = data[0].statusName;
             setStatus(orderStatus);
+
+            const payMethod = data[0].payMethod;
+            const displayPayMethod = payMethod === 'Direct Check' ? 'Thanh toán khi nhận hàng' : payMethod;
+            setPayMethod(displayPayMethod);
+
+            const orderDate = data[0].orderDate;
+            const formattedOrderDate = orderDate
+              ? format(new Date(orderDate), "HH:mm dd-MM-yyyy")
+              : "Date not available";
+            setOrderDate(formattedOrderDate);
             console.log("Shipping Fee:", fee);
+
             setFullNameAdd(data[0].name);
           }
           setLoading(false);
@@ -48,195 +80,354 @@ const HistoryOrderDetail = () => {
     }
   }, [orderId]);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+
 
   if (error) {
     return <div>{error}</div>;
   }
 
-  const totalProductCost = orderDetails.reduce((total, item) => {
-    return total + (item.productPrice * item.productQuantity);
-  }, 0);
 
   const subtotalList = orderDetails.map(item => item.productPrice * item.productQuantity);
   const totalSubtotal = subtotalList.reduce((total, subtotal) => total + subtotal, 0);
+
+  const formattedTotalSubtotal = new Intl.NumberFormat('vi-VN', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 3
+  }).format(totalSubtotal);
+
   const finalTotal = totalSubtotal + shippingFee;
+  const formattedFinalTotal = new Intl.NumberFormat('vi-VN', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 3
+  }).format(finalTotal);
 
   const goBack = () => {
     navigate(`/History`);
   };
 
+  const statusMap = [
+    { name: "Đơn Hàng Đã Đặt", icon: faReceipt, active: true },
+    { status: 'Đang xử lý', name: 'Đang xử lý', icon: faReceipt },
+    { status: 'Đang giao', name: 'Đang giao', icon: faTruck },
+    { status: 'Đã giao', name: 'Đã giao', icon: faBoxOpen },
+    { status: 'Hoàn thành', name: 'Hoàn thành', icon: faCheckCircle },
+  ];
 
-  const navbarStyle = {
-    backgroundColor: 'white',
-    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
-    borderBottom: 'white solid 1px',
-    borderTop: 'white solid 1px',
-};
+  const steps = statusMap.map((step, index) => ({
+    label: step.name,
+    icon: step.icon,
+    active: status === step.status,
+    completed: index <= statusMap.findIndex(s => s.status === status)
+  }));
 
-const navMenuStyle = {
-    listStyle: 'none',
-    padding: 0,
-    margin: '0 auto', 
-    display: 'flex',
-    justifyContent: 'center', 
-};
+  const styles = {
+    progressContainer: {
+      display: "flex",
+      justifyContent: "space-between",
+      margin: "20px",
+      textAlign: "center",
+      position: "relative",
+    },
+    step: {
+      position: "relative",
+      flex: 1,
+      textAlign: "center",
+    },
+    stepCircle: {
+      width: "40px",
+      height: "40px",
+      backgroundColor: "#ccc",
+      borderRadius: "50%",
+      display: "inline-block",
+      zIndex: 1,
+      position: "relative",
+      lineHeight: "40px",
+      color: "white",
+      fontSize: "18px",
+    },
+    activeStepCircle: {
+      backgroundColor: "#4CAF50",
+    },
+    stepLabel: {
+      marginBottom: "4px",
+      fontSize: "12px",
+    },
+    activeStepLabel: {
+      color: "#4CAF50",
+    },
+    stepLine: {
+      position: "absolute",
+      width: "calc(100% - 0px)",
+      height: "2px",
+      backgroundColor: "#ccc",
+      top: "20%",
+      left: "50%",
+      zIndex: 0,
+
+    },
+    activeStepLine: {
+      backgroundColor: "#4CAF50",
+    },
+  };
 
   return (
     <>
       <HasagiNav />
-      <nav className="navbar navbar-expand-lg p-0 pt-5" style={navbarStyle}>
-            <div className="container-fluid d-flex justify-content-between align-items-center p-0">
-                <div className="collapse navbar-collapse">
-                    <ul className="nav-menu" style={navMenuStyle}>
-                    <marquee>CẢM ƠN QUÝ KHÁCH ĐÃ MUA HÀNG!</marquee>
-                    </ul>
+      <br />
+      <ArgonBox p={10}>
+
+
+        <Box p={3} style={{ padding: "16px", position: "relative", maxWidth: "1030px", margin: "0 auto" }}>
+          <Grid container spacing={2}>
+            <Grid xs={12}>
+              <Paper elevation={3} style={{ padding: "16px", position: "relative" }}>
+                <div className="header" style={{ paddingTop: "10px" }}>
+                  <button className="back-button" onClick={goBack}>
+                    <i className="ni ni-bold-left" />
+                  </button>
+                  <h5 className="mb-1" style={{ fontWeight: "bold", fontSize: "24px", color: "#343a40", marginLeft: '-15px' }}>Quay lại</h5>
                 </div>
-            </div>
-        </nav>
-      <div className="history-order-detail">
-      <div className="header" style={{paddingTop: '50px'}}>
-          <button className="back-button" onClick={() => goBack()}>
-            <i className="ni ni-bold-left" />
-          </button>
-          <h5 className="section-title mb-1" style={{ fontWeight: "bold", fontSize: "24px", color: "#343a40", marginLeft: '-15px' }}>Chi tiết đơn hàng</h5>
-        </div>
+                <div style={styles.progressContainer}>
+                  {status !== 'Đã hủy' && steps.map((step, index) => (
+                    <div key={index} style={styles.step}>
+                      <div
+                        style={{
+                          ...styles.stepCircle,
+                          ...(step.active ? styles.activeStepCircle : {}),
+                          ...(step.completed ? styles.activeStepCircle : {}),
+                        }}
+                      >
+                        <FontAwesomeIcon icon={step.icon} />
+                      </div>
+                      <div
+                        style={{
+                          ...styles.stepLabel,
+                          ...(step.active ? styles.activeStepLabel : {}),
+                        }}
+                      >
+                        {step.label}
+                      </div>
+                      {index === 0 && (
+                        <Typography
+                          variant="caption"
+                          color="textSecondary"
+                        >
+                          {orderDate}
+                        </Typography>
+                      )}
+                      {index < steps.length - 1 && (
+                        <div
+                          style={{
+                            ...styles.stepLine,
+                            ...(steps[index + 1].completed ? styles.activeStepLine : {}),
+                          }}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {status === "Đã hủy" && (
+                  <Box
+                    display="flex"
+                    flexDirection="column"
+                    alignItems="flex-start"
+                    style={{
+                      backgroundColor: "#fff9e6", // Light yellow background
+                      padding: "8px 16px",
+                    }}
+                  >
+                    <Typography variant="body1">
+                      <h4>Đã hủy đơn hàng</h4>
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      color="textSecondary"
+                      style={{ fontSize: "20px" }}
+                    >
+                      vào 20:48 22-10-2024.
+                    </Typography>
+                  </Box>
+                )}
+                <section
+                  style={{
+                    borderTop: '2px dashed rgba(128, 128, 128, 0.4)',
+                    margin: '10px 0',
+                  }}
+                />
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                  <Box display="flex" alignItems="center">
+                    <Typography variant="body1" >
+                      <h4>Người đặt hàng: {fullNameAdd}</h4>
+                    </Typography>
+                  </Box>
+                  {status !== "Đã hủy" && (
+                    <Typography variant="h6" color="textSecondary" gutterBottom>
+                      MÃ ĐƠN HÀNG: {orderId}
+                    </Typography>
+                  )}
+                </Box>
+                <section
+                  style={{
+                    borderTop: '2px dashed rgba(128, 128, 128, 0.4)',
+                    margin: '10px 0',
+                  }}
+                />
 
-        <div className="header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h3>Người đặt hàng: {fullNameAdd}</h3>
-          <div className="order-status">
-            <strong>Trạng thái: </strong>
-            <span>{status}</span>
-          </div>
-        </div>
+                {orderDetails.map((item, index) => (
+                  <Box display="flex" alignItems="center" style={{ marginBottom: "25px", marginTop: "-15px" }} key={index}>
+                    <img src={item.productImage} alt="Product" style={{ width: "100px", marginRight: "16px" }} />
+                    <Box>
+                      <Typography variant="h6" gutterBottom>
+                        {item.productName}
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary" style={{ color: "black" }}>
+                        Phân loại hàng: {item.size}, {item.color}
+                      </Typography>
+                      <Box display="flex" justifyContent="space-between">
+                        <Typography variant="body2" color="textSecondary" style={{ color: "black" }}>
+                          Số lượng: {item.productQuantity}
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary" style={{ marginLeft: "710px", color: "red" }}>
+                          đ{new Intl.NumberFormat('vi-VN').format(item.productPrice)}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                ))}
 
-        <table className="order-table">
-          <thead>
-            <tr>
-              <th>Hình ảnh</th>
-              <th>Sản phẩm</th>
-              <th>Đơn giá</th>
-              <th>Số lượng</th>
-              <th>Kích thước</th>
-              <th>Màu sắc</th>
-              <th>Tạm tính</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orderDetails.length > 0 ? (
-              orderDetails.map((item, index) => (
-                <tr key={index}>
-                  <td><img src={item.image} className="product-image" /></td>
-                  <td>{item.productName}</td>
-                  <td>{item.productPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
-                  <td>{item.productQuantity}</td>
-                  <td>{item.size || 'N/A'}</td>
-                  <td>{item.color || 'N/A'}</td>
-                  <td>{new Intl.NumberFormat('vi-VN', {
-                    style: 'currency',
-                    currency: 'VND',
-                  }).format(item.productPrice * item.productQuantity)}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="7">No products found.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-        <div className="order-summary" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', width: '320px', marginLeft: 'auto' }}>
-          <div className="status" style={{ display: 'flex', justifyContent: 'space-between', width: '300px', marginBottom: '10px' }}>
-            <strong>Tổng tiền:</strong>
-            <span>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalSubtotal)}</span>
-          </div>
-          <div className="shipping-fee" style={{ display: 'flex', justifyContent: 'space-between', width: '300px', marginBottom: '10px' }}>
-            <strong>Phí vận chuyển:</strong>
-            <span>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(shippingFee)}</span>
-          </div>
-          <div className="total" style={{ display: 'flex', justifyContent: 'space-between', width: '300px' }}>
-            <strong>Thành tiền:</strong>
-            <span>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(finalTotal)}</span>
-          </div>
-        </div>
+                <section
+                  style={{
+                    borderTop: '2px dashed rgba(128, 128, 128, 0.4)',
+                    margin: '10px 0',
+                    marginTop: "-10px",
+                  }}
+                />
+                {status !== "Đã hủy" && (
+                  <>
+                    <TableContainer
+                      component={Paper}
+                      style={{ marginTop: '-10px', borderRadius: '0px', overflow: 'hidden' }}
+                    >
+                      <Table style={{ borderCollapse: 'collapse' }}>
+                        <TableBody>
+                          <TableRow style={{ border: '1px solid #ddd' }}>
+                            <TableCell
+                              align="right"
+                              style={{ fontWeight: 'bold', padding: '12px 16px', border: '1px solid #ddd', width: '610px' }}
+                            >
+                              Tổng tiền hàng
+                            </TableCell>
+                            <TableCell
+                              align="right"
+                              style={{ padding: '12px 16px', border: '1px solid #ddd' }}
+                            >
+                              đ{formattedTotalSubtotal}
+                            </TableCell>
+                          </TableRow>
+                          <TableRow style={{ border: '1px solid #ddd' }}>
+                            <TableCell
+                              align="right"
+                              style={{ fontWeight: 'bold', padding: '12px 16px', border: '1px solid #ddd' }}
+                            >
+                              Phí vận chuyển
+                            </TableCell>
+                            <TableCell
+                              align="right"
+                              style={{ padding: '12px 16px', border: '1px solid #ddd' }}
+                            >
+                              đ{new Intl.NumberFormat('vi-VN').format(shippingFee)}
+                            </TableCell>
+                          </TableRow>
+                          <TableRow style={{ border: '1px solid #ddd' }}>
+                            <TableCell
+                              align="right"
+                              style={{ fontWeight: 'bold', padding: '12px 16px', border: '1px solid #ddd' }}
+                            >
+                              Thành tiền
+                            </TableCell>
+                            <TableCell
+                              align="right"
+                              style={{ padding: '12px 16px', color: '#f5222d', fontWeight: 'bold', border: '1px solid #ddd' }}
+                            >
+                              ₫{formattedFinalTotal}
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
 
-        <style>{`
-          .history-order-detail {
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-          }
-          .header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-          }
-          .back-button {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            margin-right: 20px;
-          }
-          .order-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            overflow: hidden;
-          }
-          .order-table th, .order-table td {
-            padding: 12px;
-            border: 1px solid #ddd;
-            text-align: center;
-            transition: background-color 0.3s;
-          }
-          .order-table th {
-            background-color: #212529;
-            color: white;
-            font-weight: bold;
-          }
-          .order-table tr:hover {
-            background-color: #f1f1f1;
-          }
-          .product-image {
-            width: 50px;
-            height: 50px;
-            border-radius: 4px;
-            object-fit: cover;
-          }
-          .order-summary {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-          }
-          .shipping-fee {
-            background-color: #ffc107;
-            padding: 10px;
-            color: black;
-            border-radius: 4px;
-          }
-          .status {
-            background-color: #17a2b8;
-            padding: 10px;
-            color: white;
-            border-radius: 4px;
-          }
-          .total {
-            background-color: #28a745;
-            padding: 10px;
-            color: white;
-            border-radius: 4px;
-            text-align: right;
-          }
-        `}</style>
-      </div>
+
+                    <TableContainer
+                      component={Paper}
+                      style={{ marginTop: '-10px', borderRadius: '0px', overflow: 'hidden', border: '1px solid #ddd', marginTop: "10px" }}
+                    >
+                      <Table style={{ borderCollapse: 'collapse' }}>
+                        <TableBody>
+                          <TableRow style={{ border: '1px solid #ddd' }}>
+                            <TableCell
+                              align="right"
+                              style={{ fontWeight: 'bold', padding: '12px 16px', border: '1px solid #ddd' }}
+                            >
+                              Phương thức thanh toán
+                            </TableCell>
+                            <TableCell
+                              align="right"
+                              style={{ padding: '12px 16px', border: '1px solid #ddd', width: '370px' }}
+                            >
+                              {payMethod}
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </>
+                )}
+                {status === "Đã hủy" && (
+                  <>
+                    <TableContainer
+                      component={Paper}
+                      style={{ marginTop: '-10px', borderRadius: '0px', overflow: 'hidden', marginTop: "10px" }}
+                    >
+                      <Table style={{ borderCollapse: 'collapse' }}>
+                        <TableBody>
+                          <TableRow style={{ border: '1px solid #ddd' }}>
+                            <TableCell
+                              align="right"
+                              style={{ fontWeight: 'bold', padding: '12px 16px', border: '1px solid #ddd' }}
+                            >
+                              Phương thức thanh toán
+                            </TableCell>
+                            <TableCell
+                              align="right"
+                              style={{ padding: '12px 16px', border: '1px solid #ddd', width: '370px' }}
+                            >
+                              COD
+                            </TableCell>
+                          </TableRow>
+                          <TableRow style={{ border: '1px solid #ddd' }}>
+                            <TableCell
+                              align="right"
+                              style={{ fontWeight: 'bold', padding: '12px 16px', border: '1px solid #ddd' }}
+                            >
+                              Mã đơn hàng
+                            </TableCell>
+                            <TableCell
+                              align="right"
+                              style={{ padding: '12px 16px', border: '1px solid #ddd' }}
+                            >
+                              7945700590
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </>
+                )}
+              </Paper>
+            </Grid>
+          </Grid>
+        </Box>
+      </ArgonBox>
       <Footer />
     </>
   );

@@ -17,7 +17,6 @@ import routes from "routes";
 import { useArgonController, setMiniSidenav, setOpenConfigurator } from "context";
 import brand from "assets/images/logo-ct.png";
 import brandDark from "assets/images/logo-ct-dark.png";
-import Cookies from 'js-cookie';
 import ProtectedRoute from './ProtectedRoute ';
 import "assets/css/nucleo-icons.css";
 import "assets/css/nucleo-svg.css";
@@ -114,18 +113,20 @@ export default function App() {
   const filteredRoutes = routes.filter(route => route.showInSidenav !== false);
 
   // Kiểm tra nếu đường dẫn hiện tại là /feature-section
-  const shouldShowSidenav = 
-  pathname !== "/feature-section" 
-  && pathname !== "/ShopDetail" 
-  && pathname !== "/Shop" 
-  && pathname !== "/Cart" 
-  && pathname !== "/Contact" 
-  && pathname !== "/Checkout" 
-  && pathname !== "/Backup" 
-  && pathname !== "/Favorite"
-  && pathname !== "/Complete"
-  && pathname !== "/History"
-  && !pathname.startsWith("/history-order/");
+  const shouldShowSidenav =
+    pathname !== "/feature-section"
+    && pathname !== "/ShopDetail"
+    && pathname !== "/Shop"
+    && pathname !== "/Cart"
+    && pathname !== "/Contact"
+    && pathname !== "/Checkout"
+    && pathname !== "/Backup"
+    && pathname !== "/Favorite"
+    && pathname !== "/Complete"
+    && pathname !== "/History"
+    && pathname !== "/chatAI"
+    && pathname !== "/chatbot"
+    && !pathname.startsWith("/history-order/");
   ;
 
   return direction === "rtl" ? (

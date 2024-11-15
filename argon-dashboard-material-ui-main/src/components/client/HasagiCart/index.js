@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Header from "components/client/HasagiHeader";
+import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
 import { FaTimes } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +12,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Link } from "react-router-dom";
 import Navbar from "../HasagiNavbar";
 import aboutImage from "layouts/assets/img/shopping.png";
-
+import CartService from"../../../services/CartService";
 const Cart = () => {
     const [cartItems, setCartItems] = useState([]);
     const [address, setAddress] = useState(null);
@@ -38,7 +38,7 @@ const Cart = () => {
 
         try {
             const [cartResponse, addressResponse] = await Promise.all([
-                axios.get(`http://localhost:3000/api/cart/account?accountId=${accountId}`),
+              CartService.getCart(),
                 axios.get(`http://localhost:3000/api/addresses/exists?accountId=${accountId}`, { withCredentials: true })
             ]);
             setCartItems(cartResponse.data);
@@ -202,6 +202,8 @@ const Cart = () => {
         }
     };
 
+
+
     return (
         <>
             <ToastContainer />
@@ -212,7 +214,8 @@ const Cart = () => {
                     </div>
                 </div>
             )}
-            <Header />
+            <HasagiNav />
+            <Navbar />
             <div className="container-fluid py-2">
                 <div className="row px-xl-5">
                     <div className="col-lg-12 mb-5" id="tableAddCart">

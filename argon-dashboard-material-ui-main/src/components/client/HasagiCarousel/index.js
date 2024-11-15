@@ -1,99 +1,91 @@
-import React, { useState, useEffect } from "react";
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React from "react";
+import aboutImage4 from "layouts/assets/img/offer-1.jpg";
+import aboutImage from "layouts/assets/img/h1.jpg";
+import aboutImage1 from "layouts/assets/img/h2.jpg";
+import aboutImage2 from "layouts/assets/img/carousel-3.jpg";
+import 'layouts/assets/css/style.css';
 import { Carousel } from 'react-bootstrap';
-import BannerDataService from "../../../services/BannerServices";
-import ArgonBox from "components/ArgonBox";
-import Grid from '@mui/material/Grid';
-import { Paper } from "@mui/material";
 
-const smallBannerUrl = "https://vending-cdn.kootoro.com/torov-cms/upload/image/1669358914523-kh%C3%A1i%20ni%E1%BB%87m%20qu%E1%BA%A3ng%20c%C3%A1o%20banner%20tr%C3%AAn%20website.jpg"; // Use the specific URL you provided
-const smallBannerUrl1 = "https://img.timviec.com.vn/2021/07/banner-la-gi-1.jpg"; // Use the specific URL you provided
-
-const ImageCarousel = () => {
-    const [banners, setBanners] = useState([]);
-    const [loading, setLoading] = useState(true);
-
-    const getBanners = async () => {
-        try {
-            const data = await BannerDataService.getAllBanners();
-            setBanners(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-        } catch (error) {
-            console.error("Failed to fetch banners:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        getBanners();
-    }, []);
-
-    if (loading) {
-        return <p>Loading banners...</p>;
-    }
-
+const HasagiCau = () => {
     return (
-        <ArgonBox mt={5}>
-            <Grid container spacing={2}>
-                {/* Cột 8 */}
-                <Grid item xs={12} sm={8}>
-                    <div className="carousel-container" style={styles.carouselContainer}>
+        <div className="container-fluid mb-3 py-3" style={{ marginTop: "60px" }}>
+            <div className="row px-xl-5">
+                <div className="col-lg-8">
+                    <div id="header-carousel" className="carousel slide carousel-fade mb-30 mb-lg-0">
                         <Carousel
-                            prevIcon={<span style={styles.customPrevIcon}>&lt;</span>}  // Biểu tượng mũi tên trái
-                            nextIcon={<span style={styles.customNextIcon}>&gt;</span>}  // Biểu tượng mũi tên phải
-                            fade
-                            interval={3000}
+                            interval={2000}
+                            indicators={true}
                         >
-                            {banners.map((banner, index) => (
-                                banner.imageUrls.map((imageUrl, imgIndex) => (
-                                    <Carousel.Item key={`${banner.id}-${imgIndex}`}>
-                                        <img
-                                            className="d-block w-100"
-                                            style={styles.carouselImage}
-                                            src={imageUrl}
-                                            alt={banner.title || `Banner ${index + 1} Image ${imgIndex + 1}`}
-                                        />
-                                    </Carousel.Item>
-                                ))
-                            ))}
+                            <Carousel.Item style={{ height: '420px' }}>
+                                <img
+                                    className="d-block w-100"
+                                    src={aboutImage}
+                                    alt="First slide"
+                                    style={{ objectFit: 'cover', height: '100%' }}
+                                />
+                                <Carousel.Caption className="d-flex flex-column align-items-center justify-content-center">
+                                    <div style={{ maxWidth: '700px' }}>
+                                        <h1 className="display-4 text-white mb-3 animate__animated animate__fadeInDown">Men Fashion</h1>
+                                        <p className="mx-md-5 px-5 animate__animated animate__bounceIn">
+                                            Phong cách thời trang không bị lỗi thời, thường mang tính trang trọng và tinh tế.
+                                        </p>
+                                    </div>
+                                </Carousel.Caption>
+                            </Carousel.Item>
+                            <Carousel.Item style={{ height: '420px' }}>
+                                <img
+                                    className="d-block w-100"
+                                    src={aboutImage1}
+                                    alt="Second slide"
+                                    style={{ objectFit: 'cover', height: '100%' }}
+                                />
+                                <Carousel.Caption className="d-flex flex-column align-items-center justify-content-center">
+                                    <div style={{ maxWidth: '700px' }}>
+                                        <h1 className="display-4 text-white mb-3 animate__animated animate__fadeInDown">Women Fashion</h1>
+                                        <p className="mx-md-5 px-5 animate__animated animate__bounceIn">
+                                            Phong cách thời trang tự do, phóng khoáng với cảm hứng từ nghệ thuật dân gian và thiên nhiên.
+                                        </p>
+                                    </div>
+                                </Carousel.Caption>
+                            </Carousel.Item>
+                            <Carousel.Item style={{ height: '420px' }}>
+                                <img
+                                    className="d-block w-100"
+                                    src={aboutImage2}
+                                    alt="Third slide"
+                                    style={{ objectFit: 'cover', height: '100%' }}
+                                />
+                                <Carousel.Caption className="d-flex flex-column align-items-center justify-content-center">
+                                    <div style={{ maxWidth: '700px' }}>
+                                        <h1 className="display-4 text-white mb-3 animate__animated animate__fadeInDown">Kids Fashion</h1>
+                                        <p className="mx-md-5 px-5 animate__animated animate__bounceIn">
+                                            Phong cách thời trang dành cho trẻ em với sự thoải mái và linh hoạt trong các hoạt động hàng ngày.
+                                        </p>
+                                    </div>
+                                </Carousel.Caption>
+                            </Carousel.Item>
                         </Carousel>
                     </div>
-                </Grid>
-
-                {/* Cột 4 */}
-                <Grid item xs={12} sm={4}>
-                    <ArgonBox display='flex' flexDirection='column' justifyContent='contetn'>
-                        <ArgonBox component='img' src={smallBannerUrl} pb={1} borderRadius='lg' height={170} />
-                        <ArgonBox component='img' src={smallBannerUrl1} borderRadius='lg' height={170} />
-                    </ArgonBox>
-                </Grid>
-            </Grid>
-        </ArgonBox>
+                </div>
+                <div className="col-lg-4">
+                    <div className="product-offer mb-30" style={{ height: "200px" }}>
+                        <img className="img-fluid" src={aboutImage4} alt="Offer 1" />
+                        <div className="offer-text">
+                            <h6 className="text-white text-uppercase">Save 20%</h6>
+                            <h3 className="text-white mb-3">Special Offer</h3>
+                        </div>
+                    </div>
+                    <div className="product-offer mb-30" style={{ height: "200px" }}>
+                        <img className="img-fluid" src={aboutImage4} alt="Offer 1" />
+                        <div className="offer-text">
+                            <h6 className="text-white text-uppercase">Save 20%</h6>
+                            <h3 className="text-white mb-3">Special Offer</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
-};
+}
 
-const styles = {
-    carouselContainer: {
-        borderRadius: '10px',
-        boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
-    },
-    carouselImage: {
-        height: 'auto',
-        objectFit: 'cover',
-        borderRadius: '10px',
-    },
-    customPrevIcon: {
-        fontSize: '2rem',
-        color: 'white',
-        background: 'rgba(0, 0, 0, 0.3)',
-        marginLeft: '40px',
-    },
-    customNextIcon: {
-        fontSize: '2rem',
-        color: 'white',
-        background: 'rgba(0, 0, 0, 0.3)',
-        marginRight: '40px',
-    },
-};
-
-export default ImageCarousel;
+export default HasagiCau;

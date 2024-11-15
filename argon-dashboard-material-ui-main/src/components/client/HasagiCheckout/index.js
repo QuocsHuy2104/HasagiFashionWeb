@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
 import "components/client/assets/css/style.css";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCcVisa, faCcMastercard, faCcAmex } from '@fortawesome/free-brands-svg-icons';
 import ArgonButton from "components/ArgonButton";
 import AddressSelection from "components/client/HasagiBackup1";
 import axios from 'axios';
@@ -11,8 +9,9 @@ import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
 import { ToastContainer, toast } from 'react-toastify';
-import Navbar from '../HasagiNavbar';
-
+import VoucherService from "../../../services/VoucherServices";
+import { Card, Container, Button, Row, Col } from "react-bootstrap";
+import CheckoutService from '../../../services/CheckoutServices';
 const Checkout = () => {
     const [selectedPayment, setSelectedPayment] = useState('');
     const [showPaymentButtons, setShowPaymentButtons] = useState(true);
@@ -30,7 +29,11 @@ const Checkout = () => {
     const [selectedAddress, setSelectedAddress] = useState(null);
     const navigate = useNavigate();
     const [shipFee, setShipFee] = useState(null);
-
+    const [selectedVoucher, setSelectedVoucher] = useState(null);
+    const [vouchers, setVouchers] = useState([]);
+    const [usedVouchers, setUsedVouchers] = useState([]);
+    const [accountId, setAccountId] = useState(Cookies.get('accountId'));
+    const [showVouchers, setShowVouchers] = useState(false);
 
 
     useEffect(() => {
@@ -43,8 +46,9 @@ const Checkout = () => {
                 const addressesId = new URLSearchParams(window.location.search).get('id');
                 if (addressesId) {
                     const response = await axios.get(`http://localhost:3000/api/addresses/${addressesId}`);
-                    console.log("Fetched address:", response.data); // Kiểm tra dữ liệu
                     setAddress(response.data);
+
+                    console.log(address);
                     await fetchProvinces();
                 } else {
                     console.error("No address ID found in the URL");
@@ -66,7 +70,7 @@ const Checkout = () => {
                 });
                 if (response.data && response.data.districtCode) {
                     setAddress(response.data);
-                    console.log("Fetched address:", response.data);
+                    console.log(address);
                 } else {
                     console.error("District code is missing in the address data");
                 }
@@ -94,7 +98,7 @@ const Checkout = () => {
     const fetchProvinces = async () => {
         try {
             const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/province', {
-                headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' }
+                headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' }
             });
             setProvinces(response.data.data);
         } catch (error) {
@@ -107,11 +111,13 @@ const Checkout = () => {
         try {
             const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee', {
                 headers: {
-                    'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f'
+                    'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d'
                 },
                 params: {
                     from_district_id: XuanKhanhDistrictID,
+                    from_ward_code: "550113",
                     to_district_id: address.districtCode,
+                    to_ward_code: address.wardCode,
                     weight: 1000,
                     length: 10,
                     width: 10,
@@ -121,9 +127,9 @@ const Checkout = () => {
                     coupon_code: ""
                 }
             });
-            console.log("Shipping fee response:", response.data);
             setShipFee(response.data.data);
         } catch (error) {
+            console.log(error);
         }
     };
 
@@ -140,7 +146,7 @@ const Checkout = () => {
     const fetchDistricts = async (provinceId) => {
         try {
             const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/district', {
-                headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' },
+                headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' },
                 params: { province_id: provinceId }
             });
             setDistricts(response.data.data);
@@ -152,7 +158,7 @@ const Checkout = () => {
     const fetchWards = async (districtId) => {
         try {
             const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/ward', {
-                headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' },
+                headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' },
                 params: { district_id: districtId }
             });
             setWards(response.data.data);
@@ -246,7 +252,7 @@ const Checkout = () => {
             provinceID: address.provinceID,
             districtCode: address.districtCode,
             wardCode: address.wardCode,
-           
+            fullName: address.fullName
         };
 
         const cartDetailsDTO = selectedItems.map(item => ({
@@ -255,33 +261,42 @@ const Checkout = () => {
             price: item.price,
         }));
 
-        const accountId = Cookies.get('accountId');
-        setIsLoading(true); // Set loading state to true at the start
+        const productDetailIdSelected = selectedItems.map(item => item.id);
+
+
+        const payStatusDirect = 'Chưa thanh toán';
+        const voucherId = selectedVoucher ? selectedVoucher.id : null;
+        const checkoutDataDirect = {
+            addressDTO,
+            cartDetails: cartDetailsDTO,
+            payMethod: selectedPayment,
+            payStatus: payStatusDirect,
+            voucherId: voucherId,
+            shippingFree: shipFee.total,
+            fullName: `${address.address}, ${getAddressNameById(address.wardCode, wards, 'ward')}, ${getAddressNameById(address.districtCode, districts, 'district')}, ${getAddressNameById(address.provinceID, provinces, 'province')}`,
+            productDetailIdSelected: productDetailIdSelected
+        };
+        const payStatusBank = 'Đã thanh toán';
+        const checkoutDataBank = {
+            addressDTO,
+            cartDetails: cartDetailsDTO,
+            payMethod: selectedPayment,
+            payStatus: payStatusBank,
+            voucherId: voucherId,
+            shippingFree: shipFee.total,
+            fullName: `${address.address}, ${getAddressNameById(address.wardCode, wards, 'ward')}, ${getAddressNameById(address.districtCode, districts, 'district')}, ${getAddressNameById(address.provinceID, provinces, 'province')}`,
+            productDetailIdSelected: productDetailIdSelected
+        };
+
+
+
+        setIsLoading(true);
         try {
-            // Handle cash on delivery
+            let response;
             if (selectedPayment === 'Direct Check') {
-                const payStatus = 'Not Paid'; // Status for cash on delivery
-                const response = await axios.post(
-                    `http://localhost:3000/api/checkout/${addressId}?accountId=${accountId}`,
-                    {
-                        addressDTO,
-                        cartDetails: cartDetailsDTO,
-                        payMethod: selectedPayment,
-                        payStatus: payStatus,
-                        shippingFree: shipFee.total,
-                        fullName: `${address.address} ${getAddressNameById(address.wardCode, wards, 'ward')} ${getAddressNameById(address.districtCode, districts, 'district')} ${getAddressNameById(address.provinceID, provinces, 'province')}`.trim()
-                    },
-                    {
-                        withCredentials: true,
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    }
-                );
+                response = await CheckoutService.postCheckout(addressId, checkoutDataDirect);
 
                 if (response.status === 200) {
-                    console.log("Order placed successfully!");
-                    toast.success("Đặt hàng thành công!");
                     await handleRemoveItems();
                     localStorage.setItem('address1', JSON.stringify(addressDTO));
                     localStorage.setItem('orderDetails1', JSON.stringify(cartDetailsDTO));
@@ -295,30 +310,9 @@ const Checkout = () => {
                     console.error('Failed to place order:', response.data);
                     toast.error("Có lỗi xảy ra khi đặt hàng.");
                 }
-
-                // Handle VNPAY payment
             } else if (selectedPayment === 'Bank Transfer') {
-                const payStatus = 'Paid';
-                const response = await axios.post(
-                    `http://localhost:3000/api/checkout/${addressId}?accountId=${accountId}`,
-                    {
-                        addressDTO,
-                        cartDetails: cartDetailsDTO,
-                        payMethod: selectedPayment,
-                        payStatus: payStatus,
-                        shippingFree: shipFee.total,
-                        fullName: `${address.address} ${getAddressNameById(address.wardCode, wards, 'ward')} ${getAddressNameById(address.districtCode, districts, 'district')} ${getAddressNameById(address.provinceID, provinces, 'province')}`.trim()
-                    },
-                    {
-                        withCredentials: true,
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    }
-                );
-
+                response = await CheckoutService.postCheckout(addressId, checkoutDataBank);
                 if (response.data.paymentUrl) {
-
                     localStorage.setItem('address1', JSON.stringify(addressDTO));
                     localStorage.setItem('orderDetails1', JSON.stringify(cartDetailsDTO));
                     Cookies.set('addressId', address.id);
@@ -340,6 +334,53 @@ const Checkout = () => {
         }
     };
 
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    };
+
+    useEffect(() => {
+        // Fetch all vouchers
+        const fetchVouchers = async () => {
+            try {
+                // Fetch all vouchers
+                const response = await VoucherService.getAllVouchers();
+
+                // Filter out only active vouchers
+                const activeVouchers = response.data.filter(voucher => voucher.isActive);
+
+                setVouchers(activeVouchers);
+            } catch (error) {
+                console.error("Error fetching vouchers:", error);
+            }
+        };
+
+
+        // Fetch used vouchers for the account
+        const fetchUsedVouchers = async () => {
+            if (accountId) {
+                try {
+                    const response = await VoucherService.getUsedVouchersByAccount(accountId);
+                    setUsedVouchers(response.data);
+                } catch (error) {
+                    console.error("Error fetching used vouchers:", error);
+                }
+            }
+        };
+
+        fetchVouchers();
+        fetchUsedVouchers();
+    }, [accountId]); 
+
+    const [appliedVoucherId, setAppliedVoucherId] = useState(null);
+    const handleApplyVoucher = (voucher) => {
+        setSelectedVoucher(voucher); // Save the voucher in state
+        toast.success(`Áp dụng mã giảm giá ${voucher.code} thành công!`);
+    };
+
     const goBack = () => {
         navigate('/Cart');
     };
@@ -355,7 +396,6 @@ const Checkout = () => {
                 </div>
             )}
             <HasagiNav />
-            <Navbar />
             <div className="container-fluid">
                 <div className="row px-xl-5">
                     <div className="header py-3">
@@ -377,14 +417,14 @@ const Checkout = () => {
                                     <>
                                         <div className="d-flex" style={{ alignItems: 'center' }}>
                                             <span style={{ fontWeight: 'bold', marginRight: '20px' }}>
-                                                {address.fullNameAddress} (+84) {address.numberPhone.startsWith('0') ? address.numberPhone.substring(1) : address.numberPhone}
+                                                {address.fullName} (+84) {address.numberPhone.startsWith('0') ? address.numberPhone.substring(1) : address.numberPhone}
                                             </span>
                                             <span style={{ whiteSpace: 'nowrap' }}>
-                                            {address.address},{" "}
-                                            {getAddressNameById(address.wardCode, wards, 'ward')},{" "}
-                                            {getAddressNameById(address.districtCode, districts, 'district')},{" "}
-                                            {getAddressNameById(address.provinceID, provinces, 'province')}
-                                        </span>
+                                                {address.address},{" "}
+                                                {getAddressNameById(address.wardCode, wards, 'ward')},{" "}
+                                                {getAddressNameById(address.districtCode, districts, 'district')},{" "}
+                                                {getAddressNameById(address.provinceID, provinces, 'province')}
+                                            </span>
                                             {address.status && (
                                                 <span className="badge bg-danger" style={{ fontSize: '0.75rem', marginLeft: '10px' }}>Mặc định</span>
                                             )}
@@ -478,6 +518,126 @@ const Checkout = () => {
                                                 người mua sẽ thanh toán tiền mặt (tiền đặt hàng) cho người giao hàng ngay tại thời điểm nhận hàng.</p>
                                         </div>
                                     )}
+
+                                    <Container className="my-1 mx-0">
+                                        {showVouchers && (
+                                            vouchers.length > 0 ? (
+                                                (() => {
+                                                    const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+                                                    const applicableVouchers = vouchers
+                                                        .filter(voucher =>
+                                                            totalAmount >= voucher.minimumOrderValue &&
+                                                            !usedVouchers.some(usedVoucher => usedVoucher.id === voucher.id)
+                                                        )
+                                                        .map(voucher => ({
+                                                            ...voucher,
+                                                            discountAmount: (totalAmount * voucher.discountPercentage) / 100,
+                                                        }))
+                                                        .sort((a, b) => b.discountAmount - a.discountAmount);
+
+                                                    return (
+                                                        <Row>
+                                                            {applicableVouchers.map((voucher, index) => (
+                                                                <Col key={voucher.id} md={6} className="mb-2 px-1" >
+                                                                    <Card
+                                                                        className="text-center border-0"
+                                                                        style={{
+                                                                            backgroundColor: appliedVoucherId === voucher.id ? '#d3d3d3' : '#fef5e3',
+                                                                            color: appliedVoucherId === voucher.id ? '#808080' : '#000',
+                                                                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                                                                            transition: 'transform 0.2s, box-shadow 0.2s',
+                                                                            flexWrap: 'nowrap',
+                                                                        }}
+                                                                        onMouseEnter={(e) => {
+                                                                            e.currentTarget.style.transform = 'scale(1.02)';
+                                                                            e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.3)';
+                                                                        }}
+                                                                        onMouseLeave={(e) => {
+                                                                            e.currentTarget.style.transform = 'scale(1)';
+                                                                            e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.2)';
+                                                                        }}
+                                                                    >
+
+                                                                        <Card.Body className='py-3'>
+                                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                                <span style={{
+                                                                                    background: appliedVoucherId === voucher.id
+                                                                                        ? 'linear-gradient(to right, #d3d3d3, #a9a9a9)'
+                                                                                        : 'linear-gradient(to right, #FFD700, #FFA500)',
+                                                                                    color: '#000',
+                                                                                    padding: '2px 4px',
+                                                                                    borderRadius: '8px',
+                                                                                    fontWeight: 'bold',
+                                                                                    fontSize: '0.85rem',
+                                                                                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                                                                                }}>
+                                                                                    VOUCHER
+                                                                                </span>
+                                                                                <h3 style={{ fontSize: '1.2rem', color: appliedVoucherId === voucher.id ? '#808080' : '#FF4500', margin: '0' }}>Giảm {voucher.discountPercentage}%</h3>
+                                                                            </div>
+                                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                                <Card.Title
+                                                                                    style={{
+                                                                                        fontSize: '1rem',
+                                                                                        color: appliedVoucherId === voucher.id ? '#808080' : '#FF4500',
+                                                                                        margin: '0',
+                                                                                        fontWeight: 600
+                                                                                    }}
+                                                                                >
+                                                                                    <span style={{ fontWeight: 'bold' }}> Mã: {voucher.code}</span>
+                                                                                </Card.Title>
+
+                                                                                {appliedVoucherId === voucher.id ? (
+                                                                                    <Button
+                                                                                        variant="secondary"
+                                                                                        style={{ marginLeft: '8px', padding: '6px 14px', fontSize: '0.8rem' }}
+                                                                                        onClick={() => {
+                                                                                            setAppliedVoucherId(null);
+                                                                                            setSelectedVoucher(null); // Cập nhật selectedVoucher về null để số tiền giảm về 0
+                                                                                        }}
+                                                                                    >
+                                                                                        Bỏ áp dụng
+                                                                                    </Button>
+
+                                                                                ) : (
+                                                                                    <Button
+                                                                                        variant="warning"
+                                                                                        onClick={() => {
+                                                                                            // Áp dụng voucher
+                                                                                            handleApplyVoucher(voucher);
+                                                                                            setAppliedVoucherId(voucher.id);  // Cập nhật voucher đang được áp dụng
+                                                                                        }}
+                                                                                        style={{ marginLeft: '8px', padding: '6px 14px', fontSize: '0.8rem', background: 'linear-gradient(to right, #FF7F50, #FF4500)', color: 'white' }}
+                                                                                    >
+                                                                                        Áp dụng
+                                                                                    </Button>
+                                                                                )}
+
+                                                                            </div>
+                                                                            <Card.Text style={{ fontSize: '0.8rem', color: '#6c757d', textAlign: 'left' }}>
+                                                                                Giảm {voucher.discountPercentage}% khi hóa đơn từ {voucher.minimumOrderValue}đ
+                                                                                <div style={{ marginTop: '4px', fontSize: '0.75rem' }}>
+                                                                                    HSD: {formatDate(voucher.endDate)}
+                                                                                </div>
+                                                                            </Card.Text>
+                                                                        </Card.Body>
+                                                                    </Card>
+                                                                </Col>
+                                                            ))}
+                                                        </Row>
+                                                    );
+                                                })()
+                                            ) : (
+                                                <Card className="text-center mb-4">
+                                                    <Card.Body>
+                                                        <Card.Text>No vouchers available</Card.Text>
+                                                    </Card.Body>
+                                                </Card>
+                                            )
+                                        )}
+                                    </Container>
+
                                 </div>
                                 <div className="col-lg-5">
                                     {selectedPayment === 'Direct Check' && (
@@ -497,6 +657,14 @@ const Checkout = () => {
                                             </ArgonButton>
                                         </div>
                                     )}
+                                    <Button
+                                        onClick={() => setShowVouchers(prevState => !prevState)}
+                                        className="mb-3"
+                                        style={{ backgroundColor: 'yellow', color: 'black' }} // Màu nền vàng và chữ đen
+                                    >
+                                        {showVouchers ? 'Ẩn' : 'Áp dụng voucher'}
+                                    </Button>
+
                                     <div className="border-bottom pt-4" style={{ padding: '0 20px' }}>
                                         <div className="d-flex justify-content-between mb-3">
                                             <h6 className="font-weight-medium" style={{ fontSize: '1.2rem' }}>Tổng tiền hàng</h6>
@@ -510,12 +678,22 @@ const Checkout = () => {
                                                 {shipFee?.total ? shipFee.total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) : 'Đang tính...'}
                                             </h6>
                                         </div>
+                                        <div className="d-flex justify-content-between">
+                                            <h6 className="font-weight-medium" style={{ fontSize: '1.2rem' }}>Giảm</h6>
+                                            <h6 style={{ fontSize: '1.2rem' }}>
+                                                {selectedVoucher ? (cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) * selectedVoucher.discountPercentage / 100) : 0}đ
+                                            </h6>
+                                        </div>
                                     </div>
                                     <div className="pt-3" style={{ padding: '0 20px' }}>
                                         <div className="d-flex justify-content-between mt-2">
                                             <h5 className="font-weight-bold">Tổng thanh toán</h5>
                                             <h5 className="font-weight-bold" style={{ color: '#ee4d2d' }}>
-                                                {(cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) + (shipFee?.total || 0)).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                                                {(
+                                                    cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) *
+                                                    (selectedVoucher ? (1 - selectedVoucher.discountPercentage / 100) : 1) +
+                                                    (shipFee?.total || 0)
+                                                ).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                                             </h5>
                                         </div>
                                     </div>
@@ -542,7 +720,7 @@ const Checkout = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div >
             <Footer />
             {showBackup && <AddressSelection show={showBackup} onClose={handleAddressChange} addressId={addressId} />}
             <AddressSelection show={showModal} onClose={handleAddressModalClose} />

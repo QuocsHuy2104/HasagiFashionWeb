@@ -6,6 +6,8 @@ import axios from 'axios';
 import Backup3 from '../HasagiBackup3';
 import Backup2 from '../HasagiBackup2';
 import Cookies from "js-cookie";
+import { ToastContainer, toast } from 'react-toastify';
+import AddressService from '../../../services/AddressServices';
 
 const AddressSelection = ({ show, onClose }) => {
     const [address, setAddress] = useState([]);
@@ -18,28 +20,26 @@ const AddressSelection = ({ show, onClose }) => {
     const [showBackup1, setShowBackup1] = useState(false);
     const [backupAddress, setBackupAddress] = useState(null);
     const navigate = useNavigate();
-
+ 
     const fetchAddress = async () => {
-        const accountId = Cookies.get('accountId');
+ 
         try {
             setLoading(true);
-            const response = await axios.get(`http://localhost:3000/api/addresses/account?accountId=${accountId}`, {
-                withCredentials: true
-            });
+            const response = await AddressService.getAllAddress(); 
             let addresses = response.data;
 
             // Fetching the province, district, and ward names directly from the GHN API
             for (const addr of addresses) {
                 // Fetch province name
                 const provinceData = await axios.get(`https://online-gateway.ghn.vn/shiip/public-api/master-data/province`, {
-                    headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' }
+                    headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' }
                 });
                 const province = provinceData.data.data.find(p => p.ProvinceID === Number(addr.provinceID));
                 addr.provinceName = province ? province.ProvinceName : 'Không xác định';
 
                 // Fetch district name
                 const districtData = await axios.get(`https://online-gateway.ghn.vn/shiip/public-api/master-data/district`, {
-                    headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' },
+                    headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' },
                     params: { province_id: addr.provinceID }
                 });
                 const district = districtData.data.data.find(d => d.DistrictID === Number(addr.districtCode));
@@ -47,7 +47,7 @@ const AddressSelection = ({ show, onClose }) => {
 
                 // Fetch ward name
                 const wardData = await axios.get(`https://online-gateway.ghn.vn/shiip/public-api/master-data/ward`, {
-                    headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' },
+                    headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' },
                     params: { district_id: addr.districtCode }
                 });
                 const ward = wardData.data.data.find(w => w.WardCode === String(addr.wardCode));
@@ -66,8 +66,6 @@ const AddressSelection = ({ show, onClose }) => {
             setLoading(false);
         }
     };
-
-
 
     useEffect(() => {
         if (show) {
@@ -107,15 +105,16 @@ const AddressSelection = ({ show, onClose }) => {
         try {
             const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa địa chỉ này?");
             if (!confirmDelete) return;
+
             const payload = {};
-            await axios.put(`http://localhost:3000/api/addresses/delete/${id}`, payload);
-            alert("Địa chỉ đã được xóa thành công");
-            fetchAddress();
+            await AddressService.removeAddress(id);
+            fetchAddress(); 
+            toast.success('Xóa địa chỉ thành công!');
         } catch (error) {
-            console.error("Lỗi khi xóa địa chỉ:", error);
-            alert("Xóa địa chỉ thất bại");
+            toast.error('Xóa địa chỉ thất bại!');
         }
     };
+
 
     const handleComplete = () => {
         if (selectedAddress) {
@@ -143,12 +142,10 @@ const AddressSelection = ({ show, onClose }) => {
     };
 
 
-
-
     const fetchDistricts = async (provinceId) => {
         try {
             const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/district', {
-                headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' },
+                headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' },
                 params: { province_id: provinceId }
             });
             setDistricts(prev => ({ ...prev, [provinceId]: response.data.data }));
@@ -158,11 +155,11 @@ const AddressSelection = ({ show, onClose }) => {
             }
         }
     };
-    
+
     const fetchWards = async (districtId) => {
         try {
             const response = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/ward', {
-                headers: { 'Token': '8d0588cd-65d9-11ef-b3c4-52669f455b4f' },
+                headers: { 'Token': '2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d' },
                 params: { district_id: districtId }
             });
             setWards(prev => ({ ...prev, [districtId]: response.data.data }));
@@ -173,12 +170,13 @@ const AddressSelection = ({ show, onClose }) => {
             }
         }
     };
-    
+
 
     if (!show && !showBackup) return null;
 
     return (
         <>
+            <ToastContainer />
             {show && !showBackup && !showBackup1 && (
                 <div className="modal" style={{ display: show ? 'block' : 'none' }}>
                     <div className="modal-dialog">
@@ -199,12 +197,12 @@ const AddressSelection = ({ show, onClose }) => {
                                                     style={{ marginRight: '10px' }}
                                                 />
                                                 <div className="ms-3">
-                                                    <div style={{ fontWeight: '500' }}>{addr.fullNameAddress} <span style={{ fontSize: '12px' }}>({addr.numberPhone})</span></div>
+                                                    <div style={{ fontWeight: '500' }}>{addr.fullName} <span style={{ fontSize: '12px' }}>({addr.numberPhone})</span></div>
                                                     <div style={{ fontSize: '12px', color: '#666' }}>
                                                         {addr.address},
-                                                        {addr.provinceName},
+                                                        {addr.wardName},
                                                         {addr.districtName},
-                                                        {addr.wardName}
+                                                        {addr.provinceName}
                                                     </div>
                                                     {addr.status && <span className="badge bg-danger" style={{ fontSize: '10px' }}>Mặc định</span>}
                                                 </div>
