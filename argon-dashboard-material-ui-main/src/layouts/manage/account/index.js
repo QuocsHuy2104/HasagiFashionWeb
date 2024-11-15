@@ -131,7 +131,7 @@ function Account() {
   const handleFileUpload = (downloadURL) => {
     setFormData((prevData) => ({
       ...prevData,
-      avatar: downloadURL, // Save the avatar URL
+      avatar: downloadURL, 
     }));
   };
 

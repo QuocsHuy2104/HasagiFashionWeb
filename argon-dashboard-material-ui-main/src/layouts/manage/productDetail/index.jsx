@@ -21,6 +21,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ProductService from "services/ProductServices";
 import ProductFormDialog from "./update";
+import ImageUploader from "./uploadImage";
 
 function ProductDetail() {
 
@@ -56,19 +57,24 @@ function ProductDetail() {
 
     const refreshData = async () => {
         try {
-          const detailRes = await ProductDetailService.getAllByProductId(product.id);
-          setProductDetails(detailRes.data);
+            const detailRes = await ProductDetailService.getAllByProductId(product.id);
+            setProductDetails(detailRes.data);
         } catch (error) {
-          console.error('Error refreshing product details:', error);
+            console.error('Error refreshing product details:', error);
         }
-      };
+    };
+
+    const handleUploadComplete = (urls) => {
+        console.log("Uploaded URLs:", urls);
+        // Lưu URLs hoặc thực hiện hành động khác
+    };
 
     const handleDeleteClick = async (row) => {
         try {
             await ProductDetailService.delete(row.id);
             toast.success("Product detail deleted successfully!");
-            const detailRes = await ProductDetailService.getAllByProductId(product.id);
-            setProductDetails(detailRes.data);
+            refreshData();
+
         } catch (error) {
             toast.error("Failed to delete product detail.");
             console.error("Error deleting product detail:", error);
@@ -149,7 +155,6 @@ function ProductDetail() {
         } catch (e) {
             console.error(e)
         }
-
     }
 
     const handleChange = (e) => {
@@ -262,8 +267,8 @@ function ProductDetail() {
                                     </ArgonBox>
                                 </Grid>
                             </Grid>
-
                         </ArgonBox>
+
                         <ArgonBox mx={7}>
                             <ArgonBox component="form" role="form" onSubmit={handleSubmit}>
 
@@ -374,7 +379,7 @@ function ProductDetail() {
                                             }}
                                             onReady={(editor) => {
                                                 const editorElement = editor.ui.view.editable.element;
-                                                editorElement.setAttribute('style', 'min-height: 300px');
+                                                editorElement.setAttribute('style', 'height: 300px');
                                             }}
                                         />
                                     </div>
@@ -435,6 +440,8 @@ function ProductDetail() {
                                     </ArgonButton>
                                 </ArgonBox>
 
+                                <ImageUploader onUploadComplete={handleUploadComplete} />
+
                             </ArgonBox>
                         </ArgonBox>
                     </Card>
@@ -472,7 +479,7 @@ function ProductDetail() {
                     </Card>
                 </ArgonBox>
             </ArgonBox>
-            <ProductFormDialog open={dialogOpen} onClose={handleCloseDialog} colors={colors} sizes={sizes} initialData={selectedRow}  productID={product.id} refreshData={refreshData} />
+            <ProductFormDialog open={dialogOpen} onClose={handleCloseDialog} colors={colors} sizes={sizes} initialData={selectedRow} productID={product.id} refreshData={refreshData} />
             <ToastContainer />
         </DashboardLayout>
     );

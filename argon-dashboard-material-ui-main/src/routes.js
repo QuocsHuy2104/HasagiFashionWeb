@@ -66,6 +66,9 @@ import Complete from "components/client/HasagiComplete";
 import History from "components/client/HasagiHistory";
 import HistoryOrderDetail from "components/client/HasagiHistoryDetail";
 import ProductDetail from "layouts/manage/productDetail";
+import { isAuthenticated } from "utils/Authen";
+import { Navigate } from "react-router-dom";
+
 
 const routes = [
   {
@@ -85,7 +88,7 @@ const routes = [
     icon: (
       <ArgonBox component="i" color="warning" fontSize="14px" className="ni ni-single-copy-04" />
     ),
-    component: <SignIn />,
+    component: isAuthenticated() ? <Navigate to="/" /> : <SignIn />,
   },
   {
     name: "Sign Up",
