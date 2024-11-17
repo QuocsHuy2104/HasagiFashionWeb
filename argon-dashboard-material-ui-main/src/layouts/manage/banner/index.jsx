@@ -5,6 +5,7 @@ import Footer from "../../../examples/Footer";
 import { Container, Row, Col } from "react-bootstrap";
 import Card from "@mui/material/Card";
 import DashboardLayout from "../../../examples/LayoutContainers/DashboardLayout";
+import DashboardNavbar from "../../../examples/Navbars/DashboardNavbar";
 import ArgonBox from "../../../components/ArgonBox";
 import ArgonTypography from "../../../components/ArgonTypography";
 
@@ -14,25 +15,18 @@ function Banner() {
 
     const getBannerIdHandler = (id) => {
         console.log("The ID of document to be edited: ", id);
-        setBannerId(id);  // Sửa lỗi ở đây
+        setBannerId(id);
     };
 
     return (
         <>
             <DashboardLayout>
+                <DashboardNavbar />
                 <ArgonBox mb={5}>
                     <Card>
                         <ArgonBox display="flex" justifyContent="space-between" p={3}>
-                            <ArgonTypography variant="h6">Manage Banners</ArgonTypography>
+                            <ArgonTypography variant="h6">Quản lý Banner</ArgonTypography>
                         </ArgonBox>
-                        <Container>
-                            <Row>
-                                <Col>
-                                    <AddBanner id={bookId} setBannerId={setBannerId} />
-                                </Col>
-                            </Row>
-                        </Container>
-
                         <Container>
                             <Row>
                                 <Col>

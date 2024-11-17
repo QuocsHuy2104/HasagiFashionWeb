@@ -20,7 +20,9 @@ import StarBorderIcon from '@mui/icons-material/StarBorder';
 import PhotoCamera from '@mui/icons-material/PhotoCamera'; // Biểu tượng máy ảnh
 import reviewsService from "services/ReviewsServices";
 import Swal from 'sweetalert2';
-import ReactLoading from 'react-loading';
+import ReviewFilesService from '../../../services/ReviewFileServices';
+import { storage } from "../../../config/firebase-config";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 
 const History = () => {
@@ -45,13 +47,12 @@ const History = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [star, setStar] = useState(5);
   const [comment, setComment] = useState('');
-  const [image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
-  const [video, setVideo] = useState(null);
-  const [videoPreview, setVideoPreview] = useState(null);
   const [orderDetailId, setOrderDetailId] = useState(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+
+  const [imageFiles, setImageFiles] = useState([]); 
+  const [videoFile, setVideoFile] = useState(null); 
 
   useEffect(() => {
     if (location.state?.activeTab) {
@@ -159,16 +160,13 @@ const History = () => {
   };
 
 
-  
+
   const handleReviewClick = (product) => {
     setSelectedProduct(product);
     setShowReviewModal(true);
-    console.log(product);
     const orderDetailId = product?.orderDetailId;
     setOrderDetailId(orderDetailId);
-    console.log("Selected OrderDetailId:", orderDetailId);
   };
-
 
   const handleClose = () => setShowReviewModal(false);
 
@@ -176,127 +174,141 @@ const History = () => {
     setStar(index + 1);
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImage(file); // Set the actual file to be used in form submission
-      setImagePreview(URL.createObjectURL(file)); // Create a preview URL to display the image
-    }
-  };
 
-  const handleVideoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setVideo(file); // Set the actual file to be used in form submission
-      setVideoPreview(URL.createObjectURL(file)); // Create a preview URL to display the video
-    }
-  };
-
-
-  const resetImageInput = () => {
-    setImage(null); // Reset state của ảnh
-    setImagePreview(null); // Reset preview ảnh
-    const imageInput = document.getElementById('image-upload');
-    if (imageInput) {
-      imageInput.value = ''; // Reset giá trị input
-    }
-  };
-
-  const resetVideoInput = () => {
-    setVideo(null); // Reset state của video
-    setVideoPreview(null); // Reset preview video
-    const videoInput = document.getElementById('video-upload');
-    if (videoInput) {
-      videoInput.value = ''; // Reset giá trị input
-    }
-  };
-
-
-  const handleSubmit = async (e) => {
+  const handleSubmitAndAddReviewFile = async (e) => {
     e.preventDefault();
-
+  
     if (!orderDetailId) {
       alert("Order Detail ID không hợp lệ!");
       return;
     }
-
+  
     const formData = new FormData();
-    formData.append('star', star);
-    formData.append('comment', comment);
-    formData.append('orderDetailId', orderDetailId);
-
-    if (image) {
-      formData.append('image', image);
-    }
-    if (video) {
-      formData.append('video', video);
-    }
-
+    formData.append("star", star);
+    formData.append("comment", comment);
+    formData.append("orderDetailId", orderDetailId);
+  
     try {
-      // Hiển thị hộp thoại với spinner ngay lập tức
       const swal = Swal.fire({
-        title: 'Đang xử lý...',
+        title: "Đang xử lý...",
         width: 500,
         height: 300,
         padding: "1em",
         color: "white",
-        background: "transparent", // Không có nền trắng khi xử lý
-        showConfirmButton: false, // Không hiển thị nút xác nhận trong khi spinner
-        allowOutsideClick: false, // Không cho phép đóng khi nhấp ra ngoài
+        background: "transparent",
+        showConfirmButton: false,
+        allowOutsideClick: false,
         customClass: {
-          popup: 'custom-popup', // Thêm lớp tùy chỉnh cho modal
+          popup: "custom-popup",
         },
         didOpen: () => {
-          const popup = document.querySelector('.swal2-popup');
-          // Ẩn thanh cuộn khi đang xử lý
-          popup.style.overflow = 'hidden'; // Ẩn thanh cuộn
-        }
+          const popup = document.querySelector(".swal2-popup");
+          popup.style.overflow = "hidden";
+        },
       });
-
-      // Sau khi tạo review, trì hoãn 2 giây
+  
+      // Gửi đánh giá
       const response = await reviewsService.createReview(formData);
-      console.log('Review created successfully:', response);
-
-      // Cập nhật nội dung modal sau khi hoàn thành
+      const reviewId = response.id;
+  
+      console.log("Phản hồi từ API:", response);
+      console.log("Review ID nhận được:", reviewId);
+  
+      if (!reviewId) {
+        throw new Error("Không lấy được ID review.");
+      }
+  
+      // Tải file (nếu có)
+      const imageUrls = [];
+      for (const imageFile of imageFiles) {
+        const storageRef = ref(storage, `review_files/${imageFile.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, imageFile);
+        await uploadTask;
+        const imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
+        imageUrls.push(imageUrl);
+      }
+  
+      // Tải video (nếu có)
+      let videoUrl = "";
+      if (videoFile) {
+        const videoStorageRef = ref(storage, `review_files/${videoFile.name}`);
+        const videoUploadTask = uploadBytesResumable(videoStorageRef, videoFile);
+        await videoUploadTask;
+        videoUrl = await getDownloadURL(videoUploadTask.snapshot.ref);
+      }
+  
+      if (!videoUrl && videoFile) {
+        throw new Error("URL video không có giá trị");
+      }
+  
+      const newReviewFile = {
+        imageUrls,
+        videoUrl,
+        reviewId: parseInt(reviewId, 10),
+      };
+  
+      await ReviewFilesService.createFileReviews(newReviewFile);
+  
       setTimeout(() => {
         swal.update({
           title: "Thành công!",
-          html: "Đánh giá thành công!",
+          html: "Đánh giá và thêm file review thành công!",
           icon: "success",
           color: "black",
           showConfirmButton: true,
-          customClass: {
-            popup: 'custom-popup', // Thêm lớp tùy chỉnh khi cập nhật modal
-          },
-          didOpen: () => {
-            const popup = document.querySelector('.swal2-popup');
-            // Sau khi hoàn tất, ẩn thanh cuộn
-            popup.style.overflow = 'hidden'; // Ẩn thanh cuộn nếu không muốn nó xuất hiện
-          },
-          background: "#fff", // Đặt lại nền trắng sau khi xử lý xong
+          background: "#fff",
         });
-      }, 2000); // Sau 2 giây
-
-      // Reset các input và trạng thái
+      }, 0);
+  
+      // Reset trạng thái
       setStar(5);
-      setComment('');
-      resetImageInput();
-      resetVideoInput();
-
+      setComment("");
+      setImageFiles([]);
+      setVideoFile(null);
     } catch (error) {
-      console.error('Error creating review:', error);
-      const errorMessage = error.response?.data?.message || 'Có lỗi xảy ra khi tạo đánh giá.';
+      console.error("Lỗi xử lý:", error);
+      const errorMessage = error.response?.data?.message || "Có lỗi xảy ra trong quá trình xử lý.";
       Swal.fire({
-        icon: 'error',
-        title: 'Lỗi',
+        icon: "error",
+        title: "Lỗi",
         text: errorMessage,
       });
     }
-
   };
+
+
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
   };
+
+  const handleImageChange = (e) => {
+    const files = e.target.files;
+    const newFiles = Array.from(files);
+    const limitedFiles = newFiles.slice(0, 5 - imageFiles.length);
+    setImageFiles([...imageFiles, ...limitedFiles]);
+  };
+
+
+  const handleVideoChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setVideoFile(file);
+    }
+  };
+
+  const handleRemoveImage = (index) => {
+    const updatedImages = imageFiles.filter((_, i) => i !== index);
+    setImageFiles(updatedImages);
+  };
+
+
+  const resetVideoInput = () => {
+    setVideoFile(null);
+    const inputFile = document.getElementById('video-upload');
+    inputFile.value = '';
+  };
+
+
 
   return (
     <>
@@ -514,6 +526,7 @@ const History = () => {
           </ArgonButton>
         </Box>
       </MuiModal>
+      
       {selectedProduct && (
         <BootstrapModal show={showReviewModal} size="lg">
           <BootstrapModal.Body>
@@ -552,7 +565,7 @@ const History = () => {
                     </div>
                   </div>
                 </div>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmitAndAddReviewFile}>
                   <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
                     <label style={{ fontWeight: 'bold', marginRight: '50px', fontSize: '18px' }}>Chất lượng sản phẩm:</label>
                     <div style={{ display: 'flex' }}>
@@ -572,7 +585,6 @@ const History = () => {
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
-                    {/* Nút Tải lên hình ảnh */}
                     <div style={{ marginRight: '5px' }}>
                       <input
                         type="file"
@@ -580,6 +592,7 @@ const History = () => {
                         accept="image/*"
                         style={{ display: 'none' }}
                         onChange={handleImageChange}
+                        multiple
                       />
                       <BootstrapButton
                         variant="outlined"
@@ -600,35 +613,43 @@ const History = () => {
                       </BootstrapButton>
                     </div>
 
-                    {imagePreview && (
-                      <div style={{ position: 'relative', marginRight: '3px' }}>
-                        <img
-                          src={imagePreview}
-                          alt="Selected"
-                          style={{
-                            width: '100px',
-                            height: '100px',
-                            borderRadius: '8px',
-                            objectFit: 'cover',
-                          }}
-                        />
-                        <IconButton
-                          style={{
-                            position: 'absolute',
-                            top: '2px',
-                            right: '2px',
-                            padding: '0',
-                            color: '#fff',
-                            fontSize: '15px',
-                            backgroundColor: '#B8B8B8',
-                          }}
-                          onClick={resetImageInput} // Gọi hàm reset ảnh
-                        >
-                          <CloseIcon style={{ fontSize: '16px' }} />
-                        </IconButton>
-                      </div>
-                    )}
-                    {/* Nút Tải lên video */}
+
+
+                    <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                      {imageFiles.map((file, index) => (
+                        <div key={index} style={{ position: 'relative', marginRight: '3px' }}>
+                          <img
+                            src={URL.createObjectURL(file)} // Tạo URL tạm thời cho ảnh
+                            alt={`Review ${index}`}
+                            style={{
+                              width: '100px',
+                              height: '100px',
+                              borderRadius: '8px',
+                              objectFit: 'cover',
+                              marginRight: '3px'
+                            }}
+                          />
+                          {/* Icon Close chỉ hiển thị khi có ảnh */}
+                          <IconButton
+                            style={{
+                              position: 'absolute',
+                              top: '2px',
+                              right: '5px',
+                              padding: '0',
+                              color: '#fff',
+                              fontSize: '15px',
+                              backgroundColor: '#B8B8B8',
+                            }}
+                            onClick={() => handleRemoveImage(index)} // Xử lý xóa ảnh
+                          >
+                            <CloseIcon style={{ fontSize: '16px' }} />
+                          </IconButton>
+                        </div>
+                      ))}
+                    </div>
+
+
+
                     <div style={{ marginLeft: '1px' }}>
                       <input
                         type="file"
@@ -637,11 +658,12 @@ const History = () => {
                         style={{ display: 'none' }}
                         onChange={handleVideoChange}
                       />
-                      {videoPreview ? (
+
+                      {videoFile ? (
                         <div style={{ position: 'relative', marginTop: '10px' }}>
                           <video
-                            src={videoPreview}
                             controls
+                            src={URL.createObjectURL(videoFile)}
                             style={{
                               width: '100px',
                               height: '100px',
@@ -678,12 +700,14 @@ const History = () => {
                             height: '100px',
                             borderRadius: '8px',
                           }}
-                          onClick={() => document.getElementById('video-upload').click()}
+                          onClick={() => document.getElementById('video-upload').click()} // Tự động mở cửa sổ chọn file
                         >
-                          <Videocam style={{ fontSize: '48px', color: 'black' }} /> {/* Tăng kích thước icon */}
+                          <Videocam style={{ fontSize: '48px', color: 'black' }} />
                         </BootstrapButton>
                       )}
                     </div>
+
+
                   </div>
                   <textarea
                     rows="4"
@@ -705,14 +729,29 @@ const History = () => {
                     <BootstrapButton
                       type="submit"
                       variant="contained"
+                      onClick={handleSubmitAndAddReviewFile}
                       style={{
-                        color: '#000',
-                        backgroundColor: '#FFD700', // Yellow color for the Gửi đánh giá button
-                        borderColor: '#FFD700',
+                        color: '#fff',                
+                        backgroundColor: '#FFD700',    
+                        borderColor: '#FFD700',        
+                        padding: '10px 20px',         
+                        fontWeight: 'bold',         
+                        fontSize: '16px',           
+                        borderRadius: '8px',         
+                        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)', 
+                        transition: 'background-color 0.3s ease',    
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.style.backgroundColor = '#FFC107';  
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.backgroundColor = '#FFD700';  
                       }}
                     >
                       Gửi đánh giá
                     </BootstrapButton>
+
+
                   </div>
                   <Snackbar
                     open={openSnackbar}

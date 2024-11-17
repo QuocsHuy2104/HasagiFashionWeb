@@ -11,8 +11,6 @@ import CategoriesService from "../../../services/CategoryServices";
 function Category({ image, name }) {
     const imageUrl = image || "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/330px-No-Image-Placeholder.svg.png?20200912122019";
 
-    console.log("Image URL: ", imageUrl);
-
     return (
         <ArgonBox display="flex" alignItems="center" px={1} py={0.5}>
             <ArgonBox mr={2}>

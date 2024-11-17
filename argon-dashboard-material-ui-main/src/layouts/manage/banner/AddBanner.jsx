@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useCallback } from "react";
 import BannerDataService from "../../../services/BannerServices";
-import { Form, Alert, InputGroup, Button } from "react-bootstrap";
+import { Form, Alert } from "react-bootstrap";
+import ArgonButton from "../../../components/ArgonButton";
+import ArgonBox from "../../../components/ArgonBox";
 import { storage } from "../../../config/firebase-config";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 const AddBanner = ({ id, setBannerId }) => {
     const [title, setTitle] = useState("");
@@ -16,7 +18,10 @@ const AddBanner = ({ id, setBannerId }) => {
         setMessage({ error: false, msg: "" });
 
         if (title === "" || images.length === 0) {
-            setMessage({ error: true, msg: "All fields including images are mandatory!" });
+            setMessage({
+                error: true,
+                msg: "All fields including images are mandatory!",
+            });
             return;
         }
 
@@ -33,18 +38,21 @@ const AddBanner = ({ id, setBannerId }) => {
 
             if (id !== undefined && id !== "") {
                 await BannerDataService.updateBanner(id, newBanner);
-                setBannerId("");  // Reset banner ID after update
+                setBannerId(""); // Reset banner ID after update
                 setMessage({ error: false, msg: "Updated successfully!" });
             } else {
                 await BannerDataService.addBanner(newBanner);
-                setMessage({ error: false, msg: "New Banner added successfully!" });
+                setMessage({
+                    error: false,
+                    msg: "New Banner added successfully!",
+                });
             }
 
             // Reset form fields
             setTitle("");
             setImages([]);
             setPreviewUrls([]);
-            document.querySelector('input[type="file"]').value = null;  // Clear file input
+            document.querySelector('input[type="file"]').value = null; // Clear file input
         } catch (err) {
             setMessage({ error: true, msg: err.message });
         }
@@ -81,82 +89,142 @@ const AddBanner = ({ id, setBannerId }) => {
         const files = Array.from(e.target.files);
         setImages(files);
 
-        const previewUrls = files.map(file => URL.createObjectURL(file));
+        const previewUrls = files.map((file) => URL.createObjectURL(file));
         setPreviewUrls(previewUrls);
     };
 
     const handleRemoveImage = (index) => {
-        // Remove image from images state
         const newImages = images.filter((_, i) => i !== index);
         setImages(newImages);
 
-        // Remove image from previewUrls state
         const newPreviewUrls = previewUrls.filter((_, i) => i !== index);
         setPreviewUrls(newPreviewUrls);
     };
 
     return (
-        <>
-            <div className="p-4 box">
-                {message?.msg && (
-                    <Alert
-                        variant={message?.error ? "danger" : "success"}
-                        dismissible
-                        onClose={() => setMessage({})}
-                    >
-                        {message?.msg}
-                    </Alert>
-                )}
+        <div
+            style={{
+                background: "linear-gradient(135deg, #fdfbfb, #ebedee)",
+                borderRadius: "15px",
+                padding: "2rem",
+                margin: "2rem auto",
+            }}
+        >
+            {message?.msg && (
+                <Alert
+                    variant={message?.error ? "danger" : "success"}
+                    dismissible
+                    onClose={() => setMessage({})}
+                >
+                    {message?.msg}
+                </Alert>
+            )}
 
-                <Form onSubmit={handleSubmit}>
-                    <Form.Group className="mb-2">
-                        <InputGroup>
-                            <Form.Control
-                                type="text"
-                                placeholder="Banner Title"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                            />
-                        </InputGroup>
-                    </Form.Group>
+            <Form onSubmit={handleSubmit}>
+                <Form.Group className="mb-3">
+                    <Form.Label style={{ fontWeight: "bold", color: "#495057" }}>
+                        Tiêu đề
+                    </Form.Label>
+                    <Form.Control
+                        type="text"
+                        placeholder="Nhập tiêu đề"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        style={{
+                            borderRadius: "8px",
+                            border: "1px solid #ced4da",
+                            padding: "0.75rem",
+                            fontSize: "1rem",
+                        }}
+                    />
+                </Form.Group>
 
-                    <Form.Group className="mb-2">
-                        <Form.Control
-                            type="file"
-                            onChange={handleImageChange}
-                            accept="image/*"
-                            multiple
-                        />
-                    </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Label style={{ fontWeight: "bold", color: "#495057" }}>
+                        Thêm ảnh
+                    </Form.Label>
+                    <Form.Control
+                        type="file"
+                        onChange={handleImageChange}
+                        accept="image/*"
+                        multiple
+                        style={{
+                            borderRadius: "8px",
+                            border: "1px solid #ced4da",
+                            padding: "0.5rem",
+                        }}
+                    />
+                </Form.Group>
 
-                    {/* Hiển thị ảnh xem trước với dấu x */}
-                    <div className="image-preview-container">
-                        {previewUrls.length > 0 && previewUrls.map((url, index) => (
-                            <div key={index} className="image-preview-wrapper">
+                <div
+                    style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: "0.5rem",
+                        marginTop: "1rem",
+                        marginBottom: "1rem"
+                    }}
+                >
+                    {previewUrls.length > 0 &&
+                        previewUrls.map((url, index) => (
+                            <div
+                                key={index}
+                                style={{
+                                    position: "relative",
+                                    width: "100px",
+                                    height: "100px",
+                                    borderRadius: "10px",
+                                    overflow: "hidden",
+                                    boxShadow:
+                                        "0px 5px 15px rgba(0, 0, 0, 0.2)",
+                                    transition: "transform 0.3s",
+                                }}
+                            >
                                 <img
                                     src={url}
                                     alt={`Preview ${index}`}
-                                    className="image-preview"
+                                    style={{
+                                        width: "100%",
+                                        height: "100%",
+                                        objectFit: "cover",
+                                        cursor: "pointer",
+                                    }}
                                 />
                                 <button
                                     type="button"
-                                    className="remove-image-btn"
+                                    style={{
+                                        background: "rgba(0, 0, 0, 0.5)",
+                                        border: "none",
+                                        color: "white",
+                                        fontSize: "1.5rem",
+                                        position: "absolute",
+                                        top: "5px",
+                                        right: "5px",
+                                        cursor: "pointer",
+                                        borderRadius: "50%",
+                                        width: "20px",
+                                        height: "20px",
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.3)",
+                                    }}
                                     onClick={() => handleRemoveImage(index)}
                                 >
                                     &times;
                                 </button>
+
                             </div>
                         ))}
-                    </div>
+                </div>
 
-                    <div className="d-grid gap-2">
-                        <Button variant="primary" type="submit">
-                            Add/ Update
-                        </Button>
-                    </div>
-                </Form>
-            </div>
-        </>
+                <ArgonBox mb={3} sx={{ width: { xs: '100%', sm: '50%', md: '20%' } }}>
+                    <ArgonButton type="submit" size="large" color="info" fullWidth>
+                        {id ? "Cập nhật" : "Thêm"}
+                    </ArgonButton>
+                </ArgonBox>
+            </Form>
+        </div>
     );
 };
 

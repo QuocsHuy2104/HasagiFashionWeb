@@ -21,10 +21,8 @@ const Header = ({ onSearch }) => {
     const [searchTerm, setSearchTerm] = useState("");
     const { favoriteCount } = useFavoriteCount();
     const navigate = useNavigate();
-    // Tạo state để quản lý việc mở/đóng dropdown
     const [isOpen, setIsOpen] = useState(false);
 
-    // Hàm để toggle dropdown
     const toggleDropdown = () => {
         setIsOpen(prevState => !prevState);
     };
@@ -76,6 +74,7 @@ const Header = ({ onSearch }) => {
             alert('Trình duyệt của bạn không hỗ trợ tìm kiếm bằng giọng nói.');
         }
     };
+    
     const handleLogout = () => {
 
         Cookies.remove('user');
@@ -118,45 +117,6 @@ const Header = ({ onSearch }) => {
 
 
     const styles = {
-        // topNav: {
-        //     backgroundColor: 'gold',  // Nền đen
-        //     color: 'black',  // Chữ vàng
-        //     padding: '10px 0',
-        // },
-        // text: {
-        //     color: 'black',  // Màu chữ vàng
-        //     fontSize: '16px',
-        //     margin: '0 10px 0 0',  // Khoảng cách bên phải giữa các thẻ p
-        // },
-        // socialLinks: {
-        //     display: 'flex',
-        //     gap: '15px',
-        // },
-        // socialLink: {
-        //     color: 'black',
-        //     fontSize: '18px',
-        //     transition: 'color 0.3s ease',
-        // },
-        // socialLinkHover: {
-        //     color: '#fff',  // Màu icon khi hover
-        // },
-        // row: {
-        //     display: 'flex',
-        //     justifyContent: 'space-between',
-        //     alignItems: 'center',
-        //     with: '880px'
-        // },
-        // colAuto: {
-        //     flex: '0 0 auto',
-        //     display: 'flex',
-        //     alignItems: 'right', 
-
-        // },
-        // colText: {
-        //     display: 'flex',
-        //     alignItems: 'center',
-        // },
-
         header: {
             position: 'fixed',
             top: 0,
@@ -221,42 +181,6 @@ const Header = ({ onSearch }) => {
     return (
         <>
             <div className="container-fluid bg-secondary px-0" data-bs-spy="scroll" data-bs-target="navbar">
-                {/* <nav className="top-nav" id="home" style={styles.topNav}>
-                    <Container className="mx-5">
-                        <Row style={styles.row}>
-                            <Col xs="auto" style={styles.colAuto}>
-                                <div style={styles.colText}>
-                                    <p style={styles.text}>
-                                        <FaEnvelope />
-                                        <span style={{ marginRight: '50px' }}> hasagifashion@gmail.com</span>
-                                    </p>
-                                    <p style={styles.text}>
-                                        <FaPhoneAlt />
-                                        <span>+84 917 465 863</span>
-                                    </p>
-                                </div>
-                            </Col>
-
-                            <Col xs="auto" style={styles.colAuto}>
-                                <div className="social-links" style={styles.socialLinks}>
-                                        <a href="#" style={styles.socialLink}>
-                                            <BsFacebook />
-                                        </a>
-                                        <a href="#" style={styles.socialLink}>
-                                            <BsTiktok />
-                                        </a>
-                                        <a href="#" style={styles.socialLink}>
-                                            <BsInstagram />
-                                        </a>
-                                        <a href="#" style={styles.socialLink}>
-                                            <BsYoutube />
-                                        </a>
-                                </div>
-                            </Col>
-                        </Row>
-                    </Container>
-                </nav> */}
-
                 <header className="navbar navbar-expand-lg" style={styles.header}>
                     <div className="main-logo">
                         {position === true ? (
@@ -282,8 +206,8 @@ const Header = ({ onSearch }) => {
                         <div className="nav-menu d-flex">
                             <a href="/feature-section" className="nav-item nav-link" style={styles.navLink}>Trang Chủ</a>
                             <a href="/Shop" className="nav-item nav-link" style={styles.navLink}>Sản Phẩm</a>
-                            <a href="#about" className="nav-item nav-link" style={styles.navLink}>Giới Thiệu</a>
-                            <a href="#contact" className="nav-item nav-link" style={styles.navLink}>Liên Hệ</a>
+                            <a href="/about" className="nav-item nav-link" style={styles.navLink}>Giới Thiệu</a>
+                            <a href="/contact" className="nav-item nav-link" style={styles.navLink}>Liên Hệ</a>
                             <a href="#faq" className="nav-item nav-link" style={styles.navLink}>Hỏi Đáp</a>
                             <a href="/chatbot" className="nav-item nav-link" style={styles.navLink}>Chat bot</a>
                             <a href="/review-image" className="nav-item nav-link" style={styles.navLink}>Test</a>

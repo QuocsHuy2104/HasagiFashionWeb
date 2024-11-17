@@ -60,6 +60,7 @@ import ShopDetail from "components/client/HasagiShopDetail";
 import Shop from "components/client/HasagiShop";
 import Cart from "components/client/HasagiCart";
 import Contact from "components/client/HasagiContact";
+import AboutShop from "components/client/HasagiAbout";
 import Checkout from "components/client/HasagiCheckout";
 import Favorite from "components/client/HasagiFavorite";
 import SignIn from "layouts/authentication/sign-in";
@@ -309,12 +310,19 @@ const routes = [
     showInSidenav: true,
   },
   {
-    // type: "route",
     name: "Contact",
     key: "contact",
     route: "/Contact",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
     component: <Contact />,
+    showInSidenav: true,
+  },
+  {
+    name: "About",
+    key: "about",
+    route: "/About",
+    icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
+    component: <AboutShop />,
     showInSidenav: true,
   },
   {
