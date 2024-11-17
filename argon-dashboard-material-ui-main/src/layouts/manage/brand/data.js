@@ -55,10 +55,10 @@ const BrandTable = ({ onEditClick }) => {
         try {
             await BrandsService.deleteBrand(id);
             setBrands(brands.filter(brand => brand.id !== id));
-            toast.success("Delete brand successful");
+            toast.success("Xóa thương hiệu thành công");
         } catch (error) {
             console.error("There was an error deleting the item!", error);
-            toast.error("Error deleting brand");
+            toast.error("Xóa thương hiệu thất bại!!!");
         }
     };
 

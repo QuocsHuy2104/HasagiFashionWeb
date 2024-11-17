@@ -55,24 +55,36 @@ function Category() {
 
   const validateForm = () => {
     const newErrors = { name: false, image: false };
+
+    // Kiểm tra tên danh mục
     if (!formData.name.trim()) {
+      newErrors.name = true;
       toast.warn("Vui lòng nhập tên danh mục!!!");
     } else if (/\d/.test(formData.name)) {
+      newErrors.name = true;
       toast.warn("Tên danh mục không được nhập số!!!");
     }
 
+    // Kiểm tra ảnh
     if (!formData.image) {
+      newErrors.image = true;
       toast.warn("Vui lòng chọn ảnh danh mục!!!");
     }
-    setErrors(newErrors);
-    return !newErrors.name && !newErrors.image;
+
+    setErrors(newErrors); 
+    console.log("Form errors: ", newErrors);
+
+    return !newErrors.name && !newErrors.image; 
   };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      return;
+    const isValid = validateForm();
+    if (!isValid) {
+      console.log("Form is invalid. Aborting submit.");
+      return; 
     }
 
     try {
@@ -149,6 +161,9 @@ function Category() {
 
 
 
+
+
+
   const resetForm = () => {
     setFormData({
       name: "",
@@ -180,7 +195,7 @@ function Category() {
         <ArgonBox mb={3}>
           <Card>
             <ArgonBox display="flex" justifyContent="space-between" p={3}>
-              <ArgonTypography variant="h6">Manage Category</ArgonTypography>
+              <ArgonTypography variant="h6">Quản lý danh mục</ArgonTypography>
             </ArgonBox>
 
             <ArgonBox
@@ -213,7 +228,6 @@ function Category() {
                   mb={2}
                   sx={{
                     backgroundColor: errors.image ? "#f8d7da" : "#f0f0f0",
-                    border: errors.image ? "2px solid red" : "none",
                   }}
                 >
                   <Image
@@ -241,7 +255,7 @@ function Category() {
                     },
                   }}
                 >
-                  Choose Image
+                  Chọn ảnh
                   <input
                     type="file"
                     name="image"
@@ -262,24 +276,14 @@ function Category() {
                       fullWidth
                       value={formData.name}
                       onChange={handleChange}
-                      error={errors.name}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderColor: errors.name ? 'red' : 'default',
-                        },
-                      }}
                     />
-                    {errors.name && (
-                      <ArgonTypography color="error" variant="caption">
-                        Category name is required.
-                      </ArgonTypography>
-                    )}
+  
                   </ArgonBox>
                 </ArgonBox>
 
                 <ArgonBox mb={3} sx={{ width: { xs: '100%', sm: '50%', md: '20%' } }}>
                   <ArgonButton type="submit" size="large" color="info" fullWidth>
-                    {formData.id ? "Update" : "Create"}
+                    {formData.id ? "Cập nhật" : "Thêm"}
                   </ArgonButton>
                 </ArgonBox>
               </ArgonBox>

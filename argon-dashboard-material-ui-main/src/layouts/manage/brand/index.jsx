@@ -55,48 +55,67 @@ function Brand() {
 
 
   const validateForm = () => {
-    const newErrors = {};
+    const newErrors = { name: false, image: false };
 
+    // Kiểm tra tên danh mục
     if (!formData.name.trim()) {
+      newErrors.name = true;
       toast.warn("Vui lòng nhập tên thương hiệu!!!");
     } else if (/\d/.test(formData.name)) {
+      newErrors.name = true;
       toast.warn("Tên thương hiệu không được nhập số!!!");
     }
 
+    // Kiểm tra ảnh
     if (!formData.image) {
+      newErrors.image = true;
       toast.warn("Vui lòng chọn ảnh thương hiệu!!!");
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    console.log("Form errors: ", newErrors);
+
+    return !newErrors.name && !newErrors.image;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) {
+    const isValid = validateForm();
+    if (!isValid) {
+      console.log("Form is invalid. Aborting submit.");
       return;
     }
 
     try {
       let imageUrl;
-
       if (formData.image instanceof File) {
-        const storageRef = ref(storage, `brands/${formData.image.name}`);
-        const uploadTask = uploadBytesResumable(storageRef, formData.image);
+        const imageFile = formData.image;
+        const storageRef = ref(storage, `brands/${imageFile.name}`);  // Thay đổi từ "categories" thành "brands"
+        const uploadTask = uploadBytesResumable(storageRef, imageFile);
 
         await new Promise((resolve, reject) => {
           uploadTask.on(
             "state_changed",
-            null,
-            reject,
-            () => {
-              getDownloadURL(uploadTask.snapshot.ref)
-                .then((url) => {
-                  imageUrl = url;
-                  resolve();
-                })
-                .catch(reject);
+            (snapshot) => {
+              console.log(
+                `Upload progress: ${(snapshot.bytesTransferred / snapshot.totalBytes) * 100}%`
+              );
+            },
+            (error) => {
+              console.error("Error uploading file:", error);
+              toast.error("Lỗi khi tải ảnh lên Firebase.");
+              reject(error);
+            },
+            async () => {
+              try {
+                imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                resolve();
+              } catch (error) {
+                console.error("Error getting download URL:", error);
+                toast.error("Lỗi khi lấy URL ảnh.");
+                reject(error);
+              }
             }
           );
         });
@@ -115,27 +134,28 @@ function Brand() {
 
       let result;
       if (formData.id) {
-        result = await BrandsService.updateBrand(formData.id, formDataObj, {
+        result = await BrandsService.updateBrand(formData.id, formDataObj, {  // Thay đổi từ CategoriesService sang BrandsService
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
-        setBrands(brands.map((cate) => (cate.id === result.data.id ? result.data : cate)));
+        setBrands(brands.map((brand) => (brand.id === result.data.id ? result.data : brand)));  // Thay đổi từ setCategories sang setBrands
         toast.success("Cập nhật thương hiệu thành công");
       } else {
-        result = await BrandsService.createBrand(formDataObj, {
+        result = await BrandsService.createBrand(formDataObj, {  // Thay đổi từ CategoriesService sang BrandsService
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
-        setBrands([...brands, result.data]);
+        setBrands([...brands, result.data]);  // Thay đổi từ setCategories sang setBrands
         toast.success("Thêm thương hiệu thành công");
       }
 
+      fetchData();
       resetForm();
     } catch (error) {
       console.error("Unexpected error:", error);
-      toast.error("Có lỗi xảy ra, vui lòng thử lại!!!");
+      toast.error("Có lỗi xảy ra. Vui lòng thử lại!");
     }
   };
 
@@ -173,12 +193,12 @@ function Brand() {
         <ArgonBox mb={3}>
           <Card>
             <ArgonBox display="flex" justifyContent="space-between" p={3}>
-              <ArgonTypography variant="h6">Manage Brand</ArgonTypography>
+              <ArgonTypography variant="h6">Quản lý thương hiệu</ArgonTypography>
             </ArgonBox>
 
             <ArgonBox
               display="flex"
-              flexDirection={{ xs: "column", md: "row" }} // Responsive direction
+              flexDirection={{ xs: "column", md: "row" }}
               justifyContent="space-between"
               alignItems="center"
               p={3}
@@ -189,7 +209,7 @@ function Brand() {
               <ArgonBox
                 mb={3}
                 mx={3}
-                width={{ xs: "100%", md: 400 }} // Responsive width
+                width={{ xs: "100%", md: 400 }} 
                 display="flex"
                 flexDirection="column"
                 alignItems="center"
@@ -204,13 +224,6 @@ function Brand() {
                   boxShadow="0 0 15px rgba(0,0,0,0.1)"
                   overflow="hidden"
                   mb={2}
-                  sx={{
-                    backgroundColor: "#f0f0f0",
-                    border: errors.image ? "1px solid red" : "",  // Add red border if error
-                    "&:hover": {
-                      cursor: "pointer",
-                    },
-                  }}
                 >
                   <Image
                     src={
@@ -223,13 +236,6 @@ function Brand() {
                     style={{ objectFit: "cover", width: "100%", height: "100%" }}
                   />
                 </ArgonBox>
-
-                {errors.image && (
-                  <ArgonTypography variant="caption" color="error">
-                    {errors.image}
-                  </ArgonTypography>
-                )}
-
                 <ArgonButton
                   component="label"
                   variant="outlined"
@@ -244,7 +250,7 @@ function Brand() {
                     },
                   }}
                 >
-                  Choose Image
+                  Chọn ảnh
                   <input type="file" name="image" hidden onChange={handleFileChange} />
                 </ArgonButton>
               </ArgonBox>
@@ -258,24 +264,12 @@ function Brand() {
                   <ArgonBox>
                     <ArgonInput
                       type="text"
-                      placeholder="Brand Name"
+                      placeholder="Tên thương hiệu"
                       size="large"
                       fullWidth
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
-                      error={Boolean(errors.name)} // Simplified boolean conversion
-                      sx={{
-                        "& fieldset": {
-                          borderColor: errors.name ? "red" : "rgba(0, 0, 0, 0.23)", // Red border on error
-                        },
-                        "&:hover fieldset": {
-                          borderColor: errors.name ? "red" : "black", // Maintain hover effect with error
-                        },
-                        "&.Mui-focused fieldset": {
-                          borderColor: errors.name ? "red" : "blue", // Blue border on focus unless error
-                        },
-                      }}
                     />
                   </ArgonBox>
                   {errors.name && (
@@ -287,7 +281,7 @@ function Brand() {
 
                 <ArgonBox mb={3} sx={{ width: { xs: '100%', sm: '50%', md: '20%' } }}>
                   <ArgonButton type="submit" size="large" color="info" fullWidth={true}>
-                    {formData.id ? "Update" : "Create"}
+                    {formData.id ? "Cập nhật" : "Thêm"}
                   </ArgonButton>
                 </ArgonBox>
               </ArgonBox>

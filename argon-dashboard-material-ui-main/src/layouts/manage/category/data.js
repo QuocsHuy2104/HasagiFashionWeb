@@ -55,10 +55,10 @@ const CategoryTable = ({ onEditClick }) => {
         try {
             await CategoriesService.deleteCategory(id);
             setCategories(categories.filter(cate => cate.id !== id));
-            toast.success("Delete category successful");
+            toast.success("Xóa danh mục thành công");
         } catch (error) {
             console.error("There was an error deleting the item!", error);
-            toast.error("Error deleting category");
+            toast.error("Xóa danh mục thất bại");
         }
     };
 
