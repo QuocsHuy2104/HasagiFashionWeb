@@ -106,8 +106,8 @@ const AddBanner = ({ id, setBannerId }) => {
             style={{
                 background: "linear-gradient(135deg, #fdfbfb, #ebedee)",
                 borderRadius: "15px",
-                padding: "2rem",
-                margin: "2rem auto",
+                padding: "1rem",
+                margin: "0rem auto",
             }}
         >
             {message?.msg && (

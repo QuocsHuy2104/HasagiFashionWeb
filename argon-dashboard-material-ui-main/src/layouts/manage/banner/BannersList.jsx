@@ -96,17 +96,23 @@ const BannersList = ({ getBannerId }) => {
                 </ArgonButton>
             </ArgonBox>
 
-            <Dialog open={open} onClose={handleClose}>
-                <DialogTitle>Popup Title</DialogTitle>
+            <Dialog
+                open={open}
+                onClose={handleClose}
+                maxWidth="md"  // Bạn có thể thay đổi giá trị này thành 'sm', 'md', 'lg', 'xl'
+                fullWidth={true} // Thiết lập chiều rộng đầy đủ
+            >
+                <DialogTitle>Banner</DialogTitle>
                 <DialogContent>
                     <AddBanner />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} color="primary">
-                        Close
+                        Đóng
                     </Button>
                 </DialogActions>
             </Dialog>
+
 
 
             <ArgonBox className="banner-wrapper">
