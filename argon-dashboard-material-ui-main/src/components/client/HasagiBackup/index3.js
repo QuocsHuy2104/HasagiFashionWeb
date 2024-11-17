@@ -482,17 +482,6 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
                                     <div className="text-danger">{errors.selectedWard}</div>
                                 )}
                             </div>
-                            {/* {!status && (
-                <label style={{ marginLeft: "10px", marginBottom: "0" }}>
-                  Đặt làm địa chỉ mặc định
-                  <input
-                    type="checkbox"
-                    checked={status}
-                    onChange={handleCheckboxChange}
-                    style={{ transform: "scale(1.5)", marginBottom: "0", marginLeft: "10px" }}
-                  />
-                </label>
-              )} */}
                             {showCheckbox && (
                                 <label style={{ marginLeft: "10px", marginBottom: "0" }}>
                                     Đặt làm địa chỉ mặc định
@@ -525,7 +514,7 @@ Backup3.propTypes = {
     show: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
     onAddressUpdated: PropTypes.func.isRequired,
-    addressId: PropTypes.string.isRequired,
+    addressId: PropTypes.number.isRequired,
 };
 
 export default Backup3;

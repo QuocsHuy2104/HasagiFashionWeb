@@ -5,8 +5,6 @@ const ProfileServices = {
         const response = await apiClient.get('/account/profile');
         return response.data; // Return the profile data directly
       } catch (error) {
-        console.error('Error fetching profile:', error);
-        throw error; // Throw the error to handle it in the component
       }
     },
     changeProfile: async (formData) => {

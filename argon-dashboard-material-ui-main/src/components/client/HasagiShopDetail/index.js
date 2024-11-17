@@ -31,23 +31,25 @@ function ShopDetail() {
     const navigate = useNavigate();
     const [reviews, setReviews] = useState([]);
 
-    const fetchReviews = async (productId) => {
+    const fetchReviews = async () => {
         try {
-            const productReviews = await reviewsService.getReviewsByProduct(productId);
-            console.log('Fetched reviews for product:', productReviews);
-
+            const productReviews = await reviewsService.getReviewsByProduct(productId);  // Use await here
             if (Array.isArray(productReviews)) {
                 const sortedReviews = productReviews.sort((a, b) => b.star - a.star);
                 setReviews(sortedReviews);
             } else {
-                console.error('Expected an array but got:', productReviews);
                 setReviews([]);
             }
         } catch (error) {
-            console.error('Error fetching reviews for product:', error);
             setReviews([]);
         }
     };
+    useEffect(() => {
+        if (productId) {
+            fetchReviews();
+        }
+
+    }, [productId]);
 
     const calculateAverageStars = () => {
         if (reviews.length === 0) return 0;
@@ -57,15 +59,6 @@ function ShopDetail() {
     };
 
     const averageStars = calculateAverageStars();
-
-    useEffect(() => {
-        const query = new URLSearchParams(location.search);
-        const productId = query.get('id');
-
-        if (productId) {
-            fetchReviews(productId);
-        }
-    }, [location]);
 
     const getUniqueSizes = (sizes) => {
         return sizes.reduce((unique, size) => {
@@ -110,7 +103,6 @@ function ShopDetail() {
             Cookies.set('productId', productId);
             toast.success('Sản phẩm đã được thêm vào giỏ hàng thành công!');
         } catch (error) {
-            console.error('Error adding to cart:', error);
             toast.error('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.');
         }
     };
@@ -122,7 +114,6 @@ function ShopDetail() {
             });
             return response.data;
         } catch (error) {
-            console.error('Error fetching favorite count:', error);
             return 0;
         }
     };
@@ -130,18 +121,10 @@ function ShopDetail() {
         try {
             // Await the response from cartService.checkFavorite
             const favoriteResponse = await cartService.checkFavorite(productId);
-
-            // Log the full response to check its structure
-            console.log(favoriteResponse);
-
-            // Ensure the data property exists and then use it
             if (favoriteResponse && favoriteResponse.data !== undefined) {
-                setIsFavorite(favoriteResponse.data);  // This should now work
-            } else {
-                console.error('Favorite response is missing data');
+                setIsFavorite(favoriteResponse.data);
             }
         } catch (error) {
-            console.error("Error checking favorite status:", error);
         }
     };
 
@@ -156,15 +139,12 @@ function ShopDetail() {
             if (!productId) throw new Error("Product ID is missing");
             const response = await cartService.getProductDetail(productId);
             const productData = response.data;
-            console.log("Fetched Product Data:", productData);
-
             setProduct(productData);
             setTotalPrice(productData.importPrice);
             const countRSN = await fetchFavoriteCount(productId);
             setFavoriteCount(countRSN);
             checkFavoriteStatus(productId);
         } catch (error) {
-            console.error("Error fetching product details:", error);
         }
     };
 
@@ -180,7 +160,6 @@ function ShopDetail() {
             });
             setTotalPrice(response.data * quantity); // cập nhật giá với số lượng
         } catch (error) {
-            console.error('Error fetching price:', error);
             toast.error('Đã xảy ra lỗi khi lấy giá sản phẩm. Vui lòng thử lại sau.');
         }
     };
@@ -205,7 +184,6 @@ function ShopDetail() {
             const count = await fetchFavoriteCount(product.id);
             setFavoriteCount(count);
         } catch (error) {
-            console.error('Error adding to favorites:', error.response?.data || error.message);
         }
     };
 
@@ -301,7 +279,7 @@ function ShopDetail() {
             <HasagiNav />
             <ToastContainer />
             <div className="container-fluid">
-                <div className="row px-xl-5" style={{marginTop: "90px"}}>
+                <div className="row px-xl-5" style={{ marginTop: "90px" }}>
                     <div className="col-12">
                         <nav className="breadcrumb bg-light mb-30">
                             <a className="breadcrumb-item text-dark" href="/feature-section">Trang chủ</a>
@@ -312,9 +290,9 @@ function ShopDetail() {
                 </div>
             </div>
             <div className="container-fluid pb-5" style={{ maxWidth: "1400px" }}>
-                <div className="row px-xl-5" style={{marginLeft: "10px"}}>
+                <div className="row px-xl-5" style={{ marginLeft: "10px" }}>
                     <div className="col-lg-5 mb-30">
-                        <div className="product-thumbnail" style={{ textAlign: 'center'}}>
+                        <div className="product-thumbnail" style={{ textAlign: 'center' }}>
                             {/* Main Image */}
                             <img src={product.image} alt="Product" className="product-thumbnail-img" style={{ width: '100%', maxWidth: '450px', maxHeight: "450px" }} />
                             {/* Thumbnail Gallery */}
@@ -337,7 +315,7 @@ function ShopDetail() {
                             </div>
                         </div>
                     </div>
-                    <div className="col-lg-7 mb-30" style={{marginLeft: "-20px"}}>
+                    <div className="col-lg-7 mb-30" style={{ marginLeft: "-20px" }}>
                         <div className="h-100 bg-white p-30 pt-4">
                             <h3 className="font-weight-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>{product.name}</h3>
                             <div className="d-flex align-items-center mb-3">
@@ -467,7 +445,7 @@ function ShopDetail() {
                                             className="btn btn-primary btn-minus"
                                             onClick={() => setQuantity(quantity - 1)}
                                             disabled={quantity <= 1}
-                                            style={{ marginRight: '5px', backgroundColor: "#ffb524"}}
+                                            style={{ marginRight: '5px', backgroundColor: "#ffb524" }}
                                         >
                                             <i className="fa fa-minus"></i>
                                         </button>

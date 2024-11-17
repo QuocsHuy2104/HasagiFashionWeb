@@ -6,31 +6,29 @@ import User from "../HasagiUser";
 import IndexHistory from "../HasagiMenuItemBackup/indexHisory";
 import Footer from "../HasagiFooter";
 import ChangePassword from "../HasagiChangePassword";
+import Voucher from "components/client/HasagiVorcher/vorcher";
 
 const History = () => {
   const [activeItem, setActiveItem] = useState("Đơn Mua");
   const [expandedItem, setExpandedItem] = useState(null);
 
   useEffect(() => {
-    window.history.pushState(null, "", window.location.href); 
+    window.history.pushState(null, "", window.location.href);
     window.onpopstate = () => {
-        window.history.pushState(null, "", window.location.href);
+      window.history.pushState(null, "", window.location.href);
     };
-}, []);
+  }, []);
 
   const menuItems = [
     { name: "Tài Khoản Của Tôi", hasSubItems: true },
-    { name: "Cài Đặt Thông Báo" },
-    { name: "Những Thiết Lập Riêng Tư" },
     { name: "Đơn Mua" },
-    { name: "Thông Báo" },
     { name: "Kho Voucher", isNew: true },
-    { name: "Shopee Xu" },
   ];
   const subMenuItems = [
     { name: "Hồ Sơ", parent: "Tài Khoản Của Tôi" },
     { name: "Địa Chỉ", parent: "Tài Khoản Của Tôi" },
     { name: "Đổi Mật Khẩu", parent: "Tài Khoản Của Tôi" },
+    { name: "Kho Voucher", parent: "Tài Khoản Của Tôi" },
   ];
 
 
@@ -51,6 +49,8 @@ const History = () => {
         return <IndexHistory />;
       case "Đổi Mật Khẩu":
         return <ChangePassword />;
+      case "Kho Voucher":
+        return <Voucher />;
       default:
         null;
     }

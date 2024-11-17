@@ -58,11 +58,8 @@ const HistoryOrderDetail = () => {
               ? format(new Date(orderDate), "HH:mm dd-MM-yyyy")
               : "Date not available";
             setOrderDate(formattedOrderDate);
-
             setVoucherPrice(data[0].voucher);
             setCancelReason(data[0].reason);
-            console.log("Shipping Fee:", fee);
-
             setFullNameAdd(data[0].name);
           }
           setLoading(false);

@@ -28,12 +28,6 @@ const Complete = () => {
                 const selectedItemIds = cartItemsBackup
                     .filter(item => item.selected)
                     .map(item => item.cartdetailid);
-
-                if (selectedItemIds.length === 0) {
-                    console.error("No items selected for removal");
-                    return;
-                }
-
                 try {
                     const response = await axios.delete('http://localhost:3000/api/cart/delete', {
                         data: selectedItemIds,
@@ -41,7 +35,6 @@ const Complete = () => {
                         headers: { 'Content-Type': 'application/json' }
                     });
                     if (response.status === 200) {
-                        console.log("Items deleted successfully");
                         const updatedCartItems = cartItemsBackup.filter(item => !selectedItemIds.includes(item.cartdetailid));
                         localStorage.setItem('cartItemsBackup', JSON.stringify(updatedCartItems));
                     } else {

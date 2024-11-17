@@ -48,8 +48,6 @@ const Cart = () => {
             setCartItems(cartResponse.data);
             setAccountExists(addressResponse.data.exists);
             setAddress(addressResponse.data.addressId);
-            console.log("Cart Response:", cartResponse.data);
-            console.log("Address Response:", addressResponse.data);
         } catch (error) {
             console.error("Error fetching data:", error);
         } finally {
@@ -121,7 +119,6 @@ const Cart = () => {
             toast.warn("Vui lòng chọn sản phẩm để thanh toán.");
             return;
         }
-        console.log("Selected Items:", selectedItems);
         localStorage.setItem("cartItemsBackup", JSON.stringify(selectedItems));
         if (!accountExists) {
             setShowBackupModal(true);
@@ -207,90 +204,87 @@ const Cart = () => {
         }
     };
 
+    // Container for the main content
     const Container = styled.div`
-    margin-top: 20px;
-    padding: 0 10px;
-  `;
+margin-top: 20px;
+padding: 0 10px;
+`;
 
+    // Title component styling
     const Title = styled.h6`
-    color: rgba(0, 0, 0, 0.54);
-    font-size: 1.3rem;
-    font-weight: 500;
-    padding-bottom: 1rem;
-  `;
+color: rgba(0, 0, 0, 0.54);
+font-size: 1.3rem;
+font-weight: 500;
+padding-bottom: 1rem;
+`;
 
+    // Grid container for displaying products
     const ProductGrid = styled.div`
-    display: grid;
-    grid-template-columns: repeat(5, 1fr); /* 6 sản phẩm mỗi hàng */
-  `;
+display: grid;
+grid-template-columns: repeat(5, 1fr); /* 5 products per row */
+gap: 10px; /* Optional: add spacing between cards */
+`;
 
+    // Product card styling
     const ProductCard = styled.div`
-    width: 95%;
-    height: 365px;
-    cursor: pointer;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
-    background-color: #fff;
-    transition: transform 0.3s;
-    position: relative;
+width: 95%;
+height: 365px;
+cursor: pointer;
+border: 1px solid #ddd;
+border-radius: 8px;
+overflow: hidden;
+background-color: #fff;
+transition: transform 0.3s;
+position: relative;
 
-    &:hover {
-      transform: scale(1.05);
-    }
-  `;
+&:hover {
+  transform: scale(1.05);
+}
+`;
 
+    // Product image styling
     const ProductImage = styled.img`
-    width: 100%;
-    height: 250px;
-  `;
+width: 100%;
+height: 250px;
+object-fit: cover; /* Ensures image scales properly */
+`;
 
+    // Badge component styling for special offers or discounts
     const Badge = styled.div`
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background-color: #ff4d4f;
-    color: #fff;
-    font-size: 0.8rem;
-    font-weight: bold;
-    padding: 2px 5px;
-    border-radius: 3px;
-  `;
+position: absolute;
+top: 10px;
+left: 10px;
+background-color: #ff4d4f;
+color: #fff;
+font-size: 0.8rem;
+font-weight: bold;
+padding: 2px 5px;
+border-radius: 3px;
+`;
 
+    // Container for product information
     const ProductInfo = styled.div`
-    padding: 10px;
-  `;
+padding: 10px;
+`;
 
+    // Product title styling
     const ProductTitle = styled.h6`
-    font-size: 0.9rem;
-    color: #333;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: -5px;
-    text-align: center;
-  `;
+font-size: 0.9rem;
+color: #333;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+margin-bottom: -5px;
+text-align: center;
+`;
 
-    const Price = styled.p`
-    color: #ff0000;
-    font-weight: bold;
-    font-size: 1rem;
-    margin: 0;
-  `;
-
-    const OriginalPrice = styled.p`
-    font-size: 0.8rem;
-    color: #888;
-    text-decoration: line-through;
-    margin: 0;
-  `;
-
+    // Discount information styling
     const Discount = styled.p`
-    color: #ff6600;
-    font-weight: bold;
-    font-size: 0.8rem;
-    margin-top: 5px;
-  `;
+color: #ff6600;
+font-weight: bold;
+font-size: 0.8rem;
+margin-top: 5px;
+`;
 
     const [products, setProducts] = useState([]);
 

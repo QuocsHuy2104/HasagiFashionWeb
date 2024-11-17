@@ -6,12 +6,6 @@ import DiscountIcon from "@mui/icons-material/LocalOffer";
 import VoucherService from "../../../services/VoucherServices";
 import Cookies from "js-cookie";
 import PropTypes from "prop-types";
-import Slider from "react-slick";
-
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 const Voucher = ({ voucher }) => {
 
@@ -44,7 +38,7 @@ const Voucher = ({ voucher }) => {
                         fontSize: "32px",
                         marginRight: "10px",
                         marginLeft: "-10px",
-                        marginTop: "-80px",
+                        marginTop: "-100px",
                         flexShrink: 0,
                     }}
                 />
@@ -147,51 +141,6 @@ Voucher.propTypes = {
 };
 
 
-
-const CustomPrevArrow = ({ onClick }) => (
-    <ArrowBackIosIcon
-        onClick={onClick ? () => onClick() : null}
-        sx={{
-            position: "absolute",
-            top: "-20px",
-            right: "100px",
-            zIndex: 1,
-            cursor: "pointer",
-            fontSize: "28px",
-            transition: "transform 0.2s ease-in-out",
-            "&:hover": {
-                transform: "scale(1.2)",
-            },
-        }}
-    />
-);
-
-CustomPrevArrow.propTypes = {
-    onClick: PropTypes.func,
-};
-
-const CustomNextArrow = ({ onClick }) => (
-    <ArrowForwardIosIcon
-        onClick={onClick ? () => onClick() : null}
-        sx={{
-            position: "absolute",
-            top: "-20px",
-            right: "80px",
-            zIndex: 1,
-            cursor: "pointer",
-            fontSize: "28px",
-            transition: "transform 0.2s ease-in-out",
-            "&:hover": {
-                transform: "scale(1.2)",
-            },
-        }}
-    />
-);
-
-CustomNextArrow.propTypes = {
-    onClick: PropTypes.func,
-};
-
 const VoucherList = () => {
     const [vouchers, setVouchers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -231,51 +180,30 @@ const VoucherList = () => {
         !usedVouchers.some(usedVoucher => usedVoucher.id === voucher.id)
     );
 
-    const sliderSettings = {
-        infinite: false,
-        speed: 500,
-        slidesToShow: Math.min(4, availableVouchers.length),
-        slidesToScroll: 1,
-        nextArrow: <CustomNextArrow />,
-        prevArrow: <CustomPrevArrow />,
-        responsive: [
-            {
-                breakpoint: 1024,
-                settings: {
-                    slidesToShow: Math.min(3, availableVouchers.length),
-                },
-            },
-            {
-                breakpoint: 600,
-                settings: {
-                    slidesToShow: Math.min(2, availableVouchers.length),
-                },
-            },
-            {
-                breakpoint: 480,
-                settings: {
-                    slidesToShow: Math.min(1, availableVouchers.length),
-                },
-            },
-        ],
-    };
-
     if (loading) {
         return <CircularProgress />;
     }
 
+
+
     return (
         <>
-            <div className="container-fluid pt-3">
-                <Typography variant="h2" className="section-title position-relative text-uppercase mx-xl-5 mb-3">
-                    <span className="bg-white pr-3">VOUCHER</span>
-                </Typography>
-            </div>
-
-            <div style={{ position: "relative" }}>
-                <Slider {...sliderSettings} className="px-xl-5 pb-3">
+            <div style={{ position: "relative", display: "flex", justifyContent: "center" }}>
+                <div
+                    className="px-xl-5 pb-3"
+                    style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fit, minmax(450px, 1fr))", 
+                        gap: 0,
+                        justifyContent: "center",
+                        maxWidth: "1200px", 
+                        margin: "0 auto", 
+                    }}
+                >
                     {availableVouchers.length === 0 ? (
-                        <Typography variant="h6">Không có voucher nào.</Typography>
+                        <Typography variant="h6" style={{ gridColumn: "1 / -1", textAlign: "center" }}>
+                            Không có voucher nào.
+                        </Typography>
                     ) : (
                         availableVouchers.map(voucher => (
                             <div key={voucher.id}>
@@ -283,10 +211,14 @@ const VoucherList = () => {
                             </div>
                         ))
                     )}
-                </Slider>
+                </div>
             </div>
+
+
         </>
     );
 };
+
+
 
 export default VoucherList;

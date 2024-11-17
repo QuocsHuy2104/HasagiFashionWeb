@@ -53,8 +53,6 @@ const Checkout = () => {
                 if (addressesId) {
                     const response = await axios.get(`http://localhost:3000/api/addresses/${addressesId}`);
                     setAddress(response.data);
-
-                    console.log(address);
                     await fetchProvinces();
                 } else {
                     console.error("No address ID found in the URL");
@@ -76,7 +74,6 @@ const Checkout = () => {
                 });
                 if (response.data && response.data.districtCode) {
                     setAddress(response.data);
-                    console.log(address);
                 } else {
                     console.error("District code is missing in the address data");
                 }
@@ -141,7 +138,6 @@ const Checkout = () => {
             );
             setShipFee(response.data.data);
         } catch (error) {
-            console.log(error);
         }
     };
 
@@ -239,7 +235,6 @@ const Checkout = () => {
                 },
             });
             if (response.status === 200) {
-                console.log("Items deleted successfully");
                 const updatedCartItems = cartItemsBackup.filter(
                     (item) => !selectedItemIds.includes(item.cartdetailid)
                 );
@@ -255,10 +250,6 @@ const Checkout = () => {
 
     const handleClick = async () => {
         const selectedItems = cartItems.filter((item) => item.selected);
-        if (selectedItems.length === 0) {
-            toast.warn("Vui lòng chọn sản phẩm để thanh toán.");
-            return;
-        }
         if (!selectedPayment) {
             toast.warn("Vui lòng chọn phương thức thanh toán.");
             return;
@@ -313,7 +304,6 @@ const Checkout = () => {
                     const swal = Swal.fire({
                         title: "Đang xử lý...",
                         width: 500,
-                        height: 300,
                         padding: "1em",
                         color: "white",
                         background: "transparent",

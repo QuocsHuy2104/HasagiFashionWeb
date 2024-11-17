@@ -11,7 +11,10 @@ import BrandTable from "./data";
 import Footer from "../../../examples/Footer";
 import BrandsService from "../../../services/BrandServices";
 import { Image } from "react-bootstrap";
-import { toast } from "react-toastify";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { storage } from "../../../config/firebase-config";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 function Brand() {
   const [formData, setFormData] = useState({
@@ -20,7 +23,7 @@ function Brand() {
   });
 
   const [brands, setBrands] = useState([]);
-  const [errors, setErrors] = useState({}); // State for tracking validation errors
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,28 +34,9 @@ function Brand() {
         console.log(err);
       }
     };
+
     fetchData();
   }, []);
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    // Validate name
-    if (!formData.name.trim()) {
-      newErrors.name = "Brand name is required";
-    } else if (/\d/.test(formData.name)) {
-      newErrors.name = "Brand name cannot contain numbers";
-    }
-
-    // Validate image
-    if (!formData.image) {
-      newErrors.image = "Brand image is required";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
 
   const handleChange = (e) => {
     setFormData({
@@ -62,40 +46,100 @@ function Brand() {
   };
 
   const handleFileChange = (e) => {
+    const file = e.target.files[0];
     setFormData({
       ...formData,
-      image: e.target.files[0],
+      image: file || formData.image,
     });
+  };
+
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) {
+      toast.warn("Vui lòng nhập tên thương hiệu!!!");
+    } else if (/\d/.test(formData.name)) {
+      toast.warn("Tên thương hiệu không được nhập số!!!");
+    }
+
+    if (!formData.image) {
+      toast.warn("Vui lòng chọn ảnh thương hiệu!!!");
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validateForm()) {
-      return; // Don't submit if the form is invalid
-    }
-
-    const data = new FormData();
-    data.append("name", formData.name);
-    if (formData.image) {
-      data.append("image", formData.image);
+      return;
     }
 
     try {
+      let imageUrl;
+
+      if (formData.image instanceof File) {
+        const storageRef = ref(storage, `brands/${formData.image.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, formData.image);
+
+        await new Promise((resolve, reject) => {
+          uploadTask.on(
+            "state_changed",
+            null,
+            reject,
+            () => {
+              getDownloadURL(uploadTask.snapshot.ref)
+                .then((url) => {
+                  imageUrl = url;
+                  resolve();
+                })
+                .catch(reject);
+            }
+          );
+        });
+      } else {
+        imageUrl = formData.image;
+      }
+
+      const data = {
+        name: formData.name,
+        image: imageUrl,
+      };
+
+      const formDataObj = new FormData();
+      formDataObj.append("name", data.name);
+      formDataObj.append("image", data.image);
+
       let result;
       if (formData.id) {
-        result = await BrandsService.updateBrand(formData.id, data);
-        setBrands(brands.map((brand) => (brand.id === result.data.id ? result.data : brand)));
+        result = await BrandsService.updateBrand(formData.id, formDataObj, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        setBrands(brands.map((cate) => (cate.id === result.data.id ? result.data : cate)));
+        toast.success("Cập nhật thương hiệu thành công");
       } else {
-        result = await BrandsService.createBrand(data);
+        result = await BrandsService.createBrand(formDataObj, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
         setBrands([...brands, result.data]);
+        toast.success("Thêm thương hiệu thành công");
       }
-      toast.success("Brand saved successfully");
+
       resetForm();
     } catch (error) {
-      toast.error(`Error: ${error.response ? error.response.data : error.message}`);
+      console.error("Unexpected error:", error);
+      toast.error("Có lỗi xảy ra, vui lòng thử lại!!!");
     }
   };
+
+
 
   const resetForm = () => {
     setFormData({
@@ -124,7 +168,7 @@ function Brand() {
   return (
     <DashboardLayout>
       <DashboardNavbar />
-
+      <ToastContainer />
       <ArgonBox py={3}>
         <ArgonBox mb={3}>
           <Card>

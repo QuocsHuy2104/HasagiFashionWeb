@@ -22,12 +22,17 @@ import ProfileServices from "services/ProfileServices";
 const Header = ({ onSearch }) => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [cartDropdownOpen, setCartDropdownOpen] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
     const { totalQuantity, fetchTotalQuantity } = useCartQuantity();
     const [cartProducts, setCartProducts] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const { favoriteCount } = useFavoriteCount();
     const [username, setUsername] = useState("");
     const navigate = useNavigate();
+    const [hovered, setHovered] = useState(null);
+
+    const handleMouseDropdownMenuEnter = (index) => setHovered(index);
+    const handleMouseDropdownMenuLeave = () => setHovered(null);
 
     const handleSearchChange = (event) => {
         const value = event.target.value;
@@ -40,12 +45,14 @@ const Header = ({ onSearch }) => {
 
     const handleMouseEnter = () => {
         clearTimeout(timeoutId); // Xóa bỏ timeout nếu có
+        setIsHovered(true);
         setDropdownOpen(true); // Mở dropdown
     };
 
     const handleMouseLeave = () => {
         // Trì hoãn việc ẩn dropdown
         timeoutId = setTimeout(() => {
+            setIsHovered(false);
             setDropdownOpen(false);
         }, 200); // 200ms delay trước khi ẩn dropdown
     };
@@ -91,11 +98,12 @@ const Header = ({ onSearch }) => {
             const accountId = Cookies.get("accountId");
 
             if (!accountId) {
+                //navigate(`/authentication/sign-in`);
                 return;
             }
 
             try {
-                const [cartResponse] = await Promise.all([
+                const [cartResponse, addressResponse] = await Promise.all([
                     CartService.getCart(),
                     axios.get(`http://localhost:3000/api/addresses/exists?accountId=${accountId}`, {
                         withCredentials: true,
@@ -165,15 +173,6 @@ const Header = ({ onSearch }) => {
             fontSize: "14px",
             width: "350px",
         },
-        searchButton: {
-            height: "35px",
-            marginTop: "-0px",
-            marginLeft: "-45px",
-            backgroundColor: "white",
-            borderColor: "white",
-            color: "black",
-            transition: "background-color 0.3s, color 0.3s",
-        },
         icon: {
             color: "white",
             fontSize: "20px",
@@ -199,16 +198,43 @@ const Header = ({ onSearch }) => {
             transition: "background-color 0.3s ease, box-shadow 0.3s ease",
             position: "relative",
         },
+        searchButton: {
+            height: "35px",
+            marginTop: "-0px",
+            marginLeft: "-45px",
+            backgroundColor: "white",
+            borderColor: "white",
+            color: "black",
+            transition: "background-color 0.3s, color 0.3s",
+            boxShadow: "none",
+            zIndex: 1002,
+        },
     };
 
     const fetchUserData = async () => {
+        try {
             const profileData = await ProfileServices.getProfile();
+
             setUsername(profileData.username || "");
+        } catch (error) {
+            console.error("Error fetching user data:", error);
+        }
     };
 
     useEffect(() => {
         fetchUserData();
     }, []);
+
+    const menuItems = user
+        ? [
+            { href: "/profile", label: "Tài khoản của tôi" },
+            { href: "/History", label: "Lịch sử đơn hàng" },
+            { href: "", label: "Đăng xuất", onClick: handleLogout },
+        ]
+        : [
+            { href: "/authentication/sign-in", label: "Đăng nhập" },
+            { href: "/authentication/sign-up", label: "Đăng ký" },
+        ];
 
     return (
         <>
@@ -250,15 +276,37 @@ const Header = ({ onSearch }) => {
 
                     <div className="d-flex align-items-center" style={{ paddingRight: "35px" }}>
                         <form className="d-flex form-search" role="search" style={{ marginRight: "20px" }}>
-                            <input
-                                type="search"
-                                placeholder="Tìm kiếm"
-                                value={searchTerm}
-                                onChange={handleSearchChange}
-                                className="form-control rounded-pill me-2"
-                                aria-label="Search"
-                                style={styles.formControl}
-                            />
+                            <div style={{ position: "relative", width: "100%" }}>
+                                <input
+                                    type="text"
+                                    placeholder="Tìm kiếm"
+                                    value={searchTerm}
+                                    onChange={handleSearchChange}
+                                    className="form-control rounded-pill me-2"
+                                    aria-label="Search"
+                                    style={{ ...styles.formControl, paddingRight: "35px" }}
+                                />
+                                {searchTerm && (
+                                    <button
+                                        type="button"
+                                        onClick={() => handleSearchChange({ target: { value: "" } })}
+                                        style={{
+                                            position: "absolute",
+                                            right: "45px",
+                                            top: "50%",
+                                            transform: "translateY(-50%)",
+                                            background: "transparent",
+                                            border: "none",
+                                            cursor: "pointer",
+                                            fontSize: "17px",
+                                            lineHeight: "1",
+                                            padding: "2px",
+                                        }}
+                                    >
+                                        ✖
+                                    </button>
+                                )}
+                            </div>
                             <button
                                 className="btn btn-outline-secondary rounded-pill"
                                 type="button"
@@ -277,6 +325,7 @@ const Header = ({ onSearch }) => {
                                 onMouseLeave={handleMouseLeave}
                             >
                                 <a
+                                    href="/profile"
                                     className="rounded-circle"
                                     style={{
                                         ...styles.userIcon,
@@ -284,6 +333,7 @@ const Header = ({ onSearch }) => {
                                         display: "flex",
                                         flexDirection: "row", // Xếp ảnh và tên trên cùng một hàng
                                         alignItems: "center", // Canh giữa dọc
+                                        cursor: "pointer",
                                     }}
                                 >
                                     {user == null ? (
@@ -300,7 +350,14 @@ const Header = ({ onSearch }) => {
                                                     marginRight: "10px",
                                                 }}
                                             />
-                                            <span style={{ fontSize: "14px", color: "white", whiteSpace: "nowrap" }}>
+                                            <span
+                                                style={{
+                                                    fontSize: "14px",
+                                                    color: isHovered ? "#cccccc" : "white", // Chuyển sang màu tối khi hover
+                                                    whiteSpace: "nowrap",
+                                                    transition: "color 0.3s ease",
+                                                }}
+                                            >
                                                 Xin chào, {username}
                                             </span>
                                         </>
@@ -310,48 +367,57 @@ const Header = ({ onSearch }) => {
                                 <ul
                                     className={`dropdown-menu icon-user ${dropdownOpen ? "show" : ""}`}
                                     style={{
+                                        paddingTop: "0px",
+                                        paddingBottom: "0px",
                                         position: "absolute",
-                                        top: "100%", // Đặt ngay bên dưới icon
+                                        borderRadius: "0px",
+                                        top: "100%",
                                         left: "50%",
-                                        transform: "translateX(-50%)", // Căn giữa với icon
-                                        marginTop: "5px",
-                                        zIndex: 1,
+                                        marginTop: "10px",
+                                        transform: "translateX(-50%)",
+                                        backgroundColor: "#fff",
+                                        zIndex: 1000,
+                                        opacity: 1,
                                     }}
                                     onMouseEnter={handleMouseEnter} // Giữ menu mở khi di chuột vào dropdown
                                     onMouseLeave={handleMouseLeave}
                                 >
-                                    {user == null ? (
-                                        <>
-                                            <li>
-                                                <a href="/authentication/sign-in" className="dropdown-item">
-                                                    Đăng nhập
+                                    <span
+                                        style={{
+                                            content: '""',
+                                            position: "absolute",
+                                            top: "-14px",
+                                            left: "50%",
+                                            transform: "translateX(-50%)",
+                                            width: "0px",
+                                            height: "0px",
+                                            borderLeft: "10px solid transparent",
+                                            borderRight: "10px solid transparent",
+                                            borderBottom: "15px solid #fff",
+                                        }}
+                                    />
+                                    <>
+                                        {menuItems.map((item, index) => (
+                                            <li key={index}>
+                                                <a
+                                                    href={item.href}
+                                                    onClick={item.onClick}
+                                                    className="dropdown-item"
+                                                    style={{
+                                                        paddingTop: "10px",
+                                                        paddingBottom: "10px",
+                                                        backgroundColor: hovered === index ? "#f9f9f9" : "transparent",
+                                                        color: hovered === index ? (user ? "#fbc02d" : "#616161") : "black",
+                                                        transition: "background-color 0.3s ease, color 0.3s ease",
+                                                    }}
+                                                    onMouseEnter={() => handleMouseDropdownMenuEnter(index)}
+                                                    onMouseLeave={handleMouseDropdownMenuLeave}
+                                                >
+                                                    {item.label}
                                                 </a>
                                             </li>
-                                            <li>
-                                                <a href="/authentication/sign-up" className="dropdown-item">
-                                                    Đăng ký
-                                                </a>
-                                            </li>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <li>
-                                                <a href="/profile" className="dropdown-item">
-                                                    Tài khoản của tôi
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="/History" className="dropdown-item">
-                                                    Lịch sử đơn hàng
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="" className="dropdown-item" onClick={handleLogout}>
-                                                    Đăng xuất
-                                                </a>
-                                            </li>
-                                        </>
-                                    )}
+                                        ))}
+                                    </>
                                 </ul>
                             </li>
 
@@ -377,20 +443,37 @@ const Header = ({ onSearch }) => {
                                         {/* Dropdown sản phẩm */}
                                         {cartDropdownOpen && (
                                             <div
-                                                className="dropdown-menu"
                                                 style={{
                                                     position: "absolute",
-                                                    marginTop: "12%",
                                                     top: "100%",
-                                                    marginLeft: "-700%",
+                                                    marginLeft: "-200%",
+                                                    transform: "translateX(-50%)",
+                                                    marginTop: "10px",
+                                                    padding: "10px 0",
                                                     width: "900%",
                                                     backgroundColor: "#fff",
-                                                    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-                                                    overflowY: "auto",
-                                                    display: "block",
+                                                    border: "1px solid white",
+                                                    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
                                                     zIndex: 1000,
+                                                    opacity: 1,
+                                                    transition: "all 0.3s ease",
                                                 }}
                                             >
+                                                <span
+                                                    style={{
+                                                        content: '""',
+                                                        position: "absolute",
+                                                        top: "-14px",
+                                                        left: "78.55%",
+                                                        transform: "translateX(-50%)",
+                                                        width: "0px",
+                                                        height: "0px",
+                                                        borderLeft: "10px solid transparent",
+                                                        borderRight: "10px solid transparent",
+                                                        borderBottom: "14px solid #fff",
+                                                    }}
+                                                />
+
                                                 {cartProducts.length > 0 && (
                                                     <h6 style={{ padding: "10px", marginLeft: "2%" }}>Sản Phẩm Mới Thêm</h6>
                                                 )}
