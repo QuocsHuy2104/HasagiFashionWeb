@@ -160,10 +160,6 @@ function Category() {
   };
 
 
-
-
-
-
   const resetForm = () => {
     setFormData({
       name: "",

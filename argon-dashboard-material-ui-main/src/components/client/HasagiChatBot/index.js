@@ -4,6 +4,8 @@ import CategoryService from '../../../services/CategoryServices';
 import BrandService from '../../../services/BrandServices';
 import ProductService from '../../../services/ProductServices';
 import VoucherService from '../../../services/VoucherServices';
+import ProductDetailService from '../../../services/ProductDetailServices';
+
 import { CircularProgress, IconButton, Box, Avatar } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import MicIcon from '@mui/icons-material/Mic';
@@ -30,6 +32,11 @@ function Gemini() {
         return response?.data || [];
     };
 
+    const getProductDetailData = async () => {
+        const response = await ProductDetailService.getAllProductDetails();
+        return response?.data || [];
+    };
+
     const getVoucherData = async () => {
         const response = await VoucherService.getAllVouchers();
         return response?.data || [];
@@ -45,6 +52,7 @@ function Gemini() {
             const categories = await getCategoryData();
             const brands = await getBrandData();
             const products = await getProductData();
+            const productDetails = await getProductDetailData();
             const vouchers = await getVoucherData();
             const language = detectLanguage(question);
 
@@ -53,6 +61,7 @@ function Gemini() {
             \nCategories: ${JSON.stringify(categories)}
             \nBrands: ${JSON.stringify(brands)}
             \nProducts: ${JSON.stringify(products)}
+            \nProductDetails: ${JSON.stringify(productDetails)}
             \nVouchers: ${JSON.stringify(vouchers)}
             \nAnswer in ${language === 'vi' ? 'Vietnamese' : 'English'}.`;
 
@@ -65,6 +74,7 @@ function Gemini() {
             );
 
             const aiAnswer = response.data.candidates?.[0]?.content?.parts?.[0]?.text || "Không có phản hồi từ AI.";
+
             setChatHistory(prevHistory => [
                 ...prevHistory,
                 { type: 'user', text: question },
@@ -75,6 +85,13 @@ function Gemini() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!question.trim()) return;
+        generateAIResponse(question);
+        setQuestion('');
     };
 
     const startVoiceRecognition = () => {
@@ -88,8 +105,6 @@ function Gemini() {
         recognition.onresult = (event) => {
             const spokenText = event.results[0][0].transcript;
             setQuestion(spokenText);
-            generateAIResponse(spokenText);
-            setQuestion('');
         };
 
         recognition.onerror = (event) => {
@@ -98,13 +113,6 @@ function Gemini() {
         };
 
         recognition.start();
-    };
-
-    const handleSubmit = (e) => {
-        if (e) e.preventDefault();
-        if (!question.trim()) return;
-        generateAIResponse(question);
-        setQuestion('');
     };
 
     return (
@@ -116,25 +124,25 @@ function Gemini() {
         }}>
             <div
                 style={{
-                    backgroundColor: '#0033FF',
-                    borderRadius: '50%',
-                    width: '60px',
+                    backgroundColor: '#0033FF', // Màu nền chính
+                    borderRadius: '50%', // Đảm bảo là hình tròn
+                    width: '60px', // Tăng kích thước một chút cho dễ nhìn
                     height: '60px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     cursor: 'pointer',
-                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
-                    animation: 'pulse 2s infinite',
-                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)', // Tăng bóng đổ để tạo cảm giác nổi
+                    animation: 'pulse 2s infinite', // Hiệu ứng nhấp nháy
+                    transition: 'transform 0.3s ease, box-shadow 0.3s ease', // Hiệu ứng chuyển động mượt mà
                 }}
                 onClick={() => setIsChatOpen(!isChatOpen)}
                 onMouseEnter={(e) => {
-                    e.target.style.transform = 'scale(1.1)';
+                    e.target.style.transform = 'scale(1.1)'; // Hiệu ứng phóng to khi hover
                     e.target.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.3)';
                 }}
                 onMouseLeave={(e) => {
-                    e.target.style.transform = 'scale(1)';
+                    e.target.style.transform = 'scale(1)'; // Quay lại kích thước ban đầu khi hover out
                     e.target.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
                 }}
             >
@@ -144,6 +152,7 @@ function Gemini() {
                     sx={{ width: 40, height: 40 }}
                 />
             </div>
+
 
             {isChatOpen && (
                 <div style={{
@@ -190,20 +199,23 @@ function Gemini() {
                         boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.1)',
                         padding: '20px',
                         marginBottom: '20px',
-                        scrollBehavior: 'smooth',
-                        // Tùy chỉnh thanh cuộn
                         '&::-webkit-scrollbar': {
-                            width: '8px', // Độ rộng của thanh cuộn
+                            width: '8px',
+                            borderRadius: '8px',
                         },
                         '&::-webkit-scrollbar-track': {
-                            backgroundColor: '#f1f1f1', // Màu nền của track thanh cuộn
+                            backgroundColor: '#e0e0e0',
+                            borderRadius: '8px',
                         },
                         '&::-webkit-scrollbar-thumb': {
-                            backgroundColor: '#C0C0C0', // Màu của thanh cuộn
+                            backgroundColor: '#9e9e9e',
+                            borderRadius: '8px',
+                            transition: 'background-color 0.3s ease',
                         },
                         '&::-webkit-scrollbar-thumb:hover': {
-                            backgroundColor: '#A9A9A9', // Màu của thanh cuộn khi hover
+                            backgroundColor: '#7e7e7e',
                         },
+                        scrollBehavior: 'smooth',
                     }}>
                         {chatHistory.map((msg, index) => (
                             <div key={index} style={{
@@ -240,8 +252,6 @@ function Gemini() {
                         ))}
                     </Box>
 
-
-
                     <form onSubmit={handleSubmit} style={{ display: 'flex', alignItems: 'center' }}>
                         <input
                             type="text"
@@ -257,16 +267,17 @@ function Gemini() {
                                 fontSize: '14px',
                                 height: '50px',
                                 boxSizing: 'border-box',
-                                marginRight: '10px',
                             }}
                         />
-                        <IconButton onClick={startVoiceRecognition} color={isListening ? 'secondary' : 'default'}>
-                            {loading ? <CircularProgress size={24} /> : <MicIcon />}
-                        </IconButton>
-                        <IconButton type="submit" color="primary">
-                            <SendIcon />
-                        </IconButton>
 
+                        <IconButton onClick={startVoiceRecognition} color={isListening ? "secondary" : "primary"}>
+                            <MicIcon />
+                        </IconButton>
+                        <IconButton type="submit" color="primary" disabled={loading} style={{
+                            padding: '10px',
+                        }}>
+                            {loading ? <CircularProgress size={24} color="inherit" /> : <SendIcon />}
+                        </IconButton>
                     </form>
                 </div>
             )}

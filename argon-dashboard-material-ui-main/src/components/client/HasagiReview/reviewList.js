@@ -213,216 +213,226 @@ const ReviewList = () => {
                 </div>
             </div>
 
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-                {currentReviews.map((review) => (
-                    <li key={review.id} style={{ borderBottom: '1px solid #ccc', padding: '10px 0' }}>
-                        <div style={{ display: 'flex' }}>
-                            <div style={{ flex: '0 0 50px', textAlign: 'center', marginRight: '1px' }}>
-                                <img
-                                    src="https://static.vecteezy.com/system/resources/previews/019/879/186/large_2x/user-icon-on-transparent-background-free-png.png"
-                                    alt="user-icon"
-                                    style={{ borderRadius: '50%', width: '60px', marginRight: '1px' }}
-                                />
-                            </div>
-
-                            <div style={{ flex: '1' }}>
-                                <strong style={{ fontSize: '18px' }}>{review.fullName}</strong>
-                                <div style={{ color: 'orange', fontSize: '14px' }}>
-                                    {renderStars(review.star)}
-                                </div>
-
-                                <p style={{ color: '#999', fontSize: '14px' }}>
-                                    {formatDate(review.createdAt)} | Phân loại hàng: {review.color}, {review.size}
-                                </p>
-
-                                {(reviewFiles.some((file) => file.reviewId === review.id && (file.videoUrl || file.imageUrl))) && (
-                                    <>
-                                        <p style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '1px' }}>Hình ảnh và video:</p>
-                                        <div style={{ display: 'flex', gap: '2px', flexWrap: 'wrap' }}>
-                                            {Array.from(new Set(reviewFiles.filter((file) => file.reviewId === review.id && file.videoUrl)
-                                                .map((file) => file.videoUrl)))
-                                                .map((videoUrl, index) => (
-                                                    <div key={index} style={{ position: 'relative' }}>
-                                                        <video
-                                                            width="130"
-                                                            height="130"
-                                                            style={{
-                                                                borderRadius: '3px',
-                                                                cursor: 'pointer',
-                                                                objectFit: 'cover',
-                                                            }}
-                                                            onClick={() => handleOpen(videoUrl)}
-                                                        >
-                                                            <source src={videoUrl} type="video/mp4" />
-                                                        </video>
-                                                        <div
-                                                            onClick={() => handleOpen(videoUrl)}
-                                                            style={{
-                                                                position: 'absolute',
-                                                                bottom: '60px',
-                                                                left: '50px',
-                                                                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                                                                borderRadius: '50%',
-                                                                padding: '8px',
-                                                                cursor: 'pointer',
-                                                                width: '30px',
-                                                                height: '30px',
-                                                                display: 'flex',
-                                                                justifyContent: 'center',
-                                                                alignItems: 'center',
-                                                            }}
-                                                        >
-                                                            <i className="fas fa-play" style={{ color: 'white', fontSize: '16px' }}></i>
-                                                        </div>
-                                                    </div>
-                                                ))}
-
-                                            {reviewFiles.filter((file) => file.reviewId === review.id && file.imageUrl).map((file) => (
-                                                <div key={file.id}>
-                                                    {file.imageUrl && (
-                                                        <img
-                                                            src={file.imageUrl}
-                                                            alt="Review"
-                                                            style={{
-                                                                width: '130px',
-                                                                height: '130px',
-                                                                borderRadius: '3px',
-                                                                cursor: 'pointer',
-                                                                objectFit: 'cover',
-                                                            }}
-                                                            onClick={() => handleOpen(file.imageUrl)}
-                                                        />
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
-                                {review.comment && (
-                                    <>
-                                        <p style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '1px' }}>Bình luận:</p>
-                                        <p style={{ fontSize: '16px', color: '#555', marginBottom: '1px' }}>{review.comment}</p>
-                                    </>
-                                )}
-                                {review.adminFeedback !== null && (
-                                    <button
-                                        onClick={() => handleToggleExpand(review.id)}
-                                        style={{
-                                            marginTop: '1px',
-                                            fontSize: '15px',
-                                            border: 'none',
-                                            backgroundColor: 'transparent',
-                                            cursor: 'pointer',
-                                            color: '#0285c7'
-                                        }}
-                                    >
-                                        {expandedReviewId === review.id ? (
-                                            <>
-                                                <i className="fas fa-chevron-up" style={{ marginRight: '5px' }}></i>
-                                                Ẩn
-                                            </>
-                                        ) : (
-                                            <>
-                                                <i className="fas fa-chevron-down" style={{ marginRight: '5px', fontWeight: 'bold' }}></i>
-                                                Xem phản hồi
-                                            </>
-                                        )}
-                                    </button>
-                                )}
-                                {expandedReviewId === review.id && (
-                                    <div style={{ marginTop: '10px', padding: '10px', border: '1px solid #ccc', borderRadius: '5px', backgroundColor: '#FFFFE0' }}>
-                                        <p style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '1px' }}>Phản hồi của người bán:</p>
-                                        <p style={{ fontSize: '16px', marginTop: '1px', marginBottom: '3px' }}>{review.adminFeedback}</p>
+            {filteredReviews.length > 0 ? (
+                <>
+                    <ul style={{ listStyle: 'none', padding: 0 }}>
+                        {currentReviews.map((review) => (
+                            <li key={review.id} style={{ borderBottom: '1px solid #ccc', padding: '10px 0' }}>
+                                <div style={{ display: 'flex' }}>
+                                    <div style={{ flex: '0 0 50px', textAlign: 'center', marginRight: '1px' }}>
+                                        <img
+                                            src="https://static.vecteezy.com/system/resources/previews/019/879/186/large_2x/user-icon-on-transparent-background-free-png.png"
+                                            alt="user-icon"
+                                            style={{ borderRadius: '50%', width: '60px', marginRight: '1px' }}
+                                        />
                                     </div>
-                                )}
-                                <Modal open={open} onClose={handleClose}>
-                                    <Box sx={{
-                                        position: 'absolute',
-                                        top: '50%',
-                                        left: '50%',
-                                        transform: 'translate(-50%, -50%)',
-                                        borderRadius: '5px',
-                                        boxShadow: 24,
-                                    }}>
-                                        {mediaUrl && mediaUrl.includes('firebasestorage.googleapis.com') ? (
-                                            mediaUrl.includes('.mp4') ? (
-                                                <video width="100%" controls>
-                                                    <source src={mediaUrl} type="video/mp4" />
-                                                </video>
-                                            ) : (
-                                                <img src={mediaUrl} alt="Review Media" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                                            )
-                                        ) : (
-                                            <p>No media available</p>
+
+                                    <div style={{ flex: '1' }}>
+                                        <strong style={{ fontSize: '18px' }}>{review.fullName}</strong>
+                                        <div style={{ color: 'orange', fontSize: '14px' }}>
+                                            {renderStars(review.star)}
+                                        </div>
+
+                                        <p style={{ color: '#999', fontSize: '14px' }}>
+                                            {formatDate(review.createdAt)} | Phân loại hàng: {review.color}, {review.size}
+                                        </p>
+
+                                        {(reviewFiles.some((file) => file.reviewId === review.id && (file.videoUrl || file.imageUrl))) && (
+                                            <>
+                                                <p style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '1px' }}>Hình ảnh và video:</p>
+                                                <div style={{ display: 'flex', gap: '2px', flexWrap: 'wrap' }}>
+                                                    {Array.from(new Set(reviewFiles.filter((file) => file.reviewId === review.id && file.videoUrl)
+                                                        .map((file) => file.videoUrl)))
+                                                        .map((videoUrl, index) => (
+                                                            <div key={index} style={{ position: 'relative' }}>
+                                                                <video
+                                                                    width="130"
+                                                                    height="130"
+                                                                    style={{
+                                                                        borderRadius: '3px',
+                                                                        cursor: 'pointer',
+                                                                        objectFit: 'cover',
+                                                                    }}
+                                                                    onClick={() => handleOpen(videoUrl)}
+                                                                >
+                                                                    <source src={videoUrl} type="video/mp4" />
+                                                                </video>
+                                                                <div
+                                                                    onClick={() => handleOpen(videoUrl)}
+                                                                    style={{
+                                                                        position: 'absolute',
+                                                                        bottom: '60px',
+                                                                        left: '50px',
+                                                                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                                                        borderRadius: '50%',
+                                                                        padding: '8px',
+                                                                        cursor: 'pointer',
+                                                                        width: '30px',
+                                                                        height: '30px',
+                                                                        display: 'flex',
+                                                                        justifyContent: 'center',
+                                                                        alignItems: 'center',
+                                                                    }}
+                                                                >
+                                                                    <i className="fas fa-play" style={{ color: 'white', fontSize: '16px' }}></i>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+
+                                                    {reviewFiles.filter((file) => file.reviewId === review.id && file.imageUrl).map((file) => (
+                                                        <div key={file.id}>
+                                                            {file.imageUrl && (
+                                                                <img
+                                                                    src={file.imageUrl}
+                                                                    alt="Review"
+                                                                    style={{
+                                                                        width: '130px',
+                                                                        height: '130px',
+                                                                        borderRadius: '3px',
+                                                                        cursor: 'pointer',
+                                                                        objectFit: 'cover',
+                                                                    }}
+                                                                    onClick={() => handleOpen(file.imageUrl)}
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </>
                                         )}
-                                    </Box>
-                                </Modal>
-                            </div>
-                        </div>
-                    </li>
-                ))}
-            </ul>
+                                        {review.comment && (
+                                            <>
+                                                <p style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '1px' }}>Bình luận:</p>
+                                                <p style={{ fontSize: '16px', color: '#555', marginBottom: '1px' }}>{review.comment}</p>
+                                            </>
+                                        )}
+                                        {review.adminFeedback !== null && (
+                                            <button
+                                                onClick={() => handleToggleExpand(review.id)}
+                                                style={{
+                                                    marginTop: '1px',
+                                                    fontSize: '15px',
+                                                    border: 'none',
+                                                    backgroundColor: 'transparent',
+                                                    cursor: 'pointer',
+                                                    color: '#0285c7'
+                                                }}
+                                            >
+                                                {expandedReviewId === review.id ? (
+                                                    <>
+                                                        <i className="fas fa-chevron-up" style={{ marginRight: '5px' }}></i>
+                                                        Ẩn
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <i className="fas fa-chevron-down" style={{ marginRight: '5px', fontWeight: 'bold' }}></i>
+                                                        Xem phản hồi
+                                                    </>
+                                                )}
+                                            </button>
+                                        )}
+                                        {expandedReviewId === review.id && (
+                                            <div style={{ marginTop: '10px', padding: '10px', border: '1px solid #ccc', borderRadius: '5px', backgroundColor: '#FFFFE0' }}>
+                                                <p style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '1px' }}>Phản hồi của người bán:</p>
+                                                <p style={{ fontSize: '16px', marginTop: '1px', marginBottom: '3px' }}>{review.adminFeedback}</p>
+                                            </div>
+                                        )}
+                                        <Modal open={open} onClose={handleClose}>
+                                            <Box sx={{
+                                                position: 'absolute',
+                                                top: '50%',
+                                                left: '50%',
+                                                transform: 'translate(-50%, -50%)',
+                                                borderRadius: '5px',
+                                                boxShadow: 24,
+                                            }}>
+                                                {mediaUrl && mediaUrl.includes('firebasestorage.googleapis.com') ? (
+                                                    mediaUrl.includes('.mp4') ? (
+                                                        <video width="100%" controls>
+                                                            <source src={mediaUrl} type="video/mp4" />
+                                                        </video>
+                                                    ) : (
+                                                        <img src={mediaUrl} alt="Review Media" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                                    )
+                                                ) : (
+                                                    <p>No media available</p>
+                                                )}
+                                            </Box>
+                                        </Modal>
+                                    </div>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
 
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px' }}>
+                        <button
+                            disabled={currentPage === 1}
+                            onClick={() => paginate(currentPage - 1)}
+                            style={{
+                                padding: '10px 15px',
+                                backgroundColor: currentPage === 1 ? '#e0e0e0' : '#FFD333',
+                                border: 'none',
+                                borderRadius: '50%',
+                                color: 'black',
+                                fontSize: '18px',
+                                cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                                transition: 'background-color 0.3s, transform 0.2s',
+                            }}
+                            onMouseEnter={(e) => (e.target.style.backgroundColor = '#FFD333')}
+                            onMouseLeave={(e) => (e.target.style.backgroundColor = currentPage === 1 ? '#e0e0e0' : '#FFD333')}
+                            onMouseDown={(e) => (e.target.style.transform = 'scale(0.98)')}
+                            onMouseUp={(e) => (e.target.style.transform = 'scale(1)')}
+                        >
+                            <FiChevronLeft style={{ fontSize: '20px' }} />
+                        </button>
 
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px' }}>
-                <button
-                    disabled={currentPage === 1}
-                    onClick={() => paginate(currentPage - 1)}
-                    style={{
-                        padding: '10px 15px',
-                        backgroundColor: currentPage === 1 ? '#e0e0e0' : '#FFD333',
-                        border: 'none',
-                        borderRadius: '50%',
-                        color: 'black',
-                        fontSize: '18px',
-                        cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                        transition: 'background-color 0.3s, transform 0.2s',
-                    }}
-                    onMouseEnter={(e) => (e.target.style.backgroundColor = '#FFD333')}
-                    onMouseLeave={(e) => (e.target.style.backgroundColor = currentPage === 1 ? '#e0e0e0' : '#FFD333')}
-                    onMouseDown={(e) => (e.target.style.transform = 'scale(0.98)')}
-                    onMouseUp={(e) => (e.target.style.transform = 'scale(1)')}
-                >
-                    <FiChevronLeft style={{ fontSize: '20px' }} />
-                </button>
+                        <span style={{
+                            fontSize: '16px',
+                            fontWeight: '600',
+                            margin: '0 15px',
+                            color: '#333',
+                            textAlign: 'center',
+                            padding: '5px 10px',
+                            backgroundColor: '#f7f7f7',
+                            borderRadius: '25px',
+                            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+                        }}>
+                            Trang {currentPage} / {totalPages}
+                        </span>
 
-                <span style={{
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    margin: '0 15px',
-                    color: '#333',
+                        <button
+                            disabled={currentPage === totalPages}
+                            onClick={() => paginate(currentPage + 1)}
+                            style={{
+                                padding: '10px 15px',
+                                backgroundColor: currentPage === totalPages ? '#e0e0e0' : '#FFD333',
+                                border: 'none',
+                                borderRadius: '50%',
+                                color: 'black',
+                                fontSize: '18px',
+                                cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                                transition: 'background-color 0.3s, transform 0.2s',
+                            }}
+                            onMouseEnter={(e) => (e.target.style.backgroundColor = '#FFD333')}
+                            onMouseLeave={(e) => (e.target.style.backgroundColor = currentPage === totalPages ? '#e0e0e0' : '#FFD333')}
+                            onMouseDown={(e) => (e.target.style.transform = 'scale(0.98)')}
+                            onMouseUp={(e) => (e.target.style.transform = 'scale(1)')}
+                        >
+                            <FiChevronRight style={{ fontSize: '20px' }} />
+                        </button>
+                    </div>
+                </>
+            ) : (
+                <div style={{
                     textAlign: 'center',
-                    padding: '5px 10px',
-                    backgroundColor: '#f7f7f7',
-                    borderRadius: '25px',
-                    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+                    color: 'gray',
+                    fontSize: '18px',
+                    padding: '20px',
                 }}>
-                    Trang {currentPage} / {totalPages}
-                </span>
-
-                <button
-                    disabled={currentPage === totalPages}
-                    onClick={() => paginate(currentPage + 1)}
-                    style={{
-                        padding: '10px 15px',
-                        backgroundColor: currentPage === totalPages ? '#e0e0e0' : '#FFD333',
-                        border: 'none',
-                        borderRadius: '50%',
-                        color: 'black',
-                        fontSize: '18px',
-                        cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                        transition: 'background-color 0.3s, transform 0.2s',
-                    }}
-                    onMouseEnter={(e) => (e.target.style.backgroundColor = '#FFD333')}
-                    onMouseLeave={(e) => (e.target.style.backgroundColor = currentPage === totalPages ? '#e0e0e0' : '#FFD333')}
-                    onMouseDown={(e) => (e.target.style.transform = 'scale(0.98)')}
-                    onMouseUp={(e) => (e.target.style.transform = 'scale(1)')}
-                >
-                    <FiChevronRight style={{ fontSize: '20px' }} />
-                </button>
-            </div>
-
-
+                    Không có đánh giá nào
+                </div>
+            )}
         </div>
     );
 };

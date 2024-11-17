@@ -74,7 +74,7 @@ const Header = ({ onSearch }) => {
             alert('Trình duyệt của bạn không hỗ trợ tìm kiếm bằng giọng nói.');
         }
     };
-    
+
     const handleLogout = () => {
 
         Cookies.remove('user');
@@ -212,78 +212,6 @@ const Header = ({ onSearch }) => {
                             <a href="/chatbot" className="nav-item nav-link" style={styles.navLink}>Chat bot</a>
                             <a href="/review-image" className="nav-item nav-link" style={styles.navLink}>Test</a>
 
-
-                            <div style={{ position: 'relative', display: 'inline-block' }}>
-                                <Button
-                                    variant="secondary"
-                                    onClick={toggleDropdown}
-                                    style={{
-                                        padding: '12px 24px',
-                                        borderRadius: '30px',
-                                        backgroundColor: '#007bff',
-                                        color: '#fff',
-                                        border: '1px solid #007bff',
-                                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                                        cursor: 'pointer',
-                                        fontWeight: 'bold',
-                                        fontSize: '14px',
-                                        transition: 'all 0.3s ease',
-                                        marginLeft: '40px'
-                                    }}
-                                    onMouseEnter={(e) => e.target.style.backgroundColor = '#0056b3'}
-                                    onMouseLeave={(e) => e.target.style.backgroundColor = '#007bff'}
-                                >
-                                    Dropdown
-                                </Button>
-
-                                {/* Dropdown Menu */}
-                                {isOpen && (
-                                    <div
-                                        style={{
-                                            position: 'absolute',
-                                            top: '45px',
-                                            left: '60%',
-                                            transform: 'translateX(-50%)',
-                                            marginTop: '10px',
-                                            padding: '10px 0',
-                                            width: '200px',
-                                            borderRadius: '12px',
-                                            backgroundColor: '#fff',
-                                            border: '1px solid white',
-                                            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-                                            zIndex: 999,
-                                            opacity: 1,
-                                            transition: 'all 0.3s ease',
-                                        }}
-                                    >
-                                        <span
-                                            style={{
-                                                content: '""',
-                                                position: 'absolute',
-                                                top: '-8px',
-                                                left: '50%',
-                                                transform: 'translateX(-50%)',
-                                                width: '0',
-                                                height: '0',
-                                                borderLeft: '8px solid transparent',
-                                                borderRight: '8px solid transparent',
-                                                borderBottom: '8px solid #fff',
-                                            }}
-                                        />
-                                        <ul className="flex flex-col gap-2 text-gray-700">
-                                            <li className="cursor-pointer hover:bg-gray-100 px-4 py-2 rounded-md text-sm transition duration-200 ease-in-out">
-                                                Option 1
-                                            </li>
-                                            <li className="cursor-pointer hover:bg-gray-100 px-4 py-2 rounded-md text-sm transition duration-200 ease-in-out">
-                                                Option 2
-                                            </li>
-                                            <li className="cursor-pointer hover:bg-gray-100 px-4 py-2 rounded-md text-sm transition duration-200 ease-in-out">
-                                                Option 3
-                                            </li>
-                                        </ul>
-                                    </div>
-                                )}
-                            </div>
 
                         </div>
                     </div>
