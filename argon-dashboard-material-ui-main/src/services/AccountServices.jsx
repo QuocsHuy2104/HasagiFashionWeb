@@ -8,6 +8,7 @@ const AccountService = {
     getAccountById: (id) => {
         return apiClient.get(`/admin/account/${id}`);
     },
+    
 
     saveAccount: (formData) => {
         const url = formData.id 
@@ -29,6 +30,8 @@ const AccountService = {
     dismissalAccount: id => apiClient.put(`/admin/account/dismissal/${id}`),
 
     getAuthor: () => apiClient.get('/admin/account/my-info'),
+
+    
 
 }
 

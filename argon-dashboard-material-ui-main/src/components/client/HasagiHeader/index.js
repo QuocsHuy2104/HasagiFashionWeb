@@ -158,8 +158,18 @@ export default function Header(props) {
                                     <MuiLink href="/Shop" sx={{ paddingRight: 3 }}>
                                         <ArgonTypography variant="h5">SẢN PHẨM</ArgonTypography>
                                     </MuiLink>
-
-
+                                    <MuiLink href="/Contact" sx={{ paddingRight: 3 }}>
+                                        <ArgonTypography variant="h5">liên hệ</ArgonTypography>
+                                    </MuiLink>
+                                    <MuiLink href="/About" sx={{ paddingRight: 3 }}>
+                                        <ArgonTypography variant="h5">giới thiệu</ArgonTypography>
+                                    </MuiLink>
+                                    <MuiLink href="/Loi404" sx={{ paddingRight: 3 }}>
+                                        <ArgonTypography variant="h5">404</ArgonTypography>
+                                    </MuiLink>
+                                    <MuiLink href="/HoiDap" sx={{ paddingRight: 3 }}>
+                                        <ArgonTypography variant="h5">q&A</ArgonTypography>
+                                    </MuiLink>
                                     <ArgonBox display="flex" alignItems="center" sx={{ borderBottom: '1px solid #d2d2d2', position: 'relative', flexGrow: 1 }}>
                                         <InputBase
                                             placeholder="Tìm kiếm sản phẩm..."

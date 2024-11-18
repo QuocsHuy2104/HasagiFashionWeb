@@ -60,6 +60,10 @@ import ShopDetail from "components/client/HasagiShopDetail/ShopDetails";
 import Shop from "components/client/HasagiShop/Shop";
 import Cart from "components/client/HasagiCart";
 import Contact from "components/client/HasagiContact";
+import About from "components/client/HasagiAbout";
+import Loi404 from "components/client/Hasagi404";
+import HoiDap from "components/client/HasagiQ&A";
+
 import Checkout from "components/client/HasagiCheckout";
 import Favorite from "components/client/HasagiFavorite";
 import SignIn from "layouts/authentication/sign-in";
@@ -266,6 +270,33 @@ const routes = [
     route: "/Contact",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
     component: <Contact />,
+    showInSidenav: true,
+  },
+  {
+    // type: "route", 
+    name: "About",
+    key: "about",
+    route: "/About",
+    icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
+    component: <About />,
+    showInSidenav: true,
+  },
+  {
+    // type: "route", 
+    name: "Loi404",
+    key: "loi404",
+    route: "/Loi404",
+    icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
+    component: <Loi404 />,
+    showInSidenav: true,
+  },
+  {
+    // type: "route", 
+    name: "HoiDap",
+    key: "HoiDap",
+    route: "/HoiDap",
+    icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
+    component: <HoiDap />,
     showInSidenav: true,
   },
   {

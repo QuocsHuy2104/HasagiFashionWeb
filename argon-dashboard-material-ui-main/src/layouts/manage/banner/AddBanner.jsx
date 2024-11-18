@@ -29,12 +29,20 @@ const AddBanner = ({ id, setBannerId }) => {
                 })
             );
     
-            const updatedImageUrls = [...previewUrls, ...newImageUrls]; 
+            let existingImageUrls = [];
+            if (id) {
+                const currentBanner = await BannerDataService.getBanner(id);
+                if (currentBanner.exists()) {
+                    existingImageUrls = currentBanner.data().imageUrls || [];
+                }
+            }
+    
+            const updatedImageUrls = [...existingImageUrls, ...newImageUrls];
             const newBanner = { title, imageUrls: updatedImageUrls };
     
             if (id) {
                 await BannerDataService.updateBanner(id, newBanner);
-                setBannerId(""); 
+                setBannerId("");
                 setMessage({ error: false, msg: "Cập nhật thành công!" });
             } else {
                 await BannerDataService.addBanner(newBanner);
@@ -43,13 +51,13 @@ const AddBanner = ({ id, setBannerId }) => {
     
             setTitle("");
             setImages([]);
-            setPreviewUrls([]); 
+            setPreviewUrls([]);
             document.querySelector('input[type="file"]').value = null;
-    
         } catch (err) {
             setMessage({ error: true, msg: err.message });
         }
     };
+    
     
 
     const editHandler = useCallback(async () => {
@@ -81,15 +89,38 @@ const AddBanner = ({ id, setBannerId }) => {
     };
     
 
-    const handleRemoveImage = (index) => {
-        if (index < previewUrls.length) {
-            const newPreviewUrls = previewUrls.filter((_, i) => i !== index);
-            setPreviewUrls(newPreviewUrls);
-        } else {
-            const newImages = images.filter((_, i) => i !== (index - previewUrls.length));
-            setImages(newImages);
+    const handleRemoveImage = async (index) => {
+        try {
+            // Nếu index nằm trong `previewUrls`, nghĩa là ảnh cũ
+            if (index < previewUrls.length) {
+                const newPreviewUrls = previewUrls.filter((_, i) => i !== index);
+                setPreviewUrls(newPreviewUrls);
+    
+                // Cập nhật lại cơ sở dữ liệu nếu đang trong chế độ chỉnh sửa
+                if (id) {
+                    const currentBanner = await BannerDataService.getBanner(id);
+                    if (currentBanner.exists()) {
+                        const existingImageUrls = currentBanner.data().imageUrls || [];
+                        const updatedImageUrls = existingImageUrls.filter((_, i) => i !== index);
+    
+                        // Cập nhật banner với danh sách URL ảnh mới
+                        await BannerDataService.updateBanner(id, {
+                            ...currentBanner.data(),
+                            imageUrls: updatedImageUrls,
+                        });
+                        setMessage({ error: false, msg: "Xóa ảnh thành công!" });
+                    }
+                }
+            } else {
+                // Nếu index thuộc về ảnh mới trong `images`
+                const newImages = images.filter((_, i) => i !== (index - previewUrls.length));
+                setImages(newImages);
+            }
+        } catch (err) {
+            setMessage({ error: true, msg: `Lỗi khi xóa ảnh: ${err.message}` });
         }
     };
+    
 
     return (
         <>

@@ -14,8 +14,7 @@ import { toast } from "react-toastify";
 import { Typography } from "@mui/material";
 import InputAdornment from '@mui/material/InputAdornment';
 import Footer from "../../../examples/Footer";
-import ColorService from "services/ColorServices";
-import SizeService from "services/SizeServices";
+
 import BrandService from "../../../services/BrandServices";
 import CategoriesService from "../../../services/CategoryServices";
 import ProductService from "../../../services/ProductServices";
