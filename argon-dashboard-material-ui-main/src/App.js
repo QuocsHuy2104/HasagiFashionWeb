@@ -127,6 +127,8 @@ export default function App() {
     && pathname !== "/History"
     && pathname !== "/profile" 
     && pathname !== "/chatBot" 
+    && pathname !== "/Q&A" 
+    && pathname !== "/About" 
     && !pathname.startsWith("/history-order/");
 
   return direction === "rtl" ? (

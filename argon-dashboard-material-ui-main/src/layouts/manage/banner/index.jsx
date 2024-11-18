@@ -25,13 +25,6 @@ function Banner() {
                         <ArgonBox display="flex" justifyContent="space-between" p={3}>
                             <ArgonTypography variant="h6">Manage Banners</ArgonTypography>
                         </ArgonBox>
-                        <Container>
-                            <Row>
-                                <Col>
-                                    <AddBanner id={bookId} setBannerId={setBannerId} />
-                                </Col>
-                            </Row>
-                        </Container>
 
                         <Container>
                             <Row>
@@ -47,10 +40,6 @@ function Banner() {
             </DashboardLayout>
 
         </>
-
-
-
-
     );
 }
 

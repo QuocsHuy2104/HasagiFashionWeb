@@ -9,7 +9,8 @@ import ArgonTypography from "../../../components/ArgonTypography";
 import DataTable from "./data";
 import Footer from "../../../examples/Footer";
 import ColorsService from "../../../services/ColorServices";
-import { toast } from "react-toastify";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Color() {
     const [formData, setFormData] = useState({
@@ -117,6 +118,7 @@ function Color() {
 
     return (
         <DashboardLayout>
+            <ToastContainer />
             <DashboardNavbar />
             <ArgonBox py={3}>
                 <ArgonBox mb={3}>

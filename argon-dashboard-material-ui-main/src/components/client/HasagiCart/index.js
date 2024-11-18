@@ -15,6 +15,7 @@ import CartService from "../../../services/CartService";
 import styled from "styled-components";
 import ProductService from "services/ProductServices";
 import aboutImage5 from "layouts/assets/img/product-1.jpg";
+
 const Cart = () => {
     const [cartItems, setCartItems] = useState([]);
     const [address, setAddress] = useState(null);

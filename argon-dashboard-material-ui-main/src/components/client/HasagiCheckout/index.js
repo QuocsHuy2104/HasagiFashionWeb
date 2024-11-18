@@ -249,6 +249,7 @@ const Checkout = () => {
     };
 
     const handleClick = async () => {
+        document.body.style.overflowY = "auto";
         const selectedItems = cartItems.filter((item) => item.selected);
         if (!selectedPayment) {
             toast.warn("Vui lòng chọn phương thức thanh toán.");
@@ -313,6 +314,7 @@ const Checkout = () => {
                             popup: "custom-popup",
                         },
                         didOpen: () => {
+                            document.body.style.padding = "0";
                             const popup = document.querySelector(".swal2-popup");
                             popup.style.overflow = "hidden";
                         },

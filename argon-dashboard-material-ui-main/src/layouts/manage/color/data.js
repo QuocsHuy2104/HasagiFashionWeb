@@ -1,40 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { DataGrid } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
-import ColorService from '../../../services/ColorServices';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
 import Box from '@mui/material/Box';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
 
 const columns = [
     { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'nameColor', headerName: 'Name Color', width: 130 },
+    { field: 'name', headerName: 'Màu', width: 130 },
 ];
 
-export default function DataTable({ onEditClick, onDeleteClick }) {
-    const [rows, setRows] = useState([]);
+export default function DataTable({ colors, onEditClick, onDeleteClick }) {
     const [selectedRows, setSelectedRows] = useState([]);
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
-
-    const fetchData = async () => {
-        try {
-            const response = await ColorService.getAllColors();
-            const colors = response.data || [];
-            const formattedData = colors.map((color) => ({
-                id: color.id,
-                nameColor: color.name,
-            }));
-            setRows(formattedData);
-        } catch (error) {
-            console.error('Error fetching colors:', error);
-        }
-    };
-
-    useEffect(() => {
-        fetchData();
-    }, []);
 
     const handleSelectionModelChange = (newSelectionModel) => {
         setSelectedRows(newSelectionModel);
@@ -43,55 +23,45 @@ export default function DataTable({ onEditClick, onDeleteClick }) {
     const handleDelete = async () => {
         if (selectedRows.length > 0) {
             await onDeleteClick(selectedRows);
-            fetchData();
+        }
+    };
+
+    const handleEdit = () => {
+        if (selectedRows.length === 1) {
+            const selectedColor = colors.find((color) => color.id === selectedRows[0]);
+            onEditClick(selectedColor);
         }
     };
 
     return (
-        <Paper style={{ height: 420, width: "100%" }}>
+        <Paper sx={{ height: 400, width: '100%', position: 'relative' }}>
             <DataGrid
-                rows={rows}
+                rows={colors}
                 columns={columns}
-                pageSize={5}
-                rowsPerPageOptions={[5, 10]}
+                paginationModel={paginationModel}
+                onPaginationModelChange={setPaginationModel}
+                pageSizeOptions={[5, 10]}
                 checkboxSelection
-                disableSelectionOnClick
-                onSelectionModelChange={handleSelectionModelChange}
-                sx={{
-                    "& .MuiDataGrid-cell": {
-                        fontSize: "0.75rem",
-                        padding: "4px",
-                    },
-                    "& .MuiDataGrid-columnHeaders": {
-                        fontSize: "0.8rem",
-                    },
-                    "& .MuiTablePagination-root": {
-                        fontSize: "0.75rem",
-                        minHeight: "30px",
-                    },
-                    "& .MuiTablePagination-select": {
-                        fontSize: "0.75rem",
-                        padding: "4px",
-                    },
-                    "& .MuiTablePagination-displayedRows": {
-                        fontSize: "0.75rem",
-                    },
-                }}
-                rowHeight={40}
+                onRowSelectionModelChange={handleSelectionModelChange}
+                sx={{ border: 0 }}
             />
-            <Box display="flex" justifyContent="flex-end" marginTop={2}>
-                <IconButton onClick={handleDelete}>
-                    <DeleteIcon color="error" />
-                </IconButton>
-                <IconButton onClick={onEditClick}>
-                    <AddIcon color="primary" />
-                </IconButton>
-            </Box>
+
+            {selectedRows.length > 0 && (
+                <Box sx={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 1 }}>
+                    <IconButton onClick={handleEdit} disabled={selectedRows.length !== 1}>
+                        <EditIcon color="primary" />
+                    </IconButton>
+                    <IconButton onClick={handleDelete}>
+                        <DeleteIcon color="error" />
+                    </IconButton>
+                </Box>
+            )}
         </Paper>
     );
 }
 
 DataTable.propTypes = {
+    colors: PropTypes.array.isRequired,
     onEditClick: PropTypes.func.isRequired,
     onDeleteClick: PropTypes.func.isRequired,
 };

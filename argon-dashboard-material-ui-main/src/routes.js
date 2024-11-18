@@ -8,10 +8,12 @@ import Order from "layouts/manage/order";
 import Account from "layouts/manage/account";
 import Image from "layouts/manage/image";
 import ForgotPassword from "layouts/authentication/forgot-password";
+import ResetPassword from "layouts/authentication/reset-password";
 import Product from "layouts/manage/product";
 import Review from "layouts/manage/review";
 // Argon Dashboard 2 MUI components
 import ArgonBox from "components/ArgonBox";
+import About from "components/client/HasagiAbout";
 import Category from "layouts/manage/category";
 import Brand from "layouts/manage/brand";
 import FeatureSection from "layouts/clientuser/home";
@@ -30,6 +32,7 @@ import History from "components/client/HasagiHistory";
 import HistoryOrderDetail from "components/client/HasagiHistoryDetail";
 import Voucher from "layouts/manage/voucher";
 import ChatBot from "components/client/HasagiChatBot";
+import QA from "components/client/HasagiQ&A";
 
 const routes = [
   {
@@ -153,6 +156,25 @@ const routes = [
   },
 
   {
+    // type: "route",
+    name: "ForgotPassword",
+    key: "forgotpassword",
+    route: "/forgot-password",
+    icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
+    component: <ForgotPassword />,
+    showInSidenav: true,
+  },
+  {
+    // type: "route",
+    name: "ResetPassword",
+    key: "resetpassword",
+    route: "/reset-password",
+    icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
+    component: <ResetPassword />,
+    showInSidenav: true,
+  },
+  
+  {
     type: "route",
     name: "Manage Order",
     key: "order",
@@ -211,6 +233,26 @@ const routes = [
     showInSidenav: true,
   },
   
+  {
+    // type: "route",
+    name: "Q&A",
+    key: "q&A",
+    route: "/Q&A",
+    icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
+    component: <QA />,
+    showInSidenav: true,
+  },
+
+  {
+    // type: "route",
+    name: "About",
+    key: "about",
+    route: "/About",
+    icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
+    component: <About />,
+    showInSidenav: true,
+  },
+
   {
     // type: "route",
     name: "Shop Detail",

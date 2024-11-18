@@ -259,17 +259,14 @@ const Header = ({ onSearch }) => {
                             <a href="/Shop" className="nav-item nav-link" style={styles.navLink}>
                                 Sản Phẩm
                             </a>
-                            <a href="#about" className="nav-item nav-link" style={styles.navLink}>
+                            <a href="/About" className="nav-item nav-link" style={styles.navLink}>
                                 Giới Thiệu
                             </a>
-                            <a href="#contact" className="nav-item nav-link" style={styles.navLink}>
+                            <a href="/Contact" className="nav-item nav-link" style={styles.navLink}>
                                 Liên Hệ
                             </a>
-                            <a href="#faq" className="nav-item nav-link" style={styles.navLink}>
+                            <a href="/Q&A" className="nav-item nav-link" style={styles.navLink}>
                                 Hỏi Đáp
-                            </a>
-                            <a href="/chatBot" className="nav-item nav-link" style={styles.navLink}>
-                                Chat Bot
                             </a>
                         </div>
                     </div>

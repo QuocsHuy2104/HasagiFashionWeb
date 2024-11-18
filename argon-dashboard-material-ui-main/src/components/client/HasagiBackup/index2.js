@@ -221,6 +221,7 @@ const Backup2 = ({ show, onClose, onAddressUpdated }) => {
             address: address,
         };
         try {
+            await AddressService.getAllAddress();
             await AddressService.createAddress(formData);
             onClose();
             await AddressService.getAllAddress();

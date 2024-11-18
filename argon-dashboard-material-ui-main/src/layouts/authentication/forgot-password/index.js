@@ -1,4 +1,3 @@
-
 // react-router-dom components
 import { Link } from "react-router-dom";
 import React, { useState, useEffect, useRef } from "react";
@@ -35,7 +34,7 @@ function ForgotPassword() {
   const [capValue, setCapValue] = useState("");
   // Loại bỏ khoảng trắng thừa ở đầu và cuối chuỗi
   const value = email.trim();
-  const isEmailValid = /^[a-zA-Z0-9._%+-]+@(gmail\.com|fpt\.edu\.vn)$/.test(value);
+  const isEmailValid = /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(value);
   const [errorEmail, setErrorEmail] = useState();
   const [successMessage, setSuccessMessage] = useState("");
   const [showError, setShowError] = useState(false);
@@ -47,14 +46,14 @@ function ForgotPassword() {
     setSuccessMessage("");
 
     if (!email) {
-      setErrorEmail("Email cannot be blank!");
+      setErrorEmail("Email không được để trống!");
       setShowError(true);
       return;
     }
 
     // Xử lý thông báo lỗi và reset ReCAPTCHA
     if (!isEmailValid) {
-      setErrorEmail("Invalid email!");
+      setErrorEmail("Email không hợp lệ!");
       setShowError(true);
       return;
     } else {
@@ -80,7 +79,7 @@ function ForgotPassword() {
         if (error.response) {
           setErrorEmail(error.response.data); // Thông báo lỗi từ server
         } else {
-          setErrorEmail("An error occurred"); // Thông báo lỗi không xác định
+          setErrorEmail("Lỗi không xác định vui lòng thử lại!"); // Thông báo lỗi không xác định
         }
         setShowError(true);
       }
@@ -126,8 +125,8 @@ function ForgotPassword() {
   }, [isLoading]);
   return (
     <CoverLayout
-      title="Welcome!"
-      description="Use these awesome forms to login or create new account in your project for free."
+      //title="Chào mừng!"
+      // description="Use these awesome forms to login or create new account in your project for free."
       image={bgImage}
       imgPosition="top"
       button={{ color: "dark", variant: "gradient" }}
@@ -141,7 +140,7 @@ function ForgotPassword() {
         <Card w={50} className="mb-5">
           <ArgonBox p={3} mb={1} textAlign="center">
             <ArgonTypography variant="h5" fontWeight="medium">
-              Forgot Password
+              Quên mật khẩu
             </ArgonTypography>
           </ArgonBox>
           <ArgonBox pt={2} pb={3} px={3}>
@@ -214,7 +213,6 @@ function ForgotPassword() {
                       ref={recaptchaRef}
                       sitekey="6LfydhoqAAAAAE2wPxlnGXh0iXc-5l1y5tu8P8Tc"
                       onChange={handleReCAPTCHA}
-                      hl="en"
                     />
                   </div>
                 </div>

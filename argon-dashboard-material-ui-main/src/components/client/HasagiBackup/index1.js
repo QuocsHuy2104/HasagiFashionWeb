@@ -98,21 +98,6 @@ const AddressSelection = ({ show, onClose }) => {
         }
     };
 
-    const handleDeleteAddress = async (id) => {
-        try {
-            const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa địa chỉ này?");
-            if (!confirmDelete) return;
-
-            const payload = {};
-            await AddressService.removeAddress(id);
-            fetchAddress(); 
-            toast.success('Xóa địa chỉ thành công!');
-        } catch (error) {
-            toast.error('Xóa địa chỉ thất bại!');
-        }
-    };
-
-
     const handleComplete = () => {
         if (selectedAddress) {
             handleAddressSelect(selectedAddress);
@@ -211,7 +196,6 @@ const AddressSelection = ({ show, onClose }) => {
                                             >
                                                 Update
                                             </button>
-                                            <button className="btn ms-2" onClick={() => handleDeleteAddress(addr.id)} disabled={addr.status === true} style={{ transform: "scale(1)", fontSize: "13px" }}>Delete</button>
                                         </div>
                                     ))}
                                 </div>
