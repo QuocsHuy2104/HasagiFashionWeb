@@ -4,7 +4,6 @@ import 'layouts/assets/css/style.css';
 import HasagiNav from "components/client/HasagiHeader";
 import { useLocation, Link } from 'react-router-dom';
 import Footer from "components/client/HasagiFooter";
-import useCartQuantity from "../HasagiQuantity/useCartQuantity";
 import cartService from "../../../services/ProductDetail";
 import Cookies from "js-cookie";
 import { toast, ToastContainer } from 'react-toastify';

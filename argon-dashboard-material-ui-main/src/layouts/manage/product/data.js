@@ -34,7 +34,7 @@ function Product({ image, name, importprice }) {
 Product.propTypes = {
     name: PropTypes.string.isRequired,
     image: PropTypes.string,
-    importprice: PropTypes.number,
+    importprice: PropTypes.string,
 };
 
 const ProductTable = ({ onEditClick, setSelectedProduct }) => {

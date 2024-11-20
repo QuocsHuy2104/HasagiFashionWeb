@@ -20,7 +20,16 @@ const HomeService = {
             console.error('Error fetching product popup by id:', error);
             throw error;
         }
+    },
+    addToCartPopup: async data => {
+        try {
+            return await apiClient.post('/web/small-cart', data)
+        } catch (e) {
+            console.error('Add to cart failed:', e);
+            throw error;
+        }
     }
+
 }
 
 export default HomeService;

@@ -162,10 +162,6 @@ function Product() {
         });
     };
 
-
-
-
-
     const setSelectedProduct = (product) => {
         console.log("Set selected product for detail view:", product);
     };

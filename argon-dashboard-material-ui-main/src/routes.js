@@ -68,6 +68,7 @@ import HistoryOrderDetail from "components/client/HasagiHistoryDetail";
 import ProductDetail from "layouts/manage/productDetail";
 import { isAuthenticated } from "utils/Authen";
 import { Navigate } from "react-router-dom";
+import NotFoundPage from "components/client/Hasagi404";
 
 
 const routes = [
@@ -308,6 +309,13 @@ const routes = [
     route: "/history-order/:orderId",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
     component: <HistoryOrderDetail />,
+    showInSidenav: true,
+  },
+  {
+    name: "NotFound",
+    key: "not-found",
+    route: "/not-found",
+    component: <NotFoundPage />,
     showInSidenav: true,
   },
 ];

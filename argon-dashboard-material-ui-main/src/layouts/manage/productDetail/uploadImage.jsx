@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { Box, Typography, Grid, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import AddIcon from "@mui/icons-material/Add";
 import ArgonBox from "components/ArgonBox";
 import Tooltip from "@mui/material/Tooltip";
 import Zoom from "@mui/material/Zoom";
@@ -12,14 +13,17 @@ import { storage } from 'config/firebase-config';
 import PropTypes from "prop-types";
 
 const ImageUploader = ({ onUploadComplete }) => {
-
     const [images, setImages] = useState([]);
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef(null);
 
     const handleFileChange = (event) => {
         const files = Array.from(event.target.files);
-        const newImages = files.map((file) => ({
+        const validFiles = files.filter((file) => file.type.startsWith("image/") && file.size <= 5 * 1024 * 1024); // 5MB limit
+        if (validFiles.length < files.length) {
+            alert("Some files were not added due to size or type restrictions.");
+        }
+        const newImages = validFiles.map((file) => ({
             file,
             preview: URL.createObjectURL(file),
         }));
@@ -35,23 +39,24 @@ const ImageUploader = ({ onUploadComplete }) => {
     };
 
     const handleRemoveAll = () => {
+        images.forEach((img) => URL.revokeObjectURL(img.preview));
         setImages([]);
     };
 
     const handleUpload = async () => {
         setUploading(true);
-        const uploadPromises = images.map(async (img) => {
-            const storageRef = ref(storage, `images/${Date.now()}_${img.file.name}`);
-            await uploadBytes(storageRef, img.file);
-            return await getDownloadURL(storageRef);
-        });
-
         try {
+            const uploadPromises = images.map(async (img) => {
+                const storageRef = ref(storage, `images/${Date.now()}_${img.file.name}`);
+                await uploadBytes(storageRef, img.file);
+                return await getDownloadURL(storageRef);
+            });
             const uploadedUrls = await Promise.all(uploadPromises);
             setUploading(false);
             onUploadComplete(uploadedUrls);
         } catch (error) {
             console.error("Error uploading images:", error);
+            alert("Failed to upload some images. Please try again.");
             setUploading(false);
         }
     };
@@ -72,7 +77,7 @@ const ImageUploader = ({ onUploadComplete }) => {
                     sx={{
                         width: "100%",
                         height: 250,
-                        border: "1px solid #ccc",
+                        border: "1px dashed #ccc",
                         borderRadius: 2,
                         display: "flex",
                         flexDirection: "column",
@@ -81,17 +86,13 @@ const ImageUploader = ({ onUploadComplete }) => {
                         backgroundColor: "#f9f9f9",
                         mb: 2,
                         cursor: "pointer",
+                        color: "#6c757d",
                     }}
                     onClick={handleDropzoneClick}
                 >
-                    <Box
-                        component="img"
-                        src="https://cdn-icons-png.flaticon.com/512/3617/3617212.png"
-                        alt="Upload Illustration"
-                        sx={{ width: 80, height: 80, mb: 2 }}
-                    />
-                    <Typography variant="h6" sx={{ color: "#6c757d", mb: 1 }}>
-                        Drop or select file
+                    <AddIcon sx={{ fontSize: 50, color: "#6c757d" }} />
+                    <Typography variant="h6" sx={{ color: "#6c757d", mt: 1 }}>
+                        Add images
                     </Typography>
                     <input
                         type="file"

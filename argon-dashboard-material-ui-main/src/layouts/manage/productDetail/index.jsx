@@ -5,7 +5,6 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import ArgonBox from "components/ArgonBox";
 import Card from "@mui/material/Card";
-import MultipleSelectCheckmarks from "./selectTag"
 import ArgonTypography from "components/ArgonTypography";
 import ColorService from "services/ColorServices";
 import SizeService from "services/SizeServices";
@@ -21,7 +20,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ProductService from "services/ProductServices";
 import ProductFormDialog from "./update";
-import ImageUploader from "./uploadImage";
+import MultipleSelectCheckmarks from "./selectTag";
 
 function ProductDetail() {
 
@@ -64,17 +63,14 @@ function ProductDetail() {
         }
     };
 
-    const handleUploadComplete = (urls) => {
-        console.log("Uploaded URLs:", urls);
-        // Lưu URLs hoặc thực hiện hành động khác
-    };
+
 
     const handleDeleteClick = async (row) => {
         try {
             await ProductDetailService.delete(row.id);
             toast.success("Product detail deleted successfully!");
             refreshData();
-
+            updateQuantityProduct();
         } catch (error) {
             toast.error("Failed to delete product detail.");
             console.error("Error deleting product detail:", error);
@@ -187,9 +183,9 @@ function ProductDetail() {
             );
 
             const responses = await Promise.all(savePromises);
-            updateQuantityProduct();
             toast.success("Product detail create successfully!");
-
+            updateQuantityProduct();
+            refreshData()
             setFormData({
                 id: '',
                 quantity: '',
@@ -204,8 +200,6 @@ function ProductDetail() {
             console.error("Error saving product details:", e);
         }
     };
-
-
 
     return (
         <DashboardLayout>
@@ -439,9 +433,6 @@ function ProductDetail() {
                                         {formData.id ? "Update" : "Save"}
                                     </ArgonButton>
                                 </ArgonBox>
-
-                                <ImageUploader onUploadComplete={handleUploadComplete} />
-
                             </ArgonBox>
                         </ArgonBox>
                     </Card>
@@ -479,7 +470,7 @@ function ProductDetail() {
                     </Card>
                 </ArgonBox>
             </ArgonBox>
-            <ProductFormDialog open={dialogOpen} onClose={handleCloseDialog} colors={colors} sizes={sizes} initialData={selectedRow} productID={product.id} refreshData={refreshData} />
+            <ProductFormDialog open={dialogOpen} onClose={handleCloseDialog} colors={colors} sizes={sizes} initialData={selectedRow} productID={product.id} refreshData={refreshData} updateQuantity={updateQuantityProduct} />
             <ToastContainer />
         </DashboardLayout>
     );
