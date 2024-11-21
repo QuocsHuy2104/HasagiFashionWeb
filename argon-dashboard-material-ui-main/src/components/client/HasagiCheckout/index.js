@@ -423,7 +423,7 @@ const Checkout = () => {
             <div className="container-fluid">
                 <div className="row px-xl-5">
                     <div className="header" style={{ marginTop: "100px" }}>
-                        <button className="back-button" onClick={() => goBack()}>
+                        <button className="back-button1" onClick={() => goBack()}>
                             <i className="ni ni-bold-left" />
                         </button>
                         <h5

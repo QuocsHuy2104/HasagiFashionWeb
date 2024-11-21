@@ -33,7 +33,8 @@ import HistoryOrderDetail from "components/client/HasagiHistoryDetail";
 import Voucher from "layouts/manage/voucher";
 import ChatBot from "components/client/HasagiChatBot";
 import QA from "components/client/HasagiQ&A";
-
+import ProductDetail from "layouts/manage/productDetail";
+// import Notfound from "components/client/Hasagi404"
 const routes = [
   {
     type: "route",
@@ -95,6 +96,13 @@ const routes = [
     route: "/manage/product",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
     component: <Product />,
+  },
+  {
+    name: "Manage Product Detail",
+    key: "product-detail",
+    route: "/manage/product-detail",
+    icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
+    component: <ProductDetail />,
   },
   {
     type: "route",
@@ -164,6 +172,14 @@ const routes = [
     component: <ForgotPassword />,
     showInSidenav: true,
   },
+  // {
+  //   name: "404",
+  //   key: "notFound",
+  //   route: "/not-Found",
+  //   icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
+  //   component: <Notfound />,
+  //   showInSidenav: true,
+  // },
   {
     // type: "route",
     name: "ResetPassword",

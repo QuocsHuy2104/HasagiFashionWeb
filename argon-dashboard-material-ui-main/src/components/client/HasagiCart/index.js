@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
 import { FaTimes } from "react-icons/fa";
@@ -12,9 +12,10 @@ import "react-toastify/dist/ReactToastify.css";
 import { Link } from "react-router-dom";
 import aboutImage from "layouts/assets/img/shopping.png";
 import CartService from "../../../services/CartService";
-import styled from "styled-components";
+import logo from "components/client/assets/images/logo1.png";
 import ProductService from "services/ProductServices";
 import aboutImage5 from "layouts/assets/img/product-1.jpg";
+import ProductVariant from "./ProductVariant";
 
 const Cart = () => {
     const [cartItems, setCartItems] = useState([]);
@@ -23,15 +24,16 @@ const Cart = () => {
     const [accountExists, setAccountExists] = useState(false);
     const [selectAll, setSelectAll] = useState(false);
     const [showBackupModal, setShowBackupModal] = useState(false);
-    const [cartSizesForColor, setCartSizesForColor] = useState([]);
     const [isModalOpen, setModalOpen] = useState(false);
-    const [selectedColor, setSelectedColor] = useState("");
-    const [selectedSize, setSelectedSize] = useState("");
-    const [currentCartDetailId, setCurrentCartDetailId] = useState(null);
-    const [currentProductId, setCurrentProductId] = useState(null);
+    const [selectedColor] = useState("");
+    const [selectedSize] = useState("");
+    const [currentCartDetailId] = useState(null);
+    const [currentProductId] = useState(null);
     const navigate = useNavigate();
-
+    const [colors, setColors] = useState([]);
+    const [sizes, setSizes] = useState([]);
     const fetchCartItems = async () => {
+
         const accountId = Cookies.get("accountId");
 
         if (!accountId) {
@@ -49,6 +51,8 @@ const Cart = () => {
             setCartItems(cartResponse.data);
             setAccountExists(addressResponse.data.exists);
             setAddress(addressResponse.data.addressId);
+            console.log("Cart Response:", cartResponse.data);
+            console.log("Address Response:", addressResponse.data);
         } catch (error) {
             console.error("Error fetching data:", error);
         } finally {
@@ -120,6 +124,7 @@ const Cart = () => {
             toast.warn("Vui lòng chọn sản phẩm để thanh toán.");
             return;
         }
+        console.log("Selected Items:", selectedItems);
         localStorage.setItem("cartItemsBackup", JSON.stringify(selectedItems));
         if (!accountExists) {
             setShowBackupModal(true);
@@ -176,116 +181,10 @@ const Cart = () => {
         fetchCartItems();
     };
 
-    const toggleModal = (itemId) => {
-        const currentItem = cartItems.find((item) => item.cartdetailid === itemId);
-        if (currentItem) {
-            setSelectedColor(currentItem.colorId);
-            setSelectedSize(currentItem.sizeId);
-            setCurrentProductId(currentItem.productId);
-            setCurrentCartDetailId(currentItem.cartdetailid);
-            const cartSizesForColor = cartItems
-                .filter((item) => item.color === currentItem.color)
-                .map((item) => item.sizeId);
-            setCartSizesForColor(cartSizesForColor);
-            setModalOpen(true);
-        }
-    };
-
     const countSelectedItems = () => {
         return cartItems.filter((item) => item.selected).length;
     };
 
-    const goBack = () => {
-        const productId = Cookies.get("productId");
-
-        if (!productId) {
-            navigate("/feature-section");
-        } else {
-            navigate(`/ShopDetail?id=${productId}`);
-        }
-    };
-
-    // Container for the main content
-    const Container = styled.div`
-margin-top: 20px;
-padding: 0 10px;
-`;
-
-    // Title component styling
-    const Title = styled.h6`
-color: rgba(0, 0, 0, 0.54);
-font-size: 1.3rem;
-font-weight: 500;
-padding-bottom: 1rem;
-`;
-
-    // Grid container for displaying products
-    const ProductGrid = styled.div`
-display: grid;
-grid-template-columns: repeat(5, 1fr); /* 5 products per row */
-gap: 10px; /* Optional: add spacing between cards */
-`;
-
-    // Product card styling
-    const ProductCard = styled.div`
-width: 95%;
-height: 365px;
-cursor: pointer;
-border: 1px solid #ddd;
-border-radius: 8px;
-overflow: hidden;
-background-color: #fff;
-transition: transform 0.3s;
-position: relative;
-
-&:hover {
-  transform: scale(1.05);
-}
-`;
-
-    // Product image styling
-    const ProductImage = styled.img`
-width: 100%;
-height: 250px;
-object-fit: cover; /* Ensures image scales properly */
-`;
-
-    // Badge component styling for special offers or discounts
-    const Badge = styled.div`
-position: absolute;
-top: 10px;
-left: 10px;
-background-color: #ff4d4f;
-color: #fff;
-font-size: 0.8rem;
-font-weight: bold;
-padding: 2px 5px;
-border-radius: 3px;
-`;
-
-    // Container for product information
-    const ProductInfo = styled.div`
-padding: 10px;
-`;
-
-    // Product title styling
-    const ProductTitle = styled.h6`
-font-size: 0.9rem;
-color: #333;
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
-margin-bottom: -5px;
-text-align: center;
-`;
-
-    // Discount information styling
-    const Discount = styled.p`
-color: #ff6600;
-font-weight: bold;
-font-size: 0.8rem;
-margin-top: 5px;
-`;
 
     const [products, setProducts] = useState([]);
 
@@ -302,6 +201,121 @@ margin-top: 5px;
         fetchProducts();
     }, []);
 
+
+    const fetchProductOptionsById = async (productId) => {
+        try {
+            console.log("Fetching API for Product ID:", productId); // Log kiểm tra
+            const response = await fetch(`http://localhost:3000/api/cart/option/${productId}`);
+            if (!response.ok) throw new Error("Network response was not ok");
+            const data = await response.json();
+            console.log("API Response:", data); // Log dữ liệu trả về từ API
+
+            const uniqueColors = [...new Map(data.colors.map(color => [color.id, color])).values()];
+            const uniqueSizes = [...new Map(data.sizes.map(size => [size.id, size])).values()];
+            setSizes(uniqueSizes);
+            setColors(uniqueColors);
+        } catch (error) {
+            console.error("Error fetching product options:", error);
+            resetSelections();
+            setError("Failed to fetch product options. Please try again later.");
+        }
+    };
+    useEffect(() => {
+        // Duyệt qua tất cả cartItems, gọi API cho sản phẩm có isDropdownVisible là true
+        cartItems.forEach((item) => {
+            if (item.isDropdownVisible) {
+                console.log("Calling fetchProductOptionsById with Product ID:", item.productId); // Log kiểm tra
+                fetchProductOptionsById(item.productId);
+            }
+        });
+    }, [cartItems]); // Trigger effect khi cartItems thay đổi
+
+
+    const variantColor = colors.map((color) => ({
+        id: color.id,
+        name: color.name,
+        disabled: false,
+    }));
+
+    const variantSize = sizes.map((size) => ({
+        id: size.id,
+        name: size.name,
+        disabled: false,
+    }));
+
+    const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+    const dropdownRef = useRef(null);
+
+    const toggleDropdown = (productId, cartDetailId) => {
+        setCartItems((prevItems) =>
+            prevItems.map((item) => {
+                const isCurrentItem = item.cartdetailid === cartDetailId && item.productId === productId;
+                return {
+                    ...item,
+                    isDropdownVisible: isCurrentItem
+                        ? !item.isDropdownVisible // Toggle nếu là sản phẩm hiện tại
+                        : false, // Đóng dropdown của sản phẩm khác
+                };
+            })
+        );
+    };
+
+    const closeDropdown = async (id) => {
+        try {
+            setCartItems((prevItems) =>
+                prevItems.map((item) =>
+                    item.id === id ? { ...item, isDropdownVisible: false } : item
+                )
+            );
+            const response = await CartService.getCart();
+            setCartItems(response.data); 
+        } catch (error) {
+            console.error("Error fetching updated cart:", error);
+        }
+    };
+
+    // Handle outside click to close the dropdown
+    const handleOutsideClick = (event, id) => {
+        const dropdown = document.getElementById(`dropdown-${id}`);
+        if (dropdown && !dropdown.contains(event.target)) {
+            closeDropdown(id);
+        }
+    };
+
+    // Event listener để xử lý click bên ngoài dropdown
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            cartItems.forEach((item) => {
+                if (item.isDropdownVisible) handleOutsideClick(event, item.id);
+            });
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [cartItems]);
+
+    const styles = {
+        container: {
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '10px',
+            backgroundColor: 'white',
+        },
+        logo: {
+            marginLeft: "20px",
+            width: "180px",
+            height: "70px",
+        },
+        cart: {
+            marginRight: '1150px',
+            fontSize: '1.1em',
+            color: 'black',
+        }
+    };
+
     return (
         <>
             <ToastContainer />
@@ -314,24 +328,20 @@ margin-top: 5px;
             )}
             <HasagiNav />
             <div className="container-fluid" style={{ marginTop: "100px" }}>
+                <div style={styles.container}>
+                    <div style={styles.logo}>
+                        <a href="/feature-section" className="navbar-brand">
+                            <img src={logo} alt="logo" className="img-fluid" style={styles.logo} />
+                        </a>
+                    </div>
+                    <div style={styles.cart}>
+                        <a href="/feature-section" className="navbar-brand">
+                            Giỏ Hàng
+                        </a>
+                    </div>
+                </div>
                 <div className="row px-xl-5">
                     <div className="col-lg-12 mb-5" id="tableAddCart">
-                        <div className="header">
-                            <button className="back-button" onClick={() => goBack()}>
-                                <i className="ni ni-bold-left" />
-                            </button>
-                            <h5
-                                className="mb-1"
-                                style={{
-                                    fontWeight: "bold",
-                                    fontSize: "24px",
-                                    color: "#343a40",
-                                    marginLeft: "-15px",
-                                }}
-                            >
-                                Giỏ Hàng
-                            </h5>
-                        </div>
                         {cartItems.length === 0 ? (
                             <div className="text-center py-3">
                                 <img src={aboutImage} style={{ height: "60px", width: "60px" }} />
@@ -450,22 +460,97 @@ margin-top: 5px;
                                                 style={{ textAlign: "left", paddingLeft: "20px", border: "none" }}
                                             >
                                                 <Link to={`/ShopDetail?id=${item.productId}`} style={{ color: "black" }}>
-                                                    <img src={item.image} style={{ width: 60 }} alt={item.name} /> {item.name}
+                                                    <img src={item.image} style={{ width: 80 }} alt={item.name} /> {item.name}
                                                 </Link>
                                             </td>
-                                            <td className="align-middle" style={{ border: "none" }}>
+                                            <td className="align-middle" style={{ border: "none", position: "relative" }}>
+                                                {/* Nút bấm */}
                                                 <button
-                                                    onClick={() => toggleModal(item.cartdetailid)}
+                                                    onMouseDown={(event) => toggleDropdown(item.productId, item.cartdetailid)}
                                                     style={{
+                                                        alignItems: "center", // Canh giữa nội dung theo chiều dọc
                                                         backgroundColor: "transparent",
                                                         border: "none",
                                                         color: "black",
                                                         cursor: "pointer",
+                                                        textAlign: "left",
                                                     }}
                                                 >
-                                                    Phân Loại Hàng: <br />
-                                                    {item.color || "Chưa chọn màu"} , {item.size || "Chưa chọn kích thước"}
+                                                    <span>Phân Loại Hàng:</span>
+                                                    <span
+                                                        style={{
+                                                            marginLeft: "10px", // Khoảng cách giữa text và mũi tên
+                                                            display: "inline-block",
+                                                            width: "0", // Không có chiều rộng
+                                                            height: "0", // Không có chiều cao
+                                                            borderLeft: "5px solid transparent", // Tạo cạnh trái
+                                                            borderRight: "5px solid transparent", // Tạo cạnh phải
+                                                            borderTop: `7px solid gray`, // Tạo cạnh trên để làm hình tam giác, màu xám khi mở
+                                                            transform: item.isDropdownVisible
+                                                                ? "rotate(180deg)" // Mở: mũi tên hướng lên
+                                                                : "rotate(3deg)", // Đóng: mũi tên hướng xuống
+                                                            transition: "transform 0.1s ease-in-out",
+                                                        }}
+                                                    />
+                                                    <br />
+                                                    {/* Hiển thị màu và kích thước dưới phân loại hàng */}
+                                                    <div
+                                                        style={{
+                                                            fontSize: "15px",
+                                                            color: "gray",
+                                                            textAlign: "left",
+                                                        }}
+                                                    >
+                                                        <span style={{ color: item.color || "black" }}>
+                                                            {item.color || "Chưa chọn màu"}
+                                                        </span>
+                                                        , {item.size || "Chưa chọn kích thước"}
+                                                    </div>
                                                 </button>
+
+                                                {/* Hiển thị dropdown nếu `isDropdownVisible` */}
+                                                {item.isDropdownVisible && (
+                                                    <div
+                                                        id={`dropdown-${item.cartdetailid}`}
+                                                        style={{
+                                                            position: "absolute",
+                                                            top: "110%",
+                                                            marginLeft: "0",
+                                                            transform: "translateX(-10%)",
+                                                            width: "100%",
+                                                            backgroundColor: "#fff",
+                                                            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+                                                            zIndex: 2000,
+                                                            opacity: 1,
+                                                            transition: "all 0.3s ease",
+                                                        }}
+                                                    >
+                                                        <span
+                                                            style={{
+                                                                content: '""',
+                                                                position: "absolute",
+                                                                top: "-14px",
+                                                                left: "45%",
+                                                                transform: "translateX(-50%)",
+                                                                width: "0px",
+                                                                height: "0px",
+                                                                border: "1px solid #dddd", // Viền xung quanh tam giác
+                                                                borderLeft: "10px solid transparent", // Tạo cạnh trái trong suốt để tạo tam giác
+                                                                borderRight: "10px solid transparent", // Tạo cạnh phải trong suốt để tạo tam giác
+                                                                borderBottom: "14px solid #dddd", // Tạo đáy tam giác có màu viền
+                                                            }}
+                                                        />
+                                                        <ProductVariant
+                                                            variantColor={variantColor}
+                                                            variantSize={variantSize}
+                                                            productId={item.productId}
+                                                            cartDetailId={item.cartdetailid}
+                                                            onClose={() => closeDropdown(item.cartdetailid)}
+                                                            colorId={item.colorId}
+                                                            sizeId={item.sizeId}
+                                                        />
+                                                    </div>
+                                                )}
                                             </td>
                                             <td className="align-middle" style={{ border: "none" }}>
                                                 <span
@@ -625,9 +710,11 @@ margin-top: 5px;
                         )}
                     </div>
                     {/* có thể bạn thích */}
-                    <Container>
+                    <div style={{ marginTop: "20px", padding: "0 10px" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                            <Title>Có Thể Bạn Cũng Thích</Title>
+                            <h6 style={{ color: "rgba(0, 0, 0, 0.54)", fontSize: "1.3rem", fontWeight: "500", paddingBottom: "1rem" }}>
+                                Có Thể Bạn Cũng Thích
+                            </h6>
                             <a
                                 href="/Shop"
                                 className="view-all-button"
@@ -643,23 +730,73 @@ margin-top: 5px;
                                 <span style={{ marginLeft: "5px", fontSize: "23px" }}>›</span>
                             </a>
                         </div>
-                        <ProductGrid>
+                        <div
+                            style={{
+                                display: "grid",
+                                gridTemplateColumns: "repeat(5, 1fr)",
+                                gap: "10px",
+                            }}
+                        >
                             {products.map((product, index) => (
-                                <ProductCard key={index}>
-                                    {product.discount && <Badge>Giảm {product.discount}%</Badge>}
+                                <div
+                                    key={index}
+                                    style={{
+                                        width: "95%",
+                                        height: "365px",
+                                        cursor: "pointer",
+                                        border: "1px solid #ddd",
+                                        borderRadius: "8px",
+                                        overflow: "hidden",
+                                        backgroundColor: "#fff",
+                                        transition: "transform 0.3s",
+                                        position: "relative",
+                                    }}
+                                    onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+                                    onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+                                >
+                                    {product.discount && (
+                                        <div
+                                            style={{
+                                                position: "absolute",
+                                                top: "10px",
+                                                left: "10px",
+                                                backgroundColor: "#ff4d4f",
+                                                color: "#fff",
+                                                fontSize: "0.8rem",
+                                                fontWeight: "bold",
+                                                padding: "2px 5px",
+                                                borderRadius: "3px",
+                                            }}
+                                        >
+                                            Giảm {product.discount}%
+                                        </div>
+                                    )}
                                     <a href={`/ShopDetail?id=${product.id}`}>
-                                        <ProductImage
+                                        <img
                                             src={product.image || aboutImage5}
                                             alt={product.name || "Product"}
+                                            style={{ width: "100%", height: "250px", objectFit: "cover" }}
                                         />
-                                        <ProductInfo>
-                                            <ProductTitle>{product.name}</ProductTitle>
-                                            {/* <Price>₫{product.price}</Price> */}
-                                            {/* {product.originalPrice && (
-                                                <OriginalPrice>₫{product.originalPrice}</OriginalPrice>
-                                            )} */}
-                                            {product.discount && <Discount>Giảm {product.discount}%</Discount>}
-                                        </ProductInfo>
+                                        <div style={{ padding: "10px" }}>
+                                            <h6
+                                                style={{
+                                                    fontSize: "0.9rem",
+                                                    color: "#333",
+                                                    whiteSpace: "nowrap",
+                                                    overflow: "hidden",
+                                                    textOverflow: "ellipsis",
+                                                    marginBottom: "-5px",
+                                                    textAlign: "center",
+                                                }}
+                                            >
+                                                {product.name}
+                                            </h6>
+                                            {product.discount && (
+                                                <p style={{ color: "#ff6600", fontWeight: "bold", fontSize: "0.8rem", marginTop: "5px" }}>
+                                                    Giảm {product.discount}%
+                                                </p>
+                                            )}
+                                        </div>
                                         <div className="text-center">
                                             <div className="d-flex align-items-center justify-content-center mb-1">
                                                 <small className="fa fa-star text-warning mr-1"></small>
@@ -671,10 +808,10 @@ margin-top: 5px;
                                             </div>
                                         </div>
                                     </a>
-                                </ProductCard>
+                                </div>
                             ))}
-                        </ProductGrid>
-                    </Container>
+                        </div>
+                    </div>
                 </div>
             </div>
 

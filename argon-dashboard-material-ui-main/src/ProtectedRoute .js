@@ -21,7 +21,7 @@ function ProtectedRoute({ children }) {
     }
 
     if (decodedToken.scope === 'ROLE_USER') {
-      return <Navigate to="/authentication/sign-in" />;
+      return <Navigate to="/feature-section" />;
     }
   } catch (error) {
     return <Navigate to="/authentication/sign-in" />;

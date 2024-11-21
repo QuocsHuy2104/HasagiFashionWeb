@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { FaMapMarkerAlt, FaEnvelope, FaPhoneAlt } from "react-icons/fa";
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
@@ -6,6 +6,38 @@ import ArgonInput from "components/ArgonInput";
 import ArgonButton from "components/ArgonButton";
 
 const Contact = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("https://formsubmit.co/hasagifashion@gmail.com", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        alert("Liên hệ đã được gửi thành công!");
+        setFormData({ name: "", email: "", message: "" });
+      } else {
+        alert("Đã xảy ra lỗi, vui lòng thử lại sau.");
+      }
+    } catch (error) {
+      console.error("Lỗi:", error);
+      alert("Không thể gửi liên hệ.");
+    }
+  };
   return (
     <>
       <HasagiNav />
@@ -41,7 +73,7 @@ const Contact = () => {
 
             {/* Contact Form */}
             <div className="col-lg-7">
-              <form
+              <form onSubmit={handleSubmit}
                 style={{
                   maxWidth: "600px",
                   margin: "0 auto",
@@ -64,7 +96,11 @@ const Contact = () => {
                 </h3>
                 <ArgonInput
                   type="text"
+                  name="name"
                   placeholder="Họ và tên"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
                   style={{
                     fontSize: "1.1rem",
                     padding: "1rem",
@@ -76,7 +112,12 @@ const Contact = () => {
                 />
                 <ArgonInput
                   type="email"
+                  name="email"
                   placeholder="Email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+
                   style={{
                     fontSize: "1.1rem",
                     padding: "1rem",
@@ -87,8 +128,12 @@ const Contact = () => {
                   }}
                 />
                 <textarea
+                  name="message"
                   placeholder="Nội dung"
+                  value={formData.message}
+                  onChange={handleChange}
                   rows="5"
+                  required
                   style={{
                     width: "100%",
                     fontSize: "1.1rem",
@@ -99,6 +144,10 @@ const Contact = () => {
                     backgroundColor: "#f9f9f9",
                   }}
                 ></textarea>
+                <input type="hidden" name="_captcha" value="false" />
+                <input type="hidden" name="_subject" value="Liên hệ từ khách hàng Hasagi Fashion" />
+                <input type="hidden" name="_next" value="https://yourwebsite.com/thank-you" />
+                <input type="hidden" name="_template" value="table" />
                 <ArgonButton
                   type="submit"
                   style={{
@@ -155,8 +204,8 @@ const Contact = () => {
                 >
                   <FaEnvelope style={{ fontSize: "2rem", color: "#ff5722", marginRight: "1rem" }} />
                   <div>
-                  <h5 style={{ marginBottom: "0.5rem", fontWeight: "bold"}}>Email:</h5>
-                  <p style={{ margin: 0 }}>hasagifashion@gmail.com</p>
+                    <h5 style={{ marginBottom: "0.5rem", fontWeight: "bold" }}>Email:</h5>
+                    <p style={{ margin: 0 }}>hasagifashion@gmail.com</p>
                   </div>
                 </div>
                 <div

@@ -37,24 +37,23 @@ const Header = ({ onSearch }) => {
     const handleSearchChange = (event) => {
         const value = event.target.value;
         setSearchTerm(value);
-        onSearch(value); // Gọi hàm tìm kiếm từ prop
+        onSearch(value); 
     };
 
     let timeoutId;
     let timeoutIdCard;
 
     const handleMouseEnter = () => {
-        clearTimeout(timeoutId); // Xóa bỏ timeout nếu có
+        clearTimeout(timeoutId);
         setIsHovered(true);
-        setDropdownOpen(true); // Mở dropdown
+        setDropdownOpen(true); 
     };
 
     const handleMouseLeave = () => {
-        // Trì hoãn việc ẩn dropdown
         timeoutId = setTimeout(() => {
             setIsHovered(false);
             setDropdownOpen(false);
-        }, 200); // 200ms delay trước khi ẩn dropdown
+        }, 200); 
     };
 
     const startVoiceSearch = (event) => {
@@ -73,7 +72,6 @@ const Header = ({ onSearch }) => {
                 setSearchTerm(transcript);
                 onSearch(transcript);
 
-                // Speak the recognized text
                 const utterance = new SpeechSynthesisUtterance(transcript);
                 utterance.lang = "vi-VN";
                 window.speechSynthesis.speak(utterance);
@@ -97,13 +95,8 @@ const Header = ({ onSearch }) => {
         const fetchCartItems = async () => {
             const accountId = Cookies.get("accountId");
 
-            if (!accountId) {
-                //navigate(`/authentication/sign-in`);
-                return;
-            }
-
             try {
-                const [cartResponse, addressResponse] = await Promise.all([
+                const [cartResponse] = await Promise.all([
                     CartService.getCart(),
                     axios.get(`http://localhost:3000/api/addresses/exists?accountId=${accountId}`, {
                         withCredentials: true,
@@ -120,7 +113,7 @@ const Header = ({ onSearch }) => {
     }, []);
 
     const handleCartMouseEnter = () => {
-        clearTimeout(timeoutIdCard); // Xóa bỏ timeout nếu có
+        clearTimeout(timeoutIdCard); 
         setCartDropdownOpen(true);
     };
 
@@ -132,7 +125,6 @@ const Header = ({ onSearch }) => {
 
     useEffect(() => { }, [fetchTotalQuantity()]);
 
-    // Check login
     const user = Cookies.get("user");
     let position = false;
     if (user === null) position = false;
@@ -144,7 +136,6 @@ const Header = ({ onSearch }) => {
             position = false;
         }
 
-    // Inline styles
     const styles = {
         header: {
             backgroundColor: "black",
