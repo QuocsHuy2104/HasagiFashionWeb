@@ -113,17 +113,15 @@ function Product() {
         e.preventDefault();
         if (!validateFields()) return;
 
-        let imageUrl = formData.imageUrl || null;  // Giữ ảnh cũ nếu không có ảnh mới
-        let videoUrl = formData.videoUrl || null;  // Giữ video cũ nếu không có video mới
+        let imageUrl = formData.imageUrl || null;
+        let videoUrl = formData.videoUrl || null;
 
         try {
-            // Nếu có ảnh mới thì tải lên
             if (formData.image) {
                 const imageFile = formData.image;
                 const imageStorageRef = ref(storage, `productFiles/${imageFile.name}`);
                 const imageUploadTask = uploadBytesResumable(imageStorageRef, imageFile);
 
-                // Tải ảnh lên Firebase Storage
                 imageUrl = await new Promise((resolve, reject) => {
                     imageUploadTask.on(
                         'state_changed',
@@ -144,18 +142,16 @@ function Product() {
                 });
             }
 
-            // Nếu có video mới thì tải lên
             if (formData.video) {
                 const videoFile = formData.video;
                 const videoStorageRef = ref(storage, `productFiles/${videoFile.name}`);
                 const videoUploadTask = uploadBytesResumable(videoStorageRef, videoFile);
 
-                // Tải video lên Firebase Storage
                 videoUrl = await new Promise((resolve, reject) => {
                     videoUploadTask.on(
                         'state_changed',
                         (snapshot) => {
-                            // Kiểm tra tiến trình video
+
                             const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                             console.log(`Video upload progress: ${progress}%`);
                         },
@@ -171,18 +167,16 @@ function Product() {
                 });
             }
 
-            // Cập nhật dữ liệu sản phẩm
             const productData = {
                 name: formData.name,
                 categoryId: formData.categoryId,
                 trademarkId: formData.trademarkId,
                 description: formData.description,
                 sale: formData.sale,
-                image: imageUrl,  // Sử dụng ảnh mới hoặc ảnh cũ
-                video: videoUrl,  // Sử dụng video mới hoặc video cũ
+                image: imageUrl,
+                video: videoUrl,  
             };
 
-            // Tạo hoặc cập nhật sản phẩm
             const response = formData.id
                 ? await ProductService.updateProduct(formData.id, productData)
                 : await ProductService.createProduct(productData);
