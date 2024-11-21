@@ -181,7 +181,7 @@ const HistoryOrderDetail = () => {
                   style={{ display: "flex", alignItems: "center", paddingTop: "10px" }}
                 >
                   <button
-                    className="back-button"
+                    className="back-button1"
                     onClick={goBack}
                     style={{ border: "none", background: "none", padding: 0 }}
                   >

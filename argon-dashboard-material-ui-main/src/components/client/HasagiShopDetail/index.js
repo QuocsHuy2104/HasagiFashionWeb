@@ -30,26 +30,25 @@ function ShopDetail() {
     const [favoriteCount, setFavoriteCount] = useState(0);
     const navigate = useNavigate();
     const [reviews, setReviews] = useState([]);
+    const [quantityPDT ,setQuantityPDT] =  useState(0);
 
-    const fetchReviews = async () => {
+    const fetchReviews = async (productId) => {
         try {
-            const productReviews = await reviewsService.getReviewsByProduct(productId);  // Use await here
+            const productReviews = await reviewsService.getReviewsByProduct(productId);
+            console.log('Fetched reviews for product:', productReviews);
+
             if (Array.isArray(productReviews)) {
                 const sortedReviews = productReviews.sort((a, b) => b.star - a.star);
                 setReviews(sortedReviews);
             } else {
+                console.error('Expected an array but got:', productReviews);
                 setReviews([]);
             }
         } catch (error) {
+            console.error('Error fetching reviews for product:', error);
             setReviews([]);
         }
     };
-    useEffect(() => {
-        if (productId) {
-            fetchReviews();
-        }
-
-    }, [productId]);
 
     const calculateAverageStars = () => {
         if (reviews.length === 0) return 0;
@@ -59,6 +58,15 @@ function ShopDetail() {
     };
 
     const averageStars = calculateAverageStars();
+
+    useEffect(() => {
+        const query = new URLSearchParams(location.search);
+        const productId = query.get('id');
+
+        if (productId) {
+            fetchReviews(productId);
+        }
+    }, [location]);
 
     const getUniqueSizes = (sizes) => {
         return sizes.reduce((unique, size) => {
@@ -88,11 +96,6 @@ function ShopDetail() {
     }, []);
 
     const handleAddToCart = async () => {
-        if (!product || !selectedColor || !selectedSize) {
-            toast.error('Vui lòng chọn màu sắc và kích thước.');
-            return;
-        }
-
         try {
             cartService.addToCart({
                 colorId: selectedColor,
@@ -103,6 +106,7 @@ function ShopDetail() {
             Cookies.set('productId', productId);
             toast.success('Sản phẩm đã được thêm vào giỏ hàng thành công!');
         } catch (error) {
+            console.error('Error adding to cart:', error);
             toast.error('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.');
         }
     };
@@ -114,6 +118,7 @@ function ShopDetail() {
             });
             return response.data;
         } catch (error) {
+            console.error('Error fetching favorite count:', error);
             return 0;
         }
     };
@@ -121,10 +126,18 @@ function ShopDetail() {
         try {
             // Await the response from cartService.checkFavorite
             const favoriteResponse = await cartService.checkFavorite(productId);
+
+          
+            console.log(favoriteResponse);
+
+            
             if (favoriteResponse && favoriteResponse.data !== undefined) {
-                setIsFavorite(favoriteResponse.data);
+                setIsFavorite(favoriteResponse.data);  
+            } else {
+                console.error('Favorite response is missing data');
             }
         } catch (error) {
+            console.error("Error checking favorite status:", error);
         }
     };
 
@@ -137,34 +150,52 @@ function ShopDetail() {
         }
         try {
             if (!productId) throw new Error("Product ID is missing");
-            const response = await cartService.getProductDetail(productId);
+            const response = await cartService.getProductDetail({ 
+                productId, 
+                sizeId: selectedSize || null 
+            });
             const productData = response.data;
+            console.log("Fetched Product Data:", productData);
+
             setProduct(productData);
             setTotalPrice(productData.importPrice);
+            console.log("Total Price Set To:", productData.importPrice);
+            setQuantityPDT(productData.importQuantity);
             const countRSN = await fetchFavoriteCount(productId);
             setFavoriteCount(countRSN);
             checkFavoriteStatus(productId);
         } catch (error) {
+            console.error("Error fetching product details:", error);
         }
     };
 
     useEffect(() => {
-        fetchProductDetail();
-        fetchReviews();
-    }, [productId]);
+        if (productId) {
+            fetchProductDetail();
+        }
+    }, [productId, selectedSize ]);
+ 
+        useEffect(() => {
+            if (productId) {
+              
+                fetchReviews(); 
+            }
+        }, [productId]); 
 
     const fetchPrice = async (productId, colorId, sizeId) => {
         try {
-            const response = await axios.get(`http://localhost:8080/api/product-detail/price`, {
+            const response = await axios.get(`http://localhost:8080/api/admin/product-detail/price`, {
                 params: { productId, colorId, sizeId }
             });
-            setTotalPrice(response.data * quantity); // cập nhật giá với số lượng
+            const { price, quantity } = response.data;
+            setTotalPrice(price); 
+            setQuantityPDT(quantity)
         } catch (error) {
+            console.error('Error fetching price:', error);
             toast.error('Đã xảy ra lỗi khi lấy giá sản phẩm. Vui lòng thử lại sau.');
         }
     };
 
-    // Gọi API để cập nhật giá mỗi khi chọn color hoặc size
     useEffect(() => {
         if (selectedColor && selectedSize) {
             fetchPrice(productId, selectedColor, selectedSize);
@@ -184,6 +215,7 @@ function ShopDetail() {
             const count = await fetchFavoriteCount(product.id);
             setFavoriteCount(count);
         } catch (error) {
+            console.error('Error adding to favorites:', error.response?.data || error.message);
         }
     };
 
@@ -206,11 +238,6 @@ function ShopDetail() {
     };
 
     const handleByNow = async () => {
-        if (!product || !selectedColor || !selectedSize) {
-            toast.error('Vui lòng chọn màu sắc và kích thước.');
-            return;
-        }
-
         try {
             await cartService.addToCart({
                 colorId: selectedColor,
@@ -229,6 +256,23 @@ function ShopDetail() {
     const handleTabClick = (tabId) => {
         setActiveTab(tabId);
     };
+
+    const formatImportPrice = (importPrice) => {
+        if (typeof importPrice === "number") {
+            return new Intl.NumberFormat("vi-VN").format(importPrice);
+        }
+        if (!importPrice || typeof importPrice !== "string" || !importPrice.includes("-")) {
+            return "N/A";
+        }
+        const [minPrice, maxPrice] = importPrice.split("-").map(price => parseFloat(price));
+        return minPrice === maxPrice
+            ? new Intl.NumberFormat("vi-VN").format(minPrice)
+            : `${new Intl.NumberFormat("vi-VN").format(minPrice)} - ${new Intl.NumberFormat("vi-VN").format(maxPrice)}`;
+    };
+    
+    
+    const formattedPrice = formatImportPrice(totalPrice);
+
 
     const renderStars = (average) => {
         const fullStars = Math.floor(average);
@@ -279,7 +323,7 @@ function ShopDetail() {
             <HasagiNav />
             <ToastContainer />
             <div className="container-fluid">
-                <div className="row px-xl-5" style={{ marginTop: "90px" }}>
+                <div className="row px-xl-5" style={{marginTop: "90px"}}>
                     <div className="col-12">
                         <nav className="breadcrumb bg-light mb-30">
                             <a className="breadcrumb-item text-dark" href="/feature-section">Trang chủ</a>
@@ -290,9 +334,9 @@ function ShopDetail() {
                 </div>
             </div>
             <div className="container-fluid pb-5" style={{ maxWidth: "1400px" }}>
-                <div className="row px-xl-5" style={{ marginLeft: "10px" }}>
+                <div className="row px-xl-5" style={{marginLeft: "10px"}}>
                     <div className="col-lg-5 mb-30">
-                        <div className="product-thumbnail" style={{ textAlign: 'center' }}>
+                        <div className="product-thumbnail" style={{ textAlign: 'center'}}>
                             {/* Main Image */}
                             <img src={product.image} alt="Product" className="product-thumbnail-img" style={{ width: '100%', maxWidth: '450px', maxHeight: "450px" }} />
                             {/* Thumbnail Gallery */}
@@ -309,13 +353,13 @@ function ShopDetail() {
                                             border: '1px solid #ddd',
                                             borderRadius: '4px',
                                         }}
-                                        onClick={() => setMainImage(thumbnail)} // Optional: Click to set as main image
+                                        onClick={() => setMainImage(thumbnail)} 
                                     />
                                 ))}
                             </div>
                         </div>
                     </div>
-                    <div className="col-lg-7 mb-30" style={{ marginLeft: "-20px" }}>
+                    <div className="col-lg-7 mb-30" style={{marginLeft: "-20px"}}>
                         <div className="h-100 bg-white p-30 pt-4">
                             <h3 className="font-weight-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>{product.name}</h3>
                             <div className="d-flex align-items-center mb-3">
@@ -384,10 +428,10 @@ function ShopDetail() {
                                 >
                                     đ
                                 </span>
-                                {new Intl.NumberFormat("vi-VN").format(totalPrice)}
+                                {formattedPrice}
                             </h3>
 
-                            <h3 className="font-medium-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>{product.importQuantity || "N/A"} sản phẩm có sẵn</h3>
+                            <h3 className="font-medium-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>{quantityPDT}</h3>
                             <div className="d-flex mb-3" id="size-input-list">
                                 <strong className="text-dark mr-3">Sizes:</strong>
                                 {product.sizes.length > 0 ? (
@@ -400,7 +444,7 @@ function ShopDetail() {
                                                     id={`size-${size.id}`}
                                                     name="size"
                                                     value={size.id}
-                                                    onChange={(e) => setSelectedSize(e.target.value)} // Update size state
+                                                    onChange={(e) => setSelectedSize(e.target.value)} 
                                                 />
                                                 <label className="custom-control-label" htmlFor={`size-${size.id}`}>
                                                     {size.name}
@@ -445,7 +489,7 @@ function ShopDetail() {
                                             className="btn btn-primary btn-minus"
                                             onClick={() => setQuantity(quantity - 1)}
                                             disabled={quantity <= 1}
-                                            style={{ marginRight: '5px', backgroundColor: "#ffb524" }}
+                                            style={{ marginRight: '5px', backgroundColor: "#ffb524"}}
                                         >
                                             <i className="fa fa-minus"></i>
                                         </button>

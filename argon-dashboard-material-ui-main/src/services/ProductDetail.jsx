@@ -8,7 +8,12 @@ const ShopDetailService = {
 
     getCategoryDetail: (categoryId) => apiClient.get(`/category/${categoryId}`),
 
-    getProductDetail: (productId) => apiClient.get(`/product/${productId}`),
+    getProductDetail: ({ productId, sizeId }) => {
+        const url = sizeId ? `/webShopDetail/${productId}?selectedSizeId=${sizeId}` : `/webShopDetail/${productId}`;
+        console.log("Requesting URL:", url); 
+        
+        return apiClient.get(url);
+    },
 
     checkFavorite: (productId) => {
         return apiClient.get("/favorites/check", {

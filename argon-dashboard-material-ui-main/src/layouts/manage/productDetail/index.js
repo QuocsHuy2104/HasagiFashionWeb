@@ -5,153 +5,88 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import ArgonBox from "components/ArgonBox";
 import Card from "@mui/material/Card";
+import MultipleSelectCheckmarks from "./selectTag";
 import ArgonTypography from "components/ArgonTypography";
 import ColorService from "services/ColorServices";
 import SizeService from "services/SizeServices";
-import ArgonInput from "../../../components/ArgonInput";
-import ArgonButton from "../../../components/ArgonButton";
-import { Grid, InputAdornment } from "@mui/material";
+import ArgonInput from "components/ArgonInput";
+import ArgonButton from "components/ArgonButton";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import DataGridDemo from './data';
 import ProductDetailService from "services/ProductDetailService";
 import Typography from "@mui/material/Typography";
+import { InputAdornment } from "@mui/material";
+import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+import Data from './data';
 import Box from "@mui/material/Box";
-import { toast, ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import ProductService from "services/ProductServices";
-import ProductFormDialog from "./update";
-import MultipleSelectCheckmarks from "./selectTag";
+
+
+
+// toast.warn("Thêm thành công");
+// toast.error("Có lỗi xảy ra khi xử lý thanh toán VNPAY.");
+// toast.success(`Áp dụng mã giảm giá ${voucher.code} thành công!`);
 
 function ProductDetail() {
-
     const location = useLocation();
     const product = location.state?.product;
-
     const [productDetails, setProductDetails] = useState([]);
     const [colors, setColors] = useState([]);
     const [sizes, setSizes] = useState([]);
     const [errors, setErrors] = useState({});
     const [selectedSize, setSelectedSize] = useState([]);
     const [selectedColor, setSelectedColor] = useState([]);
-
-    const hanleSelectSize = (newSelected) => setSelectedSize(newSelected);
-    const handleSelectColor = newSelect => setSelectedColor(newSelect);
-    const [selectedRow, setSelectedRow] = React.useState(null);
-
-    const [dialogOpen, setDialogOpen] = React.useState(false);
-
-    const handleOpenDialog = () => {
-        setDialogOpen(true);
-    };
-
-    const handleCloseDialog = () => {
-        setDialogOpen(false);
-    };
-
-    const handleEditClick = (row) => {
-        console.log('Edit row:', row);
-        setSelectedRow(row);
-        handleOpenDialog();
-    };
-
-    const refreshData = async () => {
-        try {
-            const detailRes = await ProductDetailService.getAllByProductId(product.id);
-            setProductDetails(detailRes.data);
-        } catch (error) {
-            console.error('Error refreshing product details:', error);
-        }
-    };
-
-
-
-    const handleDeleteClick = async (row) => {
-        try {
-            await ProductDetailService.delete(row.id);
-            toast.success("Product detail deleted successfully!");
-            refreshData();
-            updateQuantityProduct();
-        } catch (error) {
-            toast.error("Failed to delete product detail.");
-            console.error("Error deleting product detail:", error);
-            if (error.response && error.response.data) {
-                toast.error('Sản phẩm đang được mua');
-            }
-        }
-    };
-
-
+    const [visibleQuantities, setVisibleQuantities] = useState({});
     const [formData, setFormData] = useState({
         id: '',
-        quantity: '',
+        quantity: {},
         price: '',
-        priceSize: '',
-        subDescription: '',
+        priceSize: {},
+        description: '',
         sizeId: [],
         colorId: [],
-        productId: product.id
+        productId: product ? product.id : null,
+
     });
 
+
     useEffect(() => {
-        let isMounted = true;
+        const fetchData = async () => {
+            try {
+                console.log('Current product ID:', product ? product.id : 'No product selected');
 
-        Promise.all([
-            ColorService.getAllColors(),
-            SizeService.getAllSizes(),
-            ProductDetailService.getAllByProductId(product.id)
-        ])
-            .then(([colorRes, sizeRes, detailRes]) => {
-                if (isMounted) {
-                    setColors(colorRes.data);
-                    setSizes(sizeRes.data);
-                    setProductDetails(detailRes.data);
+                const [colorRes, sizeRes, detailRes] = await Promise.all([
+                    ColorService.getAllColors(),
+                    SizeService.getAllSizes(),
+                    product ? ProductDetailService.getAllByProductId(product.id) : Promise.resolve([]),
+                ]);
+
+                console.log('Detail response:', detailRes); // Kiểm tra phản hồi chi tiết
+               console.log(colorRes.data);
+                setColors(colorRes.data);
+                setSizes(sizeRes.data);
+
+                // Kiểm tra cấu trúc của detailRes
+                if (detailRes && Array.isArray(detailRes)) {
+                    setProductDetails(detailRes); // Gán trực tiếp nếu detailRes không có thuộc tính data
+                } else {
+                    console.warn('Detail response does not contain valid data:', detailRes);
+                    setProductDetails([]);
                 }
-            })
-            .catch(err => console.error('Error fetching data:', err));
-        return () => {
-            isMounted = false;
+
+                console.log('Fetched product details:', detailRes);
+            } catch (err) {
+                console.error('Error fetching data:', err);
+            }
         };
-    }, []);
 
-    const validateFields = () => {
-        const newErrors = {};
+        fetchData();
+    }, [product]);
 
-        if (!formData.price || isNaN(formData.price) || parseFloat(formData.price) <= 0) {
-            newErrors.price = "Valid price is required";
-        }
 
-        if (!formData.priceSize || isNaN(formData.priceSize) || parseFloat(formData.priceSize) <= 0) {
-            newErrors.priceSize = "Valid price size is required";
-        }
 
-        if (!formData.sizeId) {
-            newErrors.sizeId = "Size is required";
-        }
-
-        if (!formData.colorId) {
-            newErrors.colorId = "Color is required";
-        }
-
-        if (!formData.quantity || isNaN(formData.quantity) || parseInt(formData.quantity) < 0) {
-            newErrors.quantity = "Valid quantity is required";
-        }
-
-        if (!formData.subDescription || !formData.subDescription.trim()) {
-            newErrors.subDescription = "Sub-description is required";
-        }
-
-        setErrors(newErrors);
-
-        return Object.keys(newErrors).length === 0;
-    }
-
-    const updateQuantityProduct = async () => {
-        try {
-            const resp = await ProductService.updateQuantity(product.id);
-        } catch (e) {
-            console.error(e)
-        }
-    }
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -161,111 +96,245 @@ function ProductDetail() {
         }));
     };
 
+    const handleSelectSize = (selectedIds) => {
+        setSelectedSize(selectedIds);
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            sizeId: selectedIds,
+            priceSize: selectedIds.reduce((acc, sizeId) => {
+                acc[sizeId] = prevFormData.priceSize[sizeId] || 0;
+                return acc;
+            }, {})
+        }));
+    };
+
+    const handlePriceChange = (e, sizeId) => {
+        const value = e.target.value;
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            priceSize: {
+                ...prevFormData.priceSize,
+                [sizeId]: Number(value),
+            },
+        }));
+
+        const size = sizes.find(s => s.id === sizeId);
+        console.log("Selected Size:", size?.name);
+    };
+
+    // Hàm để xử lý ẩn input
+    const handleRemoveInput = (sizeId, colorId) => {
+        setVisibleQuantities(prevState => ({
+            ...prevState,
+            [`${sizeId}-${colorId}`]: false,
+        }));
+
+        // Đặt giá trị của input thành 0 khi input bị ẩn
+        setFormData(prevState => ({
+            ...prevState,
+            quantity: {
+                ...prevState.quantity,
+                [`${sizeId}-${colorId}`]: 0,
+            },
+        }));
+    };
+
+
+    // Cập nhật hàm handleQuantityChange
+    const handleQuantityChange = (sizeId, colorId, value) => {
+        const quantityValue = Math.max(0, Number(value) || 0);
+
+        setFormData(prevState => ({
+            ...prevState,
+            quantity: {
+                ...prevState.quantity,
+                [`${sizeId}-${colorId}`]: quantityValue,
+            },
+        }));
+
+        const size = sizes.find(s => s.id === sizeId);
+        const color = colors.find(c => c.id === colorId);
+        console.log("Selected Size:", size?.name, "Selected Color:", color?.name, "Quantity:", quantityValue);
+    };
+
+
+    const resetVisibleQuantities = () => {
+        const initialVisibility = {};
+        selectedSize.forEach(sizeId => {
+            selectedColor.forEach(colorId => {
+                initialVisibility[`${sizeId}-${colorId}`] = true;
+            });
+        });
+        setVisibleQuantities(initialVisibility);
+    };
+
+
+
+    const handleSelectColor = (selectedIds) => {
+        setSelectedColor(selectedIds);
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            colorId: selectedIds,
+        }));
+    };
+
+    const resetForm = () => {
+        setFormData({
+            id: '',
+            quantity: '',
+            price: '',
+            priceSize: '',
+            description: '',
+            sizeId: '',
+            colorId: '',
+            productId: product ? product.id : null,
+        });
+        setSelectedSize([]);
+        setSelectedColor([]);
+    };
+
+    const validateForm = () => {
+        let isValid = true;
+
+        if (!formData.price) {
+            toast.error('Bạn chưa nhập giá gốc.');
+            isValid = false;
+        }
+
+        if (!formData.quantity) {
+            toast.error('Bạn chưa nhập số lượng.');
+            isValid = false;
+        }
+
+        if (!formData.priceSize) {
+            toast.error('Bạn chưa nhập kích thước giá.');
+            isValid = false;
+        }
+
+        if (!formData.description) {
+            toast.error('Bạn chưa nhập mô tả.');
+            isValid = false;
+        }
+
+        if (selectedSize.length === 0) {
+            toast.error('Bạn chưa chọn size.');
+            isValid = false;
+        }
+
+        if (selectedColor.length === 0) {
+            toast.error('Bạn chưa chọn màu sắc.');
+            isValid = false;
+        }
+
+        return isValid;
+    };
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!validateFields()) return;
+        if (!validateForm()) {
+            return;
+        }
 
-        try {
-            const savePromises = selectedSize.flatMap((sizeId) =>
-                selectedColor.map((colorId) => {
-                    const detailData = {
-                        quantity: formData.quantity,
-                        price: formData.price,
-                        subDescription: formData.subDescription,
-                        sizeId: sizeId,
-                        colorId: colorId,
-                        productId: product.id,
-                        priceSize: formData.priceSize,
-                    };
-                    return ProductDetailService.createDetail(detailData);
-                })
-            );
-
-            const responses = await Promise.all(savePromises);
-            toast.success("Product detail create successfully!");
-            updateQuantityProduct();
-            refreshData()
-            setFormData({
-                id: '',
-                quantity: '',
-                price: '',
-                subDescription: '',
-                priceSize: '',
+        const sizeColorRequests = [];
+        selectedSize.forEach(sizeId => {
+            selectedColor.forEach(colorId => {
+                const quantity = formData.quantity[`${sizeId}-${colorId}`] || 0;
+                if (quantity > 0) {
+                    sizeColorRequests.push({
+                        sizeId,
+                        colorId,
+                        quantity
+                    });
+                }
             });
-            setSelectedSize([]);
-            setSelectedColor([]);
+        });
 
+        const data = {
+            price: Number(formData.price),
+            priceSizes: selectedSize.map(size => formData.priceSize[size]),
+            description: formData.description || null,
+            productId: product ? product.id : null,
+            sizeId: selectedSize,
+            colorId: selectedColor,
+            sizeColorRequests,
+        };
+
+        console.log("Submitting data:", data);
+        resetVisibleQuantities();
+        try {
+            const response = formData.id
+                ? await ProductDetailService.updateDetail(formData.id, data)
+                : await ProductDetailService.createDetail(data);
+
+            const updatedDetails = await ProductDetailService.getAllByProductId(product.id);
+            setProductDetails(updatedDetails.data);
+          
+            resetForm();
         } catch (e) {
-            console.error("Error saving product details:", e);
+            setErrors({ submit: "There was an error saving the product details." });
+            console.error("API responded with an error:", e.response?.data || e);
+            toast.error("Có lỗi xảy ra khi thêm sản phẩm.");
         }
     };
 
+
+    const handleEditClick = (productDetail) => {
+        // Kiểm tra nếu productDetail không phải là null
+        if (productDetail) {
+            setFormData({
+                id: productDetail.id || '',
+                quantity: productDetail.quantity || 0,
+                price: productDetail.price || '',
+                priceSize: productDetail.priceSize || {},
+                description: productDetail.description || '',
+                sizeId: productDetail.sizeId || [],
+                colorId: productDetail.colorId || [],
+            });
+        } else {
+            // Nếu productDetail là null, có thể bạn muốn thiết lập giá trị mặc định cho formData
+            setFormData({
+                id: '',
+                quantity: 0,
+                price: '',
+                priceSize: {},
+                description: '',
+                sizeId: [],
+                colorId: [],
+            });
+        }
+    };
+
+
+
     return (
+
         <DashboardLayout>
+            <ToastContainer />
             <DashboardNavbar />
             <ArgonBox py={3}>
                 <ArgonBox mb={3}>
                     <Card>
-                        <ArgonBox mx={12} >
-                            <Grid container spacing={2} mt={5}>
-                                <Grid size={6}>
-                                    <ArgonBox height={300} width={300} xs={{ overflow: 'hidden' }} borderRadius='8px'>
-                                        <ArgonBox component='img'
-                                            src={
-                                                product.image == null || product.image === ''
-                                                    ?
-                                                    'https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930'
-                                                    :
-                                                    product.image
-                                            }
-                                            alt='Product'
-                                            height='100%'
-                                        />
-                                    </ArgonBox>
-                                </Grid>
-                                <Grid size={6} mx={4}>
-                                    <ArgonBox
-                                        display="flex"
-                                        flexDirection="column"
-                                        alignItems='start'
-                                    >
-                                        <ArgonBox mb={2} >
-                                            <ArgonTypography variant="h5">{product.name}</ArgonTypography>
-                                        </ArgonBox>
-
-                                        <ArgonBox mb={2} >
-                                            <ArgonTypography variant="h5">{product.importPrice} VNĐ</ArgonTypography>
-                                        </ArgonBox>
-
-                                        <ArgonBox display="flex" justifyContent='space-evenly' mb={1}>
-                                            <ArgonBox width='75px'>
-                                                <ArgonTypography variant="button">Category</ArgonTypography>
-                                            </ArgonBox>
-
-                                            <ArgonBox>
-                                                <ArgonTypography variant="caption">{product.categoryDTOResp.name}</ArgonTypography>
-                                            </ArgonBox>
-                                        </ArgonBox>
-
-                                        <ArgonBox display="flex" justifyContent='space-evenly'>
-                                            <ArgonBox width='75px'>
-                                                <ArgonTypography variant="button">Brand</ArgonTypography>
-                                            </ArgonBox>
-
-                                            <ArgonBox>
-                                                <ArgonTypography variant="caption">{product.trademarkDTOResp.name}</ArgonTypography>
-                                            </ArgonBox>
-                                        </ArgonBox>
-
-                                    </ArgonBox>
-                                </Grid>
-                            </Grid>
+                        <ArgonBox display="flex" justifyContent="space-between" p={3}>
+                            <ArgonTypography variant="h6">Chi tiết sản phẩm</ArgonTypography>
+                        </ArgonBox>
+                        <ArgonBox p={3}>
+                            {product ? (
+                                <div>
+                                    <h2>{product.name}</h2>
+                                    <p>Giá: {product.importPrice} VNĐ</p>
+                                    <p>Số lượng: {product.importQuantity}</p>
+                                    <p>Danh mục: {product.categoryDTOResp.name}</p>
+                                    <p>Thương hiệu: {product.trademarkDTOResp.name}</p>
+                                </div>
+                            ) : (
+                                <p>Không tìm thấy sản phẩm</p>
+                            )}
                         </ArgonBox>
 
                         <ArgonBox mx={7}>
                             <ArgonBox component="form" role="form" onSubmit={handleSubmit}>
-
                                 <ArgonBox
                                     display="flex"
                                     flexDirection="column"
@@ -285,153 +354,233 @@ function ProductDetail() {
                                         </Typography>
                                     </ArgonBox>
 
-                                    {/* Quantity Input */}
-                                    <ArgonBox mb={3}>
-                                        <ArgonInput
-                                            type="number"
-                                            placeholder={errors.quantity ? errors.quantity : "Quantity"}
-                                            name="quantity"
-                                            size="large"
-                                            fullWidth
-                                            value={formData.quantity}
-                                            onChange={handleChange}
-                                            inputProps={{ min: 0 }}
-                                            sx={{
-                                                borderColor: errors.quantity ? 'red' : 'Gainsboro',
-                                                borderWidth: '0.5px',
-                                                borderStyle: 'solid',
-                                                width: '100%',
-                                            }}
-                                        />
-                                    </ArgonBox>
 
 
                                     <ArgonBox display="flex" flexDirection="column" gap={3} mb={3}>
                                         <ArgonInput
                                             type="number"
-                                            placeholder={errors.price ? errors.price : "Purchase price"}
+                                            placeholder={errors.price ? `⚠️ ${errors.price}` : "Mức giá"}
                                             name="price"
                                             size="large"
                                             fullWidth
                                             value={formData.price}
                                             inputProps={{ min: 0 }}
                                             onChange={handleChange}
-                                            mb={{ xs: 2, sm: 0 }}
                                             sx={{
                                                 borderColor: errors.price ? 'red' : 'Gainsboro',
-                                                borderWidth: '0.5px',
+                                                borderWidth: '1px',
                                                 borderStyle: 'solid',
-                                            }}
-                                            startAdornment={
-                                                <InputAdornment position="start">
-                                                    <b style={{ fontSize: '25px' }}>$</b>
-                                                </InputAdornment>
-                                            }
-                                        />
-                                    </ArgonBox>
-
-                                    <ArgonBox display="flex" flexDirection="column" gap={3} mb={3}>
-                                        <ArgonInput
-                                            type="number"
-                                            placeholder={errors.priceSize ? errors.priceSize : "Purchase price"}
-                                            name="priceSize"
-                                            size="large"
-                                            fullWidth
-                                            value={formData.priceSize}
-                                            inputProps={{ min: 0 }}
-                                            onChange={handleChange}
-                                            mb={{ xs: 2, sm: 0 }}
-                                            sx={{
-                                                borderColor: errors.priceSize ? 'red' : 'Gainsboro',
-                                                borderWidth: '0.5px',
-                                                borderStyle: 'solid',
-                                            }}
-                                            startAdornment={
-                                                <InputAdornment position="start">
-                                                    <b style={{ fontSize: '25px' }}>$</b>
-                                                </InputAdornment>
-                                            }
-                                        />
-                                    </ArgonBox>
-
-                                </ArgonBox>
-
-                                <ArgonBox mb={3} mx={{ xs: 1, sm: 2, md: 3 }}>
-                                    <div className="custom-editor" style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #ccc', padding: '8px' }}>
-                                        <CKEditor
-                                            editor={ClassicEditor}
-                                            data={formData.subDescription}
-                                            onChange={(event, editor) => {
-                                                const data = editor.getData();
-                                                setFormData(prevFormData => ({
-                                                    ...prevFormData,
-                                                    subDescription: data
-                                                }));
-                                            }}
-                                            config={{
-                                                placeholder: errors.subDescription || "Description",
-                                            }}
-                                            onReady={(editor) => {
-                                                const editorElement = editor.ui.view.editable.element;
-                                                editorElement.setAttribute('style', 'height: 300px');
+                                                '& .Mui-focused': {
+                                                    borderColor: errors.price ? 'red' : 'blue',
+                                                },
                                             }}
                                         />
-                                    </div>
-                                </ArgonBox>
-
-                                <ArgonBox
-                                    mb={3}
-                                    display="flex"
-                                    flexDirection='column'
-                                    justifyContent="space-between"
-                                    gap={2}
-                                    mx={{ xs: 1, sm: 2, md: 3 }}
-                                    p={2}
-                                    border={"1px solid #ccc"}
-                                    borderRadius="8px"
-                                >
-                                    <ArgonBox mx={2} mb={3}>
-                                        <Typography variant="h6" component="h2" fontWeight="bold">
-                                            Select Size and Color
-                                        </Typography>
                                     </ArgonBox>
-
-
                                     <ArgonBox
+                                        mb={3}
                                         display="flex"
                                         flexDirection={{ xs: 'column', sm: 'row' }}
                                         justifyContent="space-between"
                                         alignItems="center"
                                         gap={2}
-                                        width='100%'
                                     >
-
-                                        {/* Size Selector */}
-                                        <ArgonBox width="100%" maxWidth={{ xs: '100%', sm: '48%' }}>
+                                        <ArgonBox
+                                            width="100%"
+                                            maxWidth={{ xs: '100%', sm: '49%' }}
+                                            borderRadius={4}
+                                            border={"1px solid #ccc"}
+                                            bgcolor="background.default"
+                                            p={2}
+                                        >
+                                            <ArgonTypography variant="h6" mb={1}>
+                                                Chọn kích cỡ
+                                            </ArgonTypography>
                                             <MultipleSelectCheckmarks
                                                 model={sizes}
-                                                nameTag={'Select Size'}
-                                                onChange={hanleSelectSize}
+                                                onChange={handleSelectSize}
                                                 selectedModel={selectedSize}
+                                                variant="outlined"
                                             />
+                                            {errors.sizeId && <span style={{ color: 'red' }}>{errors.sizeId}</span>}
                                         </ArgonBox>
 
-                                        {/* Color Selector */}
-                                        <ArgonBox width="100%" maxWidth={{ xs: '100%', sm: '48%' }}>
+                                        <ArgonBox
+                                            width="100%"
+                                            maxWidth={{ xs: '100%', sm: '49%' }}
+                                            borderRadius={4}
+                                            border={"1px solid #ccc"}
+                                            bgcolor="background.default"
+                                            p={2}
+                                        >
+                                            <ArgonTypography variant="h6" mb={1}>
+                                                Chọn màu
+                                            </ArgonTypography>
                                             <MultipleSelectCheckmarks
                                                 model={colors}
-                                                nameTag={'Select Color'}
                                                 onChange={handleSelectColor}
                                                 selectedModel={selectedColor}
+                                                variant="outlined"
                                             />
+                                            {errors.colorId && <span style={{ color: 'red' }}>{errors.colorId}</span>}
                                         </ArgonBox>
+                                    </ArgonBox>
+
+
+
+                                    {/* test */}
+                                    <ArgonBox
+                                        width="100%"
+                                        maxWidth={{ xs: '100%', sm: '100%' }}
+                                        borderRadius={4}
+                                        border={"1px solid #ccc"}
+                                        bgcolor="background.default"
+                                        p={2}
+                                        mb={3}
+                                    >
+                                        <ArgonTypography variant="h6" mb={1} fontWeight={100}>
+                                            Nhập giá kích cỡ
+                                        </ArgonTypography>
+                                        <Grid container spacing={2}>
+                                            {selectedSize.map((sizeId) => {
+                                                const size = sizes.find(s => s.id === sizeId); // Tìm tên của kích thước
+                                                return (
+                                                    <Grid item xs={2} key={sizeId}>
+                                                        <ArgonInput
+                                                            type="number"
+                                                            placeholder={errors.priceSize ? errors.priceSize : `Nhập giá kích thước`}
+                                                            name={`priceSize-${sizeId}`}
+                                                            size="large"
+                                                            sx={{
+                                                                width: '100%',
+                                                                borderColor: errors.priceSize ? 'red' : 'Gainsboro',
+                                                                borderWidth: '1px',
+                                                                borderStyle: 'solid',
+                                                                borderRadius: '4px',
+                                                                transition: 'border-color 0.3s',
+                                                                '&:focus': {
+                                                                    borderColor: 'blue',
+                                                                },
+                                                            }}
+                                                            value={formData.priceSize[sizeId] || ""}
+                                                            inputProps={{ min: 0 }}
+                                                            onChange={(e) => handlePriceChange(e, sizeId)}
+                                                            mb={2}
+                                                            startAdornment={
+                                                                <InputAdornment position="start">
+                                                                    <b style={{ fontSize: '16px', color: '#333' }}>{size ? size.name : ''}</b>
+                                                                </InputAdornment>
+                                                            }
+                                                        />
+                                                    </Grid>
+                                                );
+                                            })}
+                                        </Grid>
+                                    </ArgonBox>
+
+                                    <ArgonBox
+                                        width="100%"
+                                        maxWidth={{ xs: '100%', sm: '100%' }}
+                                        borderRadius={4}
+                                        border={"1px solid #ccc"}
+                                        bgcolor="background.default"
+                                        p={2}
+                                    >
+                                        <ArgonTypography variant="h6" mb={1} fontWeight={100}>
+                                            Nhập số lượng từng sản phẩm theo cặp size, color đã chọn
+                                        </ArgonTypography>
+                                        <Grid container spacing={2}>
+                                            {selectedSize.map(sizeId => {
+                                                const sizeName = sizes.find(s => s.id === sizeId)?.name || ""; // Lấy tên size
+                                                return selectedColor.map(colorId => {
+                                                    const colorName = colors.find(c => c.id === colorId)?.name || ""; // Lấy tên color
+                                                    const isVisible = visibleQuantities[`${sizeId}-${colorId}`] !== false; // Kiểm tra nếu input đang hiển thị
+
+                                                    return (
+                                                        isVisible && (
+                                                            <Grid item xs={2.4} key={`${sizeId}-${colorId}`}>
+                                                                <ArgonInput
+                                                                    type="number"
+                                                                    placeholder={`Nhập số lượng`}
+                                                                    name={`quantity-${sizeId}-${colorId}`}
+                                                                    size="large"
+                                                                    sx={{
+                                                                        width: '100%',
+                                                                        borderColor: errors.quantity ? 'red' : 'Gainsboro',
+                                                                        borderWidth: '1px',
+                                                                        borderStyle: 'solid',
+                                                                        borderRadius: '4px',
+                                                                        transition: 'border-color 0.3s',
+                                                                        '&:focus': {
+                                                                            borderColor: 'blue',
+                                                                        },
+                                                                    }}
+                                                                    value={formData.quantity[`${sizeId}-${colorId}`] || ""}
+                                                                    inputProps={{ min: 0 }}
+                                                                    onChange={(e) => handleQuantityChange(sizeId, colorId, e.target.value)}
+                                                                    startAdornment={
+                                                                        <InputAdornment position="start">
+                                                                            <b style={{ fontSize: '16px', color: '#333' }}>{sizeName}, {colorName}</b>
+                                                                        </InputAdornment>
+                                                                    }
+                                                                    endAdornment={
+                                                                        <InputAdornment position="end">
+                                                                            <IconButton
+                                                                                onClick={() => handleRemoveInput(sizeId, colorId)}
+                                                                                edge="end"
+                                                                            >
+                                                                                <CloseIcon />
+                                                                            </IconButton>
+                                                                        </InputAdornment>
+                                                                    }
+                                                                />
+                                                            </Grid>
+                                                        )
+                                                    );
+                                                });
+                                            })}
+                                        </Grid>
                                     </ArgonBox>
                                 </ArgonBox>
 
-                                <ArgonBox mx={{ xs: 1, sm: 2, md: 3 }} mb={3} width={720}>
-                                    <ArgonButton type="submit" size="large" color="dark" variant='gradient'>
-                                        {formData.id ? "Update" : "Save"}
+                                <ArgonBox mb={3} mx={{ xs: 1, sm: 2, md: 3 }}>
+                                    <div className="custom-editor" style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #ccc', padding: '8px' }}>
+                                        <ArgonTypography variant="h6" component="h2" fontWeight="bold" mb={2}>
+                                            Thông tin sản phẩm
+                                        </ArgonTypography>
+                                        <CKEditor
+                                            editor={ClassicEditor}
+                                            data={formData.description}
+                                            onChange={(event, editor) => {
+                                                const data = editor.getData();
+                                                setFormData(prevFormData => ({
+                                                    ...prevFormData,
+                                                    description: data
+                                                }));
+                                            }}
+                                            config={{
+                                                placeholder: errors.description || "Nhập thông tin",
+                                            }}
+                                            onReady={(editor) => {
+                                                const editorElement = editor.ui.view.editable.element;
+                                                editorElement.setAttribute('style', 'min-height: 300px; max-height: 300px; overflow-y: auto;');
+                                            }}
+                                        />
+
+                                    </div>
+                                </ArgonBox>
+                                <ArgonBox mb={3} mx={{ xs: 1, sm: 2, md: 3 }}>
+                                    <ArgonButton type="submit" color="info">
+                                        {formData.id ? "Cập nhật" : "Thêm"}
                                     </ArgonButton>
+                                    {formData.id && (
+                                        <ArgonButton
+                                            color="primary"
+                                            onClick={resetForm}
+                                            sx={{ ml: 1 }}
+                                        >
+                                            Làm mới
+                                        </ArgonButton>
+                                    )}
                                 </ArgonBox>
                             </ArgonBox>
                         </ArgonBox>
@@ -441,8 +590,11 @@ function ProductDetail() {
                 <ArgonBox mb={3}>
                     <Card>
                         <ArgonBox>
-                            {productDetails.length > 0 ? (
-                                <DataGridDemo items={productDetails} onEdit={handleEditClick} onDelete={handleDeleteClick} />
+                            {productDetails?.length > 0 ? (
+                                <Data
+                                    productDetails={productDetails}
+                                    onEditClick={handleEditClick} />
+
                             ) : (
                                 <ArgonBox
                                     display="flex"
@@ -452,7 +604,7 @@ function ProductDetail() {
                                     sx={{
                                         padding: "80px 24px",
                                         borderRadius: "16px",
-                                        backgroundColor: "light",
+                                        backgroundColor: "#f5f5f5", // Có thể chỉnh sửa màu nền
                                     }}
                                 >
                                     <Box
@@ -466,12 +618,12 @@ function ProductDetail() {
                                     </ArgonTypography>
                                 </ArgonBox>
                             )}
+
                         </ArgonBox>
                     </Card>
                 </ArgonBox>
+
             </ArgonBox>
-            <ProductFormDialog open={dialogOpen} onClose={handleCloseDialog} colors={colors} sizes={sizes} initialData={selectedRow} productID={product.id} refreshData={refreshData} updateQuantity={updateQuantityProduct} />
-            <ToastContainer />
         </DashboardLayout>
     );
 }
