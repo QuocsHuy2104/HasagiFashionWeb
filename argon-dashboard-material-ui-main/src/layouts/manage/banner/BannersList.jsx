@@ -1,19 +1,15 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from 'prop-types';
 import BannerDataService from "../../../services/BannerServices";
+import { Button } from "react-bootstrap";
 import { FaPen, FaTrash } from 'react-icons/fa';
 import "../../../assets/css/app.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
-import ArgonBox from "../../../components/ArgonBox";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import ArgonButton from "../../../components/ArgonButton";
-import { Image } from "react-bootstrap";
-import { Dialog, DialogActions, DialogContent, DialogTitle, Button } from '@mui/material';
-import AddBanner from "./AddBanner";
-
-
-
 
 const CustomPrevArrow = ({ onClick }) => (
     <button className="carousel-arrow carousel-arrow-left" onClick={onClick}>
@@ -37,18 +33,7 @@ CustomNextArrow.propTypes = {
 
 const BannersList = ({ getBannerId }) => {
     const [banners, setBanners] = useState([]);
-    const [open, setOpen] = useState(false);
 
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
-
-    const handleClose = () => {
-        setOpen(false);
-    };
-
-
-    // Lấy danh sách banner từ Firestore
     const getBanners = async () => {
         try {
             const data = await BannerDataService.getAllBanners();
@@ -59,12 +44,14 @@ const BannersList = ({ getBannerId }) => {
     };
 
 
-    // Xóa banner
+
     const deleteBannerHandler = async (id) => {
         try {
             await BannerDataService.deleteBanner(id);
-            getBanners(); // Cập nhật danh sách banner sau khi xóa
+            toast.success("Xóa thành công!");
+            getBanners();
         } catch (error) {
+            toast.error("Thêm thất bại!");
             console.error("Failed to delete banner:", error);
         }
     };
@@ -73,7 +60,7 @@ const BannersList = ({ getBannerId }) => {
         getBanners();
     }, []);
 
-    // Cấu hình cho slider
+
     const sliderSettings = {
         dots: true,
         infinite: true,
@@ -86,92 +73,67 @@ const BannersList = ({ getBannerId }) => {
     };
 
     return (
-        <>
-            <ArgonBox className="mb-3">
-                <ArgonButton color="info" onClick={handleClickOpen} style={{ marginRight: '10px' }}>
-                    Thêm banner
-                </ArgonButton>
-                <ArgonButton color="primary" onClick={getBanners}>
+        <div className="mt-2">
+            <div className="mb-2">
+                <ArgonButton color="success" onClick={getBanners}>
                     Làm mới danh sách
                 </ArgonButton>
-            </ArgonBox>
+            </div>
 
-            <Dialog
-                open={open}
-                onClose={handleClose}
-                maxWidth="md"  // Bạn có thể thay đổi giá trị này thành 'sm', 'md', 'lg', 'xl'
-                fullWidth={true} // Thiết lập chiều rộng đầy đủ
-            >
-                <DialogTitle>Banner</DialogTitle>
-                <DialogContent>
-                    <AddBanner />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose} color="primary">
-                        Đóng
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
-
-
-            <ArgonBox className="banner-wrapper">
+            <div className="banner-wrapper">
                 {banners.map((doc) => (
-                    <ArgonBox key={doc.id} className="banner-container">
-                        <ArgonBox className="banner-carousel">
+                    <div key={doc.id} className="banner-container">
+                        <div className="banner-carousel">
                             <Slider {...sliderSettings}>
                                 {doc.imageUrls && doc.imageUrls.length > 0 ? (
                                     doc.imageUrls.map((url, index) => (
-                                        <ArgonBox key={index} className="banner-image-container">
-                                            <Image
+                                        <div key={index} className="banner-image-container">
+                                            <img
                                                 src={url}
                                                 alt={`Banner ${index}`}
                                                 className="banner-image"
-                                                responsive
                                             />
-                                            <ArgonBox className="banner-hover-content">
+                                            <div className="banner-hover-content">
                                                 <h5>{doc.title}</h5>
-                                                <ArgonBox>
-                                                    <ArgonButton
-                                                        color="warning"
-                                                        onClick={() => getBannerId(doc.id, doc.imageUrls)}
+                                                <div>
+                                                    <Button
+                                                        onClick={() => getBannerId(doc.id, doc.imageUrls)} // Truyền cả id và danh sách ảnh
+                                                        className="btn-transparent-secondary"
                                                     >
                                                         <FaPen />
-                                                    </ArgonButton>
+                                                    </Button>
 
-                                                    <ArgonButton
-                                                        color="danger"
+                                                    <Button
                                                         onClick={() => deleteBannerHandler(doc.id)}
+                                                        className="btn-transparent-danger"
                                                     >
                                                         <FaTrash />
-                                                    </ArgonButton>
-                                                </ArgonBox>
-                                            </ArgonBox>
-                                        </ArgonBox>
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     ))
                                 ) : (
-                                    <ArgonBox className="banner-image-container">
-                                        <Image
+                                    <div className="banner-image-container">
+                                        <img
                                             src='https://via.placeholder.com/150'
                                             alt="Placeholder"
                                             className="banner-image"
-                                            responsive
                                         />
-                                        <ArgonBox className="banner-hover-content">
+                                        <div className="banner-hover-content">
                                             <h5>No Images</h5>
-                                        </ArgonBox>
-                                    </ArgonBox>
+                                        </div>
+                                    </div>
                                 )}
                             </Slider>
-                        </ArgonBox>
-                    </ArgonBox>
+                        </div>
+                    </div>
                 ))}
-            </ArgonBox>
-        </>
+            </div>
+        </div>
     );
 };
 
-// Định nghĩa kiểu dữ liệu cho props
 BannersList.propTypes = {
     getBannerId: PropTypes.func.isRequired,
 };

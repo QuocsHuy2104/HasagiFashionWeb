@@ -38,37 +38,38 @@ function Illustration() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-  
+
     const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
       return;
     }
-  
+
     setErrors({});
     setMessage("");
     setLoading(true);
-  
+
     try {
       const response = await axios.post(
         "http://localhost:8080/api/auth/login",
         { username: username.trim(), password: password.trim() },
         { withCredentials: true }
       );
-  
+
       if (response.status === 200) {
         const expirationTime = rememberMe
           ? new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000) // 30 days
-          : new Date(new Date().getTime() + 60 * 60 * 1000); // 1 hour
-  
+          : new Date(new Date().getTime() + 10 * 60 * 60 * 1000); // 10 hours
+
         const token = response.data.token;
-  
+
         Cookies.set('user', token, { expires: expirationTime });
         Cookies.set('accountId', response.data.accountId, { expires: expirationTime });
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-  
+
         navigate("/");
       }
+
     } catch (error) {
       if (error.response) {
         setMessage(error.response.data.message || "Login failed. Please try again.");
@@ -81,7 +82,7 @@ function Illustration() {
       setLoading(false);
     }
   };
-  
+
 
   return (
     <IllustrationLayout

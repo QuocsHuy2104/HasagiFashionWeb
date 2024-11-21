@@ -7,11 +7,13 @@ import VoucherService from "../../../services/VoucherServices";
 import Cookies from "js-cookie";
 import PropTypes from "prop-types";
 import Slider from "react-slick";
-
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import ProductService from "../../../services/ProductServices";
+import { Link } from "react-router-dom";
+
 
 const Voucher = ({ voucher }) => {
 
@@ -130,7 +132,7 @@ const Voucher = ({ voucher }) => {
                         },
                     }}
                 >
-                    Sao chép mã
+                    Áp dụng cho
                 </ArgonButton>
             </ArgonBox>
         </ArgonBox>
@@ -199,27 +201,26 @@ const VoucherList = () => {
     const [usedVouchers, setUsedVouchers] = useState([]);
     const accountId = Cookies.get('accountId');
 
+    const [products, setProducts] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [filteredProducts, setFilteredProducts] = useState([]);
+    const productsPerPage = 5;
+
     useEffect(() => {
         const fetchData = async () => {
             try {
+                const voucherRequests = [VoucherService.getAllVouchers()];
                 if (accountId) {
-                    const [voucherResponse, usedVoucherResponse] = await Promise.all([
-                        VoucherService.getAllVouchers(),
-                        VoucherService.getUsedVouchersByAccount(accountId),
-                    ]);
-                    const activeVouchers = voucherResponse.data.filter(voucher => voucher.isActive);
-
-                    setVouchers(activeVouchers);
-                    setUsedVouchers(usedVoucherResponse.data);
-                } else {
-                    const voucherResponse = await VoucherService.getAllVouchers();
-                    const activeVouchers = voucherResponse.data.filter(voucher => voucher.isActive);
-
-                    setVouchers(activeVouchers);
-                    setUsedVouchers([]);
+                    voucherRequests.push(VoucherService.getUsedVouchersByAccount(accountId));
                 }
+
+                const [voucherResponse, usedVoucherResponse] = await Promise.all(voucherRequests);
+                const activeVouchers = voucherResponse.data.filter(voucher => voucher.isActive);
+
+                setVouchers(activeVouchers);
+                setUsedVouchers(usedVoucherResponse ? usedVoucherResponse.data : []);
             } catch (error) {
-                console.error("Error fetching data:", error);
+                console.error("Error fetching voucher data:", error);
             } finally {
                 setLoading(false);
             }
@@ -228,9 +229,49 @@ const VoucherList = () => {
         fetchData();
     }, [accountId]);
 
-    const availableVouchers = vouchers.filter(voucher =>
-        !usedVouchers.some(usedVoucher => usedVoucher.id === voucher.id)
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const response = await ProductService.getAllProducts();
+                setProducts(Array.isArray(response.data) ? response.data : []);
+            } catch (error) {
+                console.error("Error fetching products:", error);
+                setProducts([]);
+            }
+        };
+
+        fetchProducts();
+    }, []);
+
+    const availableVouchers = vouchers.filter(
+        voucher => !usedVouchers.some(usedVoucher => usedVoucher.id === voucher.id)
     );
+
+    const indexOfLastProduct = currentPage * productsPerPage;
+    const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+    const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+    const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
+    const handlePageChange = pageNumber => {
+        setCurrentPage(pageNumber);
+    };
+
+    const formatNumber = (num) => {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    };
+
+    const formatImportPrice = (importPrice) => {
+        if (!importPrice) return "0đ";
+
+        const prices = importPrice.split('-').map(price => {
+            const trimmedPrice = price.trim();
+            const numericPrice = parseFloat(trimmedPrice);
+            const integerPrice = Math.floor(numericPrice);
+            return `${formatNumber(integerPrice)}đ`;
+        });
+
+        return prices.join(' - ');
+    };
 
     const sliderSettings = {
         infinite: false,
@@ -262,11 +303,61 @@ const VoucherList = () => {
     };
 
 
+    const handleApplyVoucher = (voucher) => {
+        if (voucher.minimumOrderValue === undefined || voucher.minimumOrderValue === null || voucher.minimumOrderValue === "") {
+            console.error('Voucher does not have a valid minimumOrderValue:', voucher);
+            return;
+        }
+
+        console.log('Voucher minimumOrderValue:', voucher.minimumOrderValue);
+
+        let minPrice;
+        if (typeof voucher.minimumOrderValue === "string") {
+            minPrice = voucher.minimumOrderValue
+                .split('-')[0]
+                .trim()
+                .replace('đ', '')
+                .replace('.', '');
+
+            minPrice = parseInt(minPrice);
+        } else if (typeof voucher.minimumOrderValue === "number") {
+            minPrice = voucher.minimumOrderValue;
+        }
+
+        minPrice = minPrice;
+        if (isNaN(minPrice)) {
+            console.error('Voucher minimumOrderValue is invalid:', voucher.minimumOrderValue);
+            return;
+        }
+
+        console.log('Voucher minimumOrderValue (minPrice):', minPrice);
+        const filtered = products.filter(product => {
+            if (!product.importPrice || product.importPrice.trim() === "") return false;
+
+            const productPrices = product.importPrice
+                .split('-')
+                .map(price => {
+                    return parseInt(price.trim().replace('đ', '').replace('.', '').replace(/[^0-9]/g, ''));
+                });
+
+            const productMinPrice = productPrices[1];
+            const adjustedProductMinPrice = productMinPrice / 10;
+            if (isNaN(adjustedProductMinPrice)) return false;
+            console.log('Product minimum price (adjusted productMinPrice):', adjustedProductMinPrice);
+            const isValid = adjustedProductMinPrice >= minPrice;
+            console.log('Is product valid? ', isValid);
+
+            return isValid;
+        });
+
+        setFilteredProducts(filtered);
+    };
+
+
+
     if (loading) {
         return <CircularProgress />;
     }
-
-
 
     return (
         <>
@@ -283,16 +374,69 @@ const VoucherList = () => {
                     ) : (
                         availableVouchers.map(voucher => (
                             <div key={voucher.id}>
-                                <Voucher voucher={voucher} />
+                                <Voucher voucher={voucher} onClick={() => handleApplyVoucher(voucher)} />
                             </div>
                         ))
                     )}
                 </Slider>
             </div>
+
+            <div className="container-fluid pt-4 pb-3">
+                <h2 className="section-title position-relative text-uppercase mx-xl-5 mb-4">
+                    <span className="bg-secondary pr-3">Sản phẩm phù hợp</span>
+                </h2>
+                <div className="row px-xl-5">
+                    {currentProducts.map((product, index) => (
+                        <div className="col-lg-3 col-md-4 col-sm-6 pb-1" key={index}>
+                            <div className="product-item bg-light mb-4">
+                                <div className="product-img position-relative overflow-hidden">
+                                    <Link to={`/ShopDetail?id=${product.id}`}>
+                                        <img
+                                            className="img-fluid w-100"
+                                            src={product.image || aboutImage5}
+                                            alt={product.name || "Product"}
+                                        />
+                                    </Link>
+                                </div>
+                                <div className="py-4">
+                                    <Link className="h6 text-decoration-none text-truncate" to={`/ShopDetail?id=${product.id}`}>
+                                        {product.name || "Product Name Goes Here"}
+                                    </Link>
+                                    <div className="d-flex mb-1">
+                                        {formatImportPrice(product.importPrice)}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                    <div className="col-12" style={{ marginTop: "-30px" }}>
+                        <nav>
+                            <ul className="pagination justify-content-center">
+                                <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                                    <a className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
+                                        <i className="ni ni-bold-left" />
+                                    </a>
+                                </li>
+                                {[...Array(totalPages)].map((_, index) => (
+                                    <li className={`page-item ${currentPage === index + 1 ? "active" : ""}`} key={index}>
+                                        <a className="page-link" onClick={() => handlePageChange(index + 1)}>
+                                            {index + 1}
+                                        </a>
+                                    </li>
+                                ))}
+                                <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                                    <a className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
+                                        <i className="ni ni-bold-right" />
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
         </>
     );
 };
-
 
 
 export default VoucherList;

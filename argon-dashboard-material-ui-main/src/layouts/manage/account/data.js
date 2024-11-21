@@ -92,10 +92,6 @@ const AuthorsTableData = ({ onEditClick, searchTerm = "", selectedRoles = [] }) 
 
     setAccounts(updatedAccounts);
 
-    // Log account details
-    console.log("Account ID:", account.id);
-    console.log("Delete status:", account.delete);
-
     // Make API call to update dismissal status
     AccountService.dismissalAccount(account.id)
       .then((res) => {
@@ -117,10 +113,12 @@ const AuthorsTableData = ({ onEditClick, searchTerm = "", selectedRoles = [] }) 
   };
 
   const filteredAccounts = selectedRoles.length > 0
-    ? filteredBySearch.filter((account) =>
-      account.roleName.some((role) => selectedRoles.includes(role.name))
+    ? filteredBySearch.filter(
+      (account) =>
+        (account.roleName || []).some((role) => selectedRoles.includes(role.name))
     )
     : filteredBySearch;
+
 
   const rows = filteredAccounts.map((account) => {
     const accountRoles = (account.roleName || [])

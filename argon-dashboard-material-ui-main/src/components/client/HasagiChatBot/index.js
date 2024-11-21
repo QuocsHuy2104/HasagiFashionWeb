@@ -87,6 +87,7 @@ function Gemini() {
         }
     };
 
+
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!question.trim()) return;
@@ -286,3 +287,4 @@ function Gemini() {
 }
 
 export default Gemini;
+

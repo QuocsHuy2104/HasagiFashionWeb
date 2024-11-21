@@ -177,6 +177,7 @@ const Checkout = () => {
         setSelectedPayment('');
         setShowPaymentButtons(true);
     };
+
     const handleAddressChange = (selectedAddress) => {
         setAddress(selectedAddress);
         setShowBackup(false);
@@ -288,6 +289,18 @@ const Checkout = () => {
             productDetailIdSelected: productDetailIdSelected
         };
 
+        const payStatusMomo = 'Đã thanh toán';
+        const checkoutDataMomo = {
+            addressDTO,
+            cartDetails: cartDetailsDTO,
+            payMethod: selectedPayment,
+            payStatus: payStatusMomo,
+            voucherId: voucherId,
+            shippingFree: shipFee.total,
+            fullName: `${address.address}, ${getAddressNameById(address.wardCode, wards, 'ward')}, ${getAddressNameById(address.districtCode, districts, 'district')}, ${getAddressNameById(address.provinceID, provinces, 'province')}`,
+            productDetailIdSelected: productDetailIdSelected
+        };
+
 
 
         setIsLoading(true);
@@ -320,6 +333,18 @@ const Checkout = () => {
                     window.location.href = response.data.paymentUrl;
                 } else {
                     toast.error("Có lỗi xảy ra khi xử lý thanh toán VNPAY.");
+                }
+
+            }else if (selectedPayment === 'Momo') {
+                response = await CheckoutService.postCheckout(addressId, checkoutDataMomo);
+                if (response.data.paymentUrl) {
+                    localStorage.setItem('address1', JSON.stringify(addressDTO));
+                    localStorage.setItem('orderDetails1', JSON.stringify(cartDetailsDTO));
+                    Cookies.set('addressId', address.id);
+                    await handleRemoveItems();
+                    window.location.href = response.data.paymentUrl;
+                } else {
+                    toast.error("Có lỗi xảy ra khi xử lý thanh toán Momo.");
                 }
 
             } else {
@@ -500,6 +525,12 @@ const Checkout = () => {
                                                     <ArgonButton
                                                         className={`custom-btn payment-btn ${selectedPayment === 'Bank Transfer' ? 'active' : ''}`}
                                                         onClick={() => handleButtonClick('Bank Transfer')}
+                                                    >
+                                                        Bank Transfer
+                                                    </ArgonButton>
+                                                    <ArgonButton
+                                                        className={`custom-btn payment-btn ${selectedPayment === 'Momo' ? 'active' : ''}`}
+                                                        onClick={() => handleButtonClick('Momo')}
                                                     >
                                                         Bank Transfer
                                                     </ArgonButton>

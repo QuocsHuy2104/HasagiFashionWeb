@@ -151,7 +151,6 @@ function Category() {
         toast.success("Thêm danh mục thành công");
       }
 
-      fetchData();
       resetForm();
     } catch (error) {
       console.error("Unexpected error:", error);
