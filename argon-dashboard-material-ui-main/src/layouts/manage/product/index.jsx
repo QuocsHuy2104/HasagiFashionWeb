@@ -10,7 +10,6 @@ import ArgonSelect from '../../../components/ArgonSelect';
 import ArgonTypography from "../../../components/ArgonTypography";
 import Table from "../../../examples/Tables/Table";
 import ProductTable from "./data";
-import { toast } from "react-toastify";
 import { Typography } from "@mui/material";
 import InputAdornment from '@mui/material/InputAdornment';
 import Footer from "../../../examples/Footer";
@@ -22,6 +21,8 @@ import { storage } from "../../../config/firebase-config";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import CloseIcon from '@mui/icons-material/Close';
 import IconButton from '@mui/material/IconButton';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 function Product() {
@@ -61,7 +62,7 @@ function Product() {
         if (file && file instanceof Blob) {
             setFormData((prevData) => ({
                 ...prevData,
-                image: file,  // Cập nhật ảnh mới
+                image: file,
             }));
         } else {
             console.error("Invalid image file");
@@ -73,7 +74,7 @@ function Product() {
         if (file && file instanceof Blob) {
             setFormData((prevData) => ({
                 ...prevData,
-                video: file,  // Cập nhật video mới
+                video: file,
             }));
         } else {
             console.error("Invalid video file");
@@ -100,14 +101,45 @@ function Product() {
 
     const validateFields = () => {
         const newErrors = {};
-        if (!formData.name.trim()) newErrors.name = 'Name is required';
-        if (!formData.description.trim()) newErrors.description = 'Description is required';
-        if (!formData.categoryId) newErrors.categoryId = 'Category is required';
-        if (!formData.trademarkId) newErrors.trademarkId = 'Brand is required';
+
+        // Kiểm tra tên sản phẩm
+        if (!formData.name.trim()) {
+            newErrors.name = true;
+            toast.warn("Vui lòng nhập tên sản phẩm!!!");
+        } else if (/\d/.test(formData.name)) {
+            newErrors.name = true;
+            toast.warn("Tên sản phẩm không được nhập số!!!");
+        }
+
+        // Kiểm tra mô tả
+        if (!formData.description.trim()) {
+            newErrors.description = true;
+            toast.warn("Vui lòng nhập mô tả sản phẩm!!!");
+        }
+
+        // Kiểm tra danh mục
+        if (!formData.categoryId) {
+            newErrors.categoryId = true;
+            toast.warn("Vui lòng chọn danh mục!!!");
+        }
+
+        // Kiểm tra thương hiệu
+        if (!formData.trademarkId) {
+            newErrors.trademarkId = true;
+            toast.warn("Vui lòng chọn thương hiệu!!!");
+        }
+
+        // Kiểm tra hình ảnh
+        if (!formData.image) {
+            newErrors.image = true;
+            toast.warn("Vui lòng chọn hình ảnh sản phẩm!!!");
+        }
 
         setErrors(newErrors);
+
         return Object.keys(newErrors).length === 0;
     };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -117,7 +149,7 @@ function Product() {
         let videoUrl = formData.videoUrl || null;
 
         try {
-            if (formData.image) {
+            if (formData.image && formData.image instanceof File) {
                 const imageFile = formData.image;
                 const imageStorageRef = ref(storage, `productFiles/${imageFile.name}`);
                 const imageUploadTask = uploadBytesResumable(imageStorageRef, imageFile);
@@ -126,12 +158,13 @@ function Product() {
                     imageUploadTask.on(
                         'state_changed',
                         (snapshot) => {
-                            console.log(
-                                `Image upload progress: ${(snapshot.bytesTransferred / snapshot.totalBytes) * 100}%`
-                            );
+                            if (snapshot.totalBytes && snapshot.bytesTransferred) {
+                                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                                console.log(`Tiến trình tải ảnh: ${progress}%`);
+                            }
                         },
                         (error) => {
-                            console.error('Error uploading image:', error);
+                            console.error('Lỗi khi tải ảnh:', error);
                             reject(error);
                         },
                         async () => {
@@ -142,7 +175,7 @@ function Product() {
                 });
             }
 
-            if (formData.video) {
+            if (formData.video && formData.video instanceof File) {
                 const videoFile = formData.video;
                 const videoStorageRef = ref(storage, `productFiles/${videoFile.name}`);
                 const videoUploadTask = uploadBytesResumable(videoStorageRef, videoFile);
@@ -151,12 +184,13 @@ function Product() {
                     videoUploadTask.on(
                         'state_changed',
                         (snapshot) => {
-
-                            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                            console.log(`Video upload progress: ${progress}%`);
+                            if (snapshot.totalBytes && snapshot.bytesTransferred) {
+                                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                                console.log(`Tiến trình tải video: ${progress}%`);
+                            }
                         },
                         (error) => {
-                            console.error('Error uploading video:', error);
+                            console.error('Lỗi khi tải video:', error);
                             reject(error);
                         },
                         async () => {
@@ -174,19 +208,36 @@ function Product() {
                 description: formData.description,
                 sale: formData.sale,
                 image: imageUrl,
-                video: videoUrl,  
+                video: videoUrl,
             };
 
+            // Kiểm tra nếu có formData.id, là cập nhật sản phẩm
             const response = formData.id
                 ? await ProductService.updateProduct(formData.id, productData)
                 : await ProductService.createProduct(productData);
 
-            toast.success('Product saved successfully');
+            // Thông báo thành công
+            if (formData.id) {
+                toast.success('Cập nhật sản phẩm thành công');
+            } else {
+                toast.success('Thêm sản phẩm thành công');
+            }
+
             resetForm();
         } catch (error) {
+            // Thông báo thất bại khi thêm hoặc cập nhật sản phẩm
+            if (formData.id) {
+                toast.error('Cập nhật sản phẩm thất bại, vui lòng thử lại');
+            } else {
+                toast.error('Thêm sản phẩm thất bại, vui lòng thử lại');
+            }
+            console.error("Lỗi khi lưu sản phẩm:", error);
             handleApiError(error);
         }
     };
+
+
+
 
 
     const handleApiError = (error) => {
@@ -213,6 +264,8 @@ function Product() {
             categoryId: product.categoryDTOResp?.id || '',
             image: product.image || null,
             video: product.video || null,
+            imageUrl: product.image || '',
+            videoUrl: product.video || '',
         });
     };
 
@@ -232,6 +285,7 @@ function Product() {
 
     return (
         <DashboardLayout>
+            <ToastContainer />
             <DashboardNavbar />
             <ArgonBox py={3}>
                 <ArgonBox mb={5}>
@@ -262,16 +316,20 @@ function Product() {
                                                                 display: 'flex',
                                                                 alignItems: 'center',
                                                                 justifyContent: 'center',
-                                                                border: '1px solid #000',
+                                                                border: '1px solid #B8B8B8',
                                                                 padding: '0',
                                                                 width: '200px',
                                                                 height: '200px',
                                                                 borderRadius: '8px',
+                                                                borderColor: errors.name ? 'red' : 'Gainsboro',
+                                                                borderWidth: '0.5px',
+                                                                borderStyle: 'solid',
                                                             }}
                                                             onClick={() => document.getElementById('image-upload').click()}
                                                         >
-                                                            <PhotoCamera style={{ fontSize: '48px', color: 'black' }} />
+                                                            <PhotoCamera style={{  color: 'black', width: '50px' }} />  {/* Tăng kích thước icon lên */}
                                                         </ArgonButton>
+
                                                     </>
                                                 ) : (
                                                     <div style={{ position: 'relative' }}>
@@ -296,6 +354,7 @@ function Product() {
                                                                 color: '#fff',
                                                                 fontSize: '15px',
                                                                 backgroundColor: '#B8B8B8',
+
                                                             }}
                                                             onClick={handleRemoveImage}
                                                         >
@@ -352,7 +411,7 @@ function Product() {
                                                         display: 'flex',
                                                         alignItems: 'center',
                                                         justifyContent: 'center',
-                                                        border: '1px solid #000',
+                                                        border: '1px solid #B8B8B8',
                                                         padding: '0',
                                                         width: '200px',
                                                         height: '200px',
@@ -360,7 +419,7 @@ function Product() {
                                                     }}
                                                     onClick={() => document.getElementById('video-upload').click()}
                                                 >
-                                                    <Videocam style={{ fontSize: '48px', color: 'black' }} />
+                                                    <Videocam style={{ fontSize: '80px', color: 'black' }} />
                                                 </ArgonButton>
                                             )}
                                         </div>
