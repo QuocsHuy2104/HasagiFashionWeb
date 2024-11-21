@@ -13,9 +13,9 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ProductService from "../../../services/ProductServices";
 import { Link } from "react-router-dom";
+import reviewsService from "services/ReviewsServices";
 
-
-const Voucher = ({ voucher }) => {
+const Voucher = ({ voucher, onApplyVoucher }) => {
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -131,6 +131,7 @@ const Voucher = ({ voucher }) => {
                             background: "linear-gradient(to right, #FF4500, #FF6347)",
                         },
                     }}
+                    onClick={() => onApplyVoucher(voucher)}
                 >
                     Áp dụng cho
                 </ArgonButton>
@@ -146,6 +147,7 @@ Voucher.propTypes = {
         minimumOrderValue: PropTypes.number.isRequired,
         endDate: PropTypes.string.isRequired,
     }).isRequired,
+    onApplyVoucher: PropTypes.func.isRequired,
 };
 
 
@@ -200,7 +202,7 @@ const VoucherList = () => {
     const [loading, setLoading] = useState(true);
     const [usedVouchers, setUsedVouchers] = useState([]);
     const accountId = Cookies.get('accountId');
-
+    const [reviews, setReviews] = useState([]);
     const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [filteredProducts, setFilteredProducts] = useState([]);
@@ -353,7 +355,32 @@ const VoucherList = () => {
         setFilteredProducts(filtered);
     };
 
+    const fetchReviews = async (productId) => {
+        try {
+            const productReviews = await reviewsService.getReviewsByProduct(productId);
+            console.log('Fetched reviews for product:', productReviews);
+            setReviews((prevReviews) => [...prevReviews, ...productReviews]);
+        } catch (error) {
+            console.error('Error fetching reviews for product:', error);
+            setReviews([]);
+        }
+    };
 
+    useEffect(() => {
+        if (products.length > 0) {
+            products.forEach((product) => {
+                fetchReviews(product.id);
+            });
+        }
+    }, [products]);
+
+    const calculateAverageStars = (productId) => {
+        const productReviews = reviews.filter((review) => review.productId === productId);
+        if (productReviews.length === 0) return 0;
+
+        const totalStars = productReviews.reduce((sum, review) => sum + review.star, 0);
+        return (totalStars / productReviews.length).toFixed(1);
+    };
 
     if (loading) {
         return <CircularProgress />;
@@ -374,17 +401,15 @@ const VoucherList = () => {
                     ) : (
                         availableVouchers.map(voucher => (
                             <div key={voucher.id}>
-                                <Voucher voucher={voucher} onClick={() => handleApplyVoucher(voucher)} />
+                                <Voucher voucher={voucher} onApplyVoucher={handleApplyVoucher} />
+
                             </div>
                         ))
                     )}
                 </Slider>
             </div>
 
-            <div className="container-fluid pt-4 pb-3">
-                <h2 className="section-title position-relative text-uppercase mx-xl-5 mb-4">
-                    <span className="bg-secondary pr-3">Sản phẩm phù hợp</span>
-                </h2>
+            <div className="container-fluid pt-0 pb-3">
                 <div className="row px-xl-5">
                     {currentProducts.map((product, index) => (
                         <div className="col-lg-3 col-md-4 col-sm-6 pb-1" key={index}>
@@ -398,42 +423,78 @@ const VoucherList = () => {
                                         />
                                     </Link>
                                 </div>
-                                <div className="py-4">
-                                    <Link className="h6 text-decoration-none text-truncate" to={`/ShopDetail?id=${product.id}`}>
+                                <div className="py-4 px-2">
+                                    <Link
+                                        className="h6 text-decoration-none text-truncate"
+                                        to={`/ShopDetail?id=${product.id}`}
+                                    >
                                         {product.name || "Product Name Goes Here"}
                                     </Link>
                                     <div className="d-flex mb-1">
-                                        {formatImportPrice(product.importPrice)}
+                                        <strong style={{ color: 'red' }}>{formatImportPrice(product.importPrice)}</strong>
+                                    </div>
+                                    <div className="d-flex mb-1">
+                                        <strong> ⭐ {calculateAverageStars(product.id)} </strong>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     ))}
-                    <div className="col-12" style={{ marginTop: "-30px" }}>
-                        <nav>
-                            <ul className="pagination justify-content-center">
-                                <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                                    <a className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
-                                        <i className="ni ni-bold-left" />
-                                    </a>
-                                </li>
-                                {[...Array(totalPages)].map((_, index) => (
-                                    <li className={`page-item ${currentPage === index + 1 ? "active" : ""}`} key={index}>
-                                        <a className="page-link" onClick={() => handlePageChange(index + 1)}>
-                                            {index + 1}
+
+                    {currentProducts.length > 0 && ( 
+                        <div className="col-12" style={{ marginTop: "-30px" }}>
+                            <nav>
+                                <ul className="pagination justify-content-center">
+                                    <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                                        <a className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
+                                            <i className="ni ni-bold-left" />
                                         </a>
                                     </li>
-                                ))}
-                                <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                                    <a className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
-                                        <i className="ni ni-bold-right" />
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
+
+                                    {(() => {
+                                        const pages = [];
+                                        let startPage, endPage;
+
+                                        if (totalPages <= 3) {
+                                            startPage = 1;
+                                            endPage = totalPages;
+                                        } else if (currentPage === 1) {
+                                            startPage = 1;
+                                            endPage = 3;
+                                        } else if (currentPage === totalPages) {
+                                            startPage = totalPages - 2;
+                                            endPage = totalPages;
+                                        } else {
+                                            startPage = currentPage - 1;
+                                            endPage = currentPage + 1;
+                                        }
+
+                                        for (let i = startPage; i <= endPage; i++) {
+                                            pages.push(
+                                                <li
+                                                    className={`page-item ${currentPage === i ? "active" : ""}`}
+                                                    key={i}
+                                                >
+                                                    <a className="page-link" onClick={() => handlePageChange(i)}>
+                                                        {i}
+                                                    </a>
+                                                </li>
+                                            );
+                                        }
+                                        return pages;
+                                    })()}
+                                    <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                                        <a className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
+                                            <i className="ni ni-bold-right" />
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    )}
                 </div>
             </div>
+
         </>
     );
 };
