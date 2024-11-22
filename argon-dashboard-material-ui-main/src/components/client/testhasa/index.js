@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import ArgonBox from "components/ArgonBox";
 import ArgonButton from "components/ArgonButton";
 import { CircularProgress, Typography } from "@mui/material";
@@ -204,9 +204,7 @@ const VoucherList = () => {
     const accountId = Cookies.get('accountId');
     const [reviews, setReviews] = useState([]);
     const [products, setProducts] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
     const [filteredProducts, setFilteredProducts] = useState([]);
-    const productsPerPage = 5;
 
     useEffect(() => {
         const fetchData = async () => {
@@ -249,14 +247,6 @@ const VoucherList = () => {
         voucher => !usedVouchers.some(usedVoucher => usedVoucher.id === voucher.id)
     );
 
-    const indexOfLastProduct = currentPage * productsPerPage;
-    const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-    const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
-    const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-
-    const handlePageChange = pageNumber => {
-        setCurrentPage(pageNumber);
-    };
 
     const formatNumber = (num) => {
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -353,6 +343,39 @@ const VoucherList = () => {
         return (totalStars / productReviews.length).toFixed(1);
     };
 
+    const sliderRef = useRef(null);
+
+    const settings = {
+        dots: false, // Không hiển thị các chấm (có thể bật nếu cần)
+        infinite: true,
+        speed: 500,
+        slidesToShow: 4,
+        slidesToScroll: 1,
+        responsive: [
+            {
+                breakpoint: 1024, // Tablet và nhỏ hơn
+                settings: {
+                    slidesToShow: 3,
+                    slidesToScroll: 1,
+                },
+            },
+            {
+                breakpoint: 768, // Mobile
+                settings: {
+                    slidesToShow: 2,
+                    slidesToScroll: 1,
+                },
+            },
+            {
+                breakpoint: 480, // Mobile nhỏ hơn
+                settings: {
+                    slidesToShow: 1,
+                    slidesToScroll: 1,
+                },
+            },
+        ],
+    };
+
     if (loading) {
         return <CircularProgress />;
     }
@@ -386,88 +409,59 @@ const VoucherList = () => {
             </div>
 
             <div className="container-fluid pt-0 pb-3">
+
                 <div className="row px-xl-5">
-                    {currentProducts.map((product, index) => (
-                        <div className="col-lg-3 col-md-4 col-sm-6 pb-1" key={index}>
-                            <div className="product-item bg-light mb-4">
-                                <div className="product-img position-relative overflow-hidden">
-                                    <Link to={`/ShopDetail?id=${product.id}`}>
-                                        <img
-                                            className="img-fluid w-100"
-                                            src={product.image || aboutImage5}
-                                            alt={product.name || "Product"}
-                                        />
-                                    </Link>
-                                </div>
-                                <div className="py-4 px-2">
-                                    <Link
-                                        className="h6 text-decoration-none text-truncate"
-                                        to={`/ShopDetail?id=${product.id}`}
-                                    >
-                                        {product.name || "Product Name Goes Here"}
-                                    </Link>
-                                    <div className="d-flex mb-1">
-                                        <strong style={{ color: 'red' }}>{formatImportPrice(product.importPrice)}</strong>
+                    <div className="d-flex justify-content-end align-items-center mb-3">
+                        <div className="d-flex justify-content-end">
+                            <button
+                                className="btn me-2"
+                                onClick={() => sliderRef.current.slickPrev()}
+                                style={{ backgroundColor: 'transparent', border: 'none', color: 'black', fontSize: '30px' }}
+                            >
+                                &lt;
+                            </button>
+                            <button
+                                className="btn me-3"
+                                onClick={() => sliderRef.current.slickNext()}
+                                style={{ backgroundColor: 'transparent', border: 'none', color: 'black', fontSize: '30px' }}
+                            >
+                                &gt;
+                            </button>
+                        </div>
+                    </div>
+                    <Slider ref={sliderRef} {...settings}>
+                        {products.map((product, index) => (
+                            <div className="px-2" key={index}>
+                                <div className="product-item bg-light mb-4">
+                                    <div className="product-img position-relative overflow-hidden">
+                                        <Link to={`/ShopDetail?id=${product.id}`}>
+                                            <img
+                                                className="img-fluid w-100"
+                                                src={product.image || aboutImage5}
+                                                alt={product.name || "Product"}
+                                            />
+                                        </Link>
                                     </div>
-                                    <div className="d-flex mb-1">
-                                        <strong> ⭐ {calculateAverageStars(product.id)} </strong>
+                                    <div className="py-4 px-2">
+                                        <Link
+                                            className="h6 text-decoration-none text-truncate"
+                                            to={`/ShopDetail?id=${product.id}`}
+                                        >
+                                            {product.name || "Product Name Goes Here"}
+                                        </Link>
+                                        <div className="d-flex mb-1">
+                                            <strong style={{ color: "red" }}>
+                                                {formatImportPrice(product.importPrice)}
+                                            </strong>
+                                        </div>
+                                        <div className="d-flex mb-1">
+                                            <strong>⭐ {calculateAverageStars(product.id)}</strong>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-
-                    {currentProducts.length > 0 && (
-                        <div className="col-12" style={{ marginTop: "-30px" }}>
-                            <nav>
-                                <ul className="pagination justify-content-center">
-                                    <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                                        <a className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
-                                            <i className="ni ni-bold-left" />
-                                        </a>
-                                    </li>
-
-                                    {(() => {
-                                        const pages = [];
-                                        let startPage, endPage;
-
-                                        if (totalPages <= 3) {
-                                            startPage = 1;
-                                            endPage = totalPages;
-                                        } else if (currentPage === 1) {
-                                            startPage = 1;
-                                            endPage = 3;
-                                        } else if (currentPage === totalPages) {
-                                            startPage = totalPages - 2;
-                                            endPage = totalPages;
-                                        } else {
-                                            startPage = currentPage - 1;
-                                            endPage = currentPage + 1;
-                                        }
-
-                                        for (let i = startPage; i <= endPage; i++) {
-                                            pages.push(
-                                                <li
-                                                    className={`page-item ${currentPage === i ? "active" : ""}`}
-                                                    key={i}
-                                                >
-                                                    <a className="page-link" onClick={() => handlePageChange(i)}>
-                                                        {i}
-                                                    </a>
-                                                </li>
-                                            );
-                                        }
-                                        return pages;
-                                    })()}
-                                    <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                                        <a className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
-                                            <i className="ni ni-bold-right" />
-                                        </a>
-                                    </li>
-                                </ul>
-                            </nav>
-                        </div>
-                    )}
+                        ))}
+                    </Slider>
                 </div>
             </div>
 
