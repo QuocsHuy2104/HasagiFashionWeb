@@ -1,197 +1,479 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { TextField, CircularProgress, IconButton, Box, Typography, Avatar } from '@mui/material';
-import { Send, ChatBubble } from '@mui/icons-material';
-import { styled } from '@mui/system';
+import React, { useEffect, useState } from "react";
+import ArgonBox from "components/ArgonBox";
+import ArgonButton from "components/ArgonButton";
+import { CircularProgress, Typography } from "@mui/material";
+import DiscountIcon from "@mui/icons-material/LocalOffer";
+import VoucherService from "../../../services/VoucherServices";
+import Cookies from "js-cookie";
+import PropTypes from "prop-types";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import ProductService from "../../../services/ProductServices";
+import { Link } from "react-router-dom";
+import reviewsService from "services/ReviewsServices";
 
+const Voucher = ({ voucher, onApplyVoucher }) => {
 
-const ChatContainer = styled(Box)(({ theme }) => ({
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    height: '100vh',
-    backgroundColor: '#e3f2fd',
-    padding: '16px',
-    width: '100%',
-}));
-
-const Header = styled(Box)(({ theme }) => ({
-    padding: '16px',
-    display: 'flex',
-    alignItems: 'center',
-    backgroundColor: '#1976d2',
-    color: '#ffffff',
-    borderTopLeftRadius: '16px',
-    borderTopRightRadius: '16px',
-}));
-
-const Logo = styled(Typography)(({ theme }) => ({
-    marginLeft: '16px',
-    fontSize: '24px',
-    fontWeight: 'bold',
-}));
-
-const ChatContentWrapper = styled(Box)(({ theme }) => ({
-    maxWidth: '500px',
-    margin: '0 auto',
-    width: '100%',
-}));
-
-const MessageContainer = styled(Box)(({ isVisible }) => ({
-    flexGrow: 1,
-    overflowY: isVisible ? 'auto' : 'hidden',
-    height: '600px',
-    padding: '16px',
-    backgroundColor: '#ffffff',
-    boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
-}));
-
-const Message = styled(Box)(({ sender }) => ({
-    display: 'flex',
-    alignItems: 'flex-start',
-    justifyContent: sender === 'user' ? 'flex-end' : 'flex-start',
-    marginBottom: '8px',
-}));
-
-const MessageBubble = styled(Typography)(({ sender }) => ({
-    maxWidth: '60%',
-    padding: '12px',
-    borderRadius: '16px',
-    color: sender === 'user' ? '#ffffff' : '#000000',
-    backgroundColor: sender === 'user' ? '#1976d2' : '#f1f1f1',
-    wordBreak: 'break-word',
-    fontSize: '14px',
-}));
-
-const ChatInputContainer = styled(Box)(({ theme }) => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '10px',
-    width: '100%',
-    backgroundColor: '#ffffff',
-    borderBottomLeftRadius: '16px',
-    borderBottomRightRadius: '16px',
-}));
-
-const StyledIconButton = styled(IconButton)(({ loading }) => ({
-    backgroundColor: loading ? '#e0e0e0' : '#1976d2',
-    color: '#ffffff',
-    borderRadius: '8px',
-    '&:hover': {
-        backgroundColor: loading ? '#e0e0e0' : '#1565c0',
-    },
-}));
-
-const API_KEY = 'AIzaSyB2_xVykWy6mMZHoYGtkNAk9x7Ghp20HFA';
-
-function App() {
-    const [messages, setMessages] = useState([]);
-    const [question, setQuestion] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [isVisible, setIsVisible] = useState(true);
-
-    useEffect(() => {
-        const welcomeMessage = {
-            text: 'Xin chào! Tôi có thể giúp gì cho bạn?',
-            sender: 'ai',
-            timestamp: new Date().toLocaleTimeString(),
-        };
-        setMessages([welcomeMessage]);
-    }, []);
-
-    const generateAnswer = async (e) => {
-        e.preventDefault();
-        if (!question.trim()) return;
-
-        const userMessage = { text: question, sender: 'user', timestamp: new Date().toLocaleTimeString() };
-        setMessages((prev) => [...prev, userMessage]);
-        setQuestion('');
-        setLoading(true);
-
-        try {
-            const response = await axios({
-                url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`,
-                method: 'post',
-                data: {
-                    contents: [{ parts: [{ text: question }] }],
-                },
-            });
-
-            const aiMessage = {
-                text: response.data.candidates[0].content.parts[0].text,
-                sender: 'ai',
-                timestamp: new Date().toLocaleTimeString(),
-            };
-            setMessages((prev) => [...prev, aiMessage]);
-        } catch (error) {
-            console.error(error);
-            setMessages((prev) => [
-                ...prev,
-                { text: 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.', sender: 'ai' },
-            ]);
-        }
-        setLoading(false);
-    };
-
-    const toggleVisibility = () => {
-        setIsVisible((prev) => !prev);
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
     };
 
     return (
-        <>
-
-            <ChatContainer>
-                <IconButton onClick={toggleVisibility} sx={{ marginLeft: 'auto' }}>
-                    <ChatBubble />
-                </IconButton>
-                {isVisible && (
-                    <ChatContentWrapper>
-                        <Header>
-                            <Avatar
-                                alt="Logo"
-                                src="https://example.com/logo.png"
-                                sx={{ width: 40, height: 40 }}
-                            />
-                            <Logo>Chat Bot</Logo>
-
-                        </Header>
-
-                        <MessageContainer isVisible={isVisible}>
-                            {messages.map((message, index) => (
-                                <Message key={index} sender={message.sender}>
-                                    {message.sender === 'ai' && (
-                                        <Avatar
-                                            alt="Bot Avatar"
-                                            src="https://png.pngtree.com/png-clipart/20190905/original/pngtree-ai-white-technology-robot-head-material-png-image_4512310.jpg"
-                                            sx={{ width: 40, height: 40, marginRight: 1 }}
-                                        />
-                                    )}
-                                    <MessageBubble sender={message.sender}>{message.text}</MessageBubble>
-                                </Message>
-                            ))}
-                        </MessageContainer>
-
-                        <ChatInputContainer component="form" onSubmit={generateAnswer}>
-                            <TextField
-                                placeholder="Type your message..."
-                                value={question}
-                                onChange={(e) => setQuestion(e.target.value)}
-                                fullWidth
-                            />
-                            <StyledIconButton type="submit" disabled={loading} loading={loading}>
-                                {loading ? <CircularProgress size={24} /> : <Send />}
-                            </StyledIconButton>
-                        </ChatInputContainer>
-
-                    </ChatContentWrapper>
-                )}
-            </ChatContainer>
-        </>
-
-
-
+        <ArgonBox
+            sx={{
+                border: "1px solid #FFD700",
+                borderRadius: "12px",
+                padding: "15px",
+                display: "flex",
+                maxWidth: "480px",
+                margin: "10px 5px",
+                backgroundColor: "#FFF8E1",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                flexWrap: "nowrap",
+            }}
+        >
+            <ArgonBox sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
+                <DiscountIcon
+                    sx={{
+                        color: "#FF4500",
+                        fontSize: "32px",
+                        marginRight: "10px",
+                        marginLeft: "-10px",
+                        marginTop: "-100px",
+                        flexShrink: 0,
+                    }}
+                />
+                <ArgonBox sx={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+                    <ArgonBox
+                        sx={{
+                            background: "linear-gradient(to right, #FFD700, #FFA500)",
+                            padding: "3px 8px",
+                            color: "#000",
+                            fontWeight: "bold",
+                            display: "inline-block",
+                            borderRadius: "8px",
+                            fontSize: "12px",
+                            marginBottom: "4px",
+                            whiteSpace: "nowrap",
+                        }}
+                    >
+                        VOUCHER
+                    </ArgonBox>
+                    <ArgonBox
+                        sx={{
+                            fontWeight: "bold",
+                            fontSize: "14px",
+                            color: "#FF4500",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                        }}
+                    >
+                        Mã: {voucher.code}
+                    </ArgonBox>
+                    <ArgonBox
+                        sx={{
+                            fontSize: "12px",
+                            color: "#333",
+                            marginTop: "3px",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                        }}
+                    >
+                        Giảm <strong>{voucher.discountPercentage}%</strong> khi hóa đơn từ {voucher.minimumOrderValue}đ
+                    </ArgonBox>
+                    <ArgonBox
+                        sx={{
+                            fontSize: "12px",
+                            color: "#333",
+                            marginTop: "3px",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                        }}
+                    >
+                        HSD: {formatDate(voucher.endDate)}
+                    </ArgonBox>
+                </ArgonBox>
+            </ArgonBox>
+            <ArgonBox sx={{ textAlign: "right", flexShrink: 0 }}>
+                <ArgonBox
+                    sx={{
+                        fontSize: "20px",
+                        fontWeight: "bold",
+                        color: "#FF4500",
+                        whiteSpace: "nowrap",
+                    }}
+                >
+                    Giảm {voucher.discountPercentage}%
+                </ArgonBox>
+                <ArgonButton
+                    sx={{
+                        backgroundColor: "#FF4500",
+                        background: "linear-gradient(to right, #FF7F50, #FF4500)",
+                        color: "#fff",
+                        fontWeight: "bold",
+                        marginTop: "8px",
+                        padding: "6px 12px",
+                        borderRadius: "6px",
+                        fontSize: "12px",
+                        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+                        whiteSpace: "nowrap",
+                        "&:hover": {
+                            background: "linear-gradient(to right, #FF4500, #FF6347)",
+                        },
+                    }}
+                    onClick={() => onApplyVoucher(voucher)}
+                >
+                    Áp dụng cho
+                </ArgonButton>
+            </ArgonBox>
+        </ArgonBox>
     );
-}
+};
 
-export default App;
+Voucher.propTypes = {
+    voucher: PropTypes.shape({
+        code: PropTypes.string.isRequired,
+        discountPercentage: PropTypes.number.isRequired,
+        minimumOrderValue: PropTypes.number.isRequired,
+        endDate: PropTypes.string.isRequired,
+    }).isRequired,
+    onApplyVoucher: PropTypes.func.isRequired,
+};
+
+
+
+const CustomPrevArrow = ({ onClick }) => (
+    <ArrowBackIosIcon
+        onClick={onClick}
+        sx={{
+            position: "absolute",
+            top: "-20px",
+            right: "100px",
+            zIndex: 1,
+            cursor: "pointer",
+            fontSize: "28px",
+            transition: "transform 0.2s ease-in-out",
+            "&:hover": {
+                transform: "scale(1.2)",
+            },
+        }}
+    />
+);
+
+CustomPrevArrow.propTypes = {
+    onClick: PropTypes.func.isRequired,
+};
+
+const CustomNextArrow = ({ onClick }) => (
+    <ArrowForwardIosIcon
+        onClick={onClick}
+        sx={{
+            position: "absolute",
+            top: "-20px",
+            right: "80px",
+            zIndex: 1,
+            cursor: "pointer",
+            fontSize: "28px",
+            transition: "transform 0.2s ease-in-out",
+            "&:hover": {
+                transform: "scale(1.2)",
+            },
+        }}
+    />
+);
+
+CustomNextArrow.propTypes = {
+    onClick: PropTypes.func.isRequired,
+};
+
+
+const VoucherList = () => {
+    const [vouchers, setVouchers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [usedVouchers, setUsedVouchers] = useState([]);
+    const accountId = Cookies.get('accountId');
+    const [reviews, setReviews] = useState([]);
+    const [products, setProducts] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [filteredProducts, setFilteredProducts] = useState([]);
+    const productsPerPage = 5;
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const voucherRequests = [VoucherService.getAllVouchers()];
+                if (accountId) {
+                    voucherRequests.push(VoucherService.getUsedVouchersByAccount(accountId));
+                }
+
+                const [voucherResponse, usedVoucherResponse] = await Promise.all(voucherRequests);
+                const activeVouchers = voucherResponse.data.filter(voucher => voucher.isActive);
+
+                setVouchers(activeVouchers);
+                setUsedVouchers(usedVoucherResponse ? usedVoucherResponse.data : []);
+            } catch (error) {
+                console.error("Error fetching voucher data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [accountId]);
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const response = await ProductService.getAllProducts();
+                setProducts(Array.isArray(response.data) ? response.data : []);
+            } catch (error) {
+                console.error("Error fetching products:", error);
+                setProducts([]);
+            }
+        };
+
+        fetchProducts();
+    }, []);
+
+    const availableVouchers = vouchers.filter(
+        voucher => !usedVouchers.some(usedVoucher => usedVoucher.id === voucher.id)
+    );
+
+    const indexOfLastProduct = currentPage * productsPerPage;
+    const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+    const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+    const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
+    const handlePageChange = pageNumber => {
+        setCurrentPage(pageNumber);
+    };
+
+    const formatNumber = (num) => {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    };
+
+    const formatImportPrice = (importPrice) => {
+        if (!importPrice) return "0đ";
+
+        const prices = importPrice.split('-').map(price => {
+            const trimmedPrice = price.trim();
+            const numericPrice = parseFloat(trimmedPrice);
+            const integerPrice = Math.floor(numericPrice);
+            return `${formatNumber(integerPrice)}đ`;
+        });
+
+        return prices.join(' - ');
+    };
+
+
+
+
+    const handleApplyVoucher = (voucher) => {
+        if (voucher.minimumOrderValue === undefined || voucher.minimumOrderValue === null || voucher.minimumOrderValue === "") {
+            console.error('Voucher does not have a valid minimumOrderValue:', voucher);
+            return;
+        }
+
+        console.log('Voucher minimumOrderValue:', voucher.minimumOrderValue);
+
+        let minPrice;
+        if (typeof voucher.minimumOrderValue === "string") {
+            minPrice = voucher.minimumOrderValue
+                .split('-')[0]
+                .trim()
+                .replace('đ', '')
+                .replace('.', '');
+
+            minPrice = parseInt(minPrice);
+        } else if (typeof voucher.minimumOrderValue === "number") {
+            minPrice = voucher.minimumOrderValue;
+        }
+
+        minPrice = minPrice;
+        if (isNaN(minPrice)) {
+            console.error('Voucher minimumOrderValue is invalid:', voucher.minimumOrderValue);
+            return;
+        }
+
+        console.log('Voucher minimumOrderValue (minPrice):', minPrice);
+        const filtered = products.filter(product => {
+            if (!product.importPrice || product.importPrice.trim() === "") return false;
+
+            const productPrices = product.importPrice
+                .split('-')
+                .map(price => {
+                    return parseInt(price.trim().replace('đ', '').replace('.', '').replace(/[^0-9]/g, ''));
+                });
+
+            const productMinPrice = productPrices[1];
+            const adjustedProductMinPrice = productMinPrice / 10;
+            if (isNaN(adjustedProductMinPrice)) return false;
+            console.log('Product minimum price (adjusted productMinPrice):', adjustedProductMinPrice);
+            const isValid = adjustedProductMinPrice >= minPrice;
+            console.log('Is product valid? ', isValid);
+
+            return isValid;
+        });
+
+        setFilteredProducts(filtered);
+    };
+
+    const fetchReviews = async (productId) => {
+        try {
+            const productReviews = await reviewsService.getReviewsByProduct(productId);
+            setReviews((prevReviews) => [...prevReviews, ...productReviews]);
+        } catch (error) {
+            setReviews([]);
+        }
+    };
+
+    useEffect(() => {
+        if (products.length > 0) {
+            products.forEach((product) => {
+                fetchReviews(product.id);
+            });
+        }
+    }, [products]);
+
+    const calculateAverageStars = (productId) => {
+        const productReviews = reviews.filter((review) => review.productId === productId);
+        if (productReviews.length === 0) return 0;
+
+        const totalStars = productReviews.reduce((sum, review) => sum + review.star, 0);
+        return (totalStars / productReviews.length).toFixed(1);
+    };
+
+    if (loading) {
+        return <CircularProgress />;
+    }
+
+    return (
+        <>
+            <div style={{ position: "relative" }}>
+                <div className="px-xl-5 pb-3">
+                    {availableVouchers.length === 0 ? (
+                        <Typography variant="h6">Không có voucher nào.</Typography>
+                    ) : (
+                        <div style={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: "10px",
+                        }}>
+                            {availableVouchers.map((voucher) => (
+                                <div
+                                    key={voucher.id}
+                                    style={{
+                                        flex: "1 1 calc(30% - 16px)",
+                                        boxSizing: "border-box",
+                                    }}
+                                >
+                                    <Voucher voucher={voucher} onApplyVoucher={handleApplyVoucher} />
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <div className="container-fluid pt-0 pb-3">
+                <div className="row px-xl-5">
+                    {currentProducts.map((product, index) => (
+                        <div className="col-lg-3 col-md-4 col-sm-6 pb-1" key={index}>
+                            <div className="product-item bg-light mb-4">
+                                <div className="product-img position-relative overflow-hidden">
+                                    <Link to={`/ShopDetail?id=${product.id}`}>
+                                        <img
+                                            className="img-fluid w-100"
+                                            src={product.image || aboutImage5}
+                                            alt={product.name || "Product"}
+                                        />
+                                    </Link>
+                                </div>
+                                <div className="py-4 px-2">
+                                    <Link
+                                        className="h6 text-decoration-none text-truncate"
+                                        to={`/ShopDetail?id=${product.id}`}
+                                    >
+                                        {product.name || "Product Name Goes Here"}
+                                    </Link>
+                                    <div className="d-flex mb-1">
+                                        <strong style={{ color: 'red' }}>{formatImportPrice(product.importPrice)}</strong>
+                                    </div>
+                                    <div className="d-flex mb-1">
+                                        <strong> ⭐ {calculateAverageStars(product.id)} </strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+
+                    {currentProducts.length > 0 && (
+                        <div className="col-12" style={{ marginTop: "-30px" }}>
+                            <nav>
+                                <ul className="pagination justify-content-center">
+                                    <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                                        <a className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
+                                            <i className="ni ni-bold-left" />
+                                        </a>
+                                    </li>
+
+                                    {(() => {
+                                        const pages = [];
+                                        let startPage, endPage;
+
+                                        if (totalPages <= 3) {
+                                            startPage = 1;
+                                            endPage = totalPages;
+                                        } else if (currentPage === 1) {
+                                            startPage = 1;
+                                            endPage = 3;
+                                        } else if (currentPage === totalPages) {
+                                            startPage = totalPages - 2;
+                                            endPage = totalPages;
+                                        } else {
+                                            startPage = currentPage - 1;
+                                            endPage = currentPage + 1;
+                                        }
+
+                                        for (let i = startPage; i <= endPage; i++) {
+                                            pages.push(
+                                                <li
+                                                    className={`page-item ${currentPage === i ? "active" : ""}`}
+                                                    key={i}
+                                                >
+                                                    <a className="page-link" onClick={() => handlePageChange(i)}>
+                                                        {i}
+                                                    </a>
+                                                </li>
+                                            );
+                                        }
+                                        return pages;
+                                    })()}
+                                    <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                                        <a className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
+                                            <i className="ni ni-bold-right" />
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+        </>
+    );
+};
+
+
+export default VoucherList;
