@@ -358,10 +358,8 @@ const VoucherList = () => {
     const fetchReviews = async (productId) => {
         try {
             const productReviews = await reviewsService.getReviewsByProduct(productId);
-            console.log('Fetched reviews for product:', productReviews);
             setReviews((prevReviews) => [...prevReviews, ...productReviews]);
         } catch (error) {
-            console.error('Error fetching reviews for product:', error);
             setReviews([]);
         }
     };

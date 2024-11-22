@@ -48,6 +48,7 @@
     "express": "^4.19.2",
     "file-saver": "^2.0.5",
     "firebase": "^11.0.1",
+    "franc": "^6.2.0",
     "franc-min": "^6.2.0",
     "install": "^0.13.0",
     "jarallax": "^2.2.1",
