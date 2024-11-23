@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Profile.css";
 import Header from "../HasagiHeader";
 import Footer from "../HasagiFooter";
@@ -24,6 +24,27 @@ const Profile = () => {
     { name: "Đổi Mật Khẩu", parent: "Tài Khoản Của Tôi" },
     { name: "Kho Voucher", parent: "Tài Khoản Của Tôi" },
   ];
+
+  const urlMapping = {
+    "Tài Khoản Của Tôi": "my-account",
+    "Đơn Mua": "purchase",
+    "Kho Voucher": "voucher-store",
+    "Hồ Sơ": "profile",
+    "Địa Chỉ": "address",
+    "Đổi Mật Khẩu": "change-password",
+}; 
+
+const updateURL = (item) => {
+  const englishURL = urlMapping[item] || item.toLowerCase().replace(/\s/g, '-');
+  const newURL = `/user/${englishURL}`;
+  window.history.pushState(null, '', newURL);
+};
+
+useEffect(() => {
+    if (activeItem) {
+        updateURL(activeItem);
+    }
+}, [activeItem]);
 
   const handleMenuItemClick = (item) => {
     if (item.hasSubItems) {

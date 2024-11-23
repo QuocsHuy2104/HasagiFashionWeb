@@ -199,18 +199,18 @@ const HistoryOrderDetail = () => {
                   >
                     Trở lại
                   </h5>
-                  {(status === "Đã hủy" || status === "Chờ hoàn tiền") && (
+                  {(status === "Đã hủy" ) && (
                     <span style={{ marginLeft: "auto", fontSize: "15px", color: "#6c757d" }}>
                       Yêu cầu vào: {orderDate}
                     </span>
                   )}
-                  {status !== "Đã hủy" && status !== "Chờ hoàn tiền" && (
+                  {status !== "Đã hủy"  && (
                     <span style={{ marginLeft: "auto", fontSize: "18px", color: "#ed4600c9" }}>
                       {status}
                     </span>
                   )}
                 </div>
-                {status !== "Đã hủy" && status !== "Chờ hoàn tiền" && (
+                {status !== "Đã hủy" && (
                   <section
                     style={{
                       borderTop: "2px dashed rgba(128, 128, 128, 0.4)",
@@ -221,7 +221,6 @@ const HistoryOrderDetail = () => {
                 )}
                 <div style={styles.progressContainer}>
                   {status !== "Đã hủy" &&
-                    status !== "Chờ hoàn tiền" &&
                     steps.map((step, index) => (
                       <div key={index} style={styles.step}>
                         <div
@@ -257,7 +256,7 @@ const HistoryOrderDetail = () => {
                       </div>
                     ))}
                 </div>
-                {(status === "Đã hủy" || status === "Chờ hoàn tiền") && (
+                {(status === "Đã hủy") && (
                   <>
                     <section
                       style={{
@@ -383,7 +382,7 @@ const HistoryOrderDetail = () => {
                     marginTop: "-10px",
                   }}
                 />
-                {status !== "Đã hủy" && status !== "Chờ hoàn tiền" && (
+                {status !== "Đã hủy" && (
                   <>
                     <TableContainer
                       component={Paper}
@@ -581,7 +580,7 @@ const HistoryOrderDetail = () => {
                     </TableContainer>
                   </>
                 )}
-                {(status === "Đã hủy" || status === "Chờ hoàn tiền") && (
+                {(status === "Đã hủy" ) && (
                   <>
                     <TableContainer
                       component={Paper}

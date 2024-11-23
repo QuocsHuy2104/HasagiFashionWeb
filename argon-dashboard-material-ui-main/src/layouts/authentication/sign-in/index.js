@@ -59,7 +59,7 @@ function Illustration() {
       if (response.status === 200) {
         const expirationTime = rememberMe
           ? new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000) // 30 days
-          : new Date(new Date().getTime() + 60 * 60 * 10000); // 1 hour
+          : new Date(new Date().getTime() + 60 * 60 * 1000); // 1 hour
 
         const token = response.data.token;
 

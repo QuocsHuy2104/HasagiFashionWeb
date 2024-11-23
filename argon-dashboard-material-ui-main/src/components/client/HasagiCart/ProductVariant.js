@@ -1,23 +1,59 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import "./ProductVariant.css"; // Để tùy chỉnh CSS
 import CartService from "../../../services/CartService";
-const ProductVariant = ({ variantSize, variantColor, onClose, cartDetailId, productId, colorId, sizeId }) => {
+const ProductVariant = ({ onClose, cartDetailId, productId, colorId, sizeId }) => {
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
+  const [colors, setColors] = useState([]);
+  const [sizes, setSizes] = useState([]);
+
 
   useEffect(() => {
     setSelectedColor(colorId || null);
     setSelectedSize(sizeId || null);
   }, [colorId, sizeId]);
 
+
+  const fetchProductOptionsById = async (productId, selectedSizeId) => {
+    try {
+      const url = selectedSizeId
+        ? `http://localhost:3000/api/cart/option/${productId}?selectedSizeId=${selectedSizeId}`
+        : `http://localhost:3000/api/cart/option/${productId}`;
+
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Network response was not ok");
+
+      const data = await response.json();
+      const uniqueColors = [...new Map(data.colors.map(color => [color.id, color])).values()];
+      const uniqueSizes = [...new Map(data.sizes.map(size => [size.id, size])).values()];
+
+      setColors(uniqueColors);
+      setSizes(uniqueSizes);
+
+      if (uniqueColors.length > 0) setSelectedColor(uniqueColors[0].id);
+    } catch (error) {
+      console.error("Error fetching product options:", error);
+      setError("Failed to fetch product options. Please try again later.");
+    }
+  };
+
+  useEffect(() => {
+
+    if (productId) {
+      fetchProductOptionsById(productId, selectedSize);
+    }
+  }, [productId, selectedSize]);
+
+
+
+
   const handleFormSubmit = async (e) => {
-    console.log(`Updating cart with: cartDetailId=${cartDetailId}, colorId=${selectedColor}, sizeId=${selectedSize}, productId=${productId}`);
+
     e.preventDefault();
     if (selectedColor && selectedSize) {
       try {
-        const response = await CartService.getCartUpdate(cartDetailId, selectedColor, selectedSize, productId);
-        CartService.getCart();
+        await CartService.getCartUpdate(cartDetailId, selectedColor, selectedSize, productId);
         onClose();
       } catch (error) {
         setError(error.message || "Failed to update product option");
@@ -34,9 +70,9 @@ const ProductVariant = ({ variantSize, variantColor, onClose, cartDetailId, prod
     <div className="variant-modal">
       <div className="variant-options">
         <div className="variant-header mt-2">
-          <h4>Size:</h4>
+          <h4>Kích cỡ:</h4>
         </div>
-        {variantSize.map((variant) => (
+        {sizes.map((variant) => (
           <button
             key={variant.id}
             className={`variant-button ${selectedSize === variant.id ? 'selected' : ''}`}
@@ -50,15 +86,16 @@ const ProductVariant = ({ variantSize, variantColor, onClose, cartDetailId, prod
       </div>
       <div className="variant-options">
         <div className="variant-header mt-2">
-          <h4>Color:</h4>
+          <h4>Màu sắc:</h4>
         </div>
-        {variantColor.map((variant) => (
+        {colors.map((variant) => (
           <button
             key={variant.id}
             className={`variant-button ${selectedColor === variant.id ? 'selected' : ''}`}
             onClick={() =>
               setSelectedColor(variant.id)
             }
+            disabled={!variant.check}
           >
             {variant.name}
           </button>
@@ -73,7 +110,7 @@ const ProductVariant = ({ variantSize, variantColor, onClose, cartDetailId, prod
         </button>
         <button
           className="confirm-button btn-warning"
-          onClick={handleFormSubmit} 
+          onClick={handleFormSubmit} // Gắn sự kiện onClick
         >
           Xác nhận
         </button>
@@ -84,8 +121,6 @@ const ProductVariant = ({ variantSize, variantColor, onClose, cartDetailId, prod
 };
 
 ProductVariant.propTypes = {
-  variantSize: PropTypes.array.isRequired,
-  variantColor: PropTypes.array.isRequired,
   onClose: PropTypes.func.isRequired,
   cartDetailId: PropTypes.number.isRequired,
   productId: PropTypes.number.isRequired,

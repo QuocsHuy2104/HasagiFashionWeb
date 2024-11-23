@@ -15,16 +15,15 @@ import 'react-toastify/dist/ReactToastify.css';
 function Color() {
     const [formData, setFormData] = useState({
         id: "",
-        name: "",  // Thay đổi 'color' thành 'name'
+        name: "", 
     });
 
     const [errors, setErrors] = useState({
-        name: false,  // Thay đổi 'color' thành 'name'
+        name: false,  
     });
 
     const [colors, setColors] = useState([]);
 
-    // Fetch color data
     const fetchData = async () => {
         try {
             const response = await ColorsService.getAllColors();
@@ -47,11 +46,10 @@ function Color() {
 
     const validateForm = () => {
         let isValid = true;
-        const newErrors = { name: false };  // Thay đổi 'color' thành 'name'
+        const newErrors = { name: false };  
 
-        // Validation: Name cannot be empty
-        if (!formData.name.trim()) {  // Thay đổi 'color' thành 'name'
-            newErrors.name = "Color name is required.";
+        if (!formData.name.trim()) {  
+            newErrors.name = "Màu không được bỏ trống";
             isValid = false;
         }
 
@@ -62,23 +60,22 @@ function Color() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validate form
         if (!validateForm()) {
             return;
         }
 
-        const data = { name: formData.name };  // Thay đổi 'color' thành 'name'
+        const data = { name: formData.name };  
 
         try {
             let result;
             if (formData.id) {
                 result = await ColorsService.updateColor(formData.id, data);
-                toast.success("Color updated successfully");
+                toast.success("Sửa thành công");
             } else {
                 result = await ColorsService.createColor(data);
-                toast.success("Color created successfully");
+                toast.success("Thêm thành công");
             }
-            fetchData(); // Refresh data after create/update
+            fetchData(); 
             resetForm();
         } catch (error) {
             toast.error(`Error: ${error.response ? error.response.data : error.message}`);
@@ -88,32 +85,30 @@ function Color() {
     const resetForm = () => {
         setFormData({
             id: "",
-            name: "",  // Thay đổi 'color' thành 'name'
+            name: "", 
         });
-        setErrors({ name: false });  // Thay đổi 'color' thành 'name'
+        setErrors({ name: false }); 
     };
 
     const handleEditClick = (color) => {
         setFormData({
             id: color.id,
-            name: color.name,  // Thay đổi 'color' thành 'name'
+            name: color.name,  
         });
     };
 
-    // Handle deletion of selected rows
     const handleDeleteClick = async (selectedRows) => {
         if (selectedRows.length === 0) return;
 
         for (const id of selectedRows) {
             try {
                 await ColorsService.deleteColor(id);
-                toast.success(`Color with ID ${id} deleted successfully`);
+                toast.success(`Xóa thành công`);
             } catch (error) {
-                console.error(`Error deleting color with ID ${id}`, error);
-                toast.error(`Error deleting color with ID ${id}`);
+                toast.error(`Lỗi khi xóa`);
             }
         }
-        fetchData(); // Refresh data after deletion
+        fetchData(); 
     };
 
     return (
@@ -139,11 +134,11 @@ function Color() {
                                         type="text"
                                         placeholder="Color Name"
                                         size="large"
-                                        name="name"  // Thay đổi 'color' thành 'name'
+                                        name="name"  
                                         fullWidth
-                                        value={formData.name}  // Thay đổi 'color' thành 'name'
+                                        value={formData.name}
                                         onChange={handleChange}
-                                        error={!!errors.name}  // Thay đổi 'color' thành 'name'
+                                        error={!!errors.name} 
                                     />
                                     {errors.name && (
                                         <ArgonTypography variant="caption" color="error">
@@ -151,8 +146,6 @@ function Color() {
                                         </ArgonTypography>
                                     )}
                                 </ArgonBox>
-
-                                {/* Submit Button */}
                                 <ArgonBox mb={3}>
                                     <ArgonButton type="submit" size="large" color="info" fullWidth={true}>
                                         {formData.id ? "Update" : "Save"}

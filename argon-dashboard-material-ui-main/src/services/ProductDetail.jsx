@@ -8,12 +8,26 @@ const ShopDetailService = {
 
     getCategoryDetail: (categoryId) => apiClient.get(`/category/${categoryId}`),
 
-    getProductDetail: ({ productId, sizeId }) => {
-        const url = sizeId ? `/webShopDetail/${productId}?selectedSizeId=${sizeId}` : `/webShopDetail/${productId}`;
-        console.log("Requesting URL:", url); 
+    // getProductDetail: ({ productId, sizeId }) => {
+    //     const url = sizeId ? `/webShopDetail/${productId}?selectedSizeId=${sizeId}` : `/webShopDetail/${productId}`;
+    //     console.log("Requesting URL:", url); 
         
+    //     return apiClient.get(url);
+    // },
+
+    getProductDetail: ({ productId, sizeId, colorId }) => {
+        // Xây dựng URL với tham số sizeId và colorId nếu có
+        const url = [
+            `/webShopDetail/${productId}`,
+            sizeId ? `?selectedSizeId=${sizeId}` : '',
+            colorId ? (sizeId ? `&selectedColorId=${colorId}` : `?selectedColorId=${colorId}`) : ''
+        ].join('');
+    
+        console.log("Requesting URL:", url); // In ra URL yêu cầu
+    
         return apiClient.get(url);
     },
+    
 
     checkFavorite: (productId) => {
         return apiClient.get("/favorites/check", {

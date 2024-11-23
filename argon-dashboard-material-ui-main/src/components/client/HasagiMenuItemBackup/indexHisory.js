@@ -59,12 +59,8 @@ const indexHistory = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [star, setStar] = useState(5);
   const [comment, setComment] = useState("");
-  const [image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
-  const [video, setVideo] = useState(null);
-  const [videoPreview, setVideoPreview] = useState(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarMessage] = useState("");
 
   const paperRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -129,8 +125,6 @@ const indexHistory = () => {
       const canceledOrder = response.data.find((order) => order.id === selectedOrderId);
 
       if (canceledOrder?.payStatus === "Đã thanh toán") {
-        setActiveTab("cho-hoan-tien");
-      } else {
         setActiveTab("da-huy");
       }
 
@@ -217,17 +211,17 @@ const indexHistory = () => {
 
   const handleSubmitAndAddReviewFile = async (e) => {
     e.preventDefault();
-  
+
     if (!orderDetailId) {
       alert("Order Detail ID không hợp lệ!");
       return;
     }
-  
+
     const formData = new FormData();
     formData.append("star", star);
     formData.append("comment", comment);
     formData.append("orderDetailId", orderDetailId);
-  
+
     try {
       const swal = Swal.fire({
         title: "Đang xử lý...",
@@ -246,18 +240,18 @@ const indexHistory = () => {
           popup.style.overflow = "hidden";
         },
       });
-  
+
       // Gửi đánh giá
       const response = await reviewsService.createReview(formData);
       const reviewId = response.id;
-  
+
       console.log("Phản hồi từ API:", response);
       console.log("Review ID nhận được:", reviewId);
-  
+
       if (!reviewId) {
         throw new Error("Không lấy được ID review.");
       }
-  
+
       // Tải đồng thời các hình ảnh
       const uploadImagePromises = imageFiles.map(async (imageFile) => {
         const storageRef = ref(storage, `review_files/${imageFile.name}`);
@@ -265,31 +259,30 @@ const indexHistory = () => {
         await uploadTask;
         return getDownloadURL(uploadTask.snapshot.ref);
       });
-  
+
       // Tải video nếu có
       const uploadVideoPromise = videoFile
         ? (async () => {
-            const videoStorageRef = ref(storage, `review_files/${videoFile.name}`);
-            const videoUploadTask = uploadBytesResumable(videoStorageRef, videoFile);
-            await videoUploadTask;
-            return getDownloadURL(videoUploadTask.snapshot.ref);
-          })()
+          const videoStorageRef = ref(storage, `review_files/${videoFile.name}`);
+          const videoUploadTask = uploadBytesResumable(videoStorageRef, videoFile);
+          await videoUploadTask;
+          return getDownloadURL(videoUploadTask.snapshot.ref);
+        })()
         : Promise.resolve("");
-  
-      // Chờ tất cả các tải lên hoàn thành
+
       const [imageUrls, videoUrl] = await Promise.all([
         Promise.all(uploadImagePromises),
         uploadVideoPromise,
       ]);
-  
+
       const newReviewFile = {
         imageUrls,
         videoUrl,
         reviewId: parseInt(reviewId, 10),
       };
-  
+
       await ReviewFilesService.createFileReviews(newReviewFile);
-  
+
       setTimeout(() => {
         swal.update({
           title: "Thành công!",
@@ -300,7 +293,7 @@ const indexHistory = () => {
           background: "#fff",
         });
       }, 0);
-  
+
       // Reset trạng thái
       setStar(5);
       setComment("");
@@ -316,7 +309,7 @@ const indexHistory = () => {
       });
     }
   };
-  
+
 
   const handleImageChange = (e) => {
     const files = e.target.files;
@@ -415,7 +408,6 @@ const indexHistory = () => {
       case "da-giao":
       case "hoan-thanh":
       case "da-huy":
-      case "cho-hoan-tien":
         return "120px";
       default:
         return "60px";
@@ -431,7 +423,6 @@ const indexHistory = () => {
       case "da-giao":
       case "hoan-thanh":
       case "da-huy":
-      case "cho-hoan-tien":
         return "75px";
       default:
         return "30px";
@@ -471,10 +462,6 @@ const indexHistory = () => {
               <Tab label={`Đã giao (${getOrderCount("da-giao")})`} value="da-giao" />
               <Tab label={`Hoàn thành (${getOrderCount("hoan-thanh")})`} value="hoan-thanh" />
               <Tab label={`Đã hủy (${getOrderCount("da-huy")})`} value="da-huy" />
-              <Tab
-                label={`Trả hàng/Hoàn tiền (${getOrderCount("cho-hoan-tien")})`}
-                value="cho-hoan-tien"
-              />
             </Tabs>
           </Paper>
           {activeTab === "all" && (
@@ -792,13 +779,39 @@ const indexHistory = () => {
                           <i className="ni ni-bold-left" />
                         </a>
                       </li>
-                      {[...Array(totalPages)].map((_, index) => (
-                        <li className={`page-item ${currentPage === index + 1 ? "active" : ""}`} key={index}>
-                          <a className="page-link" onClick={() => handlePageChange(index + 1)}>
-                            {index + 1}
-                          </a>
-                        </li>
-                      ))}
+
+                      {(() => {
+                        const pages = [];
+                        let startPage, endPage;
+
+                        if (totalPages <= 3) {
+                          startPage = 1;
+                          endPage = totalPages;
+                        } else if (currentPage === 1) {
+                          startPage = 1;
+                          endPage = 3;
+                        } else if (currentPage === totalPages) {
+                          startPage = totalPages - 2;
+                          endPage = totalPages;
+                        } else {
+                          startPage = currentPage - 1;
+                          endPage = currentPage + 1;
+                        }
+
+                        for (let i = startPage; i <= endPage; i++) {
+                          pages.push(
+                            <li
+                              className={`page-item ${currentPage === i ? "active" : ""}`}
+                              key={i}
+                            >
+                              <a className="page-link" onClick={() => handlePageChange(i)}>
+                                {i}
+                              </a>
+                            </li>
+                          );
+                        }
+                        return pages;
+                      })()}
                       <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
                         <a className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
                           <i className="ni ni-bold-right" />
@@ -843,7 +856,7 @@ const indexHistory = () => {
           </Box>
         </MuiModal>
         {selectedProduct && (
-          <BootstrapModal show={showReviewModal} size="lg" centered>
+          <BootstrapModal show={showReviewModal} size="lg" centered >
             <BootstrapModal.Body>
               <div
                 style={{

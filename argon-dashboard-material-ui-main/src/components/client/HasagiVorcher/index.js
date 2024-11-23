@@ -147,14 +147,14 @@ Voucher.propTypes = {
         minimumOrderValue: PropTypes.number.isRequired,
         endDate: PropTypes.string.isRequired,
     }).isRequired,
-    onApplyVoucher: PropTypes.func.isRequired,
+    onApplyVoucher: PropTypes.func,
 };
 
 
 
 const CustomPrevArrow = ({ onClick }) => (
     <ArrowBackIosIcon
-        onClick={onClick}
+        onClick={onClick ? () => onClick() : null}
         sx={{
             position: "absolute",
             top: "-20px",
@@ -171,12 +171,12 @@ const CustomPrevArrow = ({ onClick }) => (
 );
 
 CustomPrevArrow.propTypes = {
-    onClick: PropTypes.func.isRequired,
+    onClick: PropTypes.func,
 };
 
 const CustomNextArrow = ({ onClick }) => (
     <ArrowForwardIosIcon
-        onClick={onClick}
+        onClick={onClick ? () => onClick() : null}
         sx={{
             position: "absolute",
             top: "-20px",
@@ -193,7 +193,7 @@ const CustomNextArrow = ({ onClick }) => (
 );
 
 CustomNextArrow.propTypes = {
-    onClick: PropTypes.func.isRequired,
+    onClick: PropTypes.func,
 };
 
 
@@ -441,7 +441,7 @@ const VoucherList = () => {
                         </div>
                     ))}
 
-                    {currentProducts.length > 0 && ( 
+                    {currentProducts.length > 0 && (
                         <div className="col-12" style={{ marginTop: "-30px" }}>
                             <nav>
                                 <ul className="pagination justify-content-center">

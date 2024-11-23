@@ -5,17 +5,16 @@ import { FaTimes } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Backup from "components/client/HasagiBackup";
-import ColorSelectionModal from "../HasagiPhanLoai";
 import Cookies from "js-cookie";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Link } from "react-router-dom";
 import aboutImage from "layouts/assets/img/shopping.png";
 import CartService from "../../../services/CartService";
-import logo from "components/client/assets/images/logo1.png";
 import ProductService from "services/ProductServices";
 import aboutImage5 from "layouts/assets/img/product-1.jpg";
 import ProductVariant from "./ProductVariant";
+import logo from "components/client/assets/images/logo1.png";
 
 const Cart = () => {
     const [cartItems, setCartItems] = useState([]);
@@ -24,23 +23,15 @@ const Cart = () => {
     const [accountExists, setAccountExists] = useState(false);
     const [selectAll, setSelectAll] = useState(false);
     const [showBackupModal, setShowBackupModal] = useState(false);
-    const [isModalOpen, setModalOpen] = useState(false);
-    const [selectedColor] = useState("");
-    const [selectedSize] = useState("");
-    const [currentCartDetailId] = useState(null);
-    const [currentProductId] = useState(null);
     const navigate = useNavigate();
-    const [colors, setColors] = useState([]);
-    const [sizes, setSizes] = useState([]);
+    const [products, setProducts] = useState([]);
     const fetchCartItems = async () => {
-
         const accountId = Cookies.get("accountId");
 
         if (!accountId) {
             navigate(`/authentication/sign-in`);
             return;
         }
-
         try {
             const [cartResponse, addressResponse] = await Promise.all([
                 CartService.getCart(),
@@ -79,9 +70,20 @@ const Cart = () => {
                 ? { ...item, quantity: Math.max(1, item.quantity + change) }
                 : item
         );
+
+        const updatedItem = updatedCartItems.find((item) => item.cartdetailid === itemId);
+        const availableQuantity = updatedItem.quantityDetail;
+
+
+        const finalQuantity = Math.min(updatedItem.quantity, availableQuantity);
+
+        if (finalQuantity !== updatedItem.quantity) {
+            updatedItem.quantity = finalQuantity;
+        }
+
         setCartItems(updatedCartItems);
+
         try {
-            const updatedItem = updatedCartItems.find((item) => item.cartdetailid === itemId);
             await axios.put(`http://localhost:3000/api/cart/update/${updatedItem.cartdetailid}`, null, {
                 params: { quantity: updatedItem.quantity },
             });
@@ -89,6 +91,7 @@ const Cart = () => {
             console.error("Error updating quantity:", error);
         }
     };
+
 
     const handleRemoveItem = async (itemId) => {
         const accountId = Cookies.get("accountId");
@@ -159,34 +162,9 @@ const Cart = () => {
         }
     };
 
-    const handleCloseModal = () => {
-        setModalOpen(false);
-    };
-
-    const handleColorSelect = (color) => {
-        const updatedItems = cartItems.map((item) =>
-            item.cartdetailid === currentProductId ? { ...item, color } : item
-        );
-        setCartItems(updatedItems);
-        setModalOpen(false);
-        fetchCartItems();
-    };
-
-    const handleSizeSelect = (size) => {
-        const updatedItems = cartItems.map((item) =>
-            item.cartdetailid === currentProductId ? { ...item, size } : item
-        );
-        setCartItems(updatedItems);
-        setModalOpen(false);
-        fetchCartItems();
-    };
-
     const countSelectedItems = () => {
         return cartItems.filter((item) => item.selected).length;
     };
-
-
-    const [products, setProducts] = useState([]);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -200,51 +178,6 @@ const Cart = () => {
         };
         fetchProducts();
     }, []);
-
-
-    const fetchProductOptionsById = async (productId) => {
-        try {
-            console.log("Fetching API for Product ID:", productId); // Log kiểm tra
-            const response = await fetch(`http://localhost:3000/api/cart/option/${productId}`);
-            if (!response.ok) throw new Error("Network response was not ok");
-            const data = await response.json();
-            console.log("API Response:", data); // Log dữ liệu trả về từ API
-
-            const uniqueColors = [...new Map(data.colors.map(color => [color.id, color])).values()];
-            const uniqueSizes = [...new Map(data.sizes.map(size => [size.id, size])).values()];
-            setSizes(uniqueSizes);
-            setColors(uniqueColors);
-        } catch (error) {
-            console.error("Error fetching product options:", error);
-            resetSelections();
-            setError("Failed to fetch product options. Please try again later.");
-        }
-    };
-    useEffect(() => {
-        // Duyệt qua tất cả cartItems, gọi API cho sản phẩm có isDropdownVisible là true
-        cartItems.forEach((item) => {
-            if (item.isDropdownVisible) {
-                console.log("Calling fetchProductOptionsById with Product ID:", item.productId); // Log kiểm tra
-                fetchProductOptionsById(item.productId);
-            }
-        });
-    }, [cartItems]); // Trigger effect khi cartItems thay đổi
-
-
-    const variantColor = colors.map((color) => ({
-        id: color.id,
-        name: color.name,
-        disabled: false,
-    }));
-
-    const variantSize = sizes.map((size) => ({
-        id: size.id,
-        name: size.name,
-        disabled: false,
-    }));
-
-    const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-    const dropdownRef = useRef(null);
 
     const toggleDropdown = (productId, cartDetailId) => {
         setCartItems((prevItems) =>
@@ -268,13 +201,13 @@ const Cart = () => {
                 )
             );
             const response = await CartService.getCart();
-            setCartItems(response.data); 
+            setCartItems(response.data);
         } catch (error) {
             console.error("Error fetching updated cart:", error);
         }
     };
 
-    // Handle outside click to close the dropdown
+
     const handleOutsideClick = (event, id) => {
         const dropdown = document.getElementById(`dropdown-${id}`);
         if (dropdown && !dropdown.contains(event.target)) {
@@ -282,7 +215,6 @@ const Cart = () => {
         }
     };
 
-    // Event listener để xử lý click bên ngoài dropdown
     useEffect(() => {
         const handleClickOutside = (event) => {
             cartItems.forEach((item) => {
@@ -295,7 +227,6 @@ const Cart = () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [cartItems]);
-
     const styles = {
         container: {
             display: 'flex',
@@ -342,6 +273,7 @@ const Cart = () => {
                 </div>
                 <div className="row px-xl-5">
                     <div className="col-lg-12 mb-5" id="tableAddCart">
+
                         {cartItems.length === 0 ? (
                             <div className="text-center py-3">
                                 <img src={aboutImage} style={{ height: "60px", width: "60px" }} />
@@ -460,11 +392,11 @@ const Cart = () => {
                                                 style={{ textAlign: "left", paddingLeft: "20px", border: "none" }}
                                             >
                                                 <Link to={`/ShopDetail?id=${item.productId}`} style={{ color: "black" }}>
-                                                    <img src={item.image} style={{ width: 80 }} alt={item.name} /> {item.name}
+                                                    <img src={item.image} style={{ width: 60 }} alt={item.name} /> {item.name}
                                                 </Link>
                                             </td>
                                             <td className="align-middle" style={{ border: "none", position: "relative" }}>
-                                                {/* Nút bấm */}
+
                                                 <button
                                                     onMouseDown={(event) => toggleDropdown(item.productId, item.cartdetailid)}
                                                     style={{
@@ -541,8 +473,6 @@ const Cart = () => {
                                                             }}
                                                         />
                                                         <ProductVariant
-                                                            variantColor={variantColor}
-                                                            variantSize={variantSize}
                                                             productId={item.productId}
                                                             cartDetailId={item.cartdetailid}
                                                             onClose={() => closeDropdown(item.cartdetailid)}
@@ -618,6 +548,7 @@ const Cart = () => {
                                                                 alignItems: "center",
                                                                 justifyContent: "center",
                                                             }}
+                                                            disabled={item.quantity >= item.quantityDetail}
                                                         >
                                                             <i className="fa fa-plus"></i>
                                                         </button>
@@ -816,18 +747,6 @@ const Cart = () => {
             </div>
 
             <Backup show={showBackupModal} onClose={handleCloseBackupModal} />
-            {isModalOpen && (
-                <ColorSelectionModal
-                    show={isModalOpen}
-                    onClose={handleCloseModal}
-                    onColorSelect={handleColorSelect}
-                    onSizeSelect={handleSizeSelect}
-                    productId={currentProductId}
-                    cartDetailId={currentCartDetailId}
-                    colorId={selectedColor}
-                    sizeId={selectedSize}
-                />
-            )}
             <Footer />
         </>
     );

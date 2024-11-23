@@ -15,16 +15,15 @@ import 'react-toastify/dist/ReactToastify.css';
 function Size() {
     const [formData, setFormData] = useState({
         id: "",
-        name: "",  // Thay đổi 'size' thành 'name'
+        name: "",
     });
 
     const [errors, setErrors] = useState({
-        name: false,  // Thay đổi 'size' thành 'name'
+        name: false,  
     });
 
     const [sizes, setSizes] = useState([]);
 
-    // Fetch size data
     const fetchData = async () => {
         try {
             const response = await SizesService.getAllSizes();
@@ -47,11 +46,10 @@ function Size() {
 
     const validateForm = () => {
         let isValid = true;
-        const newErrors = { name: false };  // Thay đổi 'size' thành 'name'
+        const newErrors = { name: false };  
 
-        // Validation: Name cannot be empty
-        if (!formData.name.trim()) {  // Thay đổi 'size' thành 'name'
-            newErrors.name = "Size name is required.";
+        if (!formData.name.trim()) { 
+            newErrors.name = "Size không được bỏ trống";
             isValid = false;
         }
 
@@ -61,24 +59,22 @@ function Size() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        // Validate form
         if (!validateForm()) {
             return;
         }
 
-        const data = { name: formData.name };  // Thay đổi 'size' thành 'name'
+        const data = { name: formData.name }; 
 
         try {
             let result;
             if (formData.id) {
                 result = await SizesService.updateSize(formData.id, data);
-                toast.success("Size updated successfully");
+                toast.success("Sửa thành công");
             } else {
                 result = await SizesService.createSize(data);
-                toast.success("Size created successfully");
+                toast.success("Thêm thành công");
             }
-            fetchData(); // Refresh data after create/update
+            fetchData(); 
             resetForm();
         } catch (error) {
             toast.error(`Error: ${error.response ? error.response.data : error.message}`);
@@ -88,37 +84,35 @@ function Size() {
     const resetForm = () => {
         setFormData({
             id: "",
-            name: "",  // Thay đổi 'size' thành 'name'
+            name: "",  
         });
-        setErrors({ name: false });  // Thay đổi 'size' thành 'name'
+        setErrors({ name: false }); 
     };
 
     const handleEditClick = (size) => {
         setFormData({
             id: size.id,
-            name: size.name,  // Thay đổi 'size' thành 'name'
+            name: size.name,  
         });
     };
 
-    // Handle deletion of selected rows
     const handleDeleteClick = async (selectedRows) => {
         if (selectedRows.length === 0) return;
 
         for (const id of selectedRows) {
             try {
                 await SizesService.deleteSize(id);
-                toast.success(`Size with ID ${id} deleted successfully`);
+                toast.success(`Xóa thành công`);
             } catch (error) {
-                console.error(`Error deleting size with ID ${id}`, error);
-                toast.error(`Error deleting size with ID ${id}`);
+                toast.error(`Lỗi khi xóa`);
             }
         }
-        fetchData(); // Refresh data after deletion
+        fetchData(); 
     };
 
     return (
         <DashboardLayout>
-          <ToastContainer />
+            <ToastContainer />
             <DashboardNavbar />
             <ArgonBox py={3}>
                 <ArgonBox mb={3}>
@@ -133,17 +127,16 @@ function Size() {
                             onSubmit={handleSubmit}
                         >
                             <ArgonBox mx={3}>
-                                {/* Size Name Input */}
                                 <ArgonBox mb={3} position="relative">
                                     <ArgonInput
                                         type="text"
-                                        placeholder="Size Name"
+                                        placeholder="Nhập Size"
                                         size="large"
-                                        name="name"  // Thay đổi 'size' thành 'name'
+                                        name="name"
                                         fullWidth
-                                        value={formData.name}  // Thay đổi 'size' thành 'name'
+                                        value={formData.name}
                                         onChange={handleChange}
-                                        error={!!errors.name}  // Thay đổi 'size' thành 'name'
+                                        error={!!errors.name}
                                     />
                                     {errors.name && (
                                         <ArgonTypography variant="caption" color="error">

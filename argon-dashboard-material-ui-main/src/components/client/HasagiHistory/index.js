@@ -31,7 +31,26 @@ const History = () => {
     { name: "Kho Voucher", parent: "Tài Khoản Của Tôi" },
   ];
 
+  const urlMapping = {
+    "Tài Khoản Của Tôi": "my-account",
+    "Đơn Mua": "purchase",
+    "Kho Voucher": "voucher-store",
+    "Hồ Sơ": "profile",
+    "Địa Chỉ": "address",
+    "Đổi Mật Khẩu": "change-password",
+}; 
 
+const updateURL = (item) => {
+  const englishURL = urlMapping[item] || item.toLowerCase().replace(/\s/g, '-');
+  const newURL = `/user/${englishURL}`;
+  window.history.pushState(null, '', newURL);
+};
+
+useEffect(() => {
+    if (activeItem) {
+        updateURL(activeItem);
+    }
+}, [activeItem]);
 
   const handleEditProfileClick = () => {
     setExpandedItem("Tài Khoản Của Tôi");

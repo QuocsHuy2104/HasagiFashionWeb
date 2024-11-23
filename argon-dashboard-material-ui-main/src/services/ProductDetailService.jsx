@@ -1,6 +1,9 @@
 import apiClient from "config/axiosConfig";
 
 const ProductDetailService = {
+
+    getAllProductDetails: () => apiClient.get('/admin/product-detail'),
+
     getAllByProductId: async (id) => {
         try {
             const response = await apiClient.get(`/admin/product-detail/product/${id}`);
