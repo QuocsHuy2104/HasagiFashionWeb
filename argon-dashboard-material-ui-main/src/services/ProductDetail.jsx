@@ -18,7 +18,7 @@ const ShopDetailService = {
     getProductDetail: ({ productId, sizeId, colorId }) => {
         // Xây dựng URL với tham số sizeId và colorId nếu có
         const url = [
-            `/webShopDetail/${productId}`,
+            `/public/webShopDetail/${productId}`,
             sizeId ? `?selectedSizeId=${sizeId}` : '',
             colorId ? (sizeId ? `&selectedColorId=${colorId}` : `?selectedColorId=${colorId}`) : ''
         ].join('');

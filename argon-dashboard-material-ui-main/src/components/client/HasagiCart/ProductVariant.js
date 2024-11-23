@@ -7,31 +7,34 @@ const ProductVariant = ({ onClose, cartDetailId, productId, colorId, sizeId }) =
   const [selectedSize, setSelectedSize] = useState(null);
   const [colors, setColors] = useState([]);
   const [sizes, setSizes] = useState([]);
-
+  const [Error, setError] = useState("");
 
   useEffect(() => {
     setSelectedColor(colorId || null);
     setSelectedSize(sizeId || null);
   }, [colorId, sizeId]);
 
-
-  const fetchProductOptionsById = async (productId, selectedSizeId) => {
+  const fetchProductOptionsById = async (productId, selectedSizeId, selectedColorId) => {
     try {
-      const url = selectedSizeId
-        ? `http://localhost:3000/api/cart/option/${productId}?selectedSizeId=${selectedSizeId}`
-        : `http://localhost:3000/api/cart/option/${productId}`;
+      const url = [
+        `http://localhost:3000/api/cart/option/${productId}`,
+        selectedSizeId ? `?selectedSizeId=${selectedSizeId}` : "",
+        selectedColorId
+          ? selectedSizeId
+            ? `&selectedColorId=${selectedColorId}`
+            : `?selectedColorId=${selectedColorId}`
+          : "",
+      ].join("");
 
       const response = await fetch(url);
       if (!response.ok) throw new Error("Network response was not ok");
 
       const data = await response.json();
-      const uniqueColors = [...new Map(data.colors.map(color => [color.id, color])).values()];
-      const uniqueSizes = [...new Map(data.sizes.map(size => [size.id, size])).values()];
+      const uniqueColors = [...new Map(data.colors.map((color) => [color.id, color])).values()];
+      const uniqueSizes = [...new Map(data.sizes.map((size) => [size.id, size])).values()];
 
       setColors(uniqueColors);
       setSizes(uniqueSizes);
-
-      if (uniqueColors.length > 0) setSelectedColor(uniqueColors[0].id);
     } catch (error) {
       console.error("Error fetching product options:", error);
       setError("Failed to fetch product options. Please try again later.");
@@ -39,17 +42,12 @@ const ProductVariant = ({ onClose, cartDetailId, productId, colorId, sizeId }) =
   };
 
   useEffect(() => {
-
     if (productId) {
-      fetchProductOptionsById(productId, selectedSize);
+      fetchProductOptionsById(productId, selectedSize, selectedColor);
     }
-  }, [productId, selectedSize]);
-
-
-
+  }, [productId, selectedSize, selectedColor]);
 
   const handleFormSubmit = async (e) => {
-
     e.preventDefault();
     if (selectedColor && selectedSize) {
       try {
@@ -65,7 +63,6 @@ const ProductVariant = ({ onClose, cartDetailId, productId, colorId, sizeId }) =
     }
   };
 
-
   return (
     <div className="variant-modal">
       <div className="variant-options">
@@ -75,13 +72,21 @@ const ProductVariant = ({ onClose, cartDetailId, productId, colorId, sizeId }) =
         {sizes.map((variant) => (
           <button
             key={variant.id}
-            className={`variant-button ${selectedSize === variant.id ? 'selected' : ''}`}
-            onClick={() => setSelectedSize(variant.id)}
+            className={`variant-button ${selectedSize === variant.id ? "selected" : ""} ${
+              !variant.check ? "disabled" : ""
+            }`}
+            onClick={() =>
+              setSelectedSize((prevSelected) => (prevSelected === variant.id ? null : variant.id))
+            }
+            disabled={!variant.check}
+            style={{
+              marginRight: "10px",
+              cursor: !variant.check ? "not-allowed" : "pointer",
+              opacity: !variant.check ? 0.5 : 1,
+            }}
           >
             {variant.name}
           </button>
-
-
         ))}
       </div>
       <div className="variant-options">
@@ -91,16 +96,21 @@ const ProductVariant = ({ onClose, cartDetailId, productId, colorId, sizeId }) =
         {colors.map((variant) => (
           <button
             key={variant.id}
-            className={`variant-button ${selectedColor === variant.id ? 'selected' : ''}`}
+            className={`variant-button ${selectedColor === variant.id ? "selected" : ""} ${
+              !variant.check ? "disabled" : ""
+            }`}
             onClick={() =>
-              setSelectedColor(variant.id)
+              setSelectedColor((prevSelected) => (prevSelected === variant.id ? null : variant.id))
             }
             disabled={!variant.check}
+            style={{
+              marginRight: "10px",
+              cursor: !variant.check ? "not-allowed" : "pointer",
+              opacity: !variant.check ? 0.5 : 1,
+            }}
           >
             {variant.name}
           </button>
-
-
         ))}
       </div>
 
@@ -114,7 +124,6 @@ const ProductVariant = ({ onClose, cartDetailId, productId, colorId, sizeId }) =
         >
           Xác nhận
         </button>
-
       </div>
     </div>
   );
@@ -129,3 +138,4 @@ ProductVariant.propTypes = {
 };
 
 export default ProductVariant;
+  

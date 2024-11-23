@@ -1,14 +1,8 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import ListItemText from '@mui/material/ListItemText';
-import Select from '@mui/material/Select';
-import Checkbox from '@mui/material/Checkbox';
 
 import '../account/style.css';
+import { Checkbox, FormControl, InputLabel, ListItemText, MenuItem, OutlinedInput, Select } from '@mui/material';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -21,40 +15,42 @@ const MenuProps = {
     },
 };
 
-export default function MultipleSelectCheckmarks({ model, selectedModel = [], onChange, nameTag }) {
-    const [selectedValues, setSelectedValues] = React.useState(Array.isArray(selectedModel) ? selectedModel : []);
+export default function MultipleSelectCheckmarks({ model, selectModel = [], onChange, nameTag }) {
+    const [selectedValues, setSelectedValues] = React.useState(selectModel);
 
-    // Sync initial selectedModel prop with internal state
-    React.useEffect(() => {
-        setSelectedValues(Array.isArray(selectedModel) ? selectedModel : []);
-    }, [selectedModel]);
+    const handleChange = (event) => {
+        const {
+            target: { value },
+        } = event;
+        const newSelectModel = typeof value === 'string' ? value.split(',') : value;
+        setSelectedValues(newSelectModel);
 
-    const handleSelectionChange = (event) => {
-        const { value } = event.target;
-        setSelectedValues(value);
-        onChange(value); // Pass updated selection to parent component
+        if (typeof onChange === 'function') {
+            onChange(newSelectModel);
+        }
     };
 
     return (
-        <FormControl fullWidth>
-            <InputLabel>{nameTag}</InputLabel>
+        <FormControl sx={{ width: { xs: '100%', sm: '100%' } }}>
+            <InputLabel id="demo-multiple-checkbox-label">{nameTag}</InputLabel>
             <Select
+                labelId="demo-multiple-checkbox-label"
+                id="demo-multiple-checkbox"
                 multiple
                 value={selectedValues}
-                onChange={handleSelectionChange}
+                onChange={handleChange}
                 input={<OutlinedInput label={nameTag} />}
                 renderValue={(selected) =>
-                    selected.map((id) => {
-                        const item = model.find((item) => item.id === id);
-                        return item ? item.name : '';
-                    }).join(', ')
+                    selected
+                        .map((id) => model.find((item) => item.id === id)?.name || '')
+                        .join(', ')
                 }
                 MenuProps={MenuProps}
             >
-                {model.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>
-                        <Checkbox checked={Array.isArray(selectedValues) && selectedValues.indexOf(item.id) > -1} />
-                        <ListItemText primary={item.name} />
+                {model.map((children) => (
+                    <MenuItem key={children.id} value={children.id} sx={{ margin: '5px 0' }}>
+                        <Checkbox checked={selectedValues.indexOf(children.id) > -1} />
+                        <ListItemText primary={children.name} />
                     </MenuItem>
                 ))}
             </Select>
@@ -63,8 +59,13 @@ export default function MultipleSelectCheckmarks({ model, selectedModel = [], on
 }
 
 MultipleSelectCheckmarks.propTypes = {
-    model: PropTypes.array.isRequired,
-    selectedModel: PropTypes.array,
+    model: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.string.isRequired, // Ensure 'id' is a string for consistency
+            name: PropTypes.string.isRequired,
+        })
+    ).isRequired,
+    selectModel: PropTypes.arrayOf(PropTypes.string),
     onChange: PropTypes.func.isRequired,
     nameTag: PropTypes.string.isRequired,
 };

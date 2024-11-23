@@ -103,7 +103,6 @@ function ShopDetail() {
                 quantity,
                 productId,
             });
-            Cookies.set("productId", productId);
             toast.success("Sản phẩm đã được thêm vào giỏ hàng thành công!");
         } catch (error) {
             console.error("Error adding to cart:", error);
@@ -140,11 +139,7 @@ function ShopDetail() {
     };
 
     const fetchProductDetail = async () => {
-        const accountId = Cookies.get("accountId");
-        if (!accountId) {
-            navigate(`/authentication/sign-in`);
-            return;
-        }
+       
         try {
             if (!productId) throw new Error("Product ID is missing");
             const response = await cartService.getProductDetail({
@@ -184,7 +179,7 @@ function ShopDetail() {
 
     const fetchPrice = async (productId, colorId, sizeId) => {
         try {
-            const response = await axios.get(`http://localhost:8080/api/admin/product-detail/price`, {
+            const response = await axios.get(`http://localhost:8080/api/public/webShopDetail/price`, {
                 params: { productId, colorId, sizeId },
             });
             const { price, quantity } = response.data;
@@ -251,7 +246,7 @@ function ShopDetail() {
             navigate("/Cart");
         } catch (error) {
             console.error("Error adding to cart:", error);
-            toast.error("Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.");
+          
         }
     };
     const [activeTab, setActiveTab] = useState("tab-pane-1");
