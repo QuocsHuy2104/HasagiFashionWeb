@@ -69,30 +69,62 @@ function Gemini() {
         return keywords && keywords[lang].some((word) => text.toLowerCase().includes(word));
     };
 
+    const termsAndConditions = {
+        introduction: "Các điều khoản áp dụng khi mua sắm tại shop Hasagi.",
+        orderPolicy: "Khách hàng cần cung cấp thông tin chính xác. Đơn hàng chỉ được xác nhận khi có thông báo.",
+        paymentPolicy: "Chúng tôi chấp nhận thanh toán trực tiếp khi nhận hàng, qua ví VNPay.",
+        returnPolicy: "Đổi trả trong vòng 7 ngày, sản phẩm còn nguyên tem mác.",
+        privacyPolicy: "Cam kết bảo mật thông tin cá nhân khách hàng.",
+        contact: {
+            email: "hasagifashion@gmail.com",
+            phone: "0917465863",
+            address: "49 Đ. 3 Tháng 2, Xuân Khánh, Ninh Kiều, Cần Thơ, VietNam"
+        }
+    };
+    
+
     const generateAIResponse = async (question) => {
         setLoading(true);
         try {
             const language = detectLanguage(question);
-
-            // Nếu là chào hỏi, phản hồi ngay lập tức
-            if (isGreeting(question)) {
-                const greetingResponse = language === 'vi'
-                    ? "Xin chào! Tôi có thể giúp gì cho bạn hôm nay?"
-                    : "Hello! How can I assist you today?";
+    
+            const keywords = ["điều khoản", "chính sách", "đổi trả", "bảo mật", "liên hệ"];
+            const matchedKeyword = keywords.find((keyword) => question.toLowerCase().includes(keyword));
+            if (matchedKeyword) {
+                let response = "";
+                switch (matchedKeyword) {
+                    case "điều khoản":
+                        response = termsAndConditions.introduction;
+                        break;
+                    case "chính sách":
+                        response = `Chính sách của shop: ${termsAndConditions.orderPolicy}. ${termsAndConditions.paymentPolicy}`;
+                        break;
+                    case "đổi trả":
+                        response = termsAndConditions.returnPolicy;
+                        break;
+                    case "bảo mật":
+                        response = termsAndConditions.privacyPolicy;
+                        break;
+                    case "liên hệ":
+                        response = `Thông tin liên hệ: Email - ${termsAndConditions.contact.email}, SĐT - ${termsAndConditions.contact.phone}, Địa chỉ - ${termsAndConditions.contact.address}`;
+                        break;
+                    default:
+                        response = "Xin lỗi, tôi không hiểu câu hỏi của bạn.";
+                }
                 setChatHistory((prevHistory) => [
                     ...prevHistory,
-                    { type: 'ai', text: greetingResponse },
+                    { type: 'ai', text: response },
                 ]);
                 setLoading(false);
                 return;
             }
-
+    
             const categories = await getCategoryData();
             const brands = await getBrandData();
             const products = await getProductData();
             const productDetails = await getProductDetailData();
             const vouchers = await getVoucherData();
-
+    
             const prompt = `\nCurrent Question: ${question}
             \nData (when available):
             \nCategories: ${JSON.stringify(categories.slice(0, 5))}
@@ -100,7 +132,9 @@ function Gemini() {
             \nProducts: ${JSON.stringify(products.slice(0, 5))}
             \nProductDetails: ${JSON.stringify(productDetails.slice(0, 5))} 
             \nVouchers: ${JSON.stringify(vouchers.slice(0, 5))}
+            \nTerms and Conditions: ${JSON.stringify(termsAndConditions)}
             \nAnswer in ${language === 'vi' ? 'Vietnamese' : 'English'}.`;
+    
             const API_KEY = process.env.REACT_APP_API_KEY;
             const response = await axios.post(
                 `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`,
@@ -108,7 +142,7 @@ function Gemini() {
                     contents: [{ parts: [{ text: prompt }] }]
                 }
             );
-
+    
             const aiAnswer = response.data.candidates?.[0]?.content?.parts?.[0]?.text || "Không có phản hồi từ AI.";
             setChatHistory((prevHistory) => [
                 ...prevHistory,
@@ -120,7 +154,7 @@ function Gemini() {
             setLoading(false);
         }
     };
-
+    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
