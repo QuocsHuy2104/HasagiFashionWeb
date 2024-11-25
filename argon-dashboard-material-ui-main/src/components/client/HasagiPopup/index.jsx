@@ -8,6 +8,7 @@ import SizeSelector from '../HasagiSelector/sizeSelector';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Carousel } from 'react-bootstrap';
 import MuiLink from "@mui/material/Link";
+import Typography from '@mui/material/Typography';
 
 export default function ProductPopup({ open, handleClose, id }) {
     const [productDetails, setProductDetail] = useState(null);
@@ -17,7 +18,7 @@ export default function ProductPopup({ open, handleClose, id }) {
     const [quantity, setQuantity] = useState(1);
     const allSizes = new Map();
     const allColors = new Map();
-    const allImages = new Map();
+    const allImages = [];
 
     useEffect(() => {
         const fetchData = async () => {
@@ -48,8 +49,8 @@ export default function ProductPopup({ open, handleClose, id }) {
         setSelectedColor(event.target.value);
     };
 
-    const handleSizeSelection = (size) => {
-        console.log('Size selected in parent:', size);
+    const handleSizeSelection = (sizeId) => {
+        setSelectedSize(sizeId);
     };
 
 
@@ -93,9 +94,56 @@ export default function ProductPopup({ open, handleClose, id }) {
         }
     });
 
-    const handleAddToCart = () => {
+    const handleAddToCart = async () => {
+        if (!selectedColor || !selectedSize) {
+            alert('Vui lòng chọn màu sắc và kích thước trước khi thêm vào giỏ hàng.');
+            return;
+        }
 
-    }
+        const requestData = {
+            productId: id,
+            colorId: selectedColor,
+            sizeId: selectedSize,
+            quantity: quantity,
+        };
+
+        try {
+            const response = await HomeService.addToCartPopup(requestData);
+
+            switch (response.status) {
+                case 200:
+                    alert('Sản phẩm đã được thêm vào giỏ hàng!');
+                    break;
+                case 409:
+                    alert('Sản phẩm này đã tồn tại trong giỏ hàng.');
+                    break;
+                case 400:
+                    alert('Thông tin không hợp lệ. Vui lòng kiểm tra lại.');
+                    break;
+                case 404:
+                    alert('Không tìm thấy sản phẩm hoặc dữ liệu liên quan.');
+                    break;
+                default:
+                    alert('Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.');
+                    break;
+            }
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            if (error.response) {
+                const { status, data } = error.response;
+                if (status === 500) {
+                    alert('Lỗi máy chủ. Vui lòng thử lại sau.');
+                } else {
+                    alert(`Có lỗi xảy ra: ${data}`);
+                }
+            } else {
+                alert('Không thể kết nối với máy chủ. Vui lòng kiểm tra mạng và thử lại.');
+            }
+        }
+    };
+
+    console.log(allImages)
+
 
     return (
         <Dialog open={open} onClose={handleClose} maxWidth="xl" fullWidth>
@@ -113,11 +161,11 @@ export default function ProductPopup({ open, handleClose, id }) {
                                 {
                                     allImages.size > 0 ? (
                                         Array.from(allImages.values()).map(image => (
-                                            <Carousel.Item key={`${banner.id}-${imgIndex}`}>
+                                            <Carousel.Item key={`${image.id}-${imgIndex}`}>
                                                 <img
                                                     className="d-block w-100"
                                                     style={styles.carouselImage}
-                                                    src={image.url || 'https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930'}
+                                                    src={image.url && image.url.trim() !== '' ? image.url : 'https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930'}
                                                     alt={pd.name}
                                                 />
                                             </Carousel.Item>
@@ -137,7 +185,7 @@ export default function ProductPopup({ open, handleClose, id }) {
                         <ArgonBox display="flex" justifyContent="space-between" alignItems="center" flexWrap="nowrap">
                             <ArgonTypography
                                 variant="button"
-                                sx={{ whiteSpace: "nowrap" }} // Ngăn nội dung bị xuống hàng
+                                sx={{ whiteSpace: "nowrap" }}
                             >
                                 Thương hiệu:{" "}
                                 <ArgonTypography
@@ -169,33 +217,46 @@ export default function ProductPopup({ open, handleClose, id }) {
 
                         {/* Price and Discount */}
                         <Box mt={2}>
-                            {pd.importPrice !== undefined ? (
-                                <ArgonBox display="flex" alignItems="center" gap={2}>
-                                    <ArgonTypography variant="h5" sx={{ textDecoration: 'line-through' }} color="light">
-                                        {pd.importPrice}₫
-                                    </ArgonTypography>
-                                    <ArgonTypography variant="h4" color="error" fontWeight="bold">
-                                        {
-                                            pd.sale === 0
-                                                ? `${pd.importPrice}₫`
-                                                : `${(pd.importPrice * (pd.sale / 100))}₫`
-                                        }
-                                    </ArgonTypography>
-                                    {
-                                        pd.sale !== 0 && pd.sale !== '0'
-                                            ? (
-                                                <ArgonBox bgColor='error' color='white' borderRadius='sm' px={2} py={1} sx={{ textAlign: 'center' }}>
-                                                    Tiết kiệm {pd.sale} %
-                                                </ArgonBox>
-                                            )
-                                            : null
-                                    }
+                            <ArgonBox display="flex" alignItems="center" gap={2}>
+                                {pd.importPrice !== undefined ? (
+                                    <>
+                                        {/* Giá gạch chân */}
+                                        <ArgonTypography
+                                            variant="h5"
+                                            sx={{ textDecoration: 'line-through' }}
+                                            color="light"
+                                        >
+                                            {pd.importPrice}₫
+                                        </ArgonTypography>
 
-                                </ArgonBox>
+                                        {/* Giá giảm */}
+                                        <ArgonTypography variant="h4" color="error" fontWeight="bold">
+                                            {pd.sale === "0"
+                                                ? `${parseFloat(pd.importPrice).toLocaleString()}₫`
+                                                : `${(parseFloat(pd.importPrice) * (1 - parseFloat(pd.sale) / 100)).toLocaleString()}₫`}
+                                        </ArgonTypography>
 
-                            ) : (
-                                <ArgonTypography variant="body2" color="error">Giá sản phẩm không khả dụng</ArgonTypography> // Fallback message
-                            )}
+                                    </>
+                                ) : (
+                                    <ArgonTypography variant="body2" color="error">
+                                        Giá sản phẩm không khả dụng
+                                    </ArgonTypography>
+                                )}
+
+                                {pd.sale !== "0" ? (
+                                    <ArgonBox
+                                        bgColor="error"
+                                        color="white"
+                                        borderRadius="sm"
+                                        px={2}
+                                        py={1}
+                                        sx={{ textAlign: 'center' }}
+                                    >
+                                        Tiết kiệm {parseFloat(pd.sale)}%
+                                    </ArgonBox>
+                                ) : null}
+                            </ArgonBox>
+
                         </Box>
 
                         <>
@@ -208,43 +269,121 @@ export default function ProductPopup({ open, handleClose, id }) {
                             {/* Color Selection */}
                             <Box mt={3} key="color-group">
                                 <ArgonTypography variant="body2" fontWeight="bold">Màu sắc</ArgonTypography>
-                                <RadioGroup row value={selectedColor} onChange={handleColorChange}>
-                                    {allColors.size > 0 ? (
-                                        Array.from(allColors.values()).map(color => (
-                                            <FormControlLabel
-                                                key={`color-${color.id}`}
-                                                value={color.id}
-                                                control={<Radio />}
-                                                label={color.name}
-                                            />
-                                        ))
-                                    ) : (
-                                        <ArgonTypography variant="body2" color="error">Không có màu sắc nào khả dụng</ArgonTypography>
-                                    )}
-                                </RadioGroup>
+                                <ArgonBox ml={2}>
+                                    <RadioGroup row value={selectedColor} onChange={handleColorChange}>
+                                        {allColors.size > 0 ? (
+                                            Array.from(allColors.values()).map(color => (
+                                                <FormControlLabel
+                                                    key={`color-${color.id}`}
+                                                    value={color.id}
+                                                    control={<Radio />}
+                                                    label={color.name}
+                                                />
+                                            ))
+                                        ) : (
+                                            <ArgonTypography variant="body2" color="error">Không có màu sắc nào khả dụng</ArgonTypography>
+                                        )}
+                                    </RadioGroup>
+                                </ArgonBox>
+
                             </Box>
 
                         </>
 
                         {/* Quantity */}
-                        <Box mt={2}>
-                            <Box display="flex" alignItems="center">
-                                <Button onClick={() => handleQuantityChange(false)}>-</Button>
-                                <ArgonTypography variant="body1" mx={2}>{quantity}</ArgonTypography>
-                                <Button onClick={() => handleQuantityChange(true)}>+</Button>
+                        <ArgonBox display='flex' justifyContent='start' alignItems='center' mt={2}>
+                            <ArgonTypography variant="body2" fontWeight="bold">Số lượng</ArgonTypography>
+                            <Box
+                                borderRadius='8px'
+                                ml={2}
+                                sx={{
+                                    border: '1px solid #ccc'
+                                }}
+                            >
+                                <Box display="flex" alignItems="center">
+                                    <Button onClick={() => handleQuantityChange(false)}>-</Button>
+                                    <ArgonTypography variant="body1" mx={2}>{quantity}</ArgonTypography>
+                                    <Button onClick={() => handleQuantityChange(true)}>+</Button>
+                                </Box>
                             </Box>
-                        </Box>
+                        </ArgonBox>
 
-                        <Box mt={3} display='flex' justifyContent='space-between' alignItems='center'>
-                            <Button variant="contained" color="primary" fullWidth onClick={handleAddToCart}>
+                        <Box mt={3} display="flex" justifyContent="space-between" alignItems="center">
+                            {/* Nút Thêm vào giỏ */}
+                            <Button
+                                variant="outlined"
+                                color="secondary"
+
+                                sx={{
+                                    borderRadius: "12px",
+                                    border: "1px solid #ccc",
+                                    fontWeight: "bold",
+                                    fontSize: "16px",
+                                    textTransform: "uppercase",
+                                    padding: "10px 20px",
+                                    color: "black",
+                                    flex: 1,
+                                    marginRight: "10px",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                }}
+                                onClick={handleAddToCart}
+                            >
                                 Thêm vào giỏ
+                                <Typography
+                                    variant="caption"
+                                    display="block"
+                                    sx={{
+                                        fontWeight: "normal",
+                                        fontSize: "12px",
+                                        color: "gray",
+                                        marginTop: "4px",
+                                    }}
+                                >
+                                    Chọn ngay sản phẩm bạn yêu thích
+                                </Typography>
                             </Button>
+
+                            {/* Nút Xem chi tiết */}
                             <MuiLink href={`ShopDetails/${id}`} target="_blank" rel="noreferrer">
-                                <Button variant="outlined" color="primary" fullWidth >
+                                <Button
+                                    variant="contained"
+
+                                    sx={{
+                                        borderRadius: "12px",
+                                        backgroundColor: "#FFCC00",
+                                        fontWeight: "bold",
+                                        fontSize: "16px",
+                                        textTransform: "uppercase",
+                                        padding: "10px 20px",
+                                        flex: 1,
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: "center",
+                                        "&:hover": {
+                                            backgroundColor: "#fff",
+                                            border: "1px solid #ccc"
+                                        },
+                                    }}
+                                >
                                     Xem chi tiết
+                                    <Typography
+                                        variant="caption"
+                                        display="block"
+                                        sx={{
+                                            fontWeight: "normal",
+                                            fontSize: "12px",
+                                            color: "white",
+                                            marginTop: "4px", // Tạo khoảng cách giữa dòng chính và mô tả
+                                        }}
+                                    >
+                                        Tổng quan về sản phẩm
+                                    </Typography>
                                 </Button>
                             </MuiLink>
                         </Box>
+
                     </Grid>
                 </Grid>
             </DialogContent >
@@ -267,13 +406,11 @@ const styles = {
         fontSize: '2rem',
         color: 'white',
         background: 'rgba(0, 0, 0, 0.3)',
-        marginLeft: '40px',
     },
     customNextIcon: {
         fontSize: '2rem',
         color: 'white',
         background: 'rgba(0, 0, 0, 0.3)',
-        marginRight: '40px',
     },
 };
 

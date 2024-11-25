@@ -7,10 +7,12 @@ import Divider from '@mui/material/Divider';
 
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
-
+import MuiLink from "@mui/material/Link";
 import ArgonAvatar from "components/ArgonAvatar";
 import ArgonBox from 'components/ArgonBox';
 import ArgonTypography from 'components/ArgonTypography';
+import HomeService from 'services/HomeServices';
+import { List, ListItem, ListItemAvatar } from '@mui/material';
 
 
 export default function AnchorTemporaryDrawer() {
@@ -27,6 +29,19 @@ export default function AnchorTemporaryDrawer() {
     setState({ ...state, [anchor]: open });
   };
 
+  const getCart = async () => {
+    try {
+      const resp = await HomeService.getCartByAccount();
+      setItems(resp.data);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  React.useEffect(() => {
+    getCart()
+  }, [])
+
   const list = (anchor) => (
     <Box
       sx={{ width: anchor === 'top' || anchor === 'bottom' ? 'auto' : 250 }}
@@ -39,9 +54,38 @@ export default function AnchorTemporaryDrawer() {
       </ArgonBox>
 
       {
-        items.length > 0 ? <></> :
+        items.length > 0 ?
+          <List>
+            <ListItem alignItems="flex-start">
+              <ListItemAvatar>
+                <MuiLink href='' >
+                  <ArgonAvatar src="https://bit.ly/3I3pbe6" alt="Avatar" variant="rounded" size="xl" />
+                </MuiLink>
+              </ListItemAvatar>
+
+              <ArgonBox
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <MuiLink href=''>
+                  <ArgonTypography color='sencondary'>
+
+                  </ArgonTypography>
+                </MuiLink>
+
+                <ArgonTypography color='sencondary'>
+
+                </ArgonTypography>
+              </ArgonBox>
+
+            </ListItem>
+            <Divider />
+          </List>
+          :
           <ArgonBox display='flex' justifyContent='center' alignItems='center' width='100%' height='60%'>
-              <ArgonTypography variant='button1'>Giỏ hàng bạn còn trống</ArgonTypography>
+            <ArgonTypography variant='button1'>Giỏ hàng bạn còn trống</ArgonTypography>
           </ArgonBox>
       }
 

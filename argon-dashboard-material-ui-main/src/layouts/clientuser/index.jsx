@@ -23,7 +23,7 @@ const FeaturesAndAbout = () => {
       </ArgonBox>
       <Coupon />
       <ChatBot />
-      <Footer />
+      <Footer /> 
     </>
   )
 };

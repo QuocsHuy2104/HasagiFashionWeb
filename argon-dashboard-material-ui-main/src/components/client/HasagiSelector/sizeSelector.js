@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import '../assets/css/sizeSelector.css'; // Ensure the CSS path is correct
 import PropTypes from 'prop-types';
 
-const SizeSelector = ({ sizes, onSizeSelect }) => {
+const SizeSelector = ({ sizes = [], onSizeSelect }) => {  // Use default parameter for sizes
     const [selectedSize, setSelectedSize] = useState(null);
 
     const handleSizeClick = (size) => {
         setSelectedSize(size);
-        if (onSizeSelect) onSizeSelect(size);
+        if (onSizeSelect) onSizeSelect(size.id);
     };
 
     if (!Array.isArray(sizes) || sizes.length === 0) {
@@ -34,15 +34,9 @@ SizeSelector.propTypes = {
         PropTypes.shape({
             id: PropTypes.number.isRequired,
             name: PropTypes.string.isRequired,
-            price: PropTypes.number.isRequired,
         })
     ).isRequired,
     onSizeSelect: PropTypes.func.isRequired
 };
-
-SizeSelector.defaultProps = {
-    sizes: [],
-};
-
 
 export default SizeSelector;

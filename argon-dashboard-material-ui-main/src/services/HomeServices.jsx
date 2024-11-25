@@ -28,7 +28,8 @@ const HomeService = {
             console.error('Add to cart failed:', e);
             throw error;
         }
-    }
+    },
+    getCartByAccount: () => apiClient.get('/web/small-cart')
 
 }
 

@@ -114,7 +114,7 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                     right: 15,
                     backgroundColor: '#F9F9F9',
                     padding: '5px',
-                    borderRadius: '50%'
+                    borderRadius: '12px'
                 }}
             />
 
