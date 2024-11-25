@@ -16,14 +16,18 @@ import { saveAs } from "file-saver";
 import { DataGrid } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
 import Modal from "react-bootstrap/Modal";
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button'
+
+
 function Order() {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
-  const [provinces, setProvinces] = useState([]);
-  const [districtsByProvince, setDistrictsByProvince] = useState({});
-  const [wardsByDistrict, setWardsByDistrict] = useState({});
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   useEffect(() => {
@@ -34,7 +38,12 @@ function Order() {
           console.log(response.data);
           const orders = response.data.orders.map(order => ({
             ...order,
-            orderDate: order.orderDate ? format(new Date(order.orderDate), "dd-MM-yyyy") : "Date not available"
+            orderDate: order.orderDate ? format(new Date(order.orderDate), "dd-MM-yyyy") : "Date not available",
+            amount : new Intl.NumberFormat("vi-VN", {
+              style: "currency",
+              currency: "VND",
+            }).format(order.amount),
+            
           }));
           setOrders(orders);
           setFilteredOrders(orders);
@@ -53,7 +62,7 @@ function Order() {
   const handleSearch = (event) => {
     event.preventDefault();
 
-    const statusSlug = event.target.status.value; // Get the selected status slug
+    const statusSlug = event.target.status.value; 
     const endDateInput = event.target.endDate.value
       ? new Date(event.target.endDate.value)
       : null;
@@ -102,7 +111,12 @@ function Order() {
         "Pay Method": order.payMethod,
         "Pay Status": order.payStatus,
         "Shipping Fee": order.shippingFree,
-        Amount: order.amount,
+      "Amount": new Intl.NumberFormat("vi-VN", {
+  style: "currency",
+  currency: "VND",
+}).format(order.amount),
+
+
         Status:
           statuses.find((status) => status.slug === order.slug)?.status || "Unknown",
       }))
@@ -210,7 +224,6 @@ function Order() {
   return (
     <DashboardLayout>
       <DashboardNavbar />
-
       <ArgonBox py={3}>
         <ArgonBox mb={3}>
           <Card>
@@ -274,78 +287,85 @@ function Order() {
             rows={filteredOrders}
             columns={columns}
             pageSize={5}
-            rowsPerPageOptions={[5, 10]}
+            pageSizeOptions={[5, 10, 20]} 
             checkboxSelection
             disableSelectionOnClick
             sx={{
-              "& .MuiDataGrid-cell": {
-                fontSize: "1rem", // Giảm kích thước chữ trong các ô của bảng
-                padding: "4px", // Giảm padding để làm cho nội dung trong ô gần nhau hơn
+              "& .MuiDataGrid-footerContainer": {
+                  justifyContent: "space-between", // Center-align the footer content
               },
-              "& .MuiDataGrid-columnHeaders": {
-                fontSize: "0.8rem", // Giảm kích thước chữ trong tiêu đề cột
+              "& .MuiTablePagination-selectLabel": {
+                  marginRight: 0, // Adjusts the right margin for the label
               },
               "& .MuiTablePagination-root": {
-                fontSize: "0.75rem", // Giảm kích thước chữ cho phần "Rows per page"
-                minHeight: "30px", // Giảm chiều cao tối thiểu
+                  width: "400px", // Adjusts the total pagination width
               },
-              "& .MuiTablePagination-select": {
-                fontSize: "0.75rem", // Giảm kích thước chữ trong phần lựa chọn số hàng
-                padding: "4px", // Giảm padding để nhỏ hơn
+              "& .MuiInputBase-root": {
+                  maxWidth: "60px",
+                  marginTop: "-10px", // Điều chỉnh giá trị này để đẩy nó lên trên
               },
-              "& .MuiTablePagination-displayedRows": {
-                fontSize: "1rem", // Giảm kích thước chữ trong phần số trang được hiển thị
+              "& .MuiTablePagination-actions": {
+                  display: "flex",
+                  alignItems: "center",
               },
-            }}
-            rowHeight={100} // Giảm chiều cao hàng để bảng trông nhỏ gọn hơn
-          />
+              "& .MuiSelect-select": {
+                  paddingRight: "24px", // Adjust padding for dropdown
+              },
+              border: 0,
+          }}
+      />
         </Paper>
         </ArgonBox>
       </ArgonBox>
-      <Modal show={showDetailsModal} onHide={() => setShowDetailsModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Order Details</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {selectedOrder ? (
-            <ul style={{ listStyleType: 'none', padding: 0 }}>
-              {selectedOrder.map(detail => (
-                <li key={detail.id} style={{ padding: '10px 0', borderBottom: '1px solid #ddd' }}>
-                  <div>
-                    <strong>Product ID:</strong> {detail.productDetailId}
-                  </div>
-                  <div>
-                    <strong>Quantity:</strong> {detail.quantity}
-                  </div>
-                  <div>
-                    <strong>Price:</strong> ${detail.price.toFixed(2)}
-                  </div>
-                  <div>
-                    <strong>Name:</strong> {detail.nameOrder}
-                  </div>
-                  <div>
-                    <strong>Size:</strong> {detail.sizeName}
-                  </div>
-                  <div>
-                    <strong>Color:</strong> {detail.colorName}
-                  </div>
-                  <div>
-                    <strong>Status:</strong> {detail.statusName}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>Loading...</p>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <ArgonButton variant="secondary" onClick={() => setShowDetailsModal(false)}>
-            Close
-          </ArgonButton>
-        </Modal.Footer>
-      </Modal>
 
+
+      <Dialog
+  open={showDetailsModal}
+  onClose={() => setShowDetailsModal(false)}
+  aria-labelledby="order-details-dialog"
+  fullWidth
+  maxWidth="sm"
+>
+  <DialogTitle id="order-details-dialog">Order Details</DialogTitle>
+  <DialogContent dividers>
+    {selectedOrder ? (
+      <ul style={{ listStyleType: 'none', padding: 0 }}>
+        {selectedOrder.map(detail => (
+          <li key={detail.id} style={{ padding: '10px 0', borderBottom: '1px solid #ddd' }}>
+            <div>
+              <strong>Product ID:</strong> {detail.productDetailId}
+            </div>
+            <div>
+              <strong>Quantity:</strong> {detail.quantity}
+            </div>
+            <div>
+              <strong>Price:</strong> ${detail.price.toFixed(2)}
+            </div>
+            <div>
+              <strong>Name:</strong> {detail.nameOrder}
+            </div>
+            <div>
+              <strong>Size:</strong> {detail.sizeName}
+            </div>
+            <div>
+              <strong>Color:</strong> {detail.colorName}
+            </div>
+            <div>
+              <strong>Status:</strong> {detail.statusName}
+            </div>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p>Loading...</p>
+    )}
+  </DialogContent>
+  <DialogActions>
+    <Button variant="contained" onClick={() => setShowDetailsModal(false)} color="black">
+      Close
+    </Button>
+  </DialogActions>
+</Dialog>
     </DashboardLayout>
   );
 }

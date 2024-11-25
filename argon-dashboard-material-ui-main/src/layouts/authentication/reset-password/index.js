@@ -1,7 +1,7 @@
 // react-router-dom components
 import { Link } from "react-router-dom";
 import React, { useState, useEffect, useRef } from "react";
-
+import { useNavigate } from "react-router-dom";
 // @mui material components
 import Card from "@mui/material/Card";
 import Checkbox from "@mui/material/Checkbox";
@@ -20,6 +20,7 @@ import axios from "axios";
 import CoverLayout from "layouts/authentication/components/CoverLayout";
 import "./forgotPassword.css";
 import ReCAPTCHA from "react-google-recaptcha";
+import zIndex from "@mui/material/styles/zIndex";
 //6LfydhoqAAAAAE2wPxlnGXh0iXc-5l1y5tu8P8Tc
 
 // Images
@@ -28,7 +29,7 @@ const bgImage =
 //"https://static.vecteezy.com/system/resources/previews/023/251/027/original/forgot-password-button-speech-bubble-banner-label-forgot-password-vector.jpg";
 //"https://static.vecteezy.com/system/resources/previews/023/250/815/non_2x/forgot-password-button-speech-bubble-banner-label-forgot-password-vector.jpg";
 
-function ForgotPassword() {
+function ResetPassword() {
   const recaptchaRef = useRef(null); // Tạo tham chiếu đến ReCAPTCHA
   const [password, setPassword] = useState("");
   // Loại bỏ khoảng trắng thừa ở đầu và cuối chuỗi
@@ -37,6 +38,7 @@ function ForgotPassword() {
   const [successMessage, setSuccessMessage] = useState("");
   const [showError, setShowError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const resetPassword = async (e) => {
     e.preventDefault();
@@ -57,7 +59,11 @@ function ForgotPassword() {
       setShowError(true);
       return;
     } else if (password.length < 8) {
-      setErrorPassword("MK phải có độ dài lơn hơn 8 ký tự");
+      setErrorPassword("Mật khẩu phải có độ dài lớn hơn 8 ký tự");
+      setShowError(true);
+      return;
+    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      setErrorPassword("Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt");
       setShowError(true);
       return;
     } else {
@@ -76,7 +82,8 @@ function ForgotPassword() {
           response.data,
           setTimeout(() => {
             setSuccessMessage("");
-          }, 10000)
+            navigate("/authentication/sign-in");
+          }, 5000)
         );
       } catch (error) {
         setIsLoading(false);
@@ -118,6 +125,7 @@ function ForgotPassword() {
       image={bgImage}
       imgPosition="top"
       button={{ color: "dark", variant: "gradient" }}
+      imageStyle={{ zIndex: 1000, position: "relative" }}
     >
       <div className="content-wrapper">
         {isLoading && (
@@ -128,7 +136,7 @@ function ForgotPassword() {
         <Card w={50} className="mb-5">
           <ArgonBox p={3} mb={1} textAlign="center">
             <ArgonTypography variant="h5" fontWeight="medium">
-              Reset Password
+              Đặt lại mật khẩu
             </ArgonTypography>
           </ArgonBox>
           <ArgonBox pt={2} pb={3} px={3}>
@@ -160,7 +168,7 @@ function ForgotPassword() {
                 )}
 
                 <ArgonInput
-                  placeholder="Password"
+                  placeholder="Mật khẩu"
                   type="password"
                   value={password}
                   onChange={handleInputChange}
@@ -187,7 +195,7 @@ function ForgotPassword() {
                       <span style={{ marginLeft: "0.5rem" }}>Loading...</span>
                     </>
                   ) : (
-                    "Reset Password"
+                    "Cập nhật"
                   )}
                 </ArgonButton>
               </ArgonBox>
@@ -199,4 +207,4 @@ function ForgotPassword() {
   );
 }
 
-export default ForgotPassword;
+export default ResetPassword;

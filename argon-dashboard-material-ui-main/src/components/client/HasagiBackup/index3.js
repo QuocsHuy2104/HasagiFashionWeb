@@ -5,7 +5,7 @@ import ArgonInput from "components/ArgonInput";
 import ArgonButton from "components/ArgonButton";
 import axios from "axios";
 import Select from "react-select";
-import AddressService from '../../../services/AddressServices';
+import AddressService from "../../../services/AddressServices";
 
 const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
     const [fullName, setFullName] = useState("");
@@ -22,6 +22,8 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
     const wrapperRef = useRef(null);
     const [errors, setErrors] = useState({});
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [showCheckbox, setShowCheckbox] = useState(true);
+    const [disabled, setDisabled] = useState(false);
 
     const validateForm = () => {
         const newErrors = {};
@@ -55,19 +57,16 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
     {
         isSubmitted && errors.selectedProvince && (
             <div className="text-danger">{errors.selectedProvince}</div>
-        )
+        );
     }
     {
         isSubmitted && errors.selectedDistrict && (
             <div className="text-danger">{errors.selectedDistrict}</div>
-        )
+        );
     }
     {
-        isSubmitted && errors.selectedWard && (
-            <div className="text-danger">{errors.selectedWard}</div>
-        )
+        isSubmitted && errors.selectedWard && <div className="text-danger">{errors.selectedWard}</div>;
     }
-
 
     const handleInputClick = (field) => {
         setErrors((prevErrors) => ({
@@ -87,7 +86,7 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
 
     const handleFullNameBlur = () => {
         if (isSubmitted) {
-            validateForm(); 
+            validateForm();
         }
     };
 
@@ -102,10 +101,9 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
 
     const handleNumberPhoneBlur = () => {
         if (isSubmitted) {
-            validateForm(); 
+            validateForm();
         }
     };
-
 
     const handleAddressChange = (e) => {
         const value = e.target.value;
@@ -117,7 +115,7 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
 
     const handleAddressBlur = () => {
         if (isSubmitted) {
-            validateForm(); 
+            validateForm();
         }
     };
 
@@ -133,6 +131,9 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
                 setSelectedDistrict(addressData.districtCode);
                 setSelectedWard(addressData.wardCode);
                 setStatus(addressData.status);
+                if (addressData.status) {
+                    setDisabled(true);
+                }
             }
         } catch (error) {
             console.error("Error fetching address:", error);
@@ -218,7 +219,7 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
     }, [selectedDistrict]);
 
     const handleComplete = async () => {
-        setIsSubmitted(true); 
+        setIsSubmitted(true);
 
         const isValid = validateForm();
         if (!isValid) return;
@@ -241,8 +242,11 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
         }
     };
 
-    const handleCheckboxChange = (event) => {
-        setStatus(event.target.checked);
+    const handleCheckboxChange = (e) => {
+        setStatus(e.target.checked); // Cập nhật trạng thái mặc định
+        if (e.target.checked) {
+            setShowCheckbox(true);
+        }
     };
 
     const handleProvinceChange = (provinceId) => {
@@ -289,15 +293,15 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
     };
 
     const handleModalClose = () => {
-        resetForm(); 
-        onClose(); 
+        resetForm();
+        onClose();
     };
 
     const customStylesProvince = {
         menuList: (provided) => ({
             ...provided,
             maxHeight: "225px",
-            overflowY: "auto", 
+            overflowY: "auto",
         }),
         menuListScroll: {
             "::-webkit-scrollbar": {
@@ -316,8 +320,8 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
     const customStylesDistrict = {
         menuList: (provided) => ({
             ...provided,
-            maxHeight: "160px", 
-            overflowY: "auto", 
+            maxHeight: "160px",
+            overflowY: "auto",
         }),
         menuListScroll: {
             "::-webkit-scrollbar": {
@@ -372,13 +376,13 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
                                     placeholder="Họ và tên"
                                     value={fullName}
                                     onChange={handleFullNameChange}
-                                    onBlur={handleFullNameBlur} 
+                                    onBlur={handleFullNameBlur}
                                     onClick={() => handleInputClick("fullName")}
                                     onFocus={() => handleInputClick("fullName")}
                                     className={errors.fullName ? "border-danger" : ""}
                                     style={{
-                                        color: errors.fullName ? 'red' : 'black',
-                                        fontWeight: errors.fullName ? 'bold' : 'normal',
+                                        color: errors.fullName ? "red" : "black",
+                                        fontWeight: errors.fullName ? "bold" : "normal",
                                     }}
                                 />
                                 {isSubmitted && errors.fullName && (
@@ -392,13 +396,13 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
                                     placeholder="Số điện thoại"
                                     value={numberPhone}
                                     onChange={handleNumberPhoneChange}
-                                    onBlur={handleNumberPhoneBlur} 
+                                    onBlur={handleNumberPhoneBlur}
                                     onClick={() => handleInputClick("numberPhone")}
                                     onFocus={() => handleInputClick("numberPhone")}
                                     className={errors.numberPhone ? "border-danger" : ""}
                                     style={{
-                                        color: errors.numberPhone ? 'red' : 'black',
-                                        fontWeight: errors.numberPhone ? 'bold' : 'normal',
+                                        color: errors.numberPhone ? "red" : "black",
+                                        fontWeight: errors.numberPhone ? "bold" : "normal",
                                     }}
                                 />
                                 {isSubmitted && errors.numberPhone && (
@@ -417,8 +421,8 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
                                     onFocus={() => handleInputClick("address")}
                                     className={errors.address ? "border-danger" : ""}
                                     style={{
-                                        color: errors.address ? 'red' : 'black',
-                                        fontWeight: errors.address ? 'bold' : 'normal',
+                                        color: errors.address ? "red" : "black",
+                                        fontWeight: errors.address ? "bold" : "normal",
                                     }}
                                 />
                                 {isSubmitted && errors.address && (
@@ -478,16 +482,16 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
                                     <div className="text-danger">{errors.selectedWard}</div>
                                 )}
                             </div>
-                            {!status && (
+                            {showCheckbox && (
                                 <label style={{ marginLeft: "10px", marginBottom: "0" }}>
                                     Đặt làm địa chỉ mặc định
                                     <input
                                         type="checkbox"
                                         checked={status}
                                         onChange={handleCheckboxChange}
+                                        disabled={disabled}
                                         style={{ transform: "scale(1.5)", marginBottom: "0", marginLeft: "10px" }}
                                     />
-
                                 </label>
                             )}
                         </div>
@@ -510,7 +514,7 @@ Backup3.propTypes = {
     show: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
     onAddressUpdated: PropTypes.func.isRequired,
-    addressId: PropTypes.string.isRequired,
+    addressId: PropTypes.number.isRequired,
 };
 
 export default Backup3;

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import cartService from "../../../services/ProductDetail";
 const useCartQuantity = () => {
     const [totalQuantity, setTotalQuantity] = useState(0);
@@ -9,7 +8,7 @@ const useCartQuantity = () => {
             const response = await cartService.getAllShopDetail();
             setTotalQuantity(response.data);
         } catch (error) {
-            console.error("Error fetching total quantity:", error.response?.data || error.message);
+            console.error("Error fetching favorite count:", error.response?.data || error.message);
         }
     };
     

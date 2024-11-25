@@ -6,27 +6,51 @@ import User from "../HasagiUser";
 import IndexHistory from "../HasagiMenuItemBackup/indexHisory";
 import Footer from "../HasagiFooter";
 import ChangePassword from "../HasagiChangePassword";
+import Voucher from "components/client/HasagiVorcher/vorcher";
 
 const History = () => {
   const [activeItem, setActiveItem] = useState("Đơn Mua");
   const [expandedItem, setExpandedItem] = useState(null);
 
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+    window.onpopstate = () => {
+      window.history.pushState(null, "", window.location.href);
+    };
+  }, []);
+
   const menuItems = [
     { name: "Tài Khoản Của Tôi", hasSubItems: true },
-    { name: "Cài Đặt Thông Báo" },
-    { name: "Những Thiết Lập Riêng Tư" },
     { name: "Đơn Mua" },
-    { name: "Thông Báo" },
     { name: "Kho Voucher", isNew: true },
-    { name: "Shopee Xu" },
   ];
   const subMenuItems = [
     { name: "Hồ Sơ", parent: "Tài Khoản Của Tôi" },
     { name: "Địa Chỉ", parent: "Tài Khoản Của Tôi" },
     { name: "Đổi Mật Khẩu", parent: "Tài Khoản Của Tôi" },
+    { name: "Kho Voucher", parent: "Tài Khoản Của Tôi" },
   ];
 
+  const urlMapping = {
+    "Tài Khoản Của Tôi": "my-account",
+    "Đơn Mua": "purchase",
+    "Kho Voucher": "voucher-store",
+    "Hồ Sơ": "profile",
+    "Địa Chỉ": "address",
+    "Đổi Mật Khẩu": "change-password",
+}; 
 
+const updateURL = (item) => {
+  const englishURL = urlMapping[item] || item.toLowerCase().replace(/\s/g, '-');
+  const newURL = `/user/${englishURL}`;
+  window.history.pushState(null, '', newURL);
+};
+
+useEffect(() => {
+    if (activeItem) {
+        updateURL(activeItem);
+    }
+}, [activeItem]);
 
   const handleEditProfileClick = () => {
     setExpandedItem("Tài Khoản Của Tôi");
@@ -44,6 +68,8 @@ const History = () => {
         return <IndexHistory />;
       case "Đổi Mật Khẩu":
         return <ChangePassword />;
+      case "Kho Voucher":
+        return <Voucher />;
       default:
         null;
     }

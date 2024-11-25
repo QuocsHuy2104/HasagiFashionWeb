@@ -30,7 +30,14 @@ import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import reviewsService from "services/ReviewsServices";
+import Swal from "sweetalert2";
+import ReviewFilesService from '../../../services/ReviewFileServices';
+import { storage } from "../../../config/firebase-config";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+
 const indexHistory = () => {
+  const [imageFiles, setImageFiles] = useState([]);
+  const [videoFile, setVideoFile] = useState(null);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -47,17 +54,13 @@ const indexHistory = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
-
+  const [orderDetailId, setOrderDetailId] = useState(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [star, setStar] = useState(5);
   const [comment, setComment] = useState("");
-  const [image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
-  const [video, setVideo] = useState(null);
-  const [videoPreview, setVideoPreview] = useState(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarMessage] = useState("");
 
   const paperRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -66,6 +69,8 @@ const indexHistory = () => {
   const [tabMarginTop, setTabMarginTop] = useState("60px");
   const [tabMarginTop1, setTabMarginTop1] = useState("30px");
   const threshold = 18;
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 3;
 
   useEffect(() => {
     if (location.state?.activeTab) {
@@ -104,6 +109,10 @@ const indexHistory = () => {
     setOpenCancelModal(true);
   };
 
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
   const handleCancelOrder = async () => {
     try {
       await axios.put(`http://localhost:3000/api/history-order/${selectedOrderId}/cancel`, {
@@ -116,8 +125,6 @@ const indexHistory = () => {
       const canceledOrder = response.data.find((order) => order.id === selectedOrderId);
 
       if (canceledOrder?.payStatus === "Đã thanh toán") {
-        setActiveTab("cho-hoan-tien");
-      } else {
         setActiveTab("da-huy");
       }
 
@@ -165,7 +172,6 @@ const indexHistory = () => {
     window.scrollTo(0, 0);
   }, [searchQuery]);
 
-
   const getOrderCount = (status) => {
     return orders.filter((order) => order.statusSlug === status).length;
   };
@@ -186,6 +192,9 @@ const indexHistory = () => {
     setSelectedProduct(product);
     setShowReviewModal(true);
     console.log(product);
+    const orderDetailId = product?.orderDetailId;
+    setOrderDetailId(orderDetailId);
+    console.log("Selected OrderDetailId:", orderDetailId);
   };
 
   const handleClose = () => setShowReviewModal(false);
@@ -194,69 +203,143 @@ const indexHistory = () => {
     setStar(index + 1);
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImage(file); // Set the actual file to be used in form submission
-      setImagePreview(URL.createObjectURL(file)); // Create a preview URL to display the image
-    }
-  };
 
-  const handleVideoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setVideo(file); // Set the actual file to be used in form submission
-      setVideoPreview(URL.createObjectURL(file)); // Create a preview URL to display the video
-    }
-  };
+  const indexOfLastProduct = currentPage * itemsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - itemsPerPage;
+  const currentOrder = filteredOrders.slice(indexOfFirstProduct, indexOfLastProduct);
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
 
-  const resetImageInput = () => {
-    setImage(null); // Reset state của ảnh
-    setImagePreview(null); // Reset preview ảnh
-    const imageInput = document.getElementById("image-upload");
-    if (imageInput) {
-      imageInput.value = ""; // Reset giá trị input
-    }
-  };
-
-  const resetVideoInput = () => {
-    setVideo(null); // Reset state của video
-    setVideoPreview(null); // Reset preview video
-    const videoInput = document.getElementById("video-upload");
-    if (videoInput) {
-      videoInput.value = ""; // Reset giá trị input
-    }
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmitAndAddReviewFile = async (e) => {
     e.preventDefault();
+
+    if (!orderDetailId) {
+      alert("Order Detail ID không hợp lệ!");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("star", star);
     formData.append("comment", comment);
-    formData.append("orderDetailId", selectedProduct.orderDetailId); // Thêm productId vào formData
-
-    if (image) {
-      formData.append("image", image);
-    }
-    if (video) {
-      formData.append("video", video);
-    }
+    formData.append("orderDetailId", orderDetailId);
 
     try {
+      const swal = Swal.fire({
+        title: "Đang xử lý...",
+        width: 500,
+        height: 300,
+        padding: "1em",
+        color: "white",
+        background: "transparent",
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        customClass: {
+          popup: "custom-popup",
+        },
+        didOpen: () => {
+          const popup = document.querySelector(".swal2-popup");
+          popup.style.overflow = "hidden";
+        },
+      });
+
+      // Gửi đánh giá
       const response = await reviewsService.createReview(formData);
-      console.log("Review created successfully:", response);
-      // Reset fields after successful submission
+      const reviewId = response.id;
+
+      console.log("Phản hồi từ API:", response);
+      console.log("Review ID nhận được:", reviewId);
+
+      if (!reviewId) {
+        throw new Error("Không lấy được ID review.");
+      }
+
+      // Tải đồng thời các hình ảnh
+      const uploadImagePromises = imageFiles.map(async (imageFile) => {
+        const storageRef = ref(storage, `review_files/${imageFile.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, imageFile);
+        await uploadTask;
+        return getDownloadURL(uploadTask.snapshot.ref);
+      });
+
+      // Tải video nếu có
+      const uploadVideoPromise = videoFile
+        ? (async () => {
+          const videoStorageRef = ref(storage, `review_files/${videoFile.name}`);
+          const videoUploadTask = uploadBytesResumable(videoStorageRef, videoFile);
+          await videoUploadTask;
+          return getDownloadURL(videoUploadTask.snapshot.ref);
+        })()
+        : Promise.resolve("");
+
+      const [imageUrls, videoUrl] = await Promise.all([
+        Promise.all(uploadImagePromises),
+        uploadVideoPromise,
+      ]);
+
+      const newReviewFile = {
+        imageUrls,
+        videoUrl,
+        reviewId: parseInt(reviewId, 10),
+      };
+
+      await ReviewFilesService.createFileReviews(newReviewFile);
+
+      setTimeout(() => {
+        swal.update({
+          title: "Thành công!",
+          html: "Đánh giá và thêm file review thành công!",
+          icon: "success",
+          color: "black",
+          showConfirmButton: true,
+          background: "#fff",
+        });
+      }, 0);
+
+      // Reset trạng thái
       setStar(5);
       setComment("");
-      resetImageInput();
-      resetVideoInput();
-      setSnackbarMessage("Đánh giá đã được gửi thành công!");
-      setOpenSnackbar(true);
-      handleClose();
+      setImageFiles([]);
+      setVideoFile(null);
     } catch (error) {
-      console.error("Error creating review:", error.response.data);
-      alert("Có lỗi xảy ra khi tạo đánh giá. Vui lòng kiểm tra thông tin và thử lại.");
+      console.error("Lỗi xử lý:", error);
+      const errorMessage = error.response?.data?.message || "Có lỗi xảy ra trong quá trình xử lý.";
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: errorMessage,
+      });
     }
+  };
+
+
+  const handleImageChange = (e) => {
+    const files = e.target.files;
+    const newFiles = Array.from(files);
+    const limitedFiles = newFiles.slice(0, 5 - imageFiles.length);
+    setImageFiles([...imageFiles, ...limitedFiles]);
+  };
+
+
+  const handleVideoChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setVideoFile(file);
+    }
+  };
+
+  const handleRemoveImage = (index) => {
+    const updatedImages = imageFiles.filter((_, i) => i !== index);
+    setImageFiles(updatedImages);
+  };
+
+
+  const resetVideoInput = () => {
+    setVideoFile(null);
+    const inputFile = document.getElementById('video-upload');
+    inputFile.value = '';
+  };
+
+  const resetImageInput = () => {
+    setImageFiles([]);
   };
 
   useEffect(() => {
@@ -274,7 +357,7 @@ const indexHistory = () => {
         setSearchStyle({
           position: "fixed",
           width: "66.66%",
-          top: "21.5%",
+          top: "23.11%",
           border: "none",
           fontSize: "14px",
           backgroundColor: "#f0f0f0",
@@ -325,7 +408,6 @@ const indexHistory = () => {
       case "da-giao":
       case "hoan-thanh":
       case "da-huy":
-      case "cho-hoan-tien":
         return "120px";
       default:
         return "60px";
@@ -341,7 +423,6 @@ const indexHistory = () => {
       case "da-giao":
       case "hoan-thanh":
       case "da-huy":
-      case "cho-hoan-tien":
         return "75px";
       default:
         return "30px";
@@ -352,11 +433,19 @@ const indexHistory = () => {
     setOpenSnackbar(false);
   };
 
+  useEffect(() => {
+    if (showReviewModal) {
+      document.body.style.overflowY = "auto";
+      document.body.style.padding = "0";
+    } else {
+      document.body.style.overflowY = "auto";
+    }
+  }, [showReviewModal]);
 
   return (
     <>
       <div>
-        <ArgonBox style={{ marginLeft: "-1.22%", width: "102.44%" }}>
+        <ArgonBox style={{ marginLeft: "-1.22%", width: "102.44%", paddingBottom: "52px" }}>
           <Paper
             ref={paperRef}
             elevation={3}
@@ -373,10 +462,6 @@ const indexHistory = () => {
               <Tab label={`Đã giao (${getOrderCount("da-giao")})`} value="da-giao" />
               <Tab label={`Hoàn thành (${getOrderCount("hoan-thanh")})`} value="hoan-thanh" />
               <Tab label={`Đã hủy (${getOrderCount("da-huy")})`} value="da-huy" />
-              <Tab
-                label={`Trả hàng/Hoàn tiền (${getOrderCount("cho-hoan-tien")})`}
-                value="cho-hoan-tien"
-              />
             </Tabs>
           </Paper>
           {activeTab === "all" && (
@@ -416,7 +501,7 @@ const indexHistory = () => {
               margin: "0 auto",
             }}
           >
-            {filteredOrders.length === 0 ? (
+            {currentOrder.length === 0 ? (
               <Box
                 display="flex"
                 justifyContent="center"
@@ -450,7 +535,7 @@ const indexHistory = () => {
                   justifyContent: "center",
                 }}
               >
-                {filteredOrders.map((order) => (
+                {currentOrder.map((order) => (
                   <Grid item xs={12} key={order.id}>
                     <Paper
                       elevation={2}
@@ -494,8 +579,7 @@ const indexHistory = () => {
                       <section
                         style={{
                           border: "none",
-                          borderTop:
-                            "2px dashed rgba(128, 128, 128, 0.4)",
+                          borderTop: "2px dashed rgba(128, 128, 128, 0.4)",
                           margin: "10px 0",
                         }}
                       />
@@ -537,10 +621,7 @@ const indexHistory = () => {
                                   Phân loại hàng: {product.color}, {product.size}
                                 </Typography>
                                 <Box display="flex" justifyContent="space-between">
-                                  <Typography
-                                    variant="body2"
-                                    style={{ color: "black" }}
-                                  >
+                                  <Typography variant="body2" style={{ color: "black" }}>
                                     Số lượng: {product.productQuantity}
                                   </Typography>
                                   <Typography
@@ -550,7 +631,7 @@ const indexHistory = () => {
                                       fontSize: "16px",
                                       position: "relative",
                                       display: "inline-block",
-                                      marginLeft: "680px"
+                                      marginLeft: "680px",
                                     }}
                                   >
                                     <span
@@ -565,7 +646,7 @@ const indexHistory = () => {
                                     >
                                       đ
                                     </span>
-                                    {new Intl.NumberFormat('vi-VN').format(product.productPrice)}
+                                    {new Intl.NumberFormat("vi-VN").format(product.productPrice)}
                                   </Typography>
                                 </Box>
                               </Box>
@@ -623,7 +704,7 @@ const indexHistory = () => {
                           >
                             đ
                           </span>
-                          {new Intl.NumberFormat('vi-VN').format(order.amount)}
+                          {new Intl.NumberFormat("vi-VN").format(order.amount)}
                         </Typography>
                       </div>
                       <Box display="flex" justifyContent="flex-end" mt={2}>
@@ -639,7 +720,11 @@ const indexHistory = () => {
                           <MuiButton
                             variant="contained"
                             onClick={() => handleStatusComplete(order.id)}
-                            style={{ marginRight: "10px", backgroundColor: "green", color: "white" }}
+                            style={{
+                              marginRight: "10px",
+                              backgroundColor: "green",
+                              color: "white",
+                            }}
                           >
                             Hoàn thành
                           </MuiButton>
@@ -647,7 +732,11 @@ const indexHistory = () => {
                           <MuiButton
                             variant="contained"
                             onClick={() => fetchHandleBuyNow(order.id)}
-                            style={{ marginRight: "10px", backgroundColor: "#ee4d2d", color: "white" }}
+                            style={{
+                              marginRight: "10px",
+                              backgroundColor: "#ee4d2d",
+                              color: "white",
+                            }}
                           >
                             Mua lại
                           </MuiButton>
@@ -657,7 +746,11 @@ const indexHistory = () => {
                           <MuiButton
                             variant="contained"
                             href={`/history-order/${order.id}`}
-                            style={{ marginRight: "10px", backgroundColor: "white", color: "black" }}
+                            style={{
+                              marginRight: "10px",
+                              backgroundColor: "white",
+                              color: "black",
+                            }}
                           >
                             Xem chi tiết hủy đơn
                           </MuiButton>
@@ -665,7 +758,11 @@ const indexHistory = () => {
                           <MuiButton
                             variant="contained"
                             href={`/history-order/${order.id}`}
-                            style={{ marginRight: "10px", backgroundColor: "white", color: "black" }}
+                            style={{
+                              marginRight: "10px",
+                              backgroundColor: "white",
+                              color: "black",
+                            }}
                           >
                             Xem chi tiết hóa đơn
                           </MuiButton>
@@ -674,6 +771,55 @@ const indexHistory = () => {
                     </Paper>
                   </Grid>
                 ))}
+                <div className="col-12" style={{ marginTop: "-20px" }}>
+                  <nav>
+                    <ul className="pagination justify-content-center">
+                      <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                        <a className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
+                          <i className="ni ni-bold-left" />
+                        </a>
+                      </li>
+
+                      {(() => {
+                        const pages = [];
+                        let startPage, endPage;
+
+                        if (totalPages <= 3) {
+                          startPage = 1;
+                          endPage = totalPages;
+                        } else if (currentPage === 1) {
+                          startPage = 1;
+                          endPage = 3;
+                        } else if (currentPage === totalPages) {
+                          startPage = totalPages - 2;
+                          endPage = totalPages;
+                        } else {
+                          startPage = currentPage - 1;
+                          endPage = currentPage + 1;
+                        }
+
+                        for (let i = startPage; i <= endPage; i++) {
+                          pages.push(
+                            <li
+                              className={`page-item ${currentPage === i ? "active" : ""}`}
+                              key={i}
+                            >
+                              <a className="page-link" onClick={() => handlePageChange(i)}>
+                                {i}
+                              </a>
+                            </li>
+                          );
+                        }
+                        return pages;
+                      })()}
+                      <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                        <a className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
+                          <i className="ni ni-bold-right" />
+                        </a>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
               </Grid>
             )}
           </Box>
@@ -710,7 +856,7 @@ const indexHistory = () => {
           </Box>
         </MuiModal>
         {selectedProduct && (
-          <BootstrapModal show={showReviewModal} size="lg">
+          <BootstrapModal show={showReviewModal} size="lg" centered >
             <BootstrapModal.Body>
               <div
                 style={{
@@ -754,119 +900,118 @@ const indexHistory = () => {
                       </div>
                     </div>
                   </div>
-                  <form onSubmit={handleSubmit}>
-                    <div style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
-                      <label style={{ fontWeight: "bold", marginRight: "50px", fontSize: "18px" }}>
-                        Chất lượng sản phẩm:
-                      </label>
-                      <div style={{ display: "flex" }}>
+                  <form onSubmit={handleSubmitAndAddReviewFile}>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                      <label style={{ fontWeight: 'bold', marginRight: '50px', fontSize: '18px' }}>Chất lượng sản phẩm:</label>
+                      <div style={{ display: 'flex' }}>
                         {[...Array(5)].map((_, index) => (
                           <span
                             key={index}
                             onClick={() => handleStarClick(index)}
-                            style={{ cursor: "pointer", marginRight: "20px" }}
+                            style={{ cursor: 'pointer', marginRight: '20px' }}
                           >
                             {index < star ? (
-                              <StarIcon style={{ color: "#FFD700", transform: "scale(2)" }} /> // Increase the scale size
+                              <StarIcon style={{ color: '#FFD700', transform: 'scale(2)' }} /> // Increase the scale size
                             ) : (
-                              <StarBorderIcon style={{ color: "#FFD700", transform: "scale(2)" }} />
+                              <StarBorderIcon style={{ color: '#FFD700', transform: 'scale(2)' }} />
                             )}
                           </span>
                         ))}
                       </div>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}>
-                      {/* Nút Tải lên hình ảnh */}
-                      <div style={{ marginRight: "5px" }}>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
+                      <div style={{ marginRight: '5px' }}>
                         <input
                           type="file"
                           id="image-upload"
                           accept="image/*"
-                          style={{ display: "none" }}
+                          style={{ display: 'none' }}
                           onChange={handleImageChange}
+                          multiple
                         />
                         <BootstrapButton
                           variant="outlined"
                           component="span"
                           style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            border: "1px solid #000",
-                            padding: "0",
-                            width: "100px",
-                            height: "100px",
-                            borderRadius: "8px",
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            border: '1px solid #000',
+                            padding: '0',
+                            width: '100px',
+                            height: '100px',
+                            borderRadius: '8px',
                           }}
-                          onClick={() => document.getElementById("image-upload").click()}
+                          onClick={() => document.getElementById('image-upload').click()}
                         >
-                          <PhotoCamera style={{ fontSize: "48px", color: "black" }} />{" "}
-                          {/* Tăng kích thước icon */}
+                          <PhotoCamera style={{ fontSize: '48px', color: 'black' }} /> {/* Tăng kích thước icon */}
                         </BootstrapButton>
                       </div>
-
-                      {imagePreview && (
-                        <div style={{ position: "relative", marginRight: "3px" }}>
-                          <img
-                            src={imagePreview}
-                            alt="Selected"
-                            style={{
-                              width: "100px",
-                              height: "100px",
-                              borderRadius: "8px",
-                              objectFit: "cover",
-                            }}
-                          />
-                          <IconButton
-                            style={{
-                              position: "absolute",
-                              top: "2px",
-                              right: "2px",
-                              padding: "0",
-                              color: "#fff",
-                              fontSize: "15px",
-                              backgroundColor: "#B8B8B8",
-                            }}
-                            onClick={resetImageInput} // Gọi hàm reset ảnh
-                          >
-                            <CloseIcon style={{ fontSize: "16px" }} />
-                          </IconButton>
-                        </div>
-                      )}
-                      {/* Nút Tải lên video */}
-                      <div style={{ marginLeft: "1px" }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                        {imageFiles.map((file, index) => (
+                          <div key={index} style={{ position: 'relative', marginRight: '3px' }}>
+                            <img
+                              src={URL.createObjectURL(file)} // Tạo URL tạm thời cho ảnh
+                              alt={`Review ${index}`}
+                              style={{
+                                width: '100px',
+                                height: '100px',
+                                borderRadius: '8px',
+                                objectFit: 'cover',
+                                marginRight: '3px'
+                              }}
+                            />
+                            {/* Icon Close chỉ hiển thị khi có ảnh */}
+                            <IconButton
+                              style={{
+                                position: 'absolute',
+                                top: '2px',
+                                right: '5px',
+                                padding: '0',
+                                color: '#fff',
+                                fontSize: '15px',
+                                backgroundColor: '#B8B8B8',
+                              }}
+                              onClick={() => handleRemoveImage(index)} // Xử lý xóa ảnh
+                            >
+                              <CloseIcon style={{ fontSize: '16px' }} />
+                            </IconButton>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ marginLeft: '1px' }}>
                         <input
                           type="file"
                           id="video-upload"
                           accept="video/*"
-                          style={{ display: "none" }}
+                          style={{ display: 'none' }}
                           onChange={handleVideoChange}
                         />
-                        {videoPreview ? (
-                          <div style={{ position: "relative", marginTop: "10px" }}>
+                        {videoFile ? (
+                          <div style={{ position: 'relative', marginTop: '10px' }}>
                             <video
-                              src={videoPreview}
                               controls
+                              src={URL.createObjectURL(videoFile)}
                               style={{
-                                width: "100px",
-                                height: "100px",
-                                borderRadius: "8px",
-                                objectFit: "cover",
+                                width: '100px',
+                                height: '100px',
+                                borderRadius: '8px',
+                                objectFit: 'cover',
                               }}
                             />
                             <IconButton
                               style={{
-                                position: "absolute",
-                                top: "2px",
-                                right: "2px",
-                                padding: "0",
-                                color: "#fff",
-                                fontSize: "15px",
-                                backgroundColor: "#B8B8B8",
+                                position: 'absolute',
+                                top: '2px',
+                                right: '2px',
+                                padding: '0',
+                                color: '#fff',
+                                fontSize: '15px',
+                                backgroundColor: '#B8B8B8',
                               }}
                               onClick={resetVideoInput}
                             >
-                              <CloseIcon style={{ fontSize: "16px" }} />
+                              <CloseIcon style={{ fontSize: '16px' }} />
                             </IconButton>
                           </div>
                         ) : (
@@ -874,18 +1019,18 @@ const indexHistory = () => {
                             variant="outlined"
                             component="span"
                             style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              border: "1px solid #000",
-                              padding: "0",
-                              width: "100px",
-                              height: "100px",
-                              borderRadius: "8px",
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              border: '1px solid #000',
+                              padding: '0',
+                              width: '100px',
+                              height: '100px',
+                              borderRadius: '8px',
                             }}
-                            onClick={() => document.getElementById("video-upload").click()}
+                            onClick={() => document.getElementById('video-upload').click()} // Tự động mở cửa sổ chọn file
                           >
-                            <Videocam style={{ fontSize: "48px", color: "black" }} />{" "}
+                            <Videocam style={{ fontSize: '48px', color: 'black' }} />
                           </BootstrapButton>
                         )}
                       </div>
@@ -893,27 +1038,40 @@ const indexHistory = () => {
                     <textarea
                       rows="4"
                       style={{
-                        width: "100%",
-                        padding: "10px",
-                        fontSize: "16px",
-                        borderRadius: "8px",
-                        marginBottom: "15px",
-                        border: "1px solid #888888",
-                        outline: "none",
-                        boxSizing: "border-box",
+                        width: '100%',
+                        padding: '10px',
+                        fontSize: '16px',
+                        borderRadius: '8px',
+                        marginBottom: '15px',
+                        border: '1px solid #888888',
+                        outline: 'none',
+                        boxSizing: 'border-box',
                       }}
                       placeholder="Nhập đánh giá của bạn"
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
                     />
-                    <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                       <BootstrapButton
                         type="submit"
                         variant="contained"
+                        onClick={handleSubmitAndAddReviewFile}
                         style={{
-                          color: "#000",
-                          backgroundColor: "#FFD700",
-                          borderColor: "#FFD700",
+                          color: '#fff',
+                          backgroundColor: '#FFD700',
+                          borderColor: '#FFD700',
+                          padding: '10px 20px',
+                          fontWeight: 'bold',
+                          fontSize: '16px',
+                          borderRadius: '8px',
+                          boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+                          transition: 'background-color 0.3s ease',
+                        }}
+                        onMouseOver={(e) => {
+                          e.target.style.backgroundColor = '#FFC107';
+                        }}
+                        onMouseOut={(e) => {
+                          e.target.style.backgroundColor = '#FFD700';
                         }}
                       >
                         Gửi đánh giá
@@ -924,7 +1082,7 @@ const indexHistory = () => {
                       onClose={handleCloseSnackbar}
                       message={snackbarMessage}
                       autoHideDuration={6000}
-                      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                     />
                   </form>
                 </>
@@ -932,9 +1090,8 @@ const indexHistory = () => {
             </BootstrapModal.Body>
           </BootstrapModal>
         )}
-      </div >
-
+      </div>
     </>
   );
-}
+};
 export default indexHistory;

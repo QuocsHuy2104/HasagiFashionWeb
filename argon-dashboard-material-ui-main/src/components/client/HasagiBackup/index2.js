@@ -189,7 +189,7 @@ const Backup2 = ({ show, onClose, onAddressUpdated }) => {
     useEffect(() => {
         const checkUserAddresses = async () => {
             try {
-                const addressCheckResponse = await axios.get('http://localhost:3000/api/addresses/account', { withCredentials: true });
+                const addressCheckResponse = await AddressService.getAllAddress();
                 const userHasAddresses = addressCheckResponse.data.length > 0;
                 if (!userHasAddresses) {
                     setStatus(true);
@@ -221,6 +221,7 @@ const Backup2 = ({ show, onClose, onAddressUpdated }) => {
             address: address,
         };
         try {
+            await AddressService.getAllAddress();
             await AddressService.createAddress(formData);
             onClose();
             await AddressService.getAllAddress();

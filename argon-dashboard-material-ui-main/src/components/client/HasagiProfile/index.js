@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Profile.css";
 import Header from "../HasagiHeader";
 import Footer from "../HasagiFooter";
 import IndexHistory from "../HasagiMenuItemBackup/indexHisory";
 import AddressPage from "../HasagiAddress";
 import ChangePassword from "../HasagiChangePassword";
+import Voucher from "components/client/HasagiVorcher/vorcher";
 import User from "../HasagiUser";
 
 const Profile = () => {
@@ -14,18 +15,36 @@ const Profile = () => {
   const menuItems = [
     { name: "Tài Khoản Của Tôi", hasSubItems: true },
     { name: "Đơn Mua" },
-    { name: "Cài Đặt Thông Báo" },
-    { name: "Những Thiết Lập Riêng Tư" },
-    { name: "Thông Báo" },
     { name: "Kho Voucher", isNew: true },
-    { name: "Shopee Xu" },
   ];
 
   const subMenuItems = [
     { name: "Hồ Sơ", parent: "Tài Khoản Của Tôi" },
     { name: "Địa Chỉ", parent: "Tài Khoản Của Tôi" },
     { name: "Đổi Mật Khẩu", parent: "Tài Khoản Của Tôi" },
+    { name: "Kho Voucher", parent: "Tài Khoản Của Tôi" },
   ];
+
+  const urlMapping = {
+    "Tài Khoản Của Tôi": "my-account",
+    "Đơn Mua": "purchase",
+    "Kho Voucher": "voucher-store",
+    "Hồ Sơ": "profile",
+    "Địa Chỉ": "address",
+    "Đổi Mật Khẩu": "change-password",
+}; 
+
+const updateURL = (item) => {
+  const englishURL = urlMapping[item] || item.toLowerCase().replace(/\s/g, '-');
+  const newURL = `/user/${englishURL}`;
+  window.history.pushState(null, '', newURL);
+};
+
+useEffect(() => {
+    if (activeItem) {
+        updateURL(activeItem);
+    }
+}, [activeItem]);
 
   const handleMenuItemClick = (item) => {
     if (item.hasSubItems) {
@@ -53,6 +72,8 @@ const Profile = () => {
         return <IndexHistory />;
       case "Đổi Mật Khẩu":
         return <ChangePassword />;
+      case "Kho Voucher":
+        return <Voucher />;
       default:
         return null;
     }

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import ArgonButton from "components/ArgonButton";
-import { FaCheckCircle } from "react-icons/fa";
+import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
 
@@ -11,6 +10,7 @@ const Complete = () => {
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
+    const [alertShown, setAlertShown] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -21,33 +21,22 @@ const Complete = () => {
         const selectedPayment = Cookies.get('selectedPayment');
 
         if (selectedPayment !== 'Direct Check' && (responseCode !== '00' || transactionStatus !== '00')) {
-            // Thanh toán thất bại, điều hướng đến trang Checkout mà không xóa sản phẩm
             navigate(`/Checkout?id=${addressId}`);
         } else {
-            // Thanh toán thành công, gọi hàm xóa sản phẩm
             const handleRemoveItems = async () => {
                 const cartItemsBackup = JSON.parse(localStorage.getItem('cartItemsBackup')) || [];
                 const selectedItemIds = cartItemsBackup
                     .filter(item => item.selected)
                     .map(item => item.cartdetailid);
-
-                if (selectedItemIds.length === 0) {
-                    console.error("No items selected for removal");
-                    return;
-                }
                 try {
                     const response = await axios.delete('http://localhost:3000/api/cart/delete', {
                         data: selectedItemIds,
                         withCredentials: true,
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
+                        headers: { 'Content-Type': 'application/json' }
                     });
                     if (response.status === 200) {
-                        console.log("Items deleted successfully");
                         const updatedCartItems = cartItemsBackup.filter(item => !selectedItemIds.includes(item.cartdetailid));
                         localStorage.setItem('cartItemsBackup', JSON.stringify(updatedCartItems));
-                        setCartItems(updatedCartItems);
                     } else {
                         console.error("Failed to delete items:", response.data);
                     }
@@ -57,8 +46,7 @@ const Complete = () => {
             };
             handleRemoveItems();
         }
-    }, [location, navigate]);
-
+    }, [navigate]);
 
     useEffect(() => {
         const storedAddress = JSON.parse(localStorage.getItem('address1'));
@@ -87,14 +75,6 @@ const Complete = () => {
             fetchWards(address.districtCode);
         }
     }, [address.districtCode]);
-
-    const handleViewOrder = async () => {
-        navigate("/History", { state: { activeTab: 'dang-giao' } });
-    };
-    const handleGoHome = async () => {
-        navigate('/feature-section');
-    };
-
 
     const fetchProvinces = async () => {
         try {
@@ -130,6 +110,7 @@ const Complete = () => {
             console.error("Error fetching wards:", error);
         }
     };
+
     const getAddressNameById = (id, list, type) => {
         const addressItem = list.find(item => {
             if (type === 'province' && item.ProvinceID === Number(id)) return true;
@@ -137,7 +118,6 @@ const Complete = () => {
             if (type === 'ward' && item.WardCode === String(id)) return true;
             return false;
         });
-
         if (addressItem) {
             if (type === 'province') return addressItem.ProvinceName;
             if (type === 'district') return addressItem.DistrictName;
@@ -146,61 +126,37 @@ const Complete = () => {
         return 'Unknown';
     };
 
-    return (
-        <div style={styles.container}>
-            <FaCheckCircle style={styles.icon} />
-            <h2 style={styles.title}>Đã gửi đơn hàng</h2>
-            <p style={styles.description}>
-                Đơn hàng của bạn sẽ được vận chuyển đến: <br />
-                <strong>{address.fullName || 'N/A'}</strong> (+84) {address.numberPhone?.startsWith('0') ? address.numberPhone.substring(1) : address.numberPhone || 'N/A'} <br />
-                {address.address || 'N/A'},
-                {getAddressNameById(address.wardCode, wards, 'ward') || 'Unknown'}, 
-                {getAddressNameById(address.districtCode, districts, 'district') || 'Unknown'},
-                {getAddressNameById(address.provinceID, provinces, 'province') || 'Unknown'}
-            </p>
-            <div style={styles.buttonContainer}>
-                <ArgonButton onClick={handleGoHome} color="secondary" style={styles.button}>
-                    Quay về trang chủ
-                </ArgonButton>
-                <ArgonButton onClick={handleViewOrder} color="primary" style={styles.button}>
-                    Xem đơn hàng
-                </ArgonButton>
-            </div>
-        </div>
-    );
-};
-const styles = {
-    container: {
-        textAlign: 'center',
-        padding: '20px',
-        border: '1px solid #ddd',
-        borderRadius: '8px',
-        backgroundColor: '#fff',
-        maxWidth: '400px',
-        margin: '20px auto',
-    },
-    icon: {
-        fontSize: '40px',
-        color: '#00C851',
-    },
-    title: {
-        fontSize: '24px',
-        margin: '10px 0',
-        fontWeight: 'bold',
-    },
-    description: {
-        fontSize: '14px',
-        color: '#555',
-        marginBottom: '20px',
-    },
-    buttonContainer: {
-        display: 'flex',
-        justifyContent: 'space-between',
-    },
-    button: {
-        minWidth: '120px',
-        margin: '5px',
-    },
+
+    useEffect(() => {
+        if (address && provinces.length && districts.length && wards.length && !alertShown) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Đã gửi đơn hàng',
+                html: `
+                    <strong>${address.fullName || 'N/A'}</strong> (+84) ${address.numberPhone?.startsWith('0') ? address.numberPhone.substring(1) : address.numberPhone || 'N/A'} <br />
+                    ${address.address || 'N/A'}, ${getAddressNameById(address.wardCode, wards, 'ward') || 'Unknown'}, 
+                    ${getAddressNameById(address.districtCode, districts, 'district') || 'Unknown'},
+                    ${getAddressNameById(address.provinceID, provinces, 'province') || 'Unknown'}
+                `,
+                showConfirmButton: true,
+                confirmButtonText: 'Quay lại trang chủ',
+                showDenyButton: true,
+                denyButtonText: 'Xem hóa đơn',
+                preConfirm: () => {
+                    navigate('/feature-section');
+                },
+                denyButtonColor: '#3085d6',
+                confirmButtonColor: '#d33',
+            }).then((result) => {
+                if (result.isDenied) {
+                    navigate("/History", { state: { activeTab: 'dang-giao' } });
+                }
+            });
+            setAlertShown(true);
+        }
+    }, [address, provinces, districts, wards, alertShown, navigate]);
+
+    return <></>;
 };
 
 export default Complete;

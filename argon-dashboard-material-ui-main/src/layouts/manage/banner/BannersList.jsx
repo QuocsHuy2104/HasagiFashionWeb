@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
-import PropTypes from 'prop-types'; // Import PropTypes
+import PropTypes from 'prop-types';
 import BannerDataService from "../../../services/BannerServices";
 import { Button } from "react-bootstrap";
 import { FaPen, FaTrash } from 'react-icons/fa';
-import "../../../assets/css/app.css"; // Đảm bảo rằng file CSS đang được import
-
-// Import các styles cần thiết cho slick-carousel
+import "../../../assets/css/app.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import ArgonButton from "../../../components/ArgonButton";
 
-// Định nghĩa các kiểu props cho các nút điều hướng tùy chỉnh
 const CustomPrevArrow = ({ onClick }) => (
     <button className="carousel-arrow carousel-arrow-left" onClick={onClick}>
         &#10094;
@@ -23,7 +23,6 @@ const CustomNextArrow = ({ onClick }) => (
     </button>
 );
 
-// Thêm kiểm tra kiểu dữ liệu cho các props
 CustomPrevArrow.propTypes = {
     onClick: PropTypes.func.isRequired,
 };
@@ -44,19 +43,15 @@ const BannersList = ({ getBannerId }) => {
         }
     };
 
-    const handleEditBanner = (id, images) => {
-        // Xử lý logic khi bấm nút edit
-        console.log("Banner ID:", id);
-        console.log("Images:", images);
-        // Bạn có thể mở một modal hoặc giao diện khác để hiển thị hình ảnh
-    };
 
 
     const deleteBannerHandler = async (id) => {
         try {
             await BannerDataService.deleteBanner(id);
+            toast.success("Xóa thành công!");
             getBanners();
         } catch (error) {
+            toast.error("Thêm thất bại!");
             console.error("Failed to delete banner:", error);
         }
     };
@@ -65,25 +60,26 @@ const BannersList = ({ getBannerId }) => {
         getBanners();
     }, []);
 
-    // Cấu hình cho slider
+
     const sliderSettings = {
         dots: true,
         infinite: true,
         speed: 500,
-        slidesToShow: 1,  // Hiển thị một ảnh trong mỗi banner
+        slidesToShow: 1,
         slidesToScroll: 1,
-        arrows: true, // Bật các nút điều hướng
+        arrows: true,
         prevArrow: <CustomPrevArrow />,
         nextArrow: <CustomNextArrow />,
     };
 
     return (
-        <>
+        <div className="mt-2">
             <div className="mb-2">
-                <Button variant="dark" onClick={getBanners}>Refresh List</Button>
+                <ArgonButton color="success" onClick={getBanners}>
+                    Làm mới danh sách
+                </ArgonButton>
             </div>
 
-            {/* Hiển thị các banner */}
             <div className="banner-wrapper">
                 {banners.map((doc) => (
                     <div key={doc.id} className="banner-container">
@@ -134,13 +130,12 @@ const BannersList = ({ getBannerId }) => {
                     </div>
                 ))}
             </div>
-        </>
+        </div>
     );
 };
 
-// Định nghĩa kiểu dữ liệu cho props
 BannersList.propTypes = {
-    getBannerId: PropTypes.func.isRequired, // Định nghĩa getBannerId là một hàm và là bắt buộc
+    getBannerId: PropTypes.func.isRequired,
 };
 
 export default BannersList;

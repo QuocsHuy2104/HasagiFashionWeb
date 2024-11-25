@@ -6,13 +6,28 @@ const BrandsService = {
 
     getBrandById: (brandId) => apiClient.get(`/admin/brand/${brandId}`),
 
-    createBrand: (brand) => apiClient.post("/admin/brand", brand),
+    createBrand: (brand) => {
+        return apiClient.post("/admin/brand", brand, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    },
+
+    updateBrand: (id, brand) => {
+        return apiClient.put(`/admin/brand/${id}`, brand, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    },
+
 
     updateBrand: (id, brand) => apiClient.put(`/admin/brand/${id}`, brand),
 
-    deleteBrand: (id) => apiClient.delete(`/admin/brand/${id}`)
+    deleteBrand: (id) => apiClient.delete(`/admin/brand/${id}`),
+
+    getAllBrandsUS: () => apiClient.get("/user/brand"),
 };
 
 export default BrandsService;
-
-

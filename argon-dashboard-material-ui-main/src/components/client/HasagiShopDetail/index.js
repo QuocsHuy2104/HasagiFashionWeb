@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
-import 'layouts/assets/css/style.css';
+import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
+import "layouts/assets/css/style.css";
 import HasagiNav from "components/client/HasagiHeader";
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link } from "react-router-dom";
 import Footer from "components/client/HasagiFooter";
 import cartService from "../../../services/ProductDetail";
 import Cookies from "js-cookie";
-import { toast, ToastContainer } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { toast, ToastContainer } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import reviewsService from "services/ReviewsServices";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStar as solidStar } from '@fortawesome/free-solid-svg-icons';
-import { faStar as regularStar } from '@fortawesome/free-regular-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faStar as solidStar } from "@fortawesome/free-solid-svg-icons";
+import { faStar as regularStar } from "@fortawesome/free-regular-svg-icons";
 import ReviewList from "../HasagiReview/reviewList";
 import aboutImage from "layouts/assets/img/h1.jpg";
 
@@ -26,25 +26,26 @@ function ShopDetail() {
     const location = useLocation();
     const [isFavorite, setIsFavorite] = useState(false);
     const query = new URLSearchParams(location.search);
-    const productId = query.get('id');
+    const productId = query.get("id");
     const [favoriteCount, setFavoriteCount] = useState(0);
     const navigate = useNavigate();
     const [reviews, setReviews] = useState([]);
+    const [quantityPDT, setQuantityPDT] = useState(0);
 
     const fetchReviews = async (productId) => {
         try {
             const productReviews = await reviewsService.getReviewsByProduct(productId);
-            console.log('Fetched reviews for product:', productReviews);
+            console.log("Fetched reviews for product:", productReviews);
 
             if (Array.isArray(productReviews)) {
                 const sortedReviews = productReviews.sort((a, b) => b.star - a.star);
                 setReviews(sortedReviews);
             } else {
-                console.error('Expected an array but got:', productReviews);
+                console.error("Expected an array but got:", productReviews);
                 setReviews([]);
             }
         } catch (error) {
-            console.error('Error fetching reviews for product:', error);
+            console.error("Error fetching reviews for product:", error);
             setReviews([]);
         }
     };
@@ -60,7 +61,7 @@ function ShopDetail() {
 
     useEffect(() => {
         const query = new URLSearchParams(location.search);
-        const productId = query.get('id');
+        const productId = query.get("id");
 
         if (productId) {
             fetchReviews(productId);
@@ -69,7 +70,7 @@ function ShopDetail() {
 
     const getUniqueSizes = (sizes) => {
         return sizes.reduce((unique, size) => {
-            if (!unique.some(item => item.id === size.id)) {
+            if (!unique.some((item) => item.id === size.id)) {
                 unique.push(size);
             }
             return unique;
@@ -78,7 +79,7 @@ function ShopDetail() {
 
     const getUniqueColors = (colors) => {
         return colors.reduce((unique, color) => {
-            if (!unique.some(item => item.id === color.id)) {
+            if (!unique.some((item) => item.id === color.id)) {
                 unique.push(color);
             }
             return unique;
@@ -95,11 +96,6 @@ function ShopDetail() {
     }, []);
 
     const handleAddToCart = async () => {
-        if (!product || !selectedColor || !selectedSize) {
-            toast.error('Vui lòng chọn màu sắc và kích thước.');
-            return;
-        }
-
         try {
             cartService.addToCart({
                 colorId: selectedColor,
@@ -107,22 +103,21 @@ function ShopDetail() {
                 quantity,
                 productId,
             });
-            Cookies.set('productId', productId);
-            toast.success('Sản phẩm đã được thêm vào giỏ hàng thành công!');
+            toast.success("Sản phẩm đã được thêm vào giỏ hàng thành công!");
         } catch (error) {
-            console.error('Error adding to cart:', error);
-            toast.error('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.');
+            console.error("Error adding to cart:", error);
+            toast.error("Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.");
         }
     };
 
     const fetchFavoriteCount = async (productId) => {
         try {
             const response = await axios.get(`http://localhost:8080/api/favorites/count`, {
-                params: { productId }
+                params: { productId },
             });
             return response.data;
         } catch (error) {
-            console.error('Error fetching favorite count:', error);
+            console.error("Error fetching favorite count:", error);
             return 0;
         }
     };
@@ -131,35 +126,37 @@ function ShopDetail() {
             // Await the response from cartService.checkFavorite
             const favoriteResponse = await cartService.checkFavorite(productId);
 
-            // Log the full response to check its structure
             console.log(favoriteResponse);
 
-            // Ensure the data property exists and then use it
             if (favoriteResponse && favoriteResponse.data !== undefined) {
-                setIsFavorite(favoriteResponse.data);  // This should now work
+                setIsFavorite(favoriteResponse.data);
             } else {
-                console.error('Favorite response is missing data');
+                console.error("Favorite response is missing data");
             }
         } catch (error) {
             console.error("Error checking favorite status:", error);
         }
     };
 
-
     const fetchProductDetail = async () => {
-        const accountId = Cookies.get('accountId');
-        if (!accountId) {
-            navigate(`/authentication/sign-in`);
-            return;
-        }
+       
         try {
             if (!productId) throw new Error("Product ID is missing");
-            const response = await cartService.getProductDetail(productId);
+            const response = await cartService.getProductDetail({
+                productId,
+                sizeId: selectedSize || null,
+                colorId: selectedColor || null,
+            });
             const productData = response.data;
             console.log("Fetched Product Data:", productData);
 
             setProduct(productData);
             setTotalPrice(productData.importPrice);
+            if (selectedColor && selectedSize) {
+                fetchPrice(productId, selectedColor, selectedSize);
+            }
+            console.log("Total Price Set To:", productData.importPrice);
+            setQuantityPDT(productData.importQuantity);
             const countRSN = await fetchFavoriteCount(productId);
             setFavoriteCount(countRSN);
             checkFavoriteStatus(productId);
@@ -169,31 +166,42 @@ function ShopDetail() {
     };
 
     useEffect(() => {
-        fetchProductDetail();
-        fetchReviews();
+        if (productId) {
+            fetchProductDetail();
+        }
+    }, [productId, selectedSize, selectedColor]);
+
+    useEffect(() => {
+        if (productId) {
+            fetchReviews();
+        }
     }, [productId]);
 
     const fetchPrice = async (productId, colorId, sizeId) => {
         try {
-            const response = await axios.get(`http://localhost:8080/api/product-detail/price`, {
-                params: { productId, colorId, sizeId }
+            const response = await axios.get(`http://localhost:8080/api/public/webShopDetail/price`, {
+                params: { productId, colorId, sizeId },
             });
-            setTotalPrice(response.data * quantity); // cập nhật giá với số lượng
+            const { price, quantity } = response.data;
+            setTotalPrice(price);
+            setQuantityPDT(quantity);
         } catch (error) {
-            console.error('Error fetching price:', error);
-            toast.error('Đã xảy ra lỗi khi lấy giá sản phẩm. Vui lòng thử lại sau.');
+            console.error("Error fetching price:", error);
+            toast.error("Đã xảy ra lỗi khi lấy giá sản phẩm. Vui lòng thử lại sau.");
         }
     };
 
-    // Gọi API để cập nhật giá mỗi khi chọn color hoặc size
     useEffect(() => {
         if (selectedColor && selectedSize) {
             fetchPrice(productId, selectedColor, selectedSize);
         }
+        if (!selectedColor) {
+            fetchProductDetail();
+        }
     }, [selectedColor, selectedSize, quantity]);
 
     const handleAddFavorite = async () => {
-        const accountId = Cookies.get('accountId');
+        const accountId = Cookies.get("accountId");
         if (!accountId) {
             navigate(`/authentication/sign-in`);
             return;
@@ -205,12 +213,12 @@ function ShopDetail() {
             const count = await fetchFavoriteCount(product.id);
             setFavoriteCount(count);
         } catch (error) {
-            console.error('Error adding to favorites:', error.response?.data || error.message);
+            console.error("Error adding to favorites:", error.response?.data || error.message);
         }
     };
 
     const handleRemoveFavorite = async () => {
-        const accountId = Cookies.get('accountId');
+        const accountId = Cookies.get("accountId");
         if (!accountId) {
             navigate(`/authentication/sign-in`);
             return;
@@ -223,16 +231,11 @@ function ShopDetail() {
             const count = await fetchFavoriteCount(productId);
             setFavoriteCount(count);
         } catch (error) {
-            console.error('Error removing from favorites:', error.response?.data || error.message);
+            console.error("Error removing from favorites:", error.response?.data || error.message);
         }
     };
 
     const handleByNow = async () => {
-        if (!product || !selectedColor || !selectedSize) {
-            toast.error('Vui lòng chọn màu sắc và kích thước.');
-            return;
-        }
-
         try {
             await cartService.addToCart({
                 colorId: selectedColor,
@@ -240,17 +243,34 @@ function ShopDetail() {
                 quantity,
                 productId,
             });
-            navigate('/Cart')
+            navigate("/Cart");
         } catch (error) {
-            console.error('Error adding to cart:', error);
-            toast.error('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.');
+            console.error("Error adding to cart:", error);
+          
         }
     };
-    const [activeTab, setActiveTab] = useState('tab-pane-1');
+    const [activeTab, setActiveTab] = useState("tab-pane-1");
 
     const handleTabClick = (tabId) => {
         setActiveTab(tabId);
     };
+
+    const formatImportPrice = (importPrice) => {
+        if (typeof importPrice === "number") {
+            return new Intl.NumberFormat("vi-VN").format(importPrice);
+        }
+        if (!importPrice || typeof importPrice !== "string" || !importPrice.includes("-")) {
+            return "N/A";
+        }
+        const [minPrice, maxPrice] = importPrice.split("-").map((price) => parseFloat(price));
+        return minPrice === maxPrice
+            ? new Intl.NumberFormat("vi-VN").format(minPrice)
+            : `${new Intl.NumberFormat("vi-VN").format(minPrice)} - ${new Intl.NumberFormat(
+                "vi-VN"
+            ).format(maxPrice)}`;
+    };
+
+    const formattedPrice = formatImportPrice(totalPrice);
 
     const renderStars = (average) => {
         const fullStars = Math.floor(average);
@@ -258,30 +278,55 @@ function ShopDetail() {
         const emptyStars = 5 - fullStars - (partialStar > 0 ? 1 : 0);
 
         return (
-            <div style={{ display: 'flex', gap: '5px' }}>
+            <div style={{ display: "flex", gap: "5px" }}>
                 {Array.from({ length: fullStars }).map((_, index) => (
-                    <FontAwesomeIcon key={`full-${index}`} icon={solidStar} style={{ color: 'orange', fontSize: '20px' }} />
+                    <FontAwesomeIcon
+                        key={`full-${index}`}
+                        icon={solidStar}
+                        style={{ color: "orange", fontSize: "20px" }}
+                    />
                 ))}
 
                 {partialStar > 0 && (
-                    <div style={{ position: 'relative', width: '24px', overflow: 'hidden' }}>
-
-                        <FontAwesomeIcon icon={regularStar} style={{ color: '#ccc', fontSize: '20px', position: 'absolute', width: '100%', height: '100%' }} />
+                    <div style={{ position: "relative", width: "24px", overflow: "hidden" }}>
+                        <FontAwesomeIcon
+                            icon={regularStar}
+                            style={{
+                                color: "#ccc",
+                                fontSize: "20px",
+                                position: "absolute",
+                                width: "100%",
+                                height: "100%",
+                            }}
+                        />
                         <div
                             style={{
-                                position: 'absolute',
-                                width: '100%',
-                                height: '100%',
+                                position: "absolute",
+                                width: "100%",
+                                height: "100%",
                                 clipPath: `inset(0 ${100 - partialStar * 100}% 0 0)`,
                             }}
                         >
-                            <FontAwesomeIcon icon={solidStar} style={{ color: 'orange', fontSize: '20px', width: '100%', height: '100%', marginBottom: '8px' }} />
+                            <FontAwesomeIcon
+                                icon={solidStar}
+                                style={{
+                                    color: "orange",
+                                    fontSize: "20px",
+                                    width: "100%",
+                                    height: "100%",
+                                    marginBottom: "8px",
+                                }}
+                            />
                         </div>
                     </div>
                 )}
 
                 {Array.from({ length: emptyStars }).map((_, index) => (
-                    <FontAwesomeIcon key={`empty-${index}`} icon={regularStar} style={{ color: '#ccc', fontSize: '20px' }} />
+                    <FontAwesomeIcon
+                        key={`empty-${index}`}
+                        icon={regularStar}
+                        style={{ color: "#ccc", fontSize: "20px" }}
+                    />
                 ))}
             </div>
         );
@@ -301,70 +346,89 @@ function ShopDetail() {
             <HasagiNav />
             <ToastContainer />
             <div className="container-fluid">
-                <div className="row px-xl-5" style={{marginTop: "90px"}}>
+                <div className="row px-xl-5" style={{ marginTop: "90px" }}>
                     <div className="col-12">
                         <nav className="breadcrumb bg-light mb-30">
-                            <a className="breadcrumb-item text-dark" href="/feature-section">Trang chủ</a>
-                            <a className="breadcrumb-item text-dark" href="/Shop">Sản phẩm</a>
+                            <a className="breadcrumb-item text-dark" href="/feature-section">
+                                Trang chủ
+                            </a>
+                            <a className="breadcrumb-item text-dark" href="/Shop">
+                                Sản phẩm
+                            </a>
                             <span className="breadcrumb-item active">Sản phẩm chi tiết</span>
                         </nav>
                     </div>
                 </div>
             </div>
             <div className="container-fluid pb-5" style={{ maxWidth: "1400px" }}>
-                <div className="row px-xl-5" style={{marginLeft: "10px"}}>
+                <div className="row px-xl-5" style={{ marginLeft: "10px" }}>
                     <div className="col-lg-5 mb-30">
-                        <div className="product-thumbnail" style={{ textAlign: 'center'}}>
+                        <div className="product-thumbnail" style={{ textAlign: "center" }}>
                             {/* Main Image */}
-                            <img src={product.image} alt="Product" className="product-thumbnail-img" style={{ width: '100%', maxWidth: '450px', maxHeight: "450px" }} />
+                            <img
+                                src={product.image}
+                                alt="Product"
+                                className="product-thumbnail-img"
+                                style={{ width: "100%", maxWidth: "450px", maxHeight: "450px" }}
+                            />
                             {/* Thumbnail Gallery */}
-                            <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '10px' }}>
+                            <div
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    gap: "10px",
+                                    marginTop: "10px",
+                                }}
+                            >
                                 {[aboutImage, aboutImage, aboutImage, aboutImage].map((thumbnail, index) => (
                                     <img
                                         key={index}
                                         src={thumbnail}
                                         alt={`Thumbnail ${index + 1}`}
                                         style={{
-                                            width: '106px',
-                                            height: '100px',
-                                            cursor: 'pointer',
-                                            border: '1px solid #ddd',
-                                            borderRadius: '4px',
+                                            width: "106px",
+                                            height: "100px",
+                                            cursor: "pointer",
+                                            border: "1px solid #ddd",
+                                            borderRadius: "4px",
                                         }}
-                                        onClick={() => setMainImage(thumbnail)} // Optional: Click to set as main image
+                                        onClick={() => setMainImage(thumbnail)}
                                     />
                                 ))}
                             </div>
                         </div>
                     </div>
-                    <div className="col-lg-7 mb-30" style={{marginLeft: "-20px"}}>
+                    <div className="col-lg-7 mb-30" style={{ marginLeft: "-20px" }}>
                         <div className="h-100 bg-white p-30 pt-4">
-                            <h3 className="font-weight-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>{product.name}</h3>
+                            <h3
+                                className="font-weight-semi-bold mb-3"
+                                style={{ fontFamily: `"Times New Roman", Times, serif` }}
+                            >
+                                {product.name}
+                            </h3>
                             <div className="d-flex align-items-center mb-3">
                                 {/* Phần hiển thị số sao và sao */}
                                 <div className="d-flex align-items-center">
                                     <span
                                         style={{
-                                            color: '#555',
-                                            fontWeight: 'bold',
-                                            marginRight: '5px',
-                                            textDecoration: 'underline'
+                                            color: "#555",
+                                            fontWeight: "bold",
+                                            marginRight: "5px",
+                                            textDecoration: "underline",
                                         }}
                                     >
                                         {averageStars}
                                     </span>
-                                    <div>
-                                        {renderStars(averageStars)}
-                                    </div>
+                                    <div>{renderStars(averageStars)}</div>
                                 </div>
 
                                 {/* Đường phân cách */}
                                 <div
                                     style={{
-                                        height: '16px',
-                                        width: '1px',
-                                        backgroundColor: '#ddd',
-                                        margin: '0 10px',
+                                        height: "16px",
+                                        width: "1px",
+                                        backgroundColor: "#ddd",
+                                        margin: "0 10px",
                                     }}
                                 />
 
@@ -372,9 +436,9 @@ function ShopDetail() {
                                 <div className="d-flex align-items-center">
                                     <span
                                         style={{
-                                            fontWeight: 'bold',
-                                            marginRight: '3px',
-                                            textDecoration: 'underline'
+                                            fontWeight: "bold",
+                                            marginRight: "3px",
+                                            textDecoration: "underline",
                                         }}
                                     >
                                         {reviews.length}
@@ -391,7 +455,7 @@ function ShopDetail() {
                                     fontWeight: "bold",
                                     position: "relative",
                                     display: "inline-block",
-                                    marginLeft: "15px"
+                                    marginLeft: "15px",
                                 }}
                             >
                                 <span
@@ -406,30 +470,40 @@ function ShopDetail() {
                                 >
                                     đ
                                 </span>
-                                {new Intl.NumberFormat("vi-VN").format(totalPrice)}
+                                {formattedPrice}
                             </h3>
 
-                            <h3 className="font-medium-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>{product.importQuantity || "N/A"} sản phẩm có sẵn</h3>
+                            <h3
+                                className="font-medium-semi-bold mb-3"
+                                style={{ fontFamily: `"Times New Roman", Times, serif` }}
+                            >
+                                {quantityPDT}
+                            </h3>
                             <div className="d-flex mb-3" id="size-input-list">
                                 <strong className="text-dark mr-3">Sizes:</strong>
                                 {product.sizes.length > 0 ? (
-                                    <form>
+                                    <div>
                                         {uniqueSizes.map((size) => (
-                                            <div key={size.id} className="custom-control custom-radio custom-control-inline">
-                                                <input
-                                                    type="radio"
-                                                    className="custom-control-input"
-                                                    id={`size-${size.id}`}
-                                                    name="size"
-                                                    value={size.id}
-                                                    onChange={(e) => setSelectedSize(e.target.value)} // Update size state
-                                                />
-                                                <label className="custom-control-label" htmlFor={`size-${size.id}`}>
-                                                    {size.name}
-                                                </label>
-                                            </div>
+                                            <button
+                                                key={size.id}
+                                                className={`variant-button ${selectedSize === size.id ? "selected" : ""} ${!size.check ? "disabled" : ""
+                                                    }`}
+                                                onClick={() =>
+                                                    setSelectedSize((prevSelected) =>
+                                                        prevSelected === size.id ? null : size.id
+                                                    )
+                                                }
+                                                style={{
+                                                    marginRight: "10px",
+                                                    cursor: !size.check ? "not-allowed" : "pointer",
+                                                    opacity: !size.check ? 0.5 : 1,
+                                                }}
+                                                disabled={!size.check}
+                                            >
+                                                {size.name}
+                                            </button>
                                         ))}
-                                    </form>
+                                    </div>
                                 ) : (
                                     <span>No sizes available.</span>
                                 )}
@@ -437,23 +511,28 @@ function ShopDetail() {
                             <div className="d-flex mb-4" id="color-input-list">
                                 <strong className="text-dark mr-3">Colors:</strong>
                                 {product.colors.length > 0 ? (
-                                    <form>
+                                    <div>
                                         {uniqueColors.map((color) => (
-                                            <div key={color.id} className="custom-control custom-radio custom-control-inline">
-                                                <input
-                                                    type="radio"
-                                                    className="custom-control-input"
-                                                    id={`color-${color.id}`}
-                                                    name="color"
-                                                    value={color.id}
-                                                    onChange={(e) => setSelectedColor(e.target.value)}
-                                                />
-                                                <label className="custom-control-label" htmlFor={`color-${color.id}`}>
-                                                    {color.name}
-                                                </label>
-                                            </div>
+                                            <button
+                                                key={color.id}
+                                                className={`variant-button ${selectedColor === color.id ? "selected" : ""
+                                                    } ${!color.check ? "disabled" : ""}`}
+                                                onClick={() =>
+                                                    setSelectedColor((prevSelected) =>
+                                                        prevSelected === color.id ? null : color.id
+                                                    )
+                                                }
+                                                style={{
+                                                    marginRight: "10px",
+                                                    cursor: !color.check ? "not-allowed" : "pointer",
+                                                    opacity: !color.check ? 0.5 : 1,
+                                                }}
+                                                disabled={!color.check}
+                                            >
+                                                {color.name}
+                                            </button>
                                         ))}
-                                    </form>
+                                    </div>
                                 ) : (
                                     <span>No colors available.</span>
                                 )}
@@ -461,13 +540,13 @@ function ShopDetail() {
 
                             <div className="d-flex align-items-center mb-4 pt-1">
                                 <strong className="text-dark mr-3">Số lượng:</strong>
-                                <div className="input-group quantity mr-3" style={{ width: '130px' }}>
+                                <div className="input-group quantity mr-3" style={{ width: "130px" }}>
                                     <div className="input-group-btn">
                                         <button
                                             className="btn btn-primary btn-minus"
                                             onClick={() => setQuantity(quantity - 1)}
                                             disabled={quantity <= 1}
-                                            style={{ marginRight: '5px', backgroundColor: "#ffb524"}}
+                                            style={{ marginRight: "5px", backgroundColor: "#ffb524" }}
                                         >
                                             <i className="fa fa-minus"></i>
                                         </button>
@@ -483,7 +562,7 @@ function ShopDetail() {
                                         <button
                                             className="btn btn-primary btn-plus"
                                             onClick={() => setQuantity(quantity + 1)}
-                                            style={{ marginLeft: '5px', backgroundColor: "#ffb524" }}
+                                            style={{ marginLeft: "5px", backgroundColor: "#ffb524" }}
                                         >
                                             <i className="fa fa-plus"></i>
                                         </button>
@@ -491,7 +570,11 @@ function ShopDetail() {
                                 </div>
                             </div>
                             <div className="d-flex align-items-center py-1">
-                                <button id="cartBtn" onClick={handleAddToCart} className="btn btn-warning px-3 mr-2">
+                                <button
+                                    id="cartBtn"
+                                    onClick={handleAddToCart}
+                                    className="btn btn-warning px-3 mr-2"
+                                >
                                     <i className="fa fa-shopping-cart mr-1"></i> Add To Cart
                                 </button>
                                 <button className="btn btn-warning px-3" onClick={handleByNow}>
@@ -503,68 +586,84 @@ function ShopDetail() {
                                     <span
                                         onClick={handleRemoveFavorite}
                                         className="d-flex align-items-center"
-                                        style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
+                                        style={{ cursor: "pointer", display: "inline-flex", alignItems: "center" }}
                                     >
                                         <AiFillHeart size={24} className="text-danger" />
-                                        <span style={{ marginLeft: '10px', color: 'black' }}>Yêu thích ({favoriteCount})</span>
+                                        <span style={{ marginLeft: "10px", color: "black" }}>
+                                            Yêu thích ({favoriteCount})
+                                        </span>
                                     </span>
                                 ) : (
                                     <span
                                         onClick={handleAddFavorite}
                                         className="d-flex align-items-center"
-                                        style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
+                                        style={{ cursor: "pointer", display: "inline-flex", alignItems: "center" }}
                                     >
                                         <AiOutlineHeart size={24} className="text-danger" />
-                                        <span style={{ marginLeft: '10px', color: 'black' }}>Yêu thích ({favoriteCount})</span>
+                                        <span style={{ marginLeft: "10px", color: "black" }}>
+                                            Yêu thích ({favoriteCount})
+                                        </span>
                                     </span>
                                 )}
                             </div>
                         </div>
                     </div>
-                </div >
+                </div>
                 <div className="row px-xl-5">
                     <div className="col">
                         <div className="bg-light" style={{ marginBottom: "-50px" }}>
                             <div className="nav nav-tabs mb-4">
                                 <a
-                                    className={`nav-item nav-link text-dark ${activeTab === 'tab-pane-1' ? 'active' : ''}`}
-                                    onClick={() => handleTabClick('tab-pane-1')}
+                                    className={`nav-item nav-link text-dark ${activeTab === "tab-pane-1" ? "active" : ""
+                                        }`}
+                                    onClick={() => handleTabClick("tab-pane-1")}
                                 >
                                     Chi tiết sản phẩm
                                 </a>
                                 <a
-                                    className={`nav-item nav-link text-dark ${activeTab === 'tab-pane-2' ? 'active' : ''}`}
-                                    onClick={() => handleTabClick('tab-pane-2')}
+                                    className={`nav-item nav-link text-dark ${activeTab === "tab-pane-2" ? "active" : ""
+                                        }`}
+                                    onClick={() => handleTabClick("tab-pane-2")}
                                 >
                                     Mô tả sản phẩm
                                 </a>
                                 <a
-                                    className={`nav-item nav-link text-dark ${activeTab === 'tab-pane-3' ? 'active' : ''}`}
-                                    onClick={() => handleTabClick('tab-pane-3')}
+                                    className={`nav-item nav-link text-dark ${activeTab === "tab-pane-3" ? "active" : ""
+                                        }`}
+                                    onClick={() => handleTabClick("tab-pane-3")}
                                 >
                                     Đánh giá ({reviews.length})
                                 </a>
                             </div>
                             <div className="tab-content">
-                                <div className={`tab-pane fade ${activeTab === 'tab-pane-1' ? 'show active' : ''}`} id="tab-pane-1">
+                                <div
+                                    className={`tab-pane fade ${activeTab === "tab-pane-1" ? "show active" : ""}`}
+                                    id="tab-pane-1"
+                                >
                                     <p>Danh mục: {product.category}</p>
                                     <p>Kho: {product.importQuantity || "N/A"}</p>
                                     <p>Thương hiệu: {product.trademark}</p>
                                 </div>
-                                <div className={`tab-pane fade ${activeTab === 'tab-pane-2' ? 'show active' : ''}`} id="tab-pane-2">
+                                <div
+                                    className={`tab-pane fade ${activeTab === "tab-pane-2" ? "show active" : ""}`}
+                                    id="tab-pane-2"
+                                >
                                     <p>{product.description}</p>
                                 </div>
-                                <div className={`tab-pane fade ${activeTab === 'tab-pane-3' ? 'show active' : ''}`} id="tab-pane-3">
+                                <div
+                                    className={`tab-pane fade ${activeTab === "tab-pane-3" ? "show active" : ""}`}
+                                    id="tab-pane-3"
+                                >
                                     <ReviewList />
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div >
+            </div>
             <Footer />
         </>
-    )
+    );
 }
 
 export default ShopDetail;

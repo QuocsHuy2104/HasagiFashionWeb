@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Backup3 from './index3';
 import Backup2 from './index2';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import AddressService from '../../../services/AddressServices';
 
 const AddressSelection = ({ show, onClose }) => {
@@ -22,7 +22,7 @@ const AddressSelection = ({ show, onClose }) => {
     const fetchAddress = async () => {
         try {
             setLoading(true);
-            const response = await AddressService.getAllAddress(); 
+            const response = await AddressService.getAllAddress();
             let addresses = response.data;
 
             // Fetching the province, district, and ward names directly from the GHN API
@@ -98,21 +98,6 @@ const AddressSelection = ({ show, onClose }) => {
         }
     };
 
-    const handleDeleteAddress = async (id) => {
-        try {
-            const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa địa chỉ này?");
-            if (!confirmDelete) return;
-
-            const payload = {};
-            await AddressService.removeAddress(id);
-            fetchAddress(); 
-            toast.success('Xóa địa chỉ thành công!');
-        } catch (error) {
-            toast.error('Xóa địa chỉ thất bại!');
-        }
-    };
-
-
     const handleComplete = () => {
         if (selectedAddress) {
             handleAddressSelect(selectedAddress);
@@ -177,7 +162,7 @@ const AddressSelection = ({ show, onClose }) => {
             {show && !showBackup && !showBackup1 && (
                 <div className="modal" style={{ display: show ? 'block' : 'none' }}>
                     <div className="modal-dialog">
-                        <div className="modal-content" style={{ fontSize: '14px' }}>
+                        <div className="modal-content" style={{ fontSize: '14px', width: "550px" }}>
                             <div className="modal-header">
                                 <h5 className="modal-title" style={{ fontSize: '16px' }}>Địa Chỉ Của Tôi</h5>
                             </div>
@@ -185,7 +170,7 @@ const AddressSelection = ({ show, onClose }) => {
                                 <div className="list-group">
                                     {address.map((addr) => (
                                         <div key={addr.id} className="list-group-item d-flex justify-content-between align-items-center" style={{ padding: '10px 15px' }}>
-                                            <div className="d-flex align-items-center">
+                                            <div className="d-flex align-items-center" style={{ justifyContent: 'flex-start' }}>
                                                 <input
                                                     type="radio"
                                                     name="address"
@@ -193,8 +178,10 @@ const AddressSelection = ({ show, onClose }) => {
                                                     onChange={() => handleAddressChange(addr.id, addr.provinceID, addr.districtCode)}
                                                     style={{ marginRight: '10px' }}
                                                 />
-                                                <div className="ms-3">
-                                                    <div style={{ fontWeight: '500' }}>{addr.fullName} <span style={{ fontSize: '12px' }}>({addr.numberPhone})</span></div>
+                                                <div className="ms-3" style={{ textAlign: 'left' }}>
+                                                    <div style={{ fontWeight: '500' }}>
+                                                        {addr.fullName} <span style={{ fontSize: '12px' }}>({addr.numberPhone})</span>
+                                                    </div>
                                                     <div style={{ fontSize: '12px', color: '#666' }}>
                                                         {addr.address},
                                                         {addr.wardName},
@@ -204,6 +191,7 @@ const AddressSelection = ({ show, onClose }) => {
                                                     {addr.status && <span className="badge bg-danger" style={{ fontSize: '10px' }}>Mặc định</span>}
                                                 </div>
                                             </div>
+
                                             <button
                                                 className="btn ms-2"
                                                 style={{ transform: "scale(1)", fontSize: "13px" }}
@@ -211,7 +199,6 @@ const AddressSelection = ({ show, onClose }) => {
                                             >
                                                 Update
                                             </button>
-                                            <button className="btn ms-2" onClick={() => handleDeleteAddress(addr.id)} disabled={addr.status === true} style={{ transform: "scale(1)", fontSize: "13px" }}>Delete</button>
                                         </div>
                                     ))}
                                 </div>

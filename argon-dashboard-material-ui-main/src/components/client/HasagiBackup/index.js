@@ -235,8 +235,6 @@ const Backup = ({ show, onClose }) => {
                 setIsAddressAvailable(userHasAddresses);
                 if (!userHasAddresses) setStatus(true);
             } catch (error) {
-                console.error("Error checking user addresses:", error);
-                alert("Không thể kiểm tra địa chỉ của bạn.");
             }
         };
         checkUserAddresses();

@@ -38,35 +38,35 @@ function Illustration() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-  
+
     const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
       return;
     }
-  
+
     setErrors({});
     setMessage("");
     setLoading(true);
-  
+
     try {
       const response = await axios.post(
         "http://localhost:8080/api/auth/login",
         { username: username.trim(), password: password.trim() },
         { withCredentials: true }
       );
-  
+
       if (response.status === 200) {
         const expirationTime = rememberMe
           ? new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000) // 30 days
           : new Date(new Date().getTime() + 60 * 60 * 1000); // 1 hour
-  
+
         const token = response.data.token;
-  
+
         Cookies.set('user', token, { expires: expirationTime });
         Cookies.set('accountId', response.data.accountId, { expires: expirationTime });
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-  
+
         navigate("/");
       }
     } catch (error) {
@@ -81,7 +81,7 @@ function Illustration() {
       setLoading(false);
     }
   };
-  
+
 
   return (
     <IllustrationLayout
@@ -129,17 +129,29 @@ function Illustration() {
             </ArgonTypography>
           </ArgonBox>
         )}
-        <ArgonBox display="flex" alignItems="center">
-          <Switch checked={rememberMe} onChange={handleSetRememberMe} />
+        <ArgonBox display="flex" justifyContent="space-between" alignItems="center">
+          <ArgonBox display="flex" alignItems="center">
+            <Switch checked={rememberMe} onChange={handleSetRememberMe} />
+            <ArgonTypography
+              variant="button"
+              fontWeight="regular"
+              onClick={handleSetRememberMe}
+              sx={{ cursor: "pointer", userSelect: "none" }}
+            >
+              &nbsp;&nbsp;Remember me
+            </ArgonTypography>
+          </ArgonBox>
           <ArgonTypography
+            component={Link}
+            to="/forgot-password" 
             variant="button"
             fontWeight="regular"
-            onClick={handleSetRememberMe}
             sx={{ cursor: "pointer", userSelect: "none" }}
           >
-            &nbsp;&nbsp;Remember me
+            Quên mật khẩu
           </ArgonTypography>
         </ArgonBox>
+
         <ArgonBox mt={4} mb={1}>
           <ArgonButton color="info" size="large" fullWidth type="submit" disabled={loading}>
             {loading ? "Loading..." : "Đăng nhập"}
