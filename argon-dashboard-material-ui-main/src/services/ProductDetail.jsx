@@ -8,13 +8,18 @@ const ShopDetailService = {
 
     getCategoryDetail: (categoryId) => apiClient.get(`/category/${categoryId}`),
 
-    getProductDetail: ({ productId, sizeId }) => {
-        const url = sizeId ? `/webShopDetail/${productId}?selectedSizeId=${sizeId}` : `/webShopDetail/${productId}`;
+    getProductDetail: ({ productId, sizeId, colorId }) => {
+        const url = [
+            `/public/webShopDetail/${productId}`,
+            sizeId ? `?selectedSizeId=${sizeId}` : '',
+            colorId ? (sizeId ? `&selectedColorId=${colorId}` : `?selectedColorId=${colorId}`) : ''
+        ].join('');
 
-        console.log("Requesting URL:", url);
+        console.log("Requesting URL:", url); // In ra URL yêu cầu
 
         return apiClient.get(url);
     },
+
 
     checkFavorite: (productId) => {
         return apiClient.get("/favorites/check", {
@@ -33,7 +38,6 @@ const ShopDetailService = {
     }),
 
 
-
     addToCart: ({ colorId, sizeId, quantity, productId, price }) => {
         return apiClient.post('/cart/add', {
             colorId,
@@ -42,23 +46,26 @@ const ShopDetailService = {
             productId,
             price
         }, { withCredentials: true })
-
     },
 
     getFavoritesCount: (productId) =>
         apiClient.get('/favorites/count', {
             params: { productId },
             withCredentials: true
-        }),
+        }
+    ),
+
     addToFavorites: (productId) =>
         apiClient.post('/favorites', {
             productId
-        }, { withCredentials: true }),
+        }, { withCredentials: true }
+    ),
 
     removeFromFavorites: (productId) =>
         apiClient.delete(`/favorites/${productId}`, {
             withCredentials: true
-        }),
+        }
+    ),
 };
 
 export default ShopDetailService;

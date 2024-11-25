@@ -21,7 +21,6 @@ import ProtectedRoute from './ProtectedRoute ';
 import "assets/css/nucleo-icons.css";
 import "assets/css/nucleo-svg.css";
 
-
 export default function App() {
   const [controller, dispatch] = useArgonController();
   const { miniSidenav, direction, layout, openConfigurator, sidenavColor, darkSidenav, darkMode } = controller;
@@ -29,6 +28,7 @@ export default function App() {
   const [rtlCache, setRtlCache] = useState(null);
   const location = useLocation();
   const { pathname } = location;
+  const [loading, setLoading] = useState(true); // New loading state
 
   useMemo(() => {
     const cacheRtl = createCache({
@@ -61,6 +61,10 @@ export default function App() {
   useEffect(() => {
     document.documentElement.scrollTop = 0;
     document.scrollingElement.scrollTop = 0;
+
+    // Delay rendering to prevent jitter
+    const timer = setTimeout(() => setLoading(false), 200);
+    return () => clearTimeout(timer);
   }, [pathname]);
 
   const getRoutes = (allRoutes) =>
@@ -70,7 +74,6 @@ export default function App() {
       }
 
       if (route.route) {
-        // Bọc các route cần bảo vệ bằng ProtectedRoute
         return route.protected ? (
           <Route
             exact
@@ -109,31 +112,31 @@ export default function App() {
     </ArgonBox>
   );
 
-  // Lọc các routes dựa trên thuộc tính showInSidenav
   const filteredRoutes = routes.filter(route => route.showInSidenav !== false);
 
-  // Kiểm tra nếu đường dẫn hiện tại là /feature-section
-  const shouldShowSidenav =
-    pathname !== "/feature-section"
-    && pathname !== "/ShopDetail"
-    && pathname !== "/Shop"
-    && pathname !== "/Cart"
-    && pathname !== "/Contact"
-    && pathname !== "/Checkout"
-    && pathname !== "/Backup"
+  const shouldShowSidenav = 
+    pathname !== "/feature-section" 
+    && pathname !== "/ShopDetail" 
+    && pathname !== "/Shop" 
+    && pathname !== "/Cart" 
+    && pathname !== "/Contact" 
+    && pathname !== "/Checkout" 
+    && pathname !== "/Backup" 
     && pathname !== "/Favorite"
     && pathname !== "/Complete"
     && pathname !== "/History"
-    && pathname !== "/chatAI"
-    && pathname !== "/chatbot"
+    && pathname !== "/profile" 
+    && pathname !== "/chatBot" 
+    && pathname !== "/Q&A" 
+    && pathname !== "/About" 
+    // && pathname !== "/not-Found"
     && !pathname.startsWith("/history-order/");
-  ;
 
   return direction === "rtl" ? (
     <CacheProvider value={rtlCache}>
       <ThemeProvider theme={darkMode ? themeDarkRTL : themeRTL}>
         <CssBaseline />
-        {layout === "dashboard" && shouldShowSidenav && (
+        {!loading && layout === "dashboard" && shouldShowSidenav && ( // Conditionally render Sidenav after loading
           <>
             <Sidenav
               color={sidenavColor}
@@ -158,7 +161,7 @@ export default function App() {
   ) : (
     <ThemeProvider theme={darkMode ? themeDark : theme}>
       <CssBaseline />
-      {layout === "dashboard" && shouldShowSidenav && (
+      {!loading && layout === "dashboard" && shouldShowSidenav && (
         <>
           <Sidenav
             color={sidenavColor}

@@ -26,7 +26,7 @@ function Shop() {
     const [selectedBrands, setSelectedBrands] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [reviews, setReviews] = useState([]);
-    const [value, setValue] = useState([300000, 700000]);
+    const [value, setValue] = useState([0, 1000000]);
 
     const handleSliderChange = (newValue) => {
         setValue(newValue);
@@ -70,8 +70,7 @@ function Shop() {
             try {
                 const productResponse = await ProductService.getAllProducts();
                 const categoryResponse = await CategoryService.getAllCategories();
-                const brandResponse = await BrandService.getAllBrands();
-
+                const brandResponse = await BrandService.getAllBrands();;
                 if (
                     Array.isArray(productResponse.data) &&
                     Array.isArray(categoryResponse.data) &&
@@ -99,20 +98,22 @@ function Shop() {
     const filteredProducts = products.filter(product => {
         const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.categoryDTOResp?.id);
         const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(product.trademarkDTOResp?.id);
-        const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-
-        return matchesCategory && matchesBrand && matchesSearchTerm;
+const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const minPrice = parseFloat(product.minPrice) || 0;
+        const matchesPriceRange = minPrice >= value[0] && minPrice <= value[1];
+    
+        return matchesCategory && matchesBrand && matchesSearchTerm && matchesPriceRange;
     });
 
     const sortedProducts = filteredProducts.sort((a, b) => {
         if (sortOption === "price-asc") {
-            return (a.importPrice || 0) - (b.importPrice || 0);
+            return (a.minPrice || 0) - (b.minPrice || 0);
         } else if (sortOption === "price-desc") {
-            return (b.importPrice || 0) - (a.importPrice || 0);
+            return (b.minPrice || 0) - (a.minPrice || 0);
         } else if (sortOption === "popularity") {
-            return (b.popularity || 0) - (a.popularity || 0);
+            return (b.sold || 0) - (a.sold || 0);
         } else if (sortOption === "newest") {
-            return new Date(b.date) - new Date(a.date);
+            return b.id - a.id; 
         } else {
             return 0;
         }
@@ -137,7 +138,7 @@ function Shop() {
     const formatImportPrice = (importPrice) => {
         if (!importPrice) return "0đ";
 
-        const prices = importPrice.split('-').map(price => {
+        const prices = importPrice.split(' - ').map(price => {
             const trimmedPrice = price.trim();
             const numericPrice = parseFloat(trimmedPrice);
             const integerPrice = Math.floor(numericPrice);
@@ -186,7 +187,7 @@ function Shop() {
             )}
             <div className="container-fluid">
                 <div className="row px-xl-5 py-5">
-                    <div className="col-12 px-0">
+                    <div className="col-12">
                         <nav className="breadcrumb bg-light mb-30">
                             <a className="breadcrumb-item text-dark" href="/feature-section">Trang chủ</a>
                             <span className="breadcrumb-item active">Sản phẩm</span>
@@ -195,11 +196,11 @@ function Shop() {
                 </div>
             </div>
             <HasagiNav onSearch={handleSearch} />
-            <div className="container-fluid ">
+            <div className="container-fluid">
                 <div className="row px-xl-5 pt-0">
                     <div className="col-3">
                         <h5 className="section-title position-relative text-uppercase mb-3">
-                            <span className="bg-secondary pr-3">Lọc theo:</span>
+                            <span className="bg-white pr-3">Lọc theo:</span>
                         </h5>
 
                         <div className="filter-options card p-3 mb-4" style={{
@@ -285,7 +286,7 @@ function Shop() {
                                         .rc-slider-handle:focus {
                                         border-color: #ffcc00; /* Màu của nút kéo khi focus */
                                         }
-                                   `}
+                                    `}
                                 </style>
                             </div>
                         </div>
@@ -441,12 +442,8 @@ function Shop() {
                                 </div>
                             </div>
                         </div>
-
-
-
                     </div>
-
-                    <div className="col-9 bg-secondary">
+                    <div className="col-9">
                         <div className="row pt-2">
                             {currentProducts.map((product, index) => (
                                 <div className="col-lg-3 col-md-6 col-sm-6 px-2"
@@ -529,7 +526,7 @@ function Shop() {
                             ))}
 
 
-                            <div className="col-12" style={{}}>
+                            <div className="col-12" style={{ marginTop: "-30px" }}>
                                 <nav>
                                     <ul className="pagination justify-content-center">
                                         <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>

@@ -10,15 +10,25 @@ import ArgonBadge from "components/ArgonBadge";
 
 import ProductService from "services/ProductServices";
 
-function Product({ image, name, importprice }) {
+function Product({ image, video, name, importprice }) {
     const defaultImage = "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930";
     const imageUrl = image && image !== '' ? image : defaultImage;
+    const videoUrl = video && video !== '' ? video : "";
 
     return (
         <ArgonBox display="flex" alignItems="center" px={1} py={0.5}>
-            <ArgonBox mr={2}>
-                <ArgonAvatar src={imageUrl} alt={name} size="xxl" variant="rounded" />
-            </ArgonBox>
+            {image && (
+                <ArgonBox mr={2}>
+                    <ArgonAvatar src={image} alt={name} size="xxl" variant="rounded" />
+                </ArgonBox>
+            )}
+            {video && (
+                <ArgonBox mr={2} sx={{ width: '120px', height: '120px' }}>
+                    <video width="100%" height="100%" controls style={{ borderRadius: '16px' }}>
+                        <source src={video} type="video/mp4" />
+                    </video>
+                </ArgonBox>
+            )}
             <ArgonBox display="flex" flexDirection="column">
                 <ArgonTypography variant="button" fontWeight="medium" color="textPrimary">
                     {name}
@@ -28,13 +38,15 @@ function Product({ image, name, importprice }) {
                 </ArgonTypography>
             </ArgonBox>
         </ArgonBox>
+
     );
 }
 
 Product.propTypes = {
     name: PropTypes.string.isRequired,
     image: PropTypes.string,
-    importprice: PropTypes.string,
+    video: PropTypes.string,
+    importprice: PropTypes.number,
 };
 
 const ProductTable = ({ onEditClick, setSelectedProduct }) => {
@@ -98,17 +110,17 @@ const ProductTable = ({ onEditClick, setSelectedProduct }) => {
     };
 
 
-
-
-
     const rows = products.map(product => ({
         SanPham: (
             <Product
-                image={`http://localhost:3000/${product.image || "No_Image_Available.jpg"}`}
+                image={product.image ? product.image : null} // Chỉ truyền dữ liệu image nếu có
+                video={product.video ? product.video : null} // Chỉ truyền dữ liệu video nếu có
                 name={product.name || "Unknown Product"}
                 importprice={formatImportPrice(product.importPrice)}
             />
         ),
+
+
         SoLuong: (
             <ArgonTypography variant="caption" color="secondary" fontWeight="medium">
                 {product.importQuantity > 0 ? product.importQuantity || "N/A" : "0"}

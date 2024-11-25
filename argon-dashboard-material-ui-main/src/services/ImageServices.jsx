@@ -1,4 +1,3 @@
-
 import apiClient from "config/axiosConfig";
 
 const ImageService = {

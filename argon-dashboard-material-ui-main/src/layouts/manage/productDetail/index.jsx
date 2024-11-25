@@ -195,9 +195,13 @@ function ProductDetail() {
             });
             setSelectedSize([]);
             setSelectedColor([]);
-
         } catch (e) {
             console.error("Error saving product details:", e);
+        
+            // Use e.response?.data or e.message if available, otherwise show a default error message
+            const errorMessage = e.response?.data || "An unexpected error occurred.";
+            
+            toast.error(errorMessage);
         }
     };
 

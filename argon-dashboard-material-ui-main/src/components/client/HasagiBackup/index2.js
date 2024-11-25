@@ -1,31 +1,28 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import "components/client/assets/css/phanloai1.css";
 import ArgonInput from "components/ArgonInput";
 import ArgonButton from "components/ArgonButton";
 import axios from "axios";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
-import Box from "@mui/material/Box";
-import Cookies from "js-cookie";
+import "components/client/assets/css/phanloai1.css";
 import Select from "react-select";
+import AddressSelection from './index1';
 import AddressService from '../../../services/AddressServices';
 
-const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
-    const [fullName, setFullName] = useState("");
-    const [numberPhone, setNumBerPhone] = useState("");
-    const [address, setAddress] = useState("");
-    const [selectedProvince, setSelectedProvince] = useState(null);
-    const [selectedDistrict, setSelectedDistrict] = useState(null);
-    const [selectedWard, setSelectedWard] = useState(null);
-    const [status, setStatus] = useState(false);
-    const [showTabs, setShowTabs] = useState(false);
+const Backup2 = ({ show, onClose, onAddressUpdated }) => {
+    const [fullName, setFullName] = useState('');
+    const [numberPhone, setNumBerPhone] = useState('');
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
-    const wrapperRef = useRef(null);
+    const [selectedProvince, setSelectedProvince] = useState(null); 
+    const [selectedDistrict, setSelectedDistrict] = useState(null); 
+    const [selectedWard, setSelectedWard] = useState(null);
+    const [status, setStatus] = useState(false);
+    const [showAddressSelection, setShowAddressSelection] = useState(false);
+    const [isAddressAvailable, setIsAddressAvailable] = useState(true);
+    const [address, setAddress] = useState('');
     const [errors, setErrors] = useState({});
-    const [isSubmitted, setIsSubmitted] = useState(false); // New state variable
+    const [isSubmitted, setIsSubmitted] = useState(false); 
 
     const validateForm = () => {
         const newErrors = {};
@@ -53,10 +50,9 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
         }
 
         setErrors(newErrors);
-        return Object.keys(newErrors).length === 0; // Return true if no errors
+        return Object.keys(newErrors).length === 0; 
     };
 
-    // In your return statement, add error messages for the province, district, and ward selections
     {
         isSubmitted && errors.selectedProvince && (
             <div className="text-danger">{errors.selectedProvince}</div>
@@ -77,7 +73,7 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
     const handleInputClick = (field) => {
         setErrors((prevErrors) => ({
             ...prevErrors,
-            [field]: "", // Clear error when input is clicked
+            [field]: "", 
         }));
     };
 
@@ -92,7 +88,7 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
 
     const handleFullNameBlur = () => {
         if (isSubmitted) {
-            validateForm(); // Validate only when the field loses focus
+            validateForm();
         }
     };
 
@@ -100,7 +96,6 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
         const value = e.target.value;
         setNumBerPhone(value);
 
-        // Clear the specific error on change
         if (isSubmitted) {
             setErrors((prevErrors) => ({ ...prevErrors, numberPhone: "" }));
         }
@@ -108,7 +103,7 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
 
     const handleNumberPhoneBlur = () => {
         if (isSubmitted) {
-            validateForm(); // Validate only when the field loses focus
+            validateForm();
         }
     };
 
@@ -123,66 +118,42 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
 
     const handleAddressBlur = () => {
         if (isSubmitted) {
-            validateForm(); // Validate only when the field loses focus
-        }
-    };
-
-    const fetchAddressById = async () => {
-        try {
-            if (addressId) {
-                const response = await axios.get(`http://localhost:3000/api/addresses/${addressId}`);
-                const addressData = response.data;
-                setFullName(addressData.fullName);
-                setNumBerPhone(addressData.numberPhone);
-                setAddress(addressData.address);
-                setSelectedProvince(addressData.provinceID);
-                setSelectedDistrict(addressData.districtCode);
-                setSelectedWard(addressData.wardCode);
-                setStatus(addressData.status);
-            }
-        } catch (error) {
-            console.error("Error fetching address:", error);
+            validateForm();
         }
     };
 
     useEffect(() => {
-        if (addressId) {
-            fetchAddressById();
-        }
-    }, [addressId]);
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
-                setShowTabs(false);
+        const fetchProvinces = async () => {
+            try {
+                const response = await axios.get(
+                    "https://online-gateway.ghn.vn/shiip/public-api/master-data/province",
+                    {
+                        headers: {
+                            Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d",
+                        },
+                    }
+                );
+                setProvinces(response.data.data);
+            } catch (error) {
+                console.error("Error fetching provinces:", error);
             }
         };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
+        fetchProvinces();
     }, []);
 
-    const fetchProvinces = async () => {
-        try {
-            const response = await axios.get(
-                "https://online-gateway.ghn.vn/shiip/public-api/master-data/province",
-                {
-                    headers: { Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d" },
-                }
-            );
-            setProvinces(response.data.data);
-        } catch (error) {
-            console.error("Error fetching provinces:", error);
-        }
-    };
+    const handleProvinceChange = async (provinceId) => {
+        setSelectedProvince(provinceId);
+        setSelectedDistrict("");
+        setSelectedWard("");
+        setErrors((prevErrors) => ({ ...prevErrors, selectedProvince: "" }));
 
-    const fetchDistricts = async (provinceId) => {
         try {
             const response = await axios.get(
                 "https://online-gateway.ghn.vn/shiip/public-api/master-data/district",
                 {
-                    headers: { Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d" },
+                    headers: {
+                        Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d",
+                    }, 
                     params: { province_id: provinceId },
                 }
             );
@@ -192,12 +163,20 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
         }
     };
 
-    const fetchWards = async (districtId) => {
+    const handleDistrictChange = async (districtId) => {
+        setSelectedDistrict(districtId);
+        setSelectedWard("");
+
+        // Clear the error for the district selection
+        setErrors((prevErrors) => ({ ...prevErrors, selectedDistrict: "" }));
+
         try {
             const response = await axios.get(
                 "https://online-gateway.ghn.vn/shiip/public-api/master-data/ward",
                 {
-                    headers: { Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d" },
+                    headers: {
+                        Token: "2bd710e9-8c4e-11ef-9b94-5ef2ee6a743d",
+                    },
                     params: { district_id: districtId },
                 }
             );
@@ -208,20 +187,23 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
     };
 
     useEffect(() => {
-        fetchProvinces();
+        const checkUserAddresses = async () => {
+            try {
+                const addressCheckResponse = await AddressService.getAllAddress();
+                const userHasAddresses = addressCheckResponse.data.length > 0;
+                if (!userHasAddresses) {
+                    setStatus(true);
+                    setIsAddressAvailable(false);
+                } else {
+                    setIsAddressAvailable(true);
+                }
+            } catch (error) {
+                console.error("Error checking user addresses:", error);
+            }
+        };
+        checkUserAddresses();
     }, []);
 
-    useEffect(() => {
-        if (selectedProvince) {
-            fetchDistricts(selectedProvince);
-        }
-    }, [selectedProvince]);
-
-    useEffect(() => {
-        if (selectedDistrict) {
-            fetchWards(selectedDistrict);
-        }
-    }, [selectedDistrict]);
 
     const handleComplete = async () => {
         setIsSubmitted(true); // Set submitted state to true
@@ -236,34 +218,21 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
             districtCode: selectedDistrict,
             wardCode: selectedWard,
             status,
-            address,
+            address: address,
         };
         try {
-            await AddressService.updateAddress(addressId, formData);
+            await AddressService.getAllAddress();
+            await AddressService.createAddress(formData);
             onClose();
+            await AddressService.getAllAddress();
             onAddressUpdated();
+            <AddressSelection show={showAddressSelection} onClose={() => setShowAddressSelection(false)} />
         } catch (error) {
             console.error("Error submitting address:", error);
         }
     };
-
     const handleCheckboxChange = (event) => {
         setStatus(event.target.checked);
-    };
-
-    const handleProvinceChange = (provinceId) => {
-        setSelectedProvince(provinceId);
-        setSelectedDistrict("");
-        setSelectedWard("");
-        fetchDistricts(provinceId);
-        setErrors((prevErrors) => ({ ...prevErrors, selectedProvince: "" }));
-    };
-
-    const handleDistrictChange = (id) => {
-        setSelectedDistrict(id);
-        setSelectedWard("");
-        fetchWards(id);
-        setErrors((prevErrors) => ({ ...prevErrors, selectedDistrict: "" }));
     };
 
     //chọn tỉnh thành phố
@@ -284,22 +253,67 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
         label: ward.WardName,
     }));
 
-    const resetForm = () => {
-        setFullName("");
-        setNumBerPhone("");
-        setAddress("");
-        setSelectedProvince("");
-        setSelectedDistrict("");
-        setSelectedWard("");
-        setErrors({});
-        setIsSubmitted(false);
-        setDistricts([]);
-        setWards([]);
+    const customStylesProvince = {
+        menuList: (provided) => ({
+            ...provided,
+            maxHeight: "250px", // Chiều cao tối đa của danh sách dropdown
+            overflowY: "auto", // Bật thanh cuộn dọc
+        }),
+        // Tùy chỉnh thanh cuộn trên trình duyệt hỗ trợ Webkit (Chrome, Edge, Safari)
+        menuListScroll: {
+            "::-webkit-scrollbar": {
+                width: "6px",
+            },
+            "::-webkit-scrollbar-thumb": {
+                backgroundColor: "#888",
+                borderRadius: "4px",
+            },
+            "::-webkit-scrollbar-thumb:hover": {
+                backgroundColor: "#555",
+            },
+        },
     };
 
-    const handleModalClose = () => {
-        resetForm(); // Reset form data
-        onClose(); // Close the modal
+    const customStylesDistrict = {
+        menuList: (provided) => ({
+            ...provided,
+            maxHeight: "190px", // Chiều cao tối đa của danh sách dropdown
+            overflowY: "auto", // Bật thanh cuộn dọc
+        }),
+        // Tùy chỉnh thanh cuộn trên trình duyệt hỗ trợ Webkit (Chrome, Edge, Safari)
+        menuListScroll: {
+            "::-webkit-scrollbar": {
+                width: "6px",
+            },
+            "::-webkit-scrollbar-thumb": {
+                backgroundColor: "#888",
+                borderRadius: "4px",
+            },
+            "::-webkit-scrollbar-thumb:hover": {
+                backgroundColor: "#555",
+            },
+        },
+    };
+
+    const customStylesWard = {
+        menuList: (provided) => ({
+            ...provided,
+            maxHeight: "130px", // Chiều cao tối đa của danh sách dropdown
+            overflowY: "auto", // Bật thanh cuộn dọc
+        }),
+        // Tùy chỉnh thanh cuộn trên trình duyệt hỗ trợ Webkit (Chrome, Edge, Safari)
+        menuListScroll: {
+            "::-webkit-scrollbar": {
+                width: "6px",
+            },
+            "::-webkit-scrollbar-thumb": {
+                backgroundColor: "#888",
+                borderRadius: "4px",
+            },
+            "::-webkit-scrollbar-thumb:hover": {
+                backgroundColor: "#555",
+            },
+        },
     };
 
     if (!show) return null;
@@ -309,10 +323,10 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
             <div className="modal1-dialog">
                 <div className="modal1-content">
                     <div className="modal1-header">
-                        <h5 className="modal1-title">Cập nhật địa chỉ</h5>
+                        <h5 className="modal1-title">Địa chỉ mới</h5>
                         <button type="button" className="btn-close" onClick={onClose}></button>
                     </div>
-                    <div className="modal-body p-4" ref={wrapperRef}>
+                    <div className="modal1-body p-4">
                         <div className="row">
                             <div className="col-md-6 form-group">
                                 <ArgonInput
@@ -376,15 +390,14 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
                             </div>
                             <div className="col-md-12 form-group">
                                 <Select
+                                styles={customStylesProvince}
                                     placeholder="Chọn tỉnh/thành phố"
-                                    className="province-select"
-                                    value={provinceOptions.find((option) => option.value == selectedProvince)}
-                                    onChange={(selectedOption) => {
-                                        handleProvinceChange(selectedOption.value);
+                                    value={provinceOptions.find((option) => option.value === selectedProvince)}
+                                    onChange={(option) => {
+                                        handleProvinceChange(option.value)
                                         setErrors((prevErrors) => ({ ...prevErrors, selectedProvince: "" }));
                                     }}
                                     options={provinceOptions}
-                                    isSearchable
                                 />
                                 {isSubmitted && errors.selectedProvince && (
                                     <div className="text-danger">{errors.selectedProvince}</div>
@@ -392,16 +405,15 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
                             </div>
                             <div className="col-md-12 form-group">
                                 <Select
-                                    className="district-select"
-                                    value={districtOptions.find((option) => option.value == selectedDistrict)}
-                                    onChange={(selectedOption) => {
-                                        handleDistrictChange(selectedOption.value);
+                                styles={customStylesDistrict}
+                                    placeholder="Chọn quận/huyện"
+                                    value={districtOptions.find((option) => option.value === selectedDistrict)}
+                                    onChange={(option) => {
+                                        handleDistrictChange(option.value);
                                         setErrors((prevErrors) => ({ ...prevErrors, selectedDistrict: "" }));
                                     }}
                                     options={districtOptions}
-                                    placeholder="Chọn quận/huyện"
                                     isDisabled={!selectedProvince}
-                                    isSearchable
                                 />
                                 {isSubmitted && errors.selectedDistrict && (
                                     <div className="text-danger">{errors.selectedDistrict}</div>
@@ -409,38 +421,32 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
                             </div>
                             <div className="col-md-12 form-group">
                                 <Select
-                                    className="ward-select"
+                                styles={customStylesWard}
+                                    placeholder="Chọn phường/xã"
                                     value={wardOptions.find((option) => option.value === selectedWard)}
-                                    onChange={(selectedOption) => {
-                                        setSelectedWard(selectedOption.value);
+                                    onChange={(option) => {
+                                        setSelectedWard(option.value);
                                         setErrors((prevErrors) => ({ ...prevErrors, selectedWard: "" }));
                                     }}
                                     options={wardOptions}
-                                    placeholder="Chọn phường/xã"
                                     isDisabled={!selectedDistrict}
-                                    isSearchable
                                 />
                                 {isSubmitted && errors.selectedWard && (
                                     <div className="text-danger">{errors.selectedWard}</div>
                                 )}
                             </div>
-                            {!status && (
-                                <label style={{ marginLeft: "10px", marginBottom: "0" }}>
-                                    Đặt làm địa chỉ mặc định
-                                    <input
-                                        type="checkbox"
-                                        checked={status}
-                                        onChange={handleCheckboxChange}
-                                        style={{ transform: "scale(1.5)", marginBottom: "0", marginLeft: "10px" }}
-                                    />
-
-                                </label>
-                            )}
+                            <label style={{ marginLeft: "10px", marginBottom: "0" }}>Đặt làm địa chỉ mặc định
+                                <input
+                                    type="checkbox"
+                                    checked={status}
+                                    onChange={handleCheckboxChange}
+                                    disabled={!isAddressAvailable}
+                                    style={{ transform: "scale(1.5)", marginBottom: "0", marginLeft: "10px" }}
+                                />
+                            </label>
                         </div>
                         <div className="d-flex justify-content-between mt-4">
-                            <ArgonButton className="btn btn-light" onClick={handleModalClose}>
-                                Trở Lại
-                            </ArgonButton>
+                            <ArgonButton onClick={onClose}>Trở lại</ArgonButton>
                             <ArgonButton className="btn btn-primary" onClick={handleComplete}>
                                 Hoàn thành
                             </ArgonButton>
@@ -452,11 +458,10 @@ const Backup3 = ({ show, onClose, onAddressUpdated, addressId }) => {
     );
 };
 
-Backup3.propTypes = {
+Backup2.propTypes = {
     show: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
     onAddressUpdated: PropTypes.func.isRequired,
-    addressId: PropTypes.string.isRequired,
 };
 
-export default Backup3;
+export default Backup2;

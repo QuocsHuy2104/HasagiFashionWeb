@@ -40,10 +40,31 @@ export default function DataTable({ sizes, onEditClick, onDeleteClick }) {
                 columns={columns}
                 paginationModel={paginationModel}
                 onPaginationModelChange={setPaginationModel}
-                pageSizeOptions={[5, 10]}
                 checkboxSelection
                 onRowSelectionModelChange={handleSelectionModelChange}
-                sx={{ border: 0 }}
+                sx={{
+                    "& .MuiDataGrid-footerContainer": {
+                        justifyContent: "space-between", // Center-align the footer content
+                    },
+                    "& .MuiTablePagination-selectLabel": {
+                        marginRight: 0, // Adjusts the right margin for the label
+                    },
+                    "& .MuiTablePagination-root": {
+                        width: "400px", // Adjusts the total pagination width
+                    },
+                    "& .MuiInputBase-root": {
+                        maxWidth: "60px",
+                        marginTop: "-10px", // Điều chỉnh giá trị này để đẩy nó lên trên
+                    },
+                    "& .MuiTablePagination-actions": {
+                        display: "flex",
+                        alignItems: "center",
+                    },
+                    "& .MuiSelect-select": {
+                        paddingRight: "24px", // Adjust padding for dropdown
+                    },
+                    border: 0,
+                }}
             />
 
             {selectedRows.length > 0 && (

@@ -334,7 +334,6 @@ export default function DataGridDemo({ items, onEdit, onDelete }) {
                     />
                 </Box>
             </Modal>
-            <ToastContainer />
         </>
     );
 }

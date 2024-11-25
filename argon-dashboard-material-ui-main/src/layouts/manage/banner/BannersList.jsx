@@ -4,13 +4,13 @@ import BannerDataService from "../../../services/BannerServices";
 import { Button } from "react-bootstrap";
 import { FaPen, FaTrash } from 'react-icons/fa';
 import "../../../assets/css/app.css";
-
-// Import các styles cần thiết cho slick-carousel
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import ArgonButton from "../../../components/ArgonButton";
 
-// Định nghĩa các kiểu props cho các nút điều hướng tùy chỉnh
 const CustomPrevArrow = ({ onClick }) => (
     <button className="carousel-arrow carousel-arrow-left" onClick={onClick}>
         &#10094;
@@ -34,7 +34,6 @@ CustomNextArrow.propTypes = {
 const BannersList = ({ getBannerId }) => {
     const [banners, setBanners] = useState([]);
 
-    // Lấy danh sách banner từ Firestore
     const getBanners = async () => {
         try {
             const data = await BannerDataService.getAllBanners();
@@ -44,18 +43,15 @@ const BannersList = ({ getBannerId }) => {
         }
     };
 
-    // Xử lý logic khi bấm nút edit
-    const handleEditBanner = (id, images) => {
-        console.log("Banner ID:", id);
-        console.log("Images:", images);
-    };
 
-    // Xóa banner
+
     const deleteBannerHandler = async (id) => {
         try {
             await BannerDataService.deleteBanner(id);
-            getBanners(); // Cập nhật danh sách banner sau khi xóa
+            toast.success("Xóa thành công!");
+            getBanners();
         } catch (error) {
+            toast.error("Thêm thất bại!");
             console.error("Failed to delete banner:", error);
         }
     };
@@ -64,7 +60,7 @@ const BannersList = ({ getBannerId }) => {
         getBanners();
     }, []);
 
-    // Cấu hình cho slider
+
     const sliderSettings = {
         dots: true,
         infinite: true,
@@ -77,12 +73,13 @@ const BannersList = ({ getBannerId }) => {
     };
 
     return (
-        <>
+        <div className="mt-2">
             <div className="mb-2">
-                <Button variant="dark" onClick={getBanners}>Refresh List</Button>
+                <ArgonButton color="success" onClick={getBanners}>
+                    Làm mới danh sách
+                </ArgonButton>
             </div>
 
-            {/* Hiển thị các banner */}
             <div className="banner-wrapper">
                 {banners.map((doc) => (
                     <div key={doc.id} className="banner-container">
@@ -100,7 +97,7 @@ const BannersList = ({ getBannerId }) => {
                                                 <h5>{doc.title}</h5>
                                                 <div>
                                                     <Button
-                                                        onClick={() => getBannerId(doc.id, doc.imageUrls)}
+                                                        onClick={() => getBannerId(doc.id, doc.imageUrls)} // Truyền cả id và danh sách ảnh
                                                         className="btn-transparent-secondary"
                                                     >
                                                         <FaPen />
@@ -133,11 +130,10 @@ const BannersList = ({ getBannerId }) => {
                     </div>
                 ))}
             </div>
-        </>
+        </div>
     );
 };
 
-// Định nghĩa kiểu dữ liệu cho props
 BannersList.propTypes = {
     getBannerId: PropTypes.func.isRequired,
 };
