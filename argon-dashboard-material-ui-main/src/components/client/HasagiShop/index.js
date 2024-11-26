@@ -455,134 +455,130 @@ function Shop() {
                     <div className="col-9 bg-secondary">
                         <div className="row pt-2">
                             <div
+                                className="product-list"
                                 style={{
-                                    display: "grid",
-                                    gridTemplateColumns: "repeat(4, 1fr)",
+                                    display: "flex",
+                                    flexWrap: "wrap",
                                     gap: "20px",
+                                    justifyContent: "space-between",
                                 }}
                             >
                                 {currentProducts.map((product, index) => (
                                     <div
                                         key={index}
+                                        className="product-card"
                                         style={{
+                                            width: "calc(25% - 20px)",
                                             position: "relative",
                                             overflow: "hidden",
-                                            transition: "transform 0.3s ease",
                                         }}
-                                        onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-5px)")}
-                                        onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
+                                        onMouseEnter={(e) => {
+                                            const iconContainer = e.currentTarget.querySelector('.icon-container');
+                                            if (iconContainer) {
+                                                iconContainer.style.opacity = '1';
+                                                iconContainer.style.pointerEvents = 'auto';
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            const iconContainer = e.currentTarget.querySelector('.icon-container');
+                                            if (iconContainer) {
+                                                iconContainer.style.opacity = '0';
+                                                iconContainer.style.pointerEvents = 'none';
+                                            }
+                                        }}
                                     >
-                                        <Link to={`/ShopDetail?id=${product.id}`}>
-                                            <Card
-                                                style={{
-                                                    border: "1px solid #ddd",
-                                                    borderRadius: "10px",
-                                                    boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
-                                                }}
-                                            >
+                                        <Link to={`/ShopDetail?id=${product.id}`} style={{ textDecoration: "none" }}>
+                                            <Card className="card-container" style={{ position: "relative" }}>
                                                 <div
+                                                    className="image-container"
                                                     style={{
                                                         position: "relative",
+                                                        overflow: "hidden",
                                                         width: "100%",
-                                                        height: "250px",
+                                                        height: "auto",
                                                     }}
-                                                    className="image-container"
-                                                    onMouseEnter={(e) => {
-                                                        console.log("Hover vào ảnh");
-                                                        const iconContainer = e.currentTarget.querySelector(".icon-container");
-                                                        if (iconContainer) {
-                                                            iconContainer.style.opacity = 1;
-                                                            iconContainer.style.pointerEvents = "auto";
-                                                        }
-                                                    }}
-                                                    onMouseLeave={(e) => {
-                                                        console.log("Rời khỏi ảnh");
-                                                        const iconContainer = e.currentTarget.querySelector(".icon-container");
-                                                        if (iconContainer) {
-                                                            iconContainer.style.opacity = 0;
-                                                            iconContainer.style.pointerEvents = "none";
-                                                        }
-                                                    }}
-
                                                 >
+                                                    <div
+                                                        style={{
+                                                            position: "absolute",
+                                                            top: "10px",
+                                                            left: "10px",
+                                                            backgroundColor: "#F30", // Nền mờ cho dễ đọc
+                                                            color: "white",
+                                                            padding: "1px 7px",
+                                                            borderRadius: "5px",
+                                                            zIndex: 5,
+                                                        }}
+                                                    >
+                                                        {product.sale}%
+                                                    </div>
                                                     <img
                                                         src={product.image}
                                                         alt={product.name}
                                                         style={{
                                                             width: "100%",
-                                                            height: "100%",
-                                                            objectFit: "cover",
-                                                            borderRadius: "10px 10px 0 0",
+                                                            height: "auto",
+                                                            transition: "transform 0.3s ease",
                                                         }}
                                                     />
                                                     <div
+                                                        className="icon-container"
                                                         style={{
                                                             position: "absolute",
                                                             top: "10px",
                                                             right: "10px",
+                                                            zIndex: 10,
                                                             display: "flex",
                                                             flexDirection: "column",
                                                             alignItems: "center",
-                                                            gap: "10px",
+                                                            gap: "15px", // Tăng khoảng cách giữa các icon
                                                             opacity: 0,
                                                             pointerEvents: "none",
-                                                            zIndex: 10,
                                                             transition: "opacity 0.3s ease",
                                                         }}
-                                                        className="icon-container"
                                                     >
                                                         <FavoriteBorderIcon
+                                                            className="icon"
                                                             style={{
-                                                                fontSize: "35px",
-                                                                color: "#fff",
-                                                                backgroundColor: "rgba(0, 0, 0, 0.6)",
-                                                                padding: "10px",
-                                                                borderRadius: "50%",
-                                                                cursor: "pointer",
-                                                            }}
+                                                                fontSize: "50px !important",
+                                                                color: "black",
+                                                                backgroundColor: "white",
+                                                            }} // Kích cỡ icon lớn hơn
                                                         />
                                                         <ShoppingCartIcon
+                                                            className="icon"
                                                             style={{
-                                                                fontSize: "35px",
-                                                                color: "#fff",
-                                                                backgroundColor: "rgba(0, 0, 0, 0.6)",
-                                                                padding: "10px",
-                                                                borderRadius: "50%",
-                                                                cursor: "pointer",
+                                                                fontSize: "50px !important",
+                                                                color: "black",
+                                                                backgroundColor: "white",
                                                             }}
                                                         />
                                                         <SearchIcon
+                                                            className="icon"
                                                             style={{
-                                                                fontSize: "35px",
-                                                                color: "#fff",
-                                                                backgroundColor: "rgba(0, 0, 0, 0.6)",
-                                                                padding: "10px",
-                                                                borderRadius: "50%",
-                                                                cursor: "pointer",
+                                                                fontSize: "50px !important",
+                                                                color: "black",
+                                                                backgroundColor: "white",
                                                             }}
                                                         />
                                                     </div>
                                                 </div>
 
 
-                                                <div
-                                                    style={{
-                                                        padding: "15px",
-                                                        textAlign: "center",
-                                                    }}
-                                                >
-                                                    <div>{product.name || "Product Name Goes Here"}</div>
-                                                    <Typography>
+                                                <div className="card-content" style={{ padding: "10px" }}>
+                                                    <div style={{ fontWeight: "bold" }}>{product.name || "Product Name Goes Here"}</div>
+                                                    <Typography variant="body2">
                                                         {formatImportPrice(product.importPrice)}
-                                                        <div>{product.sale}%</div>
                                                     </Typography>
-                                                    <Typography>
-                                                        <p>⭐ {calculateAverageStars(product.id)} </p>
+                                                    <Typography variant="body2">
+                                                        <p>⭐ {calculateAverageStars(product.id)}</p>
                                                     </Typography>
                                                 </div>
                                             </Card>
                                         </Link>
                                     </div>
+
+
                                 ))}
                             </div>
 
