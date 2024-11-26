@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Card from "@mui/material/Card"; 
+import Card from "@mui/material/Card";
 import Footer from "../../../examples/Footer";
 import DashboardLayout from "../../../examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "../../../examples/Navbars/DashboardNavbar";
@@ -11,7 +11,10 @@ import Table from "../../../examples/Tables/Table";
 import CategoryTable from "./data";
 import CategoriesService from "../../../services/CategoryServices";
 import { Image } from "react-bootstrap";
-import { toast } from "react-toastify";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { storage } from "../../../config/firebase-config";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 function Category() {
   const [formData, setFormData] = useState({
@@ -20,20 +23,20 @@ function Category() {
   });
 
   const [categories, setCategories] = useState([]);
-  const [errors, setErrors] = useState({ name: false, image: false }); // Track validation errors
+  const [errors, setErrors] = useState({ name: false, image: false });
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await CategoriesService.getAllCategories();
-        setCategories(response.data || []);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
     fetchData();
   }, []);
+
+  const fetchData = async () => {
+    try {
+      const response = await CategoriesService.getAllCategories();
+      setCategories(response.data || []);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -43,52 +46,114 @@ function Category() {
   };
 
   const handleFileChange = (e) => {
+    const file = e.target.files[0];
     setFormData({
       ...formData,
-      image: e.target.files[0],
+      image: file || formData.image,
     });
   };
 
   const validateForm = () => {
     const newErrors = { name: false, image: false };
+
+    // Kiểm tra tên danh mục
     if (!formData.name.trim()) {
       newErrors.name = true;
-      toast.error("Category name is required.");
+      toast.warn("Vui lòng nhập tên danh mục!!!");
+    } else if (/\d/.test(formData.name)) {
+      newErrors.name = true;
+      toast.warn("Tên danh mục không được nhập số!!!");
     }
+
+    // Kiểm tra ảnh
     if (!formData.image) {
       newErrors.image = true;
-      toast.error("Image is required.");
+      toast.warn("Vui lòng chọn ảnh danh mục!!!");
     }
-    setErrors(newErrors);
-    return !newErrors.name && !newErrors.image; // Return true if no errors
+
+    setErrors(newErrors); 
+    console.log("Form errors: ", newErrors);
+
+    return !newErrors.name && !newErrors.image; 
   };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      return; // Stop submission if validation fails
-    }
-
-    const data = new FormData();
-    data.append("name", formData.name);
-    if (formData.image) {
-      data.append("image", formData.image);
+    const isValid = validateForm();
+    if (!isValid) {
+      console.log("Form is invalid. Aborting submit.");
+      return; 
     }
 
     try {
+      let imageUrl;
+      if (formData.image instanceof File) {
+        const imageFile = formData.image;
+        const storageRef = ref(storage, `categories/${imageFile.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, imageFile);
+
+        await new Promise((resolve, reject) => {
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+              console.log(
+                `Upload progress: ${(snapshot.bytesTransferred / snapshot.totalBytes) * 100}%`
+              );
+            },
+            (error) => {
+              console.error("Error uploading file:", error);
+              toast.error("Lỗi khi tải ảnh lên Firebase.");
+              reject(error);
+            },
+            async () => {
+              try {
+                imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                resolve();
+              } catch (error) {
+                console.error("Error getting download URL:", error);
+                toast.error("Lỗi khi lấy URL ảnh.");
+                reject(error);
+              }
+            }
+          );
+        });
+      } else {
+        imageUrl = formData.image;
+      }
+
+      const data = {
+        name: formData.name,
+        image: imageUrl,
+      };
+
+      const formDataObj = new FormData();
+      formDataObj.append("name", data.name);
+      formDataObj.append("image", data.image);
+
       let result;
       if (formData.id) {
-        result = await CategoriesService.updateCategory(formData.id, data);
-        setCategories(categories.map(cate => cate.id === result.data.id ? result.data : cate));
+        result = await CategoriesService.updateCategory(formData.id, formDataObj, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        setCategories(categories.map((cate) => (cate.id === result.data.id ? result.data : cate)));
+        toast.success("Cập nhật danh mục thành công");
       } else {
-        result = await CategoriesService.createCategory(data);
+        result = await CategoriesService.createCategory(formDataObj, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
         setCategories([...categories, result.data]);
+        toast.success("Thêm danh mục thành công");
       }
-      toast.success("Category saved successfully");
       resetForm();
     } catch (error) {
-      toast.error(`Error: ${error.response ? error.response.data : error.message}`);
+      console.error("Unexpected error:", error);
+      toast.error("Có lỗi xảy ra. Vui lòng thử lại!");
     }
   };
 
@@ -97,7 +162,7 @@ function Category() {
       name: "",
       image: null,
     });
-    setErrors({ name: false, image: false }); // Reset errors
+    setErrors({ name: false, image: false });
   };
 
   const handleEditClick = (category) => {
@@ -118,12 +183,12 @@ function Category() {
   return (
     <DashboardLayout>
       <DashboardNavbar />
-
+      <ToastContainer />
       <ArgonBox py={3}>
         <ArgonBox mb={3}>
           <Card>
             <ArgonBox display="flex" justifyContent="space-between" p={3}>
-              <ArgonTypography variant="h6">Manage Category</ArgonTypography>
+              <ArgonTypography variant="h6">Quản lý danh mục</ArgonTypography>
             </ArgonBox>
 
             <ArgonBox
@@ -155,8 +220,7 @@ function Category() {
                   overflow="hidden"
                   mb={2}
                   sx={{
-                    backgroundColor: errors.image ? "#f8d7da" : "#f0f0f0", // Red background on error
-                    border: errors.image ? "2px solid red" : "none", // Red border on error
+                    backgroundColor: errors.image ? "#f8d7da" : "#f0f0f0",
                   }}
                 >
                   <Image
@@ -169,7 +233,6 @@ function Category() {
                     style={{ objectFit: "cover", width: "100%", height: "100%" }}
                   />
                 </ArgonBox>
-
 
                 <ArgonButton
                   component="label"
@@ -185,7 +248,7 @@ function Category() {
                     },
                   }}
                 >
-                  Choose Image
+                  Chọn ảnh
                   <input
                     type="file"
                     name="image"
@@ -206,24 +269,14 @@ function Category() {
                       fullWidth
                       value={formData.name}
                       onChange={handleChange}
-                      error={errors.name} // Mark as error if name validation fails
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderColor: errors.name ? 'red' : 'default',
-                        },
-                      }}
                     />
-                    {errors.name && (
-                      <ArgonTypography color="error" variant="caption">
-                        Category name is required.
-                      </ArgonTypography>
-                    )}
+  
                   </ArgonBox>
                 </ArgonBox>
 
                 <ArgonBox mb={3} sx={{ width: { xs: '100%', sm: '50%', md: '20%' } }}>
-                  <ArgonButton type="submit" size="large" color="info" fullWidth >
-                    {formData.id ? "Update" : "Create"}
+                  <ArgonButton type="submit" size="large" color="info" fullWidth>
+                    {formData.id ? "Cập nhật" : "Thêm"}
                   </ArgonButton>
                 </ArgonBox>
               </ArgonBox>
@@ -250,7 +303,7 @@ function Category() {
           </Card>
         </ArgonBox>
       </ArgonBox>
-      <Footer/>
+      <Footer />
     </DashboardLayout>
   );
 }

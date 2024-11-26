@@ -1,109 +1,88 @@
-import React, { useEffect, useState } from "react";
-import PropTypes from "prop-types";
-import { toast } from "react-toastify";
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
+import { DataGrid } from '@mui/x-data-grid';
+import Paper from '@mui/material/Paper';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import IconButton from '@mui/material/IconButton';
+import Box from '@mui/material/Box';
 
-// Argon Dashboard 2 MUI components
-import ArgonBox from "components/ArgonBox";
-import ArgonTypography from "components/ArgonTypography";
-import SizesService from "../../../services/SizeServices";
+const columns = [
+    { field: 'id', headerName: 'ID', width: 70 },
+    { field: 'name', headerName: 'Size', width: 130 },
+];
 
-// Component to display size information
-function Size({ name }) {
-    return (
-        <ArgonBox display="flex" flexDirection="column">
-            <ArgonTypography variant="button" fontWeight="medium" size="textPrimary">
-                {name}
-            </ArgonTypography>
-        </ArgonBox>
-    );
-}
+export default function DataTable({ sizes, onEditClick, onDeleteClick }) {
+    const [selectedRows, setSelectedRows] = useState([]);
+    const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
 
-Size.propTypes = {
-    name: PropTypes.string.isRequired,
-};
+    const handleSelectionModelChange = (newSelectionModel) => {
+        setSelectedRows(newSelectionModel);
+    };
 
-
-// Main SizeTable component
-const SizeTable = ({ onEditClick }) => {
-    const [sizes, setSizes] = useState([]);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await SizesService.getAllSizes();
-                setSizes(response.data || []);
-            } catch (err) {
-                console.log(err);
-            }
-        };
-
-        fetchData();
-    }, []);
-
-    const deleteItem = async (id) => {
-        try {
-            await SizesService.deleteSize(id);
-            setSizes(sizes.filter(size => size.id !== id));
-            toast.success("Delete size successful");
-        } catch (error) {
-            console.error("There was an error deleting the item!", error);
-            toast.error("Error deleting size");
+    const handleDelete = async () => {
+        if (selectedRows.length > 0) {
+            await onDeleteClick(selectedRows);
         }
     };
 
-    const rows = sizes.map(size => ({
-        size: <Size name={size.name} />,
-        action: (
-            <ArgonBox display="flex" justifyContent="space-between" alignItems="center">
-                <ArgonTypography
-                    px={1}
-                    component="span"
-                    variant="caption"
-                    color="info"
-                    fontWeight="medium"
-                    onClick={() => onEditClick(size)} // Directly use onEditClick from props
-                    sx={{
-                        cursor: "pointer",
-                        "&:hover": {
-                            textDecoration: "underline",
-                        },
-                    }}
-                >
-                    <i className="bi bi-pencil-square"></i> Edit
-                </ArgonTypography>
-                <ArgonTypography
-                    px={1}
-                    component="span"
-                    variant="caption"
-                    color="error"
-                    fontWeight="medium"
-                    onClick={() => deleteItem(size.id)}
-                    sx={{
-                        cursor: "pointer",
-                        "&:hover": {
-                            textDecoration: "underline",
-                        },
-                    }}
-                >
-                    <i className="bi bi-trash3"></i> Remove
-                </ArgonTypography>
-            </ArgonBox>
-        ),
-    }));
-
-    const sizeTableData = {
-        columns: [
-            { name: "size", align: "left" },
-            { name: "action", align: "center" },
-        ],
-        rows,
+    const handleEdit = () => {
+        if (selectedRows.length === 1) {
+            const selectedSize = sizes.find((size) => size.id === selectedRows[0]);
+            onEditClick(selectedSize);
+        }
     };
 
-    return sizeTableData;
-};
+    return (
+        <Paper sx={{ height: 400, width: '100%', position: 'relative' }}>
+            <DataGrid
+                rows={sizes}
+                columns={columns}
+                paginationModel={paginationModel}
+                onPaginationModelChange={setPaginationModel}
+                checkboxSelection
+                onRowSelectionModelChange={handleSelectionModelChange}
+                sx={{
+                    "& .MuiDataGrid-footerContainer": {
+                        justifyContent: "space-between", // Center-align the footer content
+                    },
+                    "& .MuiTablePagination-selectLabel": {
+                        marginRight: 0, // Adjusts the right margin for the label
+                    },
+                    "& .MuiTablePagination-root": {
+                        width: "400px", // Adjusts the total pagination width
+                    },
+                    "& .MuiInputBase-root": {
+                        maxWidth: "60px",
+                        marginTop: "-10px", // Điều chỉnh giá trị này để đẩy nó lên trên
+                    },
+                    "& .MuiTablePagination-actions": {
+                        display: "flex",
+                        alignItems: "center",
+                    },
+                    "& .MuiSelect-select": {
+                        paddingRight: "24px", // Adjust padding for dropdown
+                    },
+                    border: 0,
+                }}
+            />
 
-SizeTable.propTypes = {
+            {selectedRows.length > 0 && (
+                <Box sx={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 1 }}>
+                    <IconButton onClick={handleEdit} disabled={selectedRows.length !== 1}>
+                        <EditIcon color="primary" />
+                    </IconButton>
+                    <IconButton onClick={handleDelete}>
+                        <DeleteIcon color="dark" />
+                    </IconButton>
+                </Box>
+            )}
+        </Paper>
+    );
+}
+
+DataTable.propTypes = {
+    sizes: PropTypes.array.isRequired,
     onEditClick: PropTypes.func.isRequired,
+    onDeleteClick: PropTypes.func.isRequired,
 };
-
-export default SizeTable;

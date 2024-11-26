@@ -3,7 +3,6 @@ import aboutImage3 from "layouts/assets/img/cat-1.jpg";
 import aboutImage5 from "layouts/assets/img/product-1.jpg";
 import { Grid, Typography } from "@mui/material";
 import Header from "../../components/client/HasagiHeader";
-import Navbar from "components/client/HasagiNavbar";
 import HasagiCau from "../../components/client/HasagiCarousel";
 import Footer from "../../components/client/HasagiFooter";
 import Cookies from "js-cookie";
@@ -15,7 +14,11 @@ import CouponList from "components/client/HasagiVorcher";
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import ArgonBox from 'components/ArgonBox';
 import ArgonTypography from 'components/ArgonTypography';
-
+import ChatBot from "components/client/HasagiChatBot";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faStar as solidStar } from "@fortawesome/free-solid-svg-icons";
+import { faStar as regularStar } from "@fortawesome/free-regular-svg-icons";
+import Timer from "./Timer"
 function Home() {
     const [currentPage, setCurrentPage] = useState(1);
     const [products, setProducts] = useState([]);
@@ -28,6 +31,60 @@ function Home() {
     const categoryPages = [];
     const [searchTerm, setSearchTerm] = useState("");
     const [time, setTime] = useState({ hours: 1, minutes: 26, seconds: 9 });
+    const [reviews, setReviews] = useState([]);
+    const [productsFlashsale, setProductsFlashsale] = useState([]);
+    const [flashSale, setFlashSale] = useState(null);
+
+    useEffect(() => {
+        fetch("http://localhost:8080/api/user/flash-sale/active")
+            .then((response) => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    return null;
+                }
+            })
+            .then((data) => {
+                if (data) {
+                    setFlashSale(data);
+                } else {
+                    setFlashSale(null); // Không có flash sale nào
+                }
+            });
+    }, []);
+    const fetchReviews = async (productId) => {
+        try {
+            const productReviews = await reviewsService.getReviewsByProduct(productId);
+            console.log("Fetched reviews for product:", productReviews);
+
+            if (Array.isArray(productReviews)) {
+                const sortedReviews = productReviews.sort((a, b) => b.star - a.star);
+                setReviews(sortedReviews);
+            } else {
+                console.error("Expected an array but got:", productReviews);
+                setReviews([]);
+            }
+        } catch (error) {
+            console.error("Error fetching reviews for product:", error);
+            setReviews([]);
+        }
+    };
+
+    const calculateAverageStars = (productId) => {
+        const productReviews = reviews.filter((review) => review.productId === productId);
+        if (productReviews.length === 0) return 0;
+
+        const totalStars = productReviews.reduce((sum, review) => sum + review.star, 0);
+        return (totalStars / productReviews.length).toFixed(1);
+    };
+
+    useEffect(() => {
+        if (products.id) {
+            fetchReviews(products.id);
+        }
+    }, [products.id]);
+
+  
 
     const handleSearch = (term) => {
         setSearchTerm(term);
@@ -39,7 +96,6 @@ function Home() {
                 setIsLoading(false);
             }, 700);
         };
-        console.log('AccountId from cookie:', Cookies.get('accountId'));
         fetchData();
     }, []);
 
@@ -51,10 +107,20 @@ function Home() {
         const fetchProducts = async () => {
             try {
                 const response = await ProductService.getAllProducts();
+                console.log("Response received:", response);
                 setProducts(Array.isArray(response.data) ? response.data : []);
             } catch (error) {
-                console.error("Error fetching products:", error);
                 setProducts([]);
+            }
+        };
+
+        const fetchProductsf = async () => {
+            try {
+                const response = await ProductService.getAllProductsFlashsale();
+                console.log("Response received:", response);
+                setProductsFlashsale(Array.isArray(response.data) ? response.data : []);
+            } catch (error) {
+                setProductsFlashsale([]);
             }
         };
 
@@ -63,7 +129,6 @@ function Home() {
                 const response = await CategoryService.getAllCategories();
                 setCategories(Array.isArray(response.data) ? response.data : []);
             } catch (error) {
-                console.error("Error fetching categories:", error);
                 setCategories([]);
             }
         };
@@ -79,7 +144,8 @@ function Home() {
         };
         fetchProducts();
         fetchCategories();
-        fetchBrands()
+        fetchBrands();
+        fetchProductsf()
     }, []);
 
     const filteredProducts = products.filter(product => {
@@ -127,7 +193,6 @@ function Home() {
                 </div>
             )}
             <Header onSearch={handleSearch} />
-            < Navbar />
             <HasagiCau />
             <div className="col-lg-12 px-xl-5" style={{ top: "-25px" }}>
                 <div className="bg-light p-3 d-flex flex-column"
@@ -168,23 +233,11 @@ function Home() {
                             fontSize: "1.2rem",
                             marginRight: "5px",
                         }}></i>
-                        FLASH SALE
-                        <div className="countdown d-flex">
-                            {['hours', 'minutes', 'seconds'].map((unit, index) => (
-                                <div className="time-box" key={unit} style={{
-                                    backgroundColor: '#000',
-                                    color: '#fff',
-                                    padding: '5px 10px',
-                                    borderRadius: '5px',
-                                    fontWeight: 'bold',
-                                    marginLeft: '10px'
-                                }}>
-                                    <span className="time" style={{ fontSize: '1.2rem' }}>
-                                        {String(time[unit]).padStart(2, '0')}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
+                        FLASH SALE {flashSale ? (
+                <Timer flashSale={flashSale} />
+            ) : (
+                <p>No active flash sale</p>
+            )}
                         <Link to="#" style={{
                             marginLeft: "880px",
                             textDecoration: "none",
@@ -194,14 +247,13 @@ function Home() {
                         </Link>
                     </h5>
 
-
                     <div className="container-fluid pb-3">
                         <div className="row px-xl-5">
-                            {products.map((product, index) => (
+                            {productsFlashsale.map((product, index) => (
                                 <div className="col-lg-3 col-md-4 col-sm-6 pb-1" key={index}>
                                     <div className="product-item bg-light mb-4">
                                         <div className="product-img position-relative overflow-hidden">
-                                            <Link >
+                                        <Link to={`/flash-sale/ShopDetail?id=${product.id}`}>
                                                 <img
                                                     className="img-fluid w-100"
                                                     src={product.image || aboutImage5}
@@ -213,15 +265,21 @@ function Home() {
                                             <Link className="h6 text-decoration-none text-truncate">
                                                 {product.name || "Product Name Goes Here"}
                                             </Link>
-                                            
-                                            <div className="d-flex align-items-center justify-content-center mb-1">
-                                                <small className="fa fa-star text-primary mr-1"></small>
-                                                <small className="fa fa-star text-primary mr-1"></small>
-                                                <small className="fa fa-star text-primary mr-1"></small>
-                                                <small className="fa fa-star text-primary mr-1"></small>
-                                                <small className="fa fa-star text-primary mr-1"></small>
-                                                <small>({product.rating || 99})</small>
+
+                                            <div>
+                                                {product.minPrices|| "Product Name Goes Here"}
                                             </div>
+                                            
+                                            <Typography
+                                                    sx={{
+                                                        fontWeight: 'bold',
+                                                        marginBottom: '10px',
+                                                        fontSize: '14px'
+                                                    }}
+                                                >
+
+                                                    <p>   {calculateAverageStars(product.id)} </p>
+                                                </Typography>
                                         </div>
                                     </div>
                                 </div>
@@ -234,7 +292,7 @@ function Home() {
             <CouponList />
             <div className="container-fluid pt-4">
                 <Typography variant="h2" className="section-title position-relative text-uppercase mx-xl-5 mb-4">
-                    <span className="bg-secondary pr-3">Danh mục</span>
+                    <span className="bg-white pr-3">Danh mục</span>
                 </Typography>
                 <Grid container spacing={2} className="px-xl-5 pb-3">
                     {categories.map((category, index) => (
@@ -254,7 +312,7 @@ function Home() {
             <div
                 className="container-fluid pt-4">
                 <Typography variant="h2" className="section-title position-relative text-uppercase mx-xl-5 mb-4">
-                    <span className="bg-secondary pr-3">Thương hiệu</span>
+                    <span className="bg-white pr-3">Thương hiệu</span>
                 </Typography>
                 <Grid container spacing={2} className="px-xl-5 pb-3">
                     {brands.map((brand, index) => (
@@ -273,7 +331,7 @@ function Home() {
             </div>
             <div className="container-fluid pt-4 pb-3">
                 <h2 className="section-title position-relative text-uppercase mx-xl-5 mb-4">
-                    <span className="bg-secondary pr-3">Sản phẩm</span>
+                    <span className="bg-white pr-3">Sản phẩm</span>
                 </h2>
                 <div className="row px-xl-5">
                     {currentProducts.map((product, index) => (
@@ -292,15 +350,23 @@ function Home() {
                                     <Link className="h6 text-decoration-none text-truncate" to={`/ShopDetail?id=${product.id}`}>
                                         {product.name || "Product Name Goes Here"}
                                     </Link>
+
+                                    <div>
+                        <span className="text-primary">
+                            {product.minPrices} VND 
+                        </span>
+                    </div>
                                     
-                                    <div className="d-flex align-items-center justify-content-center mb-1">
-                                        <small className="fa fa-star text-primary mr-1"></small>
-                                        <small className="fa fa-star text-primary mr-1"></small>
-                                        <small className="fa fa-star text-primary mr-1"></small>
-                                        <small className="fa fa-star text-primary mr-1"></small>
-                                        <small className="fa fa-star text-primary mr-1"></small>
-                                        <small>({product.rating || 99})</small>
-                                    </div>
+                    <Typography
+                                                    sx={{
+                                                        fontWeight: 'bold',
+                                                        marginBottom: '10px',
+                                                        fontSize: '14px'
+                                                    }}
+                                                >
+
+                                                    <p> ⭐  {calculateAverageStars(product.id)} </p>
+                                                </Typography>
                                 </div>
                             </div>
                         </div>
@@ -331,6 +397,7 @@ function Home() {
                 </div>
             </div>
             <Footer />
+            <ChatBot/>
         </>
     );
 }

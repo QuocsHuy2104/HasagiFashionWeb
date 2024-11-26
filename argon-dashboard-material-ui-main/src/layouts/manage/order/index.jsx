@@ -16,24 +16,40 @@ import { saveAs } from "file-saver";
 import { DataGrid } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
 import Modal from "react-bootstrap/Modal";
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button'
+import './style.css'; 
+import logo from "components/client/assets/images/logo.png";
 function Order() {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
-  const [provinces, setProvinces] = useState([]);
-  const [districtsByProvince, setDistrictsByProvince] = useState({});
-  const [wardsByDistrict, setWardsByDistrict] = useState({});
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [shippingFee, setShippingFee] = useState(0);
+  const [voucherPrice, setVoucherPrice] = useState("");
+  const [numberPhone, setNumberPhone] = useState("");
+  const [nameOrder, setNameOrder] = useState("");
+  const [fullAddress, setFullAddress] = useState("");
+  const [orderDate, setOrderDate] = useState("");
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get("http://localhost:3000/api/order");
         if (response.data && response.data.orders) {
+          console.log(response.data);
           const orders = response.data.orders.map(order => ({
             ...order,
-            orderDate: order.orderDate ? format(new Date(order.orderDate), "dd-MM-yyyy") : "Date not available"
+            orderDate: order.orderDate ? format(new Date(order.orderDate), "dd-MM-yyyy") : "Date not available",
+            amount : new Intl.NumberFormat("vi-VN", {
+              style: "currency",
+              currency: "VND",
+            }).format(order.amount),
+            
           }));
           setOrders(orders);
           setFilteredOrders(orders);
@@ -45,19 +61,14 @@ function Order() {
         console.error("There was an error fetching the data!", error);
       }
     };
+
     fetchData();
-    const intervalId = setInterval(() => {
-            fetchData();
-        }, 3000);
-        return () => {
-            clearInterval(intervalId);
-        };
   }, []);
 
   const handleSearch = (event) => {
     event.preventDefault();
 
-    const statusSlug = event.target.status.value; // Get the selected status slug
+    const statusSlug = event.target.status.value; 
     const endDateInput = event.target.endDate.value
       ? new Date(event.target.endDate.value)
       : null;
@@ -87,6 +98,13 @@ function Order() {
       try {
         const response = await axios.get(`http://localhost:3000/api/orderdetails/${orderId}`);
         setSelectedOrder(response.data);
+        const fee = response.data[0].shippingPrice;
+        setShippingFee(fee);
+        setVoucherPrice(response.data[0].voucherDiscount);
+        setNumberPhone(response.data[0].numberPhone)
+        setFullAddress(response.data[0].fullNameAddress)
+        setNameOrder(response.data[0].nameOrder)
+        setOrderDate(format(new Date(response.data[0].orderDate), "dd-MM-yyyy"))
         setShowDetailsModal(true);
       } catch (error) {
         console.error("Error fetching order details", error);
@@ -106,7 +124,12 @@ function Order() {
         "Pay Method": order.payMethod,
         "Pay Status": order.payStatus,
         "Shipping Fee": order.shippingFree,
-        Amount: order.amount,
+      "Amount": new Intl.NumberFormat("vi-VN", {
+  style: "currency",
+  currency: "VND",
+}).format(order.amount),
+
+
         Status:
           statuses.find((status) => status.slug === order.slug)?.status || "Unknown",
       }))
@@ -150,8 +173,6 @@ function Order() {
             return availableStatuses[currentIndex + 1];
           } else if (currentStatus === 'dang-giao') {
             return 'da-giao';
-          }else  if (currentStatus === 'cho-hoan-tien') {
-            return 'da-hoan-tien';
           }
           return null;
         };
@@ -163,8 +184,7 @@ function Order() {
             <span style={{ marginRight: '10px' }}>
               {statuses.find(status => status.slug === currentStatus)?.status || 'Unknown'}
             </span>
-            
-            {currentStatus !== 'hoan-thanh' && currentStatus !== 'da-giao' && currentStatus!=='da-hoan-tien' && (
+            {currentStatus !== 'hoan-thanh' && currentStatus !== 'da-giao' && (
               <>
                 {currentStatus !== 'da-huy' && (
                   <ArgonButton
@@ -185,7 +205,6 @@ function Order() {
                     Hủy
                   </ArgonButton>
                 )}
-                
               </>
             )}
           </div>
@@ -194,6 +213,29 @@ function Order() {
     }
 
   ];
+
+
+
+  const handleStatusChange = async (orderId, newStatusSlug) => {
+    try {
+      await axios.put(`http://localhost:3000/api/order/${orderId}`, { slug: newStatusSlug });
+
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          order.id === orderId ? { ...order, slug: newStatusSlug } : order
+        )
+      );
+
+      setFilteredOrders(prevFilteredOrders =>
+        prevFilteredOrders.map(order =>
+          order.id === orderId ? { ...order, slug: newStatusSlug } : order
+        )
+      );
+    } catch (error) {
+      console.error("There was an error updating the status!", error);
+    }
+  };
+
 
   const handleNextStatus = async (orderId, currentStatus, getNextStatus) => {
     const nextStatusSlug = getNextStatus(currentStatus);
@@ -218,7 +260,6 @@ function Order() {
   return (
     <DashboardLayout>
       <DashboardNavbar />
-
       <ArgonBox py={3}>
         <ArgonBox mb={3}>
           <Card>
@@ -282,77 +323,242 @@ function Order() {
             rows={filteredOrders}
             columns={columns}
             pageSize={5}
-            rowsPerPageOptions={[5, 10]}
+            pageSizeOptions={[5, 10, 20]} 
             checkboxSelection
             disableSelectionOnClick
             sx={{
-              "& .MuiDataGrid-cell": {
-                fontSize: "1rem", // Giảm kích thước chữ trong các ô của bảng
-                padding: "4px", // Giảm padding để làm cho nội dung trong ô gần nhau hơn
+              "& .MuiDataGrid-footerContainer": {
+                  justifyContent: "space-between", // Center-align the footer content
               },
-              "& .MuiDataGrid-columnHeaders": {
-                fontSize: "0.8rem", // Giảm kích thước chữ trong tiêu đề cột
+              "& .MuiTablePagination-selectLabel": {
+                  marginRight: 0, // Adjusts the right margin for the label
               },
               "& .MuiTablePagination-root": {
-                fontSize: "0.75rem", // Giảm kích thước chữ cho phần "Rows per page"
-                minHeight: "30px", // Giảm chiều cao tối thiểu
+                  width: "400px", // Adjusts the total pagination width
               },
-              "& .MuiTablePagination-select": {
-                fontSize: "0.75rem", // Giảm kích thước chữ trong phần lựa chọn số hàng
-                padding: "4px", // Giảm padding để nhỏ hơn
+              "& .MuiInputBase-root": {
+                  maxWidth: "60px",
+                  marginTop: "-10px", // Điều chỉnh giá trị này để đẩy nó lên trên
               },
-              "& .MuiTablePagination-displayedRows": {
-                fontSize: "1rem", // Giảm kích thước chữ trong phần số trang được hiển thị
+              "& .MuiTablePagination-actions": {
+                  display: "flex",
+                  alignItems: "center",
               },
-            }}
-            rowHeight={100} // Giảm chiều cao hàng để bảng trông nhỏ gọn hơn
-          />
+              "& .MuiSelect-select": {
+                  paddingRight: "24px", // Adjust padding for dropdown
+              },
+              border: 0,
+          }}
+      />
         </Paper>
         </ArgonBox>
       </ArgonBox>
-      <Modal show={showDetailsModal} onHide={() => setShowDetailsModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Order Details</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {selectedOrder ? (
-            <ul style={{ listStyleType: 'none', padding: 0 }}>
-              {selectedOrder.map(detail => (
-                <li key={detail.id} style={{ padding: '10px 0', borderBottom: '1px solid #ddd' }}>
-                  <div>
-                    <strong>Product ID:</strong> {detail.productDetailId}
-                  </div>
-                  <div>
-                    <strong>Quantity:</strong> {detail.quantity}
-                  </div>
-                  <div>
-                    <strong>Price:</strong> ${detail.price.toFixed(2)}
-                  </div>
-                  <div>
-                    <strong>Name:</strong> {detail.nameOrder}
-                  </div>
-                  <div>
-                    <strong>Size:</strong> {detail.sizeName}
-                  </div>
-                  <div>
-                    <strong>Color:</strong> {detail.colorName}
-                  </div>
-                  <div>
-                    <strong>Status:</strong> {detail.statusName}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>Loading...</p>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <ArgonButton variant="secondary" onClick={() => setShowDetailsModal(false)}>
-            Close
-          </ArgonButton>
-        </Modal.Footer>
-      </Modal>
+
+
+      <Dialog
+  open={showDetailsModal}
+  onClose={() => setShowDetailsModal(false)}
+  aria-labelledby="order-details-dialog"
+  fullWidth
+  maxWidth="sm" 
+>
+<div>
+  <DialogTitle
+    style={{
+      display: "flex",
+      alignItems: "center",
+      fontSize: "14px",
+      fontWeight: "bold",
+      borderBottom: "1px solid #ccc",
+      paddingBottom: "10px",
+      marginBottom: "10px",
+    }}
+  >
+    <img
+      src={logo}
+      alt="logo"
+      style={{
+        maxWidth: "230px",
+        maxHeight: "100px",
+        marginRight: "15px",
+      }}
+    />
+    <div style={{ lineHeight: "1.5" }}>
+      <p style={{ margin: 0, fontSize: "16px", fontWeight: "bold" }}>
+        HASAGIFASHION
+      </p>
+      <p style={{ margin: 0, fontSize: "14px", fontWeight: "normal" }}>
+        ĐC: 49 Đ. 3 Tháng 2, Xuân Khánh, Ninh Kiều, Cần Thơ, Việt Nam
+      </p>
+      <p style={{ margin: 0, fontSize: "14px", fontWeight: "normal" }}>
+        ĐT: 0911 012 689
+      </p>
+    </div>
+  </DialogTitle>
+  <div
+    id="order-details-dialog"
+    style={{
+      textAlign: "center",
+      fontWeight: "bold",
+      fontSize: "20px",
+      marginTop: "10px",
+    }}
+  >
+    Hóa đơn thanh toán
+  </div>
+</div>
+
+
+
+  <DialogContent dividers>
+    {selectedOrder ? (
+      <div style={{ fontFamily: "Arial, sans-serif", fontSize: "14px" }}>
+  <div
+    style={{
+      flex: "1",
+      padding: "10px",
+      border: "1px solid #ddd",
+      borderRadius: "8px",
+      backgroundColor: "#f9f9f9",
+    }}
+  >
+    <h3
+      style={{
+        fontSize: "16px",
+        fontWeight: "bold",
+        margin: "0 0 10px 0",
+        borderBottom: "1px solid #ddd",
+        paddingBottom: "5px",
+      }}
+    >
+      Thông tin người đặt
+    </h3>
+    <p style={{ margin: "5px 0" }}>
+      <strong>Tên khách hàng:</strong>  {nameOrder}
+    </p>
+    <p style={{ margin: "5px 0" }}>
+      <strong>Địa chỉ giao hàng:</strong> {fullAddress}
+    </p>
+    <p style={{ margin: "5px 0" }}>
+      <strong>Số điện thoại:</strong> {numberPhone}
+    </p>
+    <p style={{ margin: "5px 0" }}>
+      <strong>Ngày đặt hàng:</strong> {orderDate}
+    </p>
+  </div>
+
+<br/>
+
+        <div style={{ marginBottom: "20px" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed", textAlign: "left" }}>
+  <thead>
+    <tr style={{ backgroundColor: "#f8f8f8", borderBottom: "2px solid #ddd" }}>
+      <th style={{ padding: "10px", fontWeight: "bold" }}>Tên sản phẩm</th>
+      <th style={{ padding: "10px", fontWeight: "bold", textAlign: "center" }}>Số lượng</th>
+      <th style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>Giá sản phẩm</th>
+      <th style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>Tổng tiền</th>
+    </tr>
+  </thead>
+  <tbody>
+    {selectedOrder.map((detail, index) => (
+      <tr key={index} style={{ borderBottom: "1px solid #ddd" }}>
+        <td style={{ padding: "10px" }}>{detail.productName}</td>
+        <td style={{ padding: "10px", textAlign: "center" }}>{detail.quantity}</td>
+        <td style={{ padding: "10px", textAlign: "right" }}>
+          {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(detail.price+detail.priceSize)}
+        </td>
+        <td style={{ padding: "10px", textAlign: "right" }}>
+          {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format((detail.price+detail.priceSize)*detail.quantity)}
+        </td>
+      </tr>
+    ))}
+  </tbody>
+  <tfoot>
+    <tr style={{ backgroundColor: "#f8f8f8", borderTop: "2px solid #ddd" }}>
+      <td colSpan="3" style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>
+        Tổng số tiền
+      </td>
+      <td style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>
+        {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
+          selectedOrder.reduce((sum, detail) => sum + (detail.price+detail.priceSize)*detail.quantity, 0)
+        )}
+      </td>
+    </tr>
+    {voucherPrice !== 0 && (
+    <tr style={{ backgroundColor: "#f8f8f8", borderTop: "2px solid #ddd" }}>
+      <td colSpan="3" style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>
+        Giảm giá
+      </td>
+      <td style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>
+    -{new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
+          selectedOrder.reduce((sum, detail) => sum + (detail.price+detail.priceSize)*detail.quantity, 0) *voucherPrice/100
+        )}
+      </td>
+    </tr>
+    )}
+    <tr style={{ backgroundColor: "#f8f8f8", borderTop: "2px solid #ddd" }}>
+      <td colSpan="3" style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>
+        Phí vận chuyển
+      </td>
+      <td style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>
+      {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(shippingFee)}
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+</div>
+        <div style={{ textAlign: "right", marginTop: "10px" }}>
+          <strong>Thành tiền: </strong>
+          {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
+          selectedOrder.reduce((sum, detail) => sum + (detail.price+detail.priceSize)*detail.quantity, 0) + shippingFee
+        )}
+        </div>
+        <div style={{ textAlign: "center", marginBottom: "10px" }}>
+    <p style={{ margin: 0, fontSize: "14px" }}>
+   Xin cảm ơn quý khách và xin hẹn gặp lại
+    </p>
+  </div>
+
+
+      </div>
+    ) : (
+      <p>Loading...</p>
+    )}
+  </DialogContent>
+  <DialogActions style={{ padding: "10px" }}>
+    <button
+      className="hide-on-print"
+      style={{
+        padding: "6px 12px",
+        backgroundColor: "#1976d2",
+        color: "#fff",
+        border: "none",
+        borderRadius: "4px",
+        cursor: "pointer",
+        marginRight: "10px",
+      }}
+      onClick={() => setShowDetailsModal(false)}
+    >
+      Đóng
+    </button>
+    <button
+      className="hide-on-print"
+      style={{
+        padding: "6px 12px",
+        backgroundColor: "#1976d2",
+        color: "#fff",
+        border: "none",
+        borderRadius: "4px",
+        cursor: "pointer",
+      }}
+      onClick={() => window.print()}
+    >
+      Xuất hóa đơn 
+    </button>
+  </DialogActions>
+
+</Dialog>
 
     </DashboardLayout>
   );

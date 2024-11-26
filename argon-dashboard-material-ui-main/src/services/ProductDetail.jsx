@@ -4,11 +4,43 @@ const ShopDetailService = {
     getAllShopDetail: () => apiClient.get('/cart/totalQuantity',{
         withCredentials: true
     }),
-  
+
 
     getCategoryDetail: (categoryId) => apiClient.get(`/category/${categoryId}`),
 
-    getProductDetail: (productId) => apiClient.get(`/product/${productId}`),
+    // getProductDetail: ({ productId, sizeId }) => {
+    //     const url = sizeId ? `/webShopDetail/${productId}?selectedSizeId=${sizeId}` : `/webShopDetail/${productId}`;
+    //     console.log("Requesting URL:", url); 
+        
+    //     return apiClient.get(url);
+    // },
+
+    getProductDetail: ({ productId, sizeId, colorId }) => {
+        const url = [
+            `/public/webShopDetail/${productId}`,
+            sizeId ? `?selectedSizeId=${sizeId}` : '',
+            colorId ? (sizeId ? `&selectedColorId=${colorId}` : `?selectedColorId=${colorId}`) : ''
+        ].join('');
+    
+        console.log("Requesting URL:", url); 
+    
+        return apiClient.get(url);
+    },
+
+    getProductDetailFS: ({ productId, sizeId, colorId }) => {
+     
+        const url = [
+            `/public/webShopDetail/flash-sale/${productId}`,
+            sizeId ? `?selectedSizeId=${sizeId}` : '',
+            colorId ? (sizeId ? `&selectedColorId=${colorId}` : `?selectedColorId=${colorId}`) : ''
+        ].join('');
+    
+        console.log("Requesting URL:", url); 
+    
+        return apiClient.get(url);
+    },
+    
+    
 
     checkFavorite: (productId) => {
         return apiClient.get("/favorites/check", {
