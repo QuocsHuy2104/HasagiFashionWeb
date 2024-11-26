@@ -10,8 +10,13 @@ import { useNavigate } from 'react-router-dom';
 import Cookies from "js-cookie";
 import { ToastContainer, toast } from 'react-toastify';
 import VoucherService from "../../../services/VoucherServices";
-import { Card, Container, Button, Row, Col } from "react-bootstrap";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import CheckoutService from '../../../services/CheckoutServices';
+import ArgonInput from "../../../components/ArgonInput";
+import ArgonBox from "../../../components/ArgonBox";
+import { AiOutlineQuestionCircle } from "react-icons/ai";
+import { Container, Card, Dropdown } from 'react-bootstrap';
+
 const Checkout = () => {
     const [selectedPayment, setSelectedPayment] = useState('');
     const [showPaymentButtons, setShowPaymentButtons] = useState(true);
@@ -34,6 +39,7 @@ const Checkout = () => {
     const [usedVouchers, setUsedVouchers] = useState([]);
     const [accountId, setAccountId] = useState(Cookies.get('accountId'));
     const [showVouchers, setShowVouchers] = useState(false);
+
 
 
     useEffect(() => {
@@ -335,7 +341,7 @@ const Checkout = () => {
                     toast.error("Có lỗi xảy ra khi xử lý thanh toán VNPAY.");
                 }
 
-            }else if (selectedPayment === 'Momo') {
+            } else if (selectedPayment === 'Momo') {
                 response = await CheckoutService.postCheckout(addressId, checkoutDataMomo);
                 if (response.data.paymentUrl) {
                     localStorage.setItem('address1', JSON.stringify(addressDTO));
@@ -398,13 +404,59 @@ const Checkout = () => {
 
         fetchVouchers();
         fetchUsedVouchers();
-    }, [accountId]); 
+    }, [accountId]);
 
     const [appliedVoucherId, setAppliedVoucherId] = useState(null);
+    const [searchText, setSearchText] = useState("");
+    const [open, setOpen] = useState(false);
+
+    // Hàm mở Dialog
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+
+    // Hàm đóng Dialog
+    const handleClose = () => {
+        setOpen(false);
+    };
+
+
     const handleApplyVoucher = (voucher) => {
-        setSelectedVoucher(voucher); // Save the voucher in state
+        setSelectedVoucher(voucher);
+        setAppliedVoucherId(voucher.id);
         toast.success(`Áp dụng mã giảm giá ${voucher.code} thành công!`);
     };
+
+
+
+    const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+    const applicableVouchers = vouchers
+        .filter((voucher) =>
+            !usedVouchers.some((usedVoucher) => usedVoucher.id === voucher.id)
+        )
+        .map((voucher) => {
+            const isValid = totalAmount >= voucher.minimumOrderValue;
+
+            return {
+                ...voucher,
+                isValid,
+                discountAmount: isValid ? (totalAmount * voucher.discountPercentage) / 100 : 0,
+            };
+        })
+        .sort((a, b) => {
+            // Đưa voucher khớp từ khóa tìm kiếm lên đầu
+            const aMatchesSearch = a.code.toLowerCase().includes(searchText.toLowerCase());
+            const bMatchesSearch = b.code.toLowerCase().includes(searchText.toLowerCase());
+
+            if (aMatchesSearch && !bMatchesSearch) return -1; // a khớp tìm kiếm, b không khớp
+            if (!aMatchesSearch && bMatchesSearch) return 1;  // b khớp tìm kiếm, a không khớp
+
+            // Nếu cả hai cùng khớp hoặc không khớp, sắp xếp theo discountAmount
+            return b.discountAmount - a.discountAmount;
+        });
+
+
 
     const goBack = () => {
         navigate('/Cart');
@@ -550,125 +602,227 @@ const Checkout = () => {
                                         </div>
                                     )}
 
-                                    <Container className="my-1 mx-0">
-                                        {showVouchers && (
-                                            vouchers.length > 0 ? (
-                                                (() => {
-                                                    const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
-                                                    const applicableVouchers = vouchers
-                                                        .filter(voucher =>
-                                                            totalAmount >= voucher.minimumOrderValue &&
-                                                            !usedVouchers.some(usedVoucher => usedVoucher.id === voucher.id)
-                                                        )
-                                                        .map(voucher => ({
-                                                            ...voucher,
-                                                            discountAmount: (totalAmount * voucher.discountPercentage) / 100,
-                                                        }))
-                                                        .sort((a, b) => b.discountAmount - a.discountAmount);
+                                    <Dialog open={open} onClose={handleClose}>
+                                        <DialogTitle style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '0' }}>
+                                            {/* Danh sách phiếu giảm giá */}
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                Danh sách phiếu giảm giá
+                                            </div>
 
-                                                    return (
-                                                        <Row>
-                                                            {applicableVouchers.map((voucher, index) => (
-                                                                <Col key={voucher.id} md={6} className="mb-2 px-1" >
-                                                                    <Card
-                                                                        className="text-center border-0"
-                                                                        style={{
-                                                                            backgroundColor: appliedVoucherId === voucher.id ? '#d3d3d3' : '#fef5e3',
-                                                                            color: appliedVoucherId === voucher.id ? '#808080' : '#000',
-                                                                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                                                                            transition: 'transform 0.2s, box-shadow 0.2s',
-                                                                            flexWrap: 'nowrap',
-                                                                        }}
-                                                                        onMouseEnter={(e) => {
-                                                                            e.currentTarget.style.transform = 'scale(1.02)';
-                                                                            e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.3)';
-                                                                        }}
-                                                                        onMouseLeave={(e) => {
-                                                                            e.currentTarget.style.transform = 'scale(1)';
-                                                                            e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.2)';
-                                                                        }}
-                                                                    >
+                                            {/* Hỗ trợ */}
+                                            <Dropdown>
+                                                <Dropdown.Toggle
+                                                    variant="link"
+                                                    bsPrefix="icon-button"
+                                                    style={{
+                                                        color: 'black',
+                                                        fontSize: '1.2rem',
+                                                        textDecoration: 'none',
+                                                        position: 'relative',
+                                                        paddingBottom: '0',
+                                                        display: 'flex',
+                                                        alignItems: 'center', // Căn giữa biểu tượng và chữ
+                                                    }}
+                                                >
+                                                    Hỗ trợ <AiOutlineQuestionCircle size={40} style={{ marginLeft: '8px' }} />
+                                                </Dropdown.Toggle>
 
-                                                                        <Card.Body className='py-3'>
-                                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                                                <span style={{
-                                                                                    background: appliedVoucherId === voucher.id
-                                                                                        ? 'linear-gradient(to right, #d3d3d3, #a9a9a9)'
-                                                                                        : 'linear-gradient(to right, #FFD700, #FFA500)',
-                                                                                    color: '#000',
-                                                                                    padding: '2px 4px',
-                                                                                    borderRadius: '8px',
-                                                                                    fontWeight: 'bold',
-                                                                                    fontSize: '0.85rem',
-                                                                                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                                                                                }}>
-                                                                                    VOUCHER
-                                                                                </span>
-                                                                                <h3 style={{ fontSize: '1.2rem', color: appliedVoucherId === voucher.id ? '#808080' : '#FF4500', margin: '0' }}>Giảm {voucher.discountPercentage}%</h3>
-                                                                            </div>
-                                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                                                <Card.Title
-                                                                                    style={{
-                                                                                        fontSize: '1rem',
-                                                                                        color: appliedVoucherId === voucher.id ? '#808080' : '#FF4500',
-                                                                                        margin: '0',
-                                                                                        fontWeight: 600
-                                                                                    }}
-                                                                                >
-                                                                                    <span style={{ fontWeight: 'bold' }}> Mã: {voucher.code}</span>
-                                                                                </Card.Title>
+                                                <Dropdown.Menu
+                                                    style={{
+                                                        marginTop: '0',
+                                                        paddingTop: '0',
+                                                    }}
+                                                >
+                                                    <Dropdown.Item href="#action1">Hướng dẫn sử dụng</Dropdown.Item>
+                                                    <Dropdown.Item href="#action2">Chính sách giảm giá</Dropdown.Item>
+                                                    <Dropdown.Item href="#action3">Liên hệ hỗ trợ</Dropdown.Item>
+                                                </Dropdown.Menu>
+                                            </Dropdown>
+                                        </DialogTitle>
+                                        <hr />
+                                        <ArgonBox style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', paddingTop: '0px', paddingBottom: '10px' }}>
+                                            <ArgonBox
+                                                controlId="searchVoucher"
+                                                style={{
+                                                    display: 'flex',
+                                                    flexDirection: 'row',
+                                                    alignItems: 'center',
+                                                    width: '100%',
+                                                }}
+                                            >
+                                                <ArgonInput
+                                                    type="text"
+                                                    placeholder="Nhập mã giảm giá để tìm kiếm"
+                                                    value={searchText}
+                                                    onChange={(e) => setSearchText(e.target.value)}
+                                                    style={{
+                                                        borderRadius: '8px',
+                                                        border: '1px solid #ced4da',
+                                                        padding: '0.8rem',
+                                                        fontSize: '1rem',
+                                                        width: 'calc(100% - 120px)',
+                                                        marginRight: '8px',
+                                                    }}
+                                                />
 
-                                                                                {appliedVoucherId === voucher.id ? (
-                                                                                    <Button
-                                                                                        variant="secondary"
-                                                                                        style={{ marginLeft: '8px', padding: '6px 14px', fontSize: '0.8rem' }}
-                                                                                        onClick={() => {
-                                                                                            setAppliedVoucherId(null);
-                                                                                            setSelectedVoucher(null); // Cập nhật selectedVoucher về null để số tiền giảm về 0
-                                                                                        }}
-                                                                                    >
-                                                                                        Bỏ áp dụng
-                                                                                    </Button>
+                                                <ArgonButton
+                                                    variant="warning"
+                                                    onClick={() => {
+                                                        const voucher = vouchers.find((v) => v.code.toLowerCase() === searchText.toLowerCase());
+                                                        if (voucher && !usedVouchers.some((usedVoucher) => usedVoucher.id === voucher.id)) {
+                                                            handleApplyVoucher(voucher);
+                                                            setAppliedVoucherId(voucher.id);
+                                                        } else {
+                                                            toast.error('Mã giảm giá không hợp lệ hoặc đã sử dụng.');
+                                                        }
+                                                    }}
+                                                    style={{
+                                                        padding: '6px 14px',
+                                                        fontSize: '0.8rem',
+                                                        flexShrink: 0,
+                                                        backgroundColor: 'yellow',
+                                                        height: '50px'
+                                                    }}
+                                                >
+                                                    Áp dụng
+                                                </ArgonButton>
+                                            </ArgonBox>
+                                        </ArgonBox>
 
-                                                                                ) : (
-                                                                                    <Button
-                                                                                        variant="warning"
-                                                                                        onClick={() => {
-                                                                                            // Áp dụng voucher
-                                                                                            handleApplyVoucher(voucher);
-                                                                                            setAppliedVoucherId(voucher.id);  // Cập nhật voucher đang được áp dụng
-                                                                                        }}
-                                                                                        style={{ marginLeft: '8px', padding: '6px 14px', fontSize: '0.8rem', background: 'linear-gradient(to right, #FF7F50, #FF4500)', color: 'white' }}
-                                                                                    >
-                                                                                        Áp dụng
-                                                                                    </Button>
-                                                                                )}
 
-                                                                            </div>
-                                                                            <Card.Text style={{ fontSize: '0.8rem', color: '#6c757d', textAlign: 'left' }}>
-                                                                                Giảm {voucher.discountPercentage}% khi hóa đơn từ {voucher.minimumOrderValue}đ
-                                                                                <div style={{ marginTop: '4px', fontSize: '0.75rem' }}>
-                                                                                    HSD: {formatDate(voucher.endDate)}
-                                                                                </div>
-                                                                            </Card.Text>
-                                                                        </Card.Body>
-                                                                    </Card>
-                                                                </Col>
-                                                            ))}
-                                                        </Row>
-                                                    );
-                                                })()
-                                            ) : (
-                                                <Card className="text-center mb-4">
-                                                    <Card.Body>
-                                                        <Card.Text>No vouchers available</Card.Text>
-                                                    </Card.Body>
-                                                </Card>
-                                            )
-                                        )}
-                                    </Container>
 
+
+                                        <DialogContent style={{ padding: '5px' }}>
+                                            <Container className="my-1 mx-0">
+                                                {applicableVouchers.length > 0 ? (
+                                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                        {applicableVouchers.map((voucher) => (
+                                                            <Card
+                                                                key={voucher.id}
+                                                                className="text-center border-0 mb-3"
+                                                                style={{
+                                                                    backgroundColor: appliedVoucherId === voucher.id
+                                                                        ? '#d3d3d3' // Màu xám khi voucher đã áp dụng
+                                                                        : voucher.isValid
+                                                                            ? '#fef5e3' // Màu nền vàng cho voucher hợp lệ
+                                                                            : '#ffffff', // Màu trắng cho voucher không hợp lệ
+                                                                    color: appliedVoucherId === voucher.id
+                                                                        ? '#808080' // Màu chữ xám khi voucher đã áp dụng
+                                                                        : voucher.isValid
+                                                                            ? '#000'
+                                                                            : '#000',
+                                                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                                                                    transition: 'transform 0.2s, box-shadow 0.2s',
+                                                                    flexWrap: 'nowrap',
+                                                                    height: 'auto', // Tăng chiều cao của voucher, có thể thêm giá trị cố định như '350px' nếu cần
+                                                                }}
+                                                                onMouseEnter={(e) => {
+                                                                    e.currentTarget.style.transform = 'scale(1.02)';
+                                                                    e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.3)';
+                                                                }}
+                                                                onMouseLeave={(e) => {
+                                                                    e.currentTarget.style.transform = 'scale(1)';
+                                                                    e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.2)';
+                                                                }}
+                                                            >
+                                                                <Card.Body className="py-3" style={{ minHeight: '100px', minWidth: '500px' }}> {/* Tăng chiều cao của Card Body */}
+                                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                        <span
+                                                                            style={{
+                                                                                background: appliedVoucherId === voucher.id
+                                                                                    ? 'linear-gradient(to right, #d3d3d3, #a9a9a9)' // Gradient màu xám khi đã áp dụng
+                                                                                    : 'linear-gradient(to right, #FFD700, #FFA500)', // Gradient vàng cho voucher hợp lệ
+                                                                                color: '#000',
+                                                                                padding: '2px 4px',
+                                                                                borderRadius: '8px',
+                                                                                fontWeight: 'bold',
+                                                                                fontSize: '1rem',
+                                                                                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                                                                            }}
+                                                                        >
+                                                                            PHIẾU GIẢM GIÁ
+                                                                        </span>
+                                                                        <h3
+                                                                            style={{
+                                                                                fontSize: '1.4rem',
+                                                                                color: appliedVoucherId === voucher.id ? '#808080' : (voucher.isValid ? '#FF4500' : '#000'),
+                                                                                margin: '0',
+                                                                            }}
+                                                                        >
+                                                                            Giảm {voucher.discountPercentage}%
+                                                                        </h3>
+                                                                    </div>
+                                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                        <Card.Title
+                                                                            style={{
+                                                                                fontSize: '1rem',
+                                                                                color: appliedVoucherId === voucher.id ? '#808080' : (voucher.isValid ? '#FF4500' : '#000'),
+                                                                                margin: '0',
+                                                                                fontWeight: 600,
+                                                                            }}
+                                                                        >
+                                                                            <span style={{ fontWeight: 'bold' }}> Mã: {voucher.code}</span>
+                                                                        </Card.Title>
+                                                                        {appliedVoucherId === voucher.id ? (
+                                                                            <Button
+                                                                                variant="secondary"
+                                                                                style={{ marginLeft: '8px', padding: '6px 14px', fontSize: '1rem' }}
+                                                                                onClick={() => {
+                                                                                    setAppliedVoucherId(null); // Bỏ áp dụng voucher
+                                                                                    setSelectedVoucher(null);
+                                                                                }}
+                                                                            >
+                                                                                Bỏ áp dụng
+                                                                            </Button>
+                                                                        ) : (
+                                                                            <Button
+                                                                                variant="warning"
+                                                                                onClick={() => {
+                                                                                    if (voucher.isValid) {
+                                                                                        handleApplyVoucher(voucher);
+                                                                                        setAppliedVoucherId(voucher.id); // Cập nhật voucher đã áp dụng
+                                                                                    }
+                                                                                }}
+                                                                                style={{
+                                                                                    marginLeft: '8px', padding: '6px 14px', fontSize: '1rem',
+                                                                                    background: voucher.isValid ? 'linear-gradient(to right, #FF7F50, #FF4500)' : '#808080',
+                                                                                    color: 'white',
+                                                                                    cursor: voucher.isValid ? 'pointer' : 'not-allowed',
+                                                                                }}
+                                                                                disabled={!voucher.isValid}
+                                                                            >
+                                                                                Áp dụng
+                                                                            </Button>
+                                                                        )}
+                                                                    </div>
+                                                                    <Card.Text style={{ fontSize: '0.8rem', color: '#6c757d', textAlign: 'left' }}>
+                                                                        Giảm {voucher.discountPercentage}% khi hóa đơn từ {voucher.minimumOrderValue}đ, giảm tối đa: {voucher.maxDiscount}đ
+
+                                                                        <div style={{ marginTop: '4px', fontSize: '0.8rem' }}>
+                                                                            HSD: {formatDate(voucher.endDate)}
+                                                                        </div>
+                                                                    </Card.Text>
+                                                                </Card.Body>
+                                                            </Card>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <Card className="text-center mb-4">
+                                                        <Card.Body>
+                                                            <Card.Text>Không tìm thấy voucher phù hợp</Card.Text>
+                                                        </Card.Body>
+                                                    </Card>
+                                                )}
+                                            </Container>
+
+                                        </DialogContent>
+                                        <DialogActions>
+                                            <Button onClick={handleClose} color="info">
+                                                Đóng
+                                            </Button>
+                                        </DialogActions>
+                                    </Dialog>
                                 </div>
                                 <div className="col-lg-5">
                                     {selectedPayment === 'Direct Check' && (
@@ -688,13 +842,40 @@ const Checkout = () => {
                                             </ArgonButton>
                                         </div>
                                     )}
-                                    <Button
-                                        onClick={() => setShowVouchers(prevState => !prevState)}
-                                        className="mb-3"
-                                        style={{ backgroundColor: 'yellow', color: 'black' }} // Màu nền vàng và chữ đen
-                                    >
-                                        {showVouchers ? 'Ẩn' : 'Áp dụng voucher'}
+
+                                    <Button variant="contained" color="warning" onClick={handleClickOpen}>
+                                        Áp dụng mã giảm giá
                                     </Button>
+
+                                    <ArgonBox controlId="searchVoucher" style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+                                        <ArgonInput
+                                            type="text"
+                                            placeholder="Nhập mã giảm giá để tìm kiếm"
+                                            value={searchText}
+                                            onChange={(e) => setSearchText(e.target.value)}
+                                            style={{
+                                                borderRadius: "8px",
+                                                border: "1px solid #ced4da",
+                                                padding: "0.8rem",
+                                                fontSize: "1rem",
+                                            }}
+                                        />
+                                        <Button
+                                            variant="warning"
+                                            onClick={() => {
+                                                const voucher = vouchers.find(v => v.code.toLowerCase() === searchText.toLowerCase());
+                                                if (voucher && !usedVouchers.some(usedVoucher => usedVoucher.id === voucher.id)) {
+                                                    handleApplyVoucher(voucher);
+                                                    setAppliedVoucherId(voucher.id); // Cập nhật voucher đã áp dụng
+                                                } else {
+                                                    toast.error('Voucher không hợp lệ hoặc đã sử dụng.');
+                                                }
+                                            }}
+                                            style={{ marginLeft: '8px', padding: '6px 14px', fontSize: '0.8rem' }}
+                                        >
+                                            Áp dụng
+                                        </Button>
+                                    </ArgonBox>
 
                                     <div className="border-bottom pt-4" style={{ padding: '0 20px' }}>
                                         <div className="d-flex justify-content-between mb-3">
@@ -712,7 +893,13 @@ const Checkout = () => {
                                         <div className="d-flex justify-content-between">
                                             <h6 className="font-weight-medium" style={{ fontSize: '1.2rem' }}>Giảm</h6>
                                             <h6 style={{ fontSize: '1.2rem' }}>
-                                                {selectedVoucher ? (cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) * selectedVoucher.discountPercentage / 100) : 0}đ
+                                                {selectedVoucher ?
+                                                    Math.min(
+                                                        cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) * selectedVoucher.discountPercentage / 100,
+                                                        selectedVoucher.maxDiscount
+                                                    )
+                                                    : 0
+                                                }đ
                                             </h6>
                                         </div>
                                     </div>
@@ -721,13 +908,17 @@ const Checkout = () => {
                                             <h5 className="font-weight-bold">Tổng thanh toán</h5>
                                             <h5 className="font-weight-bold" style={{ color: '#ee4d2d' }}>
                                                 {(
-                                                    cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) *
-                                                    (selectedVoucher ? (1 - selectedVoucher.discountPercentage / 100) : 1) +
+                                                    cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) -
+                                                    (selectedVoucher ? Math.min(
+                                                        cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) * selectedVoucher.discountPercentage / 100,
+                                                        selectedVoucher.maxDiscount
+                                                    ) : 0) +
                                                     (shipFee?.total || 0)
                                                 ).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                                             </h5>
                                         </div>
                                     </div>
+
                                     <button
                                         onClick={handleClick}
                                         style={{

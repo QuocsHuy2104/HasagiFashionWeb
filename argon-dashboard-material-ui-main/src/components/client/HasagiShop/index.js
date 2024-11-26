@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import 'layouts/assets/css/style.css';
 import { Link } from "react-router-dom";
-import aboutImage5 from "layouts/assets/img/product-1.jpg";
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
 import ProductService from "../../../services/ProductServices";
@@ -13,6 +12,13 @@ import { Form } from 'react-bootstrap';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 import ChatBot from "components/client/HasagiChatBot";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import SearchIcon from "@mui/icons-material/Search";
+
+
+
+import shopcss from "./shop.css";
 
 function Shop() {
     const [products, setProducts] = useState([]);
@@ -448,86 +454,137 @@ function Shop() {
 
                     <div className="col-9 bg-secondary">
                         <div className="row pt-2">
-                            {currentProducts.map((product, index) => (
-                                <div className="col-lg-3 col-md-6 col-sm-6 px-2"
-                                    key={index}>
-                                    <Link to={`/ShopDetail?id=${product.id}`}>
-                                        <Card
-                                            sx={{
-                                                boxShadow: 3,
-                                                borderRadius: '4px',
-                                                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                                                '&:hover': {
-                                                    transform: 'scale(1.05)',
-                                                    boxShadow: 6,
-                                                },
-                                            }}
-                                            className="product-item bg-light mb-3"
-                                        >
-                                            <div className="product-img position-relative overflow-hidden">
-                                                <img
-                                                    className="img-fluid w-100"
-                                                    src={product.image || aboutImage5}
-                                                    alt={product.name || 'Product Name'}
-                                                    style={{
-                                                        objectFit: 'cover',
-                                                        height: '200px',
-                                                    }}
-                                                />
-                                            </div>
-                                            <div className="py-3 px-2">
+                            <div
+                                style={{
+                                    display: "grid",
+                                    gridTemplateColumns: "repeat(4, 1fr)",
+                                    gap: "20px",
+                                }}
+                            >
+                                {currentProducts.map((product, index) => (
+                                    <div
+                                        key={index}
+                                        style={{
+                                            position: "relative",
+                                            overflow: "hidden",
+                                            transition: "transform 0.3s ease",
+                                        }}
+                                        onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-5px)")}
+                                        onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
+                                    >
+                                        <Link to={`/ShopDetail?id=${product.id}`}>
+                                            <Card
+                                                style={{
+                                                    border: "1px solid #ddd",
+                                                    borderRadius: "10px",
+                                                    boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+                                                }}
+                                            >
                                                 <div
-                                                    className="h6 text-decoration-none text-truncate"
                                                     style={{
-                                                        color: '#333',
-                                                        fontWeight: 'bold',
-                                                        display: 'block',
-                                                        marginBottom: '1px',
-                                                        fontSize: '1rem',
+                                                        position: "relative",
+                                                        width: "100%",
+                                                        height: "250px",
                                                     }}
-                                                >
-                                                    {product.name || "Product Name Goes Here"}
-                                                </div>
-                                                <Typography
-                                                    sx={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        color: 'red',
-                                                        fontWeight: 'bold',
-                                                        marginBottom: '10px',
-                                                        fontSize: '14px',
+                                                    className="image-container"
+                                                    onMouseEnter={(e) => {
+                                                        console.log("Hover vào ảnh");
+                                                        const iconContainer = e.currentTarget.querySelector(".icon-container");
+                                                        if (iconContainer) {
+                                                            iconContainer.style.opacity = 1;
+                                                            iconContainer.style.pointerEvents = "auto";
+                                                        }
                                                     }}
+                                                    onMouseLeave={(e) => {
+                                                        console.log("Rời khỏi ảnh");
+                                                        const iconContainer = e.currentTarget.querySelector(".icon-container");
+                                                        if (iconContainer) {
+                                                            iconContainer.style.opacity = 0;
+                                                            iconContainer.style.pointerEvents = "none";
+                                                        }
+                                                    }}
+
                                                 >
-                                                    {formatImportPrice(product.importPrice)}
+                                                    <img
+                                                        src={product.image}
+                                                        alt={product.name}
+                                                        style={{
+                                                            width: "100%",
+                                                            height: "100%",
+                                                            objectFit: "cover",
+                                                            borderRadius: "10px 10px 0 0",
+                                                        }}
+                                                    />
                                                     <div
                                                         style={{
-                                                            color: '#f0e62b',
-                                                            border: '1px solid #f0e62b',
-                                                            padding: '0 5px',
-                                                            marginLeft: '10px',
-
+                                                            position: "absolute",
+                                                            top: "10px",
+                                                            right: "10px",
+                                                            display: "flex",
+                                                            flexDirection: "column",
+                                                            alignItems: "center",
+                                                            gap: "10px",
+                                                            opacity: 0,
+                                                            pointerEvents: "none",
+                                                            zIndex: 10,
+                                                            transition: "opacity 0.3s ease",
                                                         }}
+                                                        className="icon-container"
                                                     >
-                                                        {product.sale}%
+                                                        <FavoriteBorderIcon
+                                                            style={{
+                                                                fontSize: "35px",
+                                                                color: "#fff",
+                                                                backgroundColor: "rgba(0, 0, 0, 0.6)",
+                                                                padding: "10px",
+                                                                borderRadius: "50%",
+                                                                cursor: "pointer",
+                                                            }}
+                                                        />
+                                                        <ShoppingCartIcon
+                                                            style={{
+                                                                fontSize: "35px",
+                                                                color: "#fff",
+                                                                backgroundColor: "rgba(0, 0, 0, 0.6)",
+                                                                padding: "10px",
+                                                                borderRadius: "50%",
+                                                                cursor: "pointer",
+                                                            }}
+                                                        />
+                                                        <SearchIcon
+                                                            style={{
+                                                                fontSize: "35px",
+                                                                color: "#fff",
+                                                                backgroundColor: "rgba(0, 0, 0, 0.6)",
+                                                                padding: "10px",
+                                                                borderRadius: "50%",
+                                                                cursor: "pointer",
+                                                            }}
+                                                        />
                                                     </div>
-                                                </Typography>
+                                                </div>
 
-                                                <Typography
-                                                    sx={{
-                                                        fontWeight: 'bold',
-                                                        marginBottom: '10px',
-                                                        fontSize: '14px'
+
+                                                <div
+                                                    style={{
+                                                        padding: "15px",
+                                                        textAlign: "center",
                                                     }}
                                                 >
-
-                                                    <p> ⭐ {calculateAverageStars(product.id)} </p>
-                                                </Typography>
-                                            </div>
-                                        </Card>
-                                    </Link>
-                                </div>
-                            ))}
-
+                                                    <div>{product.name || "Product Name Goes Here"}</div>
+                                                    <Typography>
+                                                        {formatImportPrice(product.importPrice)}
+                                                        <div>{product.sale}%</div>
+                                                    </Typography>
+                                                    <Typography>
+                                                        <p>⭐ {calculateAverageStars(product.id)} </p>
+                                                    </Typography>
+                                                </div>
+                                            </Card>
+                                        </Link>
+                                    </div>
+                                ))}
+                            </div>
 
                             <div className="col-12" style={{}}>
                                 <nav>
@@ -555,8 +612,8 @@ function Shop() {
                         </div>
 
                     </div>
-                </div>
-            </div>
+                </div >
+            </div >
             <Footer />
             <ChatBot />
         </>

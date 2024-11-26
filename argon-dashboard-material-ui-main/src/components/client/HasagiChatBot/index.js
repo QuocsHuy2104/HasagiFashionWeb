@@ -81,13 +81,13 @@ function Gemini() {
             address: "49 Đ. 3 Tháng 2, Xuân Khánh, Ninh Kiều, Cần Thơ, VietNam"
         }
     };
-    
+
 
     const generateAIResponse = async (question) => {
         setLoading(true);
         try {
             const language = detectLanguage(question);
-    
+
             const keywords = ["điều khoản", "chính sách", "đổi trả", "bảo mật", "liên hệ"];
             const matchedKeyword = keywords.find((keyword) => question.toLowerCase().includes(keyword));
             if (matchedKeyword) {
@@ -118,13 +118,13 @@ function Gemini() {
                 setLoading(false);
                 return;
             }
-    
+
             const categories = await getCategoryData();
             const brands = await getBrandData();
             const products = await getProductData();
             const productDetails = await getProductDetailData();
             const vouchers = await getVoucherData();
-    
+
             const prompt = `\nCurrent Question: ${question}
             \nData (when available):
             \nCategories: ${JSON.stringify(categories.slice(0, 5))}
@@ -134,7 +134,7 @@ function Gemini() {
             \nVouchers: ${JSON.stringify(vouchers.slice(0, 5))}
             \nTerms and Conditions: ${JSON.stringify(termsAndConditions)}
             \nAnswer in ${language === 'vi' ? 'Vietnamese' : 'English'}.`;
-    
+
             const API_KEY = process.env.REACT_APP_API_KEY;
             const response = await axios.post(
                 `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`,
@@ -142,7 +142,7 @@ function Gemini() {
                     contents: [{ parts: [{ text: prompt }] }]
                 }
             );
-    
+
             const aiAnswer = response.data.candidates?.[0]?.content?.parts?.[0]?.text || "Không có phản hồi từ AI.";
             setChatHistory((prevHistory) => [
                 ...prevHistory,
@@ -154,7 +154,7 @@ function Gemini() {
             setLoading(false);
         }
     };
-    
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();

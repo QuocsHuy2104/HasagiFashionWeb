@@ -21,11 +21,14 @@ function Voucher() {
         code: "",
         discountPercentage: "",
         minimumOrderValue: "",
+        maxDiscount: "",
+        quantity: "",
+        usageCount: "",
         startDate: "",
         endDate: "",
         isActive: true,
     });
-    
+
     const [activeTab, setActiveTab] = useState(0);
 
     const handleTabChange = (event, newValue) => {
@@ -37,6 +40,9 @@ function Voucher() {
         code: false,
         discountPercentage: false,
         minimumOrderValue: false,
+        maxDiscount: false,
+        quantity: false,
+        usageCount: false,
         startDate: false,
         endDate: false,
     });
@@ -68,6 +74,9 @@ function Voucher() {
             code: false,
             discountPercentage: false,
             minimumOrderValue: false,
+            maxDiscount: false,
+            quantity: false,
+            usageCount: false,
             startDate: false,
             endDate: false,
         };
@@ -127,6 +136,9 @@ function Voucher() {
             code: formData.code,
             discountPercentage: parseFloat(formData.discountPercentage),
             minimumOrderValue: parseFloat(formData.minimumOrderValue),
+            maxDiscount: parseFloat(formData.maxDiscount),
+            quantity: formData.quantity,
+            usageCount: formData.usageCount,
             startDate: formData.startDate,
             endDate: formData.endDate,
             isActive: formData.isActive,
@@ -154,6 +166,9 @@ function Voucher() {
             code: "",
             discountPercentage: "",
             minimumOrderValue: "",
+            maxDiscount: "",
+            quantity: "",
+            usageCount: "",
             startDate: "",
             endDate: "",
             isActive: true,
@@ -162,6 +177,9 @@ function Voucher() {
             code: false,
             discountPercentage: false,
             minimumOrderValue: false,
+            maxDiscount: false,
+            quantity: false,
+            usageCount: false,
             startDate: false,
             endDate: false,
         });
@@ -173,6 +191,9 @@ function Voucher() {
             code: voucher.code,
             discountPercentage: voucher.discountPercentage,
             minimumOrderValue: voucher.minimumOrderValue,
+            maxDiscount: voucher.maxDiscount,
+            quantity: voucher.quantity,
+            usageCount: voucher.usageCount,
             startDate: voucher.startDate,
             endDate: voucher.endDate,
             isActive: voucher.isActive,
@@ -205,7 +226,7 @@ function Voucher() {
                 <ArgonBox mb={3}>
                     <Card sx={{ borderRadius: '15px', boxShadow: 3 }}>
                         <ArgonBox display="flex" justifyContent="space-between" p={2} sx={{ borderRadius: '15px 15px 0 0' }}>
-                            <ArgonTypography variant="h6" color="dark">Manage Voucher</ArgonTypography>
+                            <ArgonTypography variant="h6" color="dark">Quản lý phiếu giảm giá</ArgonTypography>
                         </ArgonBox>
                         <ArgonBox p={3} component="form" role="form" onSubmit={handleSubmit} sx={{ borderRadius: '0 0 15px 15px' }}>
                             <ArgonBox mx={3}>
@@ -213,7 +234,7 @@ function Voucher() {
                                 <ArgonBox mb={3} position="relative">
                                     <ArgonInput
                                         type="text"
-                                        placeholder="Voucher Code"
+                                        placeholder="Mã giảm giá"
                                         size="large"
                                         name="code"
                                         value={formData.code}
@@ -234,7 +255,7 @@ function Voucher() {
                                         <ArgonBox mb={3} position="relative">
                                             <ArgonInput
                                                 type="number"
-                                                placeholder="Discount Percentage"
+                                                placeholder="Phầm trăm giảm giá"
                                                 size="large"
                                                 name="discountPercentage"
                                                 value={formData.discountPercentage}
@@ -255,7 +276,31 @@ function Voucher() {
                                         <ArgonBox mb={3} position="relative">
                                             <ArgonInput
                                                 type="number"
-                                                placeholder="Minimum Order Value"
+                                                placeholder="Số lượng"
+                                                size="large"
+                                                name="quantity"
+                                                value={formData.quantity}
+                                                onChange={handleChange}
+                                                error={!!errors.quantity}
+                                                sx={{ bgcolor: 'white', borderRadius: '8px', width: '100%' }}
+                                            />
+                                            {errors.quantity && (
+                                                <ArgonTypography variant="caption" color="error">
+                                                    {errors.quantity}
+                                                </ArgonTypography>
+                                            )}
+                                        </ArgonBox>
+                                    </Grid>
+                                </Grid>
+
+
+                                <Grid container spacing={3}>
+                                    {/* Minimum Order Value Input */}
+                                    <Grid item xs={12} sm={6}>
+                                        <ArgonBox mb={3} position="relative">
+                                            <ArgonInput
+                                                type="number"
+                                                placeholder="Giá trị tối thiểu hóa đơn"
                                                 size="large"
                                                 name="minimumOrderValue"
                                                 value={formData.minimumOrderValue}
@@ -270,6 +315,26 @@ function Voucher() {
                                             )}
                                         </ArgonBox>
                                     </Grid>
+                                    {/* Discount Percentage Input */}
+                                    <Grid item xs={12} sm={6}>
+                                        <ArgonBox mb={3} position="relative">
+                                            <ArgonInput
+                                                type="number"
+                                                placeholder="Giảm tối đa"
+                                                size="large"
+                                                name="maxDiscount"
+                                                value={formData.maxDiscount}
+                                                onChange={handleChange}
+                                                error={!!errors.maxDiscount}
+                                                sx={{ bgcolor: 'white', borderRadius: '8px', width: '100%' }}
+                                            />
+                                            {errors.maxDiscount && (
+                                                <ArgonTypography variant="caption" color="error">
+                                                    {errors.maxDiscount}
+                                                </ArgonTypography>
+                                            )}
+                                        </ArgonBox>
+                                    </Grid>
                                 </Grid>
 
                                 <Grid container spacing={3}>
@@ -277,7 +342,7 @@ function Voucher() {
                                         <ArgonBox mb={3} position="relative">
                                             <ArgonInput
                                                 type="date"
-                                                placeholder="Start Date"
+                                                placeholder="Ngày bắt đầu"
                                                 size="large"
                                                 name="startDate"
                                                 value={formData.startDate}
@@ -298,7 +363,7 @@ function Voucher() {
                                         <ArgonBox mb={3} position="relative">
                                             <ArgonInput
                                                 type="date"
-                                                placeholder="End Date"
+                                                placeholder="Ngày hết hạn"
                                                 size="large"
                                                 name="endDate"
                                                 value={formData.endDate}
@@ -318,7 +383,7 @@ function Voucher() {
                                 {/* Submit Button */}
                                 <ArgonBox mb={3} sx={{ width: { xs: '50%', sm: '10%', md: '10%' } }}>
                                     <ArgonButton type="submit" size="large" color="info" fullWidth>
-                                        {formData.id ? "Update" : "Create"}
+                                        {formData.id ? "Cập nhật" : "Tạo"}
                                     </ArgonButton>
                                 </ArgonBox>
                             </ArgonBox>
