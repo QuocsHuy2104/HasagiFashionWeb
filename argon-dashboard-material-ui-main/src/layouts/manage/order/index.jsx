@@ -21,8 +21,8 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button'
-
-
+import './style.css'; 
+import logo from "components/client/assets/images/logo.png";
 function Order() {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -30,6 +30,12 @@ function Order() {
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [shippingFee, setShippingFee] = useState(0);
+  const [voucherPrice, setVoucherPrice] = useState("");
+  const [numberPhone, setNumberPhone] = useState("");
+  const [nameOrder, setNameOrder] = useState("");
+  const [fullAddress, setFullAddress] = useState("");
+  const [orderDate, setOrderDate] = useState("");
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -92,6 +98,13 @@ function Order() {
       try {
         const response = await axios.get(`http://localhost:3000/api/orderdetails/${orderId}`);
         setSelectedOrder(response.data);
+        const fee = response.data[0].shippingPrice;
+        setShippingFee(fee);
+        setVoucherPrice(response.data[0].voucherDiscount);
+        setNumberPhone(response.data[0].numberPhone)
+        setFullAddress(response.data[0].fullNameAddress)
+        setNameOrder(response.data[0].nameOrder)
+        setOrderDate(format(new Date(response.data[0].orderDate), "dd-MM-yyyy"))
         setShowDetailsModal(true);
       } catch (error) {
         console.error("Error fetching order details", error);
@@ -200,6 +213,29 @@ function Order() {
     }
 
   ];
+
+
+
+  const handleStatusChange = async (orderId, newStatusSlug) => {
+    try {
+      await axios.put(`http://localhost:3000/api/order/${orderId}`, { slug: newStatusSlug });
+
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          order.id === orderId ? { ...order, slug: newStatusSlug } : order
+        )
+      );
+
+      setFilteredOrders(prevFilteredOrders =>
+        prevFilteredOrders.map(order =>
+          order.id === orderId ? { ...order, slug: newStatusSlug } : order
+        )
+      );
+    } catch (error) {
+      console.error("There was an error updating the status!", error);
+    }
+  };
+
 
   const handleNextStatus = async (orderId, currentStatus, getNextStatus) => {
     const nextStatusSlug = getNextStatus(currentStatus);
@@ -324,48 +360,206 @@ function Order() {
   onClose={() => setShowDetailsModal(false)}
   aria-labelledby="order-details-dialog"
   fullWidth
-  maxWidth="sm"
+  maxWidth="sm" 
 >
-  <DialogTitle id="order-details-dialog">Order Details</DialogTitle>
+<div>
+  <DialogTitle
+    style={{
+      display: "flex",
+      alignItems: "center",
+      fontSize: "14px",
+      fontWeight: "bold",
+      borderBottom: "1px solid #ccc",
+      paddingBottom: "10px",
+      marginBottom: "10px",
+    }}
+  >
+    <img
+      src={logo}
+      alt="logo"
+      style={{
+        maxWidth: "230px",
+        maxHeight: "100px",
+        marginRight: "15px",
+      }}
+    />
+    <div style={{ lineHeight: "1.5" }}>
+      <p style={{ margin: 0, fontSize: "16px", fontWeight: "bold" }}>
+        HASAGIFASHION
+      </p>
+      <p style={{ margin: 0, fontSize: "14px", fontWeight: "normal" }}>
+        ĐC: 49 Đ. 3 Tháng 2, Xuân Khánh, Ninh Kiều, Cần Thơ, Việt Nam
+      </p>
+      <p style={{ margin: 0, fontSize: "14px", fontWeight: "normal" }}>
+        ĐT: 0911 012 689
+      </p>
+    </div>
+  </DialogTitle>
+  <div
+    id="order-details-dialog"
+    style={{
+      textAlign: "center",
+      fontWeight: "bold",
+      fontSize: "20px",
+      marginTop: "10px",
+    }}
+  >
+    Hóa đơn thanh toán
+  </div>
+</div>
+
+
+
   <DialogContent dividers>
     {selectedOrder ? (
-      <ul style={{ listStyleType: 'none', padding: 0 }}>
-        {selectedOrder.map(detail => (
-          <li key={detail.id} style={{ padding: '10px 0', borderBottom: '1px solid #ddd' }}>
-            <div>
-              <strong>Product ID:</strong> {detail.productDetailId}
-            </div>
-            <div>
-              <strong>Quantity:</strong> {detail.quantity}
-            </div>
-            <div>
-              <strong>Price:</strong> ${detail.price.toFixed(2)}
-            </div>
-            <div>
-              <strong>Name:</strong> {detail.nameOrder}
-            </div>
-            <div>
-              <strong>Size:</strong> {detail.sizeName}
-            </div>
-            <div>
-              <strong>Color:</strong> {detail.colorName}
-            </div>
-            <div>
-              <strong>Status:</strong> {detail.statusName}
-            </div>
-          </li>
-        ))}
-      </ul>
+      <div style={{ fontFamily: "Arial, sans-serif", fontSize: "14px" }}>
+  <div
+    style={{
+      flex: "1",
+      padding: "10px",
+      border: "1px solid #ddd",
+      borderRadius: "8px",
+      backgroundColor: "#f9f9f9",
+    }}
+  >
+    <h3
+      style={{
+        fontSize: "16px",
+        fontWeight: "bold",
+        margin: "0 0 10px 0",
+        borderBottom: "1px solid #ddd",
+        paddingBottom: "5px",
+      }}
+    >
+      Thông tin người đặt
+    </h3>
+    <p style={{ margin: "5px 0" }}>
+      <strong>Tên khách hàng:</strong>  {nameOrder}
+    </p>
+    <p style={{ margin: "5px 0" }}>
+      <strong>Địa chỉ giao hàng:</strong> {fullAddress}
+    </p>
+    <p style={{ margin: "5px 0" }}>
+      <strong>Số điện thoại:</strong> {numberPhone}
+    </p>
+    <p style={{ margin: "5px 0" }}>
+      <strong>Ngày đặt hàng:</strong> {orderDate}
+    </p>
+  </div>
+
+<br/>
+
+        <div style={{ marginBottom: "20px" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed", textAlign: "left" }}>
+  <thead>
+    <tr style={{ backgroundColor: "#f8f8f8", borderBottom: "2px solid #ddd" }}>
+      <th style={{ padding: "10px", fontWeight: "bold" }}>Tên sản phẩm</th>
+      <th style={{ padding: "10px", fontWeight: "bold", textAlign: "center" }}>Số lượng</th>
+      <th style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>Giá sản phẩm</th>
+      <th style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>Tổng tiền</th>
+    </tr>
+  </thead>
+  <tbody>
+    {selectedOrder.map((detail, index) => (
+      <tr key={index} style={{ borderBottom: "1px solid #ddd" }}>
+        <td style={{ padding: "10px" }}>{detail.productName}</td>
+        <td style={{ padding: "10px", textAlign: "center" }}>{detail.quantity}</td>
+        <td style={{ padding: "10px", textAlign: "right" }}>
+          {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(detail.price+detail.priceSize)}
+        </td>
+        <td style={{ padding: "10px", textAlign: "right" }}>
+          {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format((detail.price+detail.priceSize)*detail.quantity)}
+        </td>
+      </tr>
+    ))}
+  </tbody>
+  <tfoot>
+    <tr style={{ backgroundColor: "#f8f8f8", borderTop: "2px solid #ddd" }}>
+      <td colSpan="3" style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>
+        Tổng số tiền
+      </td>
+      <td style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>
+        {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
+          selectedOrder.reduce((sum, detail) => sum + (detail.price+detail.priceSize)*detail.quantity, 0)
+        )}
+      </td>
+    </tr>
+    {voucherPrice !== 0 && (
+    <tr style={{ backgroundColor: "#f8f8f8", borderTop: "2px solid #ddd" }}>
+      <td colSpan="3" style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>
+        Giảm giá
+      </td>
+      <td style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>
+    -{new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
+          selectedOrder.reduce((sum, detail) => sum + (detail.price+detail.priceSize)*detail.quantity, 0) *voucherPrice/100
+        )}
+      </td>
+    </tr>
+    )}
+    <tr style={{ backgroundColor: "#f8f8f8", borderTop: "2px solid #ddd" }}>
+      <td colSpan="3" style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>
+        Phí vận chuyển
+      </td>
+      <td style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>
+      {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(shippingFee)}
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+</div>
+        <div style={{ textAlign: "right", marginTop: "10px" }}>
+          <strong>Thành tiền: </strong>
+          {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(
+          selectedOrder.reduce((sum, detail) => sum + (detail.price+detail.priceSize)*detail.quantity, 0) + shippingFee
+        )}
+        </div>
+        <div style={{ textAlign: "center", marginBottom: "10px" }}>
+    <p style={{ margin: 0, fontSize: "14px" }}>
+   Xin cảm ơn quý khách và xin hẹn gặp lại
+    </p>
+  </div>
+
+
+      </div>
     ) : (
       <p>Loading...</p>
     )}
   </DialogContent>
-  <DialogActions>
-    <Button variant="contained" onClick={() => setShowDetailsModal(false)} color="black">
-      Close
-    </Button>
+  <DialogActions style={{ padding: "10px" }}>
+    <button
+      className="hide-on-print"
+      style={{
+        padding: "6px 12px",
+        backgroundColor: "#1976d2",
+        color: "#fff",
+        border: "none",
+        borderRadius: "4px",
+        cursor: "pointer",
+        marginRight: "10px",
+      }}
+      onClick={() => setShowDetailsModal(false)}
+    >
+      Đóng
+    </button>
+    <button
+      className="hide-on-print"
+      style={{
+        padding: "6px 12px",
+        backgroundColor: "#1976d2",
+        color: "#fff",
+        border: "none",
+        borderRadius: "4px",
+        cursor: "pointer",
+      }}
+      onClick={() => window.print()}
+    >
+      Xuất hóa đơn 
+    </button>
   </DialogActions>
+
 </Dialog>
+
     </DashboardLayout>
   );
 }

@@ -15,7 +15,7 @@ import { faMicrophone } from "@fortawesome/free-solid-svg-icons";
 import useFavoriteCount from "../HasagiFavoriteCount";
 import { useNavigate } from "react-router-dom";
 import CartService from "../../../services/CartService";
-import axios from "axios";
+import AddressService from "../../../services/AddressServices";
 import aboutImage5 from "layouts/assets/img/product-1.jpg";
 import ProfileServices from "services/ProfileServices";
 
@@ -93,14 +93,10 @@ const Header = ({ onSearch }) => {
     };
     useEffect(() => {
         const fetchCartItems = async () => {
-            const accountId = Cookies.get("accountId");
-
             try {
                 const [cartResponse] = await Promise.all([
                     CartService.getCart(),
-                    axios.get(`http://localhost:3000/api/addresses/exists?accountId=${accountId}`, {
-                        withCredentials: true,
-                    }),
+                    AddressService.getAddress(),
                 ]);
                 const reversedCartData = cartResponse.data.reverse();
                 setCartProducts(reversedCartData);

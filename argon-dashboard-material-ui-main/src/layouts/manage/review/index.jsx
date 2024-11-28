@@ -151,7 +151,7 @@ function Review() {
                     {reviews.map(review => {
                         return (
                             <Card key={review.id} style={{ marginBottom: '20px', padding: '20px', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.1)', borderRadius: '10px' }}>
-                                <ArgonTypography variant="h5" style={{ marginBottom: '15px', fontWeight: 'bold', color: '#333' }}>Review Details</ArgonTypography>
+                                <ArgonTypography variant="h5" style={{ marginBottom: '15px', fontWeight: 'bold', color: '#333' }}>Đánh giá chi tiết</ArgonTypography>
                                 <ArgonBox display="flex" gap="2px" flexWrap="wrap" >
                                     {Array.from(new Set(reviewFiles.filter((file) => file.reviewId === review.id && file.videoUrl)
                                         .map((file) => file.videoUrl)))

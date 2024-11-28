@@ -11,11 +11,11 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import ProductService from "../../../services/ProductServices";
-import { Link } from "react-router-dom";
-import reviewsService from "services/ReviewsServices";
+import "react-toastify/dist/ReactToastify.css";
+import { Snackbar, SnackbarContent } from "@mui/material";
 
-const Voucher = ({ voucher, onApplyVoucher }) => {
+
+const Voucher = ({ voucher, onCopy }) => {
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -64,7 +64,7 @@ const Voucher = ({ voucher, onApplyVoucher }) => {
                             whiteSpace: "nowrap",
                         }}
                     >
-                        VOUCHER
+                        Phiếu giảm giá
                     </ArgonBox>
                     <ArgonBox
                         sx={{
@@ -88,7 +88,7 @@ const Voucher = ({ voucher, onApplyVoucher }) => {
                             textOverflow: "ellipsis",
                         }}
                     >
-                        Giảm <strong>{voucher.discountPercentage}%</strong> khi hóa đơn từ {voucher.minimumOrderValue}đ
+                        Giảm <strong>{voucher.discountPercentage}%</strong> khi hóa đơn từ {voucher.minimumOrderValue}đ, giảm tối đa {voucher.maxDiscount}
                     </ArgonBox>
                     <ArgonBox
                         sx={{
@@ -131,9 +131,9 @@ const Voucher = ({ voucher, onApplyVoucher }) => {
                             background: "linear-gradient(to right, #FF4500, #FF6347)",
                         },
                     }}
-                    onClick={() => onApplyVoucher(voucher)}
+                    onClick={() => onCopy(voucher.code)}
                 >
-                    Áp dụng cho
+                    Sao chép mã
                 </ArgonButton>
             </ArgonBox>
         </ArgonBox>
@@ -145,16 +145,17 @@ Voucher.propTypes = {
         code: PropTypes.string.isRequired,
         discountPercentage: PropTypes.number.isRequired,
         minimumOrderValue: PropTypes.number.isRequired,
+        maxDiscount: PropTypes.number.isRequired,
         endDate: PropTypes.string.isRequired,
     }).isRequired,
-    onApplyVoucher: PropTypes.func,
+    onCopy: PropTypes.func.isRequired,
 };
 
 
 
 const CustomPrevArrow = ({ onClick }) => (
     <ArrowBackIosIcon
-        onClick={onClick ? () => onClick() : null}
+        onClick={onClick}
         sx={{
             position: "absolute",
             top: "-20px",
@@ -171,12 +172,12 @@ const CustomPrevArrow = ({ onClick }) => (
 );
 
 CustomPrevArrow.propTypes = {
-    onClick: PropTypes.func,
+    onClick: PropTypes.func.isRequired,
 };
 
 const CustomNextArrow = ({ onClick }) => (
     <ArrowForwardIosIcon
-        onClick={onClick ? () => onClick() : null}
+        onClick={onClick}
         sx={{
             position: "absolute",
             top: "-20px",
@@ -193,7 +194,7 @@ const CustomNextArrow = ({ onClick }) => (
 );
 
 CustomNextArrow.propTypes = {
-    onClick: PropTypes.func,
+    onClick: PropTypes.func.isRequired,
 };
 
 
@@ -202,11 +203,9 @@ const VoucherList = () => {
     const [loading, setLoading] = useState(true);
     const [usedVouchers, setUsedVouchers] = useState([]);
     const accountId = Cookies.get('accountId');
-    const [reviews, setReviews] = useState([]);
-    const [products, setProducts] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [filteredProducts, setFilteredProducts] = useState([]);
-    const productsPerPage = 5;
+    const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [copyMessage, setCopyMessage] = useState("");
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -231,32 +230,11 @@ const VoucherList = () => {
         fetchData();
     }, [accountId]);
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                const response = await ProductService.getAllProducts();
-                setProducts(Array.isArray(response.data) ? response.data : []);
-            } catch (error) {
-                console.error("Error fetching products:", error);
-                setProducts([]);
-            }
-        };
 
-        fetchProducts();
-    }, []);
 
     const availableVouchers = vouchers.filter(
         voucher => !usedVouchers.some(usedVoucher => usedVoucher.id === voucher.id)
     );
-
-    const indexOfLastProduct = currentPage * productsPerPage;
-    const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-    const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
-    const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-
-    const handlePageChange = pageNumber => {
-        setCurrentPage(pageNumber);
-    };
 
     const formatNumber = (num) => {
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -304,82 +282,18 @@ const VoucherList = () => {
         ],
     };
 
-
-    const handleApplyVoucher = (voucher) => {
-        if (voucher.minimumOrderValue === undefined || voucher.minimumOrderValue === null || voucher.minimumOrderValue === "") {
-            console.error('Voucher does not have a valid minimumOrderValue:', voucher);
-            return;
-        }
-
-        console.log('Voucher minimumOrderValue:', voucher.minimumOrderValue);
-
-        let minPrice;
-        if (typeof voucher.minimumOrderValue === "string") {
-            minPrice = voucher.minimumOrderValue
-                .split('-')[0]
-                .trim()
-                .replace('đ', '')
-                .replace('.', '');
-
-            minPrice = parseInt(minPrice);
-        } else if (typeof voucher.minimumOrderValue === "number") {
-            minPrice = voucher.minimumOrderValue;
-        }
-
-        minPrice = minPrice;
-        if (isNaN(minPrice)) {
-            console.error('Voucher minimumOrderValue is invalid:', voucher.minimumOrderValue);
-            return;
-        }
-
-        console.log('Voucher minimumOrderValue (minPrice):', minPrice);
-        const filtered = products.filter(product => {
-            if (!product.importPrice || product.importPrice.trim() === "") return false;
-
-            const productPrices = product.importPrice
-                .split('-')
-                .map(price => {
-                    return parseInt(price.trim().replace('đ', '').replace('.', '').replace(/[^0-9]/g, ''));
-                });
-
-            const productMinPrice = productPrices[1];
-            const adjustedProductMinPrice = productMinPrice / 10;
-            if (isNaN(adjustedProductMinPrice)) return false;
-            console.log('Product minimum price (adjusted productMinPrice):', adjustedProductMinPrice);
-            const isValid = adjustedProductMinPrice >= minPrice;
-            console.log('Is product valid? ', isValid);
-
-            return isValid;
-        });
-
-        setFilteredProducts(filtered);
-    };
-
-    const fetchReviews = async (productId) => {
-        try {
-            const productReviews = await reviewsService.getReviewsByProduct(productId);
-            console.log('Fetched reviews for product:', productReviews);
-            setReviews((prevReviews) => [...prevReviews, ...productReviews]);
-        } catch (error) {
-            console.error('Error fetching reviews for product:', error);
-            setReviews([]);
-        }
-    };
-
-    useEffect(() => {
-        if (products.length > 0) {
-            products.forEach((product) => {
-                fetchReviews(product.id);
+    const copyToClipboard = (code) => {
+        navigator.clipboard
+            .writeText(code)
+            .then(() => {
+                setCopyMessage(`Đã sao chép mã: ${code}`);
+                setOpenSnackbar(true);
+            })
+            .catch((err) => {
+                console.error("Lỗi sao chép:", err);
+                setCopyMessage("Không thể sao chép mã.");
+                setOpenSnackbar(true);
             });
-        }
-    }, [products]);
-
-    const calculateAverageStars = (productId) => {
-        const productReviews = reviews.filter((review) => review.productId === productId);
-        if (productReviews.length === 0) return 0;
-
-        const totalStars = productReviews.reduce((sum, review) => sum + review.star, 0);
-        return (totalStars / productReviews.length).toFixed(1);
     };
 
     if (loading) {
@@ -390,7 +304,7 @@ const VoucherList = () => {
         <>
             <div className="container-fluid pt-3">
                 <Typography variant="h2" className="section-title position-relative text-uppercase mx-xl-5 mb-3">
-                    <span className="bg-light pr-3">VOUCHER</span>
+                    <span className="bg-white pr-3">VOUCHER</span>
                 </Typography>
             </div>
 
@@ -401,7 +315,7 @@ const VoucherList = () => {
                     ) : (
                         availableVouchers.map(voucher => (
                             <div key={voucher.id}>
-                                <Voucher voucher={voucher} onApplyVoucher={handleApplyVoucher} />
+                                <Voucher voucher={voucher} onCopy={copyToClipboard} />
 
                             </div>
                         ))
@@ -409,92 +323,25 @@ const VoucherList = () => {
                 </Slider>
             </div>
 
-            <div className="container-fluid pt-0 pb-3">
-                <div className="row px-xl-5">
-                    {currentProducts.map((product, index) => (
-                        <div className="col-lg-3 col-md-4 col-sm-6 pb-1" key={index}>
-                            <div className="product-item bg-light mb-4">
-                                <div className="product-img position-relative overflow-hidden">
-                                    <Link to={`/ShopDetail?id=${product.id}`}>
-                                        <img
-                                            className="img-fluid w-100"
-                                            src={product.image || aboutImage5}
-                                            alt={product.name || "Product"}
-                                        />
-                                    </Link>
-                                </div>
-                                <div className="py-4 px-2">
-                                    <Link
-                                        className="h6 text-decoration-none text-truncate"
-                                        to={`/ShopDetail?id=${product.id}`}
-                                    >
-                                        {product.name || "Product Name Goes Here"}
-                                    </Link>
-                                    <div className="d-flex mb-1">
-                                        <strong style={{ color: 'red' }}>{formatImportPrice(product.importPrice)}</strong>
-                                    </div>
-                                    <div className="d-flex mb-1">
-                                        <strong> ⭐ {calculateAverageStars(product.id)} </strong>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
 
-                    {currentProducts.length > 0 && (
-                        <div className="col-12" style={{ marginTop: "-30px" }}>
-                            <nav>
-                                <ul className="pagination justify-content-center">
-                                    <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                                        <a className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
-                                            <i className="ni ni-bold-left" />
-                                        </a>
-                                    </li>
-
-                                    {(() => {
-                                        const pages = [];
-                                        let startPage, endPage;
-
-                                        if (totalPages <= 3) {
-                                            startPage = 1;
-                                            endPage = totalPages;
-                                        } else if (currentPage === 1) {
-                                            startPage = 1;
-                                            endPage = 3;
-                                        } else if (currentPage === totalPages) {
-                                            startPage = totalPages - 2;
-                                            endPage = totalPages;
-                                        } else {
-                                            startPage = currentPage - 1;
-                                            endPage = currentPage + 1;
-                                        }
-
-                                        for (let i = startPage; i <= endPage; i++) {
-                                            pages.push(
-                                                <li
-                                                    className={`page-item ${currentPage === i ? "active" : ""}`}
-                                                    key={i}
-                                                >
-                                                    <a className="page-link" onClick={() => handlePageChange(i)}>
-                                                        {i}
-                                                    </a>
-                                                </li>
-                                            );
-                                        }
-                                        return pages;
-                                    })()}
-                                    <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                                        <a className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
-                                            <i className="ni ni-bold-right" />
-                                        </a>
-                                    </li>
-                                </ul>
-                            </nav>
-                        </div>
-                    )}
-                </div>
-            </div>
-
+            <Snackbar
+                open={openSnackbar}
+                autoHideDuration={3000}
+                onClose={() => setOpenSnackbar(false)}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            >
+                <SnackbarContent
+                    message={copyMessage}
+                    sx={{
+                        backgroundColor: "black",
+                        color: "#fff",
+                        fontWeight: "bold",
+                        borderRadius: "8px",
+                        padding: "8px 16px",
+                        textAlign: "center",
+                    }}
+                />
+            </Snackbar>
         </>
     );
 };

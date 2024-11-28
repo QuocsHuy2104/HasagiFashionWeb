@@ -32,6 +32,30 @@ VoucherDiscount.propTypes = {
     discount: PropTypes.number.isRequired,
 };
 
+function VoucherQuantity({ quantity }) {
+    return (
+        <ArgonTypography variant="caption" color="secondary" fontWeight="bold">
+            {`${quantity}`}
+        </ArgonTypography>
+    );
+}
+
+VoucherQuantity.propTypes = {
+    quantity: PropTypes.number.isRequired,
+};
+
+function VoucherMaxDiscount({ maxDiscount }) {
+    return (
+        <ArgonTypography variant="caption" color="secondary" fontWeight="bold">
+            {`${maxDiscount}`}
+        </ArgonTypography>
+    );
+}
+
+VoucherMaxDiscount.propTypes = {
+    maxDiscount: PropTypes.number.isRequired,
+};
+
 function VoucherMinOrder({ minOrder }) {
     return (
         <ArgonTypography variant="caption" color="secondary" fontWeight="bold">
@@ -98,20 +122,22 @@ const VoucherTable = ({ onEditClick }) => {
     };
 
     const rows = vouchers.map(voucher => ({
-        code: <VoucherCode code={voucher.code} />,
-        discount: <VoucherDiscount discount={voucher.discountPercentage} />,
-        minOrder: <VoucherMinOrder minOrder={voucher.minimumOrderValue} />,
-        startDate: (
+        MAGIAMGIA: <VoucherCode code={voucher.code} />,
+        GIAM: <VoucherDiscount discount={voucher.discountPercentage} />,
+        GIATOITHIEU: <VoucherMinOrder minOrder={voucher.minimumOrderValue} />,
+        GIAMTOIDA: <VoucherMaxDiscount maxDiscount={voucher.maxDiscount} />,
+        SOLUONG: <VoucherQuantity quantity={voucher.quantity} />,
+        NGAYBATDAU: (
             <ArgonTypography variant="caption" color="textPrimary">
                 {formatDate(voucher.startDate)}
             </ArgonTypography>
         ),
-        endDate: (
+        NGAYHETHAN: (
             <ArgonTypography variant="caption" color="textPrimary">
                 {formatDate(voucher.endDate)}
             </ArgonTypography>
         ),
-        isActive: (
+        TRANGTHAI: (
             <Switch
                 checked={voucher.isActive}
                 onChange={() => handleStatusToggle(voucher)}
@@ -119,7 +145,7 @@ const VoucherTable = ({ onEditClick }) => {
                 inputProps={{ "aria-label": "controlled" }}
             />
         ),
-        action: (
+        THAOTAC: (
             <ArgonBox display="flex" justifyContent="space-between" alignItems="center">
                 <ArgonTypography
                     px={1}
@@ -159,13 +185,15 @@ const VoucherTable = ({ onEditClick }) => {
 
     const voucherTableData = {
         columns: [
-            { name: "code", align: "left" },
-            { name: "discount", align: "center" },
-            { name: "minOrder", align: "center" },
-            { name: "startDate", align: "center" },
-            { name: "endDate", align: "center" },
-            { name: "isActive", align: "center" },
-            { name: "action", align: "center" },
+            { name: "MAGIAMGIA", align: "left" },
+            { name: "SOLUONG", align: "left" },
+            { name: "GIAM", align: "center" },
+            { name: "GIATOITHIEU", align: "center" },
+            { name: "GIAMTOIDA", align: "center" },
+            { name: "NGAYBATDAU", align: "center" },
+            { name: "NGAYHETHAN", align: "center" },
+            { name: "TRANGTHAI", align: "center" },
+            { name: "THAOTAC", align: "center" },
         ],
         rows,
     };

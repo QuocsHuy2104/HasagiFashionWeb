@@ -80,10 +80,10 @@ function Default() {
         <Grid container spacing={3} mb={3}>
           <Grid item xs={12} md={6} lg={3}>
             <DetailedStatisticsCard
-              title="today's money"
-              count="$53,000"
+              title="Tiền hôm nay"
+              count="53,000đ"
               icon={{ color: "info", component: <i className="ni ni-money-coins" /> }}
-              percentage={{ color: "success", count: "+55%", text: "since yesterday" }}
+              percentage={{ color: "success", count: "+55%", text: "kể từ hôm qua" }}
             />
           </Grid>
           <Grid item xs={12} md={6} lg={3}>

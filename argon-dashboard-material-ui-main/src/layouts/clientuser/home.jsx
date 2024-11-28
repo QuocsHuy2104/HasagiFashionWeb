@@ -137,23 +137,23 @@ function Home() {
                     }}
                 >
                     <ArgonBox
-                            borderRadius='lg'
-                            p='25px 25px 10px'
-                            sx={{
-                                background: 'linear-gradient(to bottom, #2D0798, #fcc419)'
-                            }}>
-                            <ArgonBox
-                                display='flex'
-                                justifyContent='center'
-                                alignItems='center'
-                                flexWrap='wrap'
-                                mb={4}
-                            >
-                                <ArgonTypography variant='h2'>
-                                    <ArgonBox component='img' src='https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/home_fsale_image.png?1713464283843' />
-                                </ArgonTypography>
-                            </ArgonBox>
+                        borderRadius='lg'
+                        p='25px 25px 10px'
+                        sx={{
+                            background: 'linear-gradient(to bottom, #2D0798, #fcc419)'
+                        }}>
+                        <ArgonBox
+                            display='flex'
+                            justifyContent='center'
+                            alignItems='center'
+                            flexWrap='wrap'
+                            mb={4}
+                        >
+                            <ArgonTypography variant='h2'>
+                                <ArgonBox component='img' src='https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/home_fsale_image.png?1713464283843' />
+                            </ArgonTypography>
                         </ArgonBox>
+                    </ArgonBox>
                     <h5 className="mb-3 d-flex align-items-center py-3" style={{
                         color: "#e63946",
                         fontWeight: "bold",
@@ -196,7 +196,7 @@ function Home() {
                                 <div className="col-lg-3 col-md-4 col-sm-6 pb-1" key={index}>
                                     <div className="product-item bg-light mb-4">
                                         <div className="product-img position-relative overflow-hidden">
-                                            <Link >
+                                            <Link>
                                                 <img
                                                     className="img-fluid w-100"
                                                     src={product.image || aboutImage5}
@@ -204,12 +204,14 @@ function Home() {
                                                 />
                                             </Link>
                                         </div>
-                                        <div className="text-center py-4">
-                                            <Link className="h6 text-decoration-none text-truncate">
+                                        <div className="py-4 px-3 text-left">
+                                            <Link className="h6 text-decoration-none text-truncate d-block">
                                                 {product.name || "Product Name Goes Here"}
                                             </Link>
-                                            
-                                            <div className="d-flex align-items-center justify-content-center mb-1">
+                                            <h6 className="text-left text-primary">
+                                                {product.price ? `$${product.price}` : "Price Not Available"}
+                                            </h6>
+                                            <div className="d-flex align-items-center mb-1">
                                                 <small className="fa fa-star text-warning mr-1"></small>
                                                 <small className="fa fa-star text-warning mr-1"></small>
                                                 <small className="fa fa-star text-warning mr-1"></small>
@@ -223,6 +225,7 @@ function Home() {
                             ))}
                         </div>
                     </div>
+
                 </div>
             </div>
 
@@ -272,9 +275,9 @@ function Home() {
                 </h2>
                 <div className="row px-xl-5">
                     {currentProducts.map((product, index) => (
-                        <div className="col-lg-3 col-md-4 col-sm-6 pb-1" key={index} >
+                        <div className="col-lg-3 col-md-4 col-sm-6 pb-1" key={index}>
                             <div className="product-item bg-light mb-4">
-                                <div className="product-img position-relative overflow-hidden" >
+                                <div className="product-img position-relative overflow-hidden">
                                     <Link to={`/ShopDetail?id=${product.id}`}>
                                         <img
                                             className="img-fluid w-100"
@@ -283,23 +286,29 @@ function Home() {
                                         />
                                     </Link>
                                 </div>
-                                <div className="text-center py-4">
-                                    <Link className="h6 text-decoration-none text-truncate" to={`/ShopDetail?id=${product.id}`}>
+                                <div className="py-4 px-3 text-left">
+                                    <Link className="h6 text-decoration-none text-truncate d-block" to={`/ShopDetail?id=${product.id}`}>
                                         {product.name || "Product Name Goes Here"}
                                     </Link>
-                                    
-                                    <div className="d-flex align-items-center justify-content-center mb-1">
-                                        <small className="fa fa-star text-warning mr-1"></small>
-                                        <small className="fa fa-star text-warning mr-1"></small>
-                                        <small className="fa fa-star text-warning mr-1"></small>
-                                        <small className="fa fa-star text-warning mr-1"></small>
-                                        <small className="fa fa-star text-warning mr-1"></small>
-                                        <small>({product.rating || 99})</small>
+                                    <h6 className="text-left text-primary">
+                                        {product.price ? `$${product.price}` : "Price Not Available"}
+                                    </h6>
+                                    <div className="d-flex align-items-center justify-content-between mb-1">
+                                        <div className="d-flex align-items-center">
+                                            <small className="fa fa-star text-warning mr-1"></small>
+                                            <small className="fa fa-star text-warning mr-1"></small>
+                                            <small className="fa fa-star text-warning mr-1"></small>
+                                            <small className="fa fa-star text-warning mr-1"></small>
+                                            <small className="fa fa-star text-warning mr-1"></small>
+                                            <small>({product.rating || 99})</small>
+                                        </div>
+                                        <small className="text-muted">Đã bán: {product.sold || 0}</small>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     ))}
+
                     <div className="col-12" style={{ marginTop: "-30px" }}>
                         <nav>
                             <ul className="pagination justify-content-center">
@@ -326,7 +335,7 @@ function Home() {
                 </div>
             </div>
             <Footer />
-            <ChatBot/>
+            <ChatBot />
         </>
     );
 }

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import 'layouts/assets/css/style.css';
 import { Link } from "react-router-dom";
-import aboutImage5 from "layouts/assets/img/product-1.jpg";
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
 import ProductService from "../../../services/ProductServices";
@@ -13,6 +12,9 @@ import { Form } from 'react-bootstrap';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 import ChatBot from "components/client/HasagiChatBot";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import SearchIcon from "@mui/icons-material/Search";
 
 function Shop() {
     const [products, setProducts] = useState([]);
@@ -26,7 +28,7 @@ function Shop() {
     const [selectedBrands, setSelectedBrands] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [reviews, setReviews] = useState([]);
-    const [value, setValue] = useState([0, 1000000]);
+    const [value, setValue] = useState([300000, 700000]);
 
     const handleSliderChange = (newValue) => {
         setValue(newValue);
@@ -70,7 +72,8 @@ function Shop() {
             try {
                 const productResponse = await ProductService.getAllProducts();
                 const categoryResponse = await CategoryService.getAllCategories();
-                const brandResponse = await BrandService.getAllBrands();;
+                const brandResponse = await BrandService.getAllBrands();
+
                 if (
                     Array.isArray(productResponse.data) &&
                     Array.isArray(categoryResponse.data) &&
@@ -98,22 +101,20 @@ function Shop() {
     const filteredProducts = products.filter(product => {
         const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.categoryDTOResp?.id);
         const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(product.trademarkDTOResp?.id);
-const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-        const minPrice = parseFloat(product.minPrice) || 0;
-        const matchesPriceRange = minPrice >= value[0] && minPrice <= value[1];
-    
-        return matchesCategory && matchesBrand && matchesSearchTerm && matchesPriceRange;
+        const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+        return matchesCategory && matchesBrand && matchesSearchTerm;
     });
 
     const sortedProducts = filteredProducts.sort((a, b) => {
         if (sortOption === "price-asc") {
-            return (a.minPrice || 0) - (b.minPrice || 0);
+            return (a.importPrice || 0) - (b.importPrice || 0);
         } else if (sortOption === "price-desc") {
-            return (b.minPrice || 0) - (a.minPrice || 0);
+            return (b.importPrice || 0) - (a.importPrice || 0);
         } else if (sortOption === "popularity") {
-            return (b.sold || 0) - (a.sold || 0);
+            return (b.popularity || 0) - (a.popularity || 0);
         } else if (sortOption === "newest") {
-            return b.id - a.id; 
+            return new Date(b.date) - new Date(a.date);
         } else {
             return 0;
         }
@@ -138,7 +139,7 @@ const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLower
     const formatImportPrice = (importPrice) => {
         if (!importPrice) return "0đ";
 
-        const prices = importPrice.split(' - ').map(price => {
+        const prices = importPrice.split('-').map(price => {
             const trimmedPrice = price.trim();
             const numericPrice = parseFloat(trimmedPrice);
             const integerPrice = Math.floor(numericPrice);
@@ -185,19 +186,10 @@ const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLower
                     </div>
                 </div>
             )}
-            <div className="container-fluid">
-                <div className="row px-xl-5 py-5">
-                    <div className="col-12">
-                        <nav className="breadcrumb bg-light mb-30">
-                            <a className="breadcrumb-item text-dark" href="/feature-section">Trang chủ</a>
-                            <span className="breadcrumb-item active">Sản phẩm</span>
-                        </nav>
-                    </div>
-                </div>
-            </div>
+
             <HasagiNav onSearch={handleSearch} />
-            <div className="container-fluid">
-                <div className="row px-xl-5 pt-0">
+            <div className="container-fluid ">
+                <div className="row px-xl-5" style={{marginTop: "120px"}}>
                     <div className="col-3">
                         <h5 className="section-title position-relative text-uppercase mb-3">
                             <span className="bg-white pr-3">Lọc theo:</span>
@@ -266,7 +258,6 @@ const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLower
                                     range
                                 />
                                 <p>Từ: {value[0].toLocaleString('vi-VN')}đ - Đến: {value[1].toLocaleString('vi-VN')}đ</p>
-
 
                                 <style>
                                     {`
@@ -443,90 +434,137 @@ const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLower
                             </div>
                         </div>
                     </div>
-                    <div className="col-9">
+                    <div className="col-9 bg-white">
                         <div className="row pt-2">
-                            {currentProducts.map((product, index) => (
-                                <div className="col-lg-3 col-md-6 col-sm-6 px-2"
-                                    key={index}>
-                                    <Link to={`/ShopDetail?id=${product.id}`}>
-                                        <Card
-                                            sx={{
-                                                boxShadow: 3,
-                                                borderRadius: '4px',
-                                                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                                                '&:hover': {
-                                                    transform: 'scale(1.05)',
-                                                    boxShadow: 6,
-                                                },
-                                            }}
-                                            className="product-item bg-light mb-3"
-                                        >
-                                            <div className="product-img position-relative overflow-hidden">
-                                                <img
-                                                    className="img-fluid w-100"
-                                                    src={product.image || aboutImage5}
-                                                    alt={product.name || 'Product Name'}
-                                                    style={{
-                                                        objectFit: 'cover',
-                                                        height: '200px',
-                                                    }}
-                                                />
-                                            </div>
-                                            <div className="py-3 px-2">
+                            <div
+                                className="product-list"
+                                style={{
+                                    display: "flex",
+                                    flexWrap: "wrap",
+                                    gap: "20px",
+                                    justifyContent: "space-between",
+                                }}
+                            >
+                                {currentProducts.map((product, index) => (
+                                    <div
+                                        key={index}
+                                        className="product-card"
+                                        style={{
+                                            width: "calc(25% - 20px)",
+                                            position: "relative",
+                                            overflow: "hidden",
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            const iconContainer = e.currentTarget.querySelector('.icon-container');
+                                            if (iconContainer) {
+                                                iconContainer.style.opacity = '1';
+                                                iconContainer.style.pointerEvents = 'auto';
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            const iconContainer = e.currentTarget.querySelector('.icon-container');
+                                            if (iconContainer) {
+                                                iconContainer.style.opacity = '0';
+                                                iconContainer.style.pointerEvents = 'none';
+                                            }
+                                        }}
+                                    >
+                                        <Link to={`/ShopDetail?id=${product.id}`} style={{ textDecoration: "none" }}>
+                                            <Card className="card-container" style={{ position: "relative" }}>
                                                 <div
-                                                    className="h6 text-decoration-none text-truncate"
+                                                    className="image-container"
                                                     style={{
-                                                        color: '#333',
-                                                        fontWeight: 'bold',
-                                                        display: 'block',
-                                                        marginBottom: '1px',
-                                                        fontSize: '1rem',
+                                                        position: "relative",
+                                                        overflow: "hidden",
+                                                        width: "100%",
+                                                        height: "auto",
                                                     }}
                                                 >
-                                                    {product.name || "Product Name Goes Here"}
-                                                </div>
-                                                <Typography
-                                                    sx={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        color: 'red',
-                                                        fontWeight: 'bold',
-                                                        marginBottom: '10px',
-                                                        fontSize: '14px',
-                                                    }}
-                                                >
-                                                    {formatImportPrice(product.importPrice)}
                                                     <div
                                                         style={{
-                                                            color: '#f0e62b',
-                                                            border: '1px solid #f0e62b',
-                                                            padding: '0 5px',
-                                                            marginLeft: '10px',
-
+                                                            position: "absolute",
+                                                            top: "10px",
+                                                            left: "10px",
+                                                            backgroundColor: "#F30", // Nền mờ cho dễ đọc
+                                                            color: "white",
+                                                            padding: "1px 7px",
+                                                            borderRadius: "5px",
+                                                            zIndex: 5,
                                                         }}
                                                     >
                                                         {product.sale}%
                                                     </div>
-                                                </Typography>
+                                                    <img
+                                                        src={product.image}
+                                                        alt={product.name}
+                                                        style={{
+                                                            width: "100%",
+                                                            height: "auto",
+                                                            transition: "transform 0.3s ease",
+                                                        }}
+                                                    />
+                                                    <div
+                                                        className="icon-container"
+                                                        style={{
+                                                            position: "absolute",
+                                                            top: "10px",
+                                                            right: "10px",
+                                                            zIndex: 10,
+                                                            display: "flex",
+                                                            flexDirection: "column",
+                                                            alignItems: "center",
+                                                            gap: "15px", // Tăng khoảng cách giữa các icon
+                                                            opacity: 0,
+                                                            pointerEvents: "none",
+                                                            transition: "opacity 0.3s ease",
+                                                        }}
+                                                    >
+                                                        <FavoriteBorderIcon
+                                                            className="icon"
+                                                            style={{
+                                                                fontSize: "50px !important",
+                                                                color: "black",
+                                                                backgroundColor: "white",
+                                                            }} // Kích cỡ icon lớn hơn
+                                                        />
+                                                        <ShoppingCartIcon
+                                                            className="icon"
+                                                            style={{
+                                                                fontSize: "50px !important",
+                                                                color: "black",
+                                                                backgroundColor: "white",
+                                                            }}
+                                                        />
+                                                        <SearchIcon
+                                                            className="icon"
+                                                            style={{
+                                                                fontSize: "50px !important",
+                                                                color: "black",
+                                                                backgroundColor: "white",
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
 
-                                                <Typography
-                                                    sx={{
-                                                        fontWeight: 'bold',
-                                                        marginBottom: '10px',
-                                                        fontSize: '14px'
-                                                    }}
-                                                >
 
-                                                    <p> ⭐ {calculateAverageStars(product.id)} </p>
-                                                </Typography>
-                                            </div>
-                                        </Card>
-                                    </Link>
-                                </div>
-                            ))}
+                                                <div className="card-content" style={{ padding: "10px" }}>
+                                                    <div style={{ fontWeight: "bold" }}>{product.name || "Product Name Goes Here"}</div>
+                                                    <Typography variant="body2">
+                                                        {formatImportPrice(product.importPrice)}
+                                                    </Typography>
+                                                    <Typography variant="body2">
+                                                        <p>⭐ {calculateAverageStars(product.id)}</p>
+                                                    </Typography>
+                                                </div>
+                                            </Card>
+                                        </Link>
+                                    </div>
 
 
-                            <div className="col-12" style={{ marginTop: "-30px" }}>
+                                ))}
+                            </div>
+
+                            <div className="col-12" style={{}}>
                                 <nav>
                                     <ul className="pagination justify-content-center">
                                         <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
@@ -552,8 +590,8 @@ const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLower
                         </div>
 
                     </div>
-                </div>
-            </div>
+                </div >
+            </div >
             <Footer />
             <ChatBot />
         </>

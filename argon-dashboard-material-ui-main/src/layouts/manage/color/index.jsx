@@ -119,7 +119,7 @@ function Color() {
                 <ArgonBox mb={3}>
                     <Card>
                         <ArgonBox display="flex" justifyContent="space-between" p={3}>
-                            <ArgonTypography variant="h6">Manage Color</ArgonTypography>
+                            <ArgonTypography variant="h6">Quản lý màu sắc</ArgonTypography>
                         </ArgonBox>
                         <ArgonBox
                             p={3}
@@ -132,7 +132,7 @@ function Color() {
                                 <ArgonBox mb={3} position="relative">
                                     <ArgonInput
                                         type="text"
-                                        placeholder="Color Name"
+                                        placeholder="Tên màu"
                                         size="large"
                                         name="name"  
                                         fullWidth
@@ -148,7 +148,7 @@ function Color() {
                                 </ArgonBox>
                                 <ArgonBox mb={3}>
                                     <ArgonButton type="submit" size="large" color="info" fullWidth={true}>
-                                        {formData.id ? "Update" : "Save"}
+                                        {formData.id ? "Sửa" : "Lưu"}
                                     </ArgonButton>
                                 </ArgonBox>
                             </ArgonBox>

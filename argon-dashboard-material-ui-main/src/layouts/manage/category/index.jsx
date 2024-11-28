@@ -263,7 +263,7 @@ function Category() {
                   <ArgonBox width="100%">
                     <ArgonInput
                       type="text"
-                      placeholder="Category Name"
+                      placeholder="Tên danh mục"
                       size="large"
                       name="name"
                       fullWidth

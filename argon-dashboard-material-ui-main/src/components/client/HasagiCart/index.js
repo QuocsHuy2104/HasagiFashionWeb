@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
 import { FaTimes } from "react-icons/fa";
@@ -15,6 +15,7 @@ import ProductService from "services/ProductServices";
 import aboutImage5 from "layouts/assets/img/product-1.jpg";
 import ProductVariant from "./ProductVariant";
 import logo from "components/client/assets/images/logo1.png";
+import AddressService from "../../../services/AddressServices";
 
 const Cart = () => {
     const [cartItems, setCartItems] = useState([]);
@@ -25,19 +26,12 @@ const Cart = () => {
     const [showBackupModal, setShowBackupModal] = useState(false);
     const navigate = useNavigate();
     const [products, setProducts] = useState([]);
-    const fetchCartItems = async () => {
-        const accountId = Cookies.get("accountId");
 
-        if (!accountId) {
-            navigate(`/authentication/sign-in`);
-            return;
-        }
+    const fetchCartItems = async () => {
         try {
             const [cartResponse, addressResponse] = await Promise.all([
                 CartService.getCart(),
-                axios.get(`http://localhost:3000/api/addresses/exists?accountId=${accountId}`, {
-                    withCredentials: true,
-                }),
+                AddressService.getAddress(),
             ]);
             setCartItems(cartResponse.data);
             setAccountExists(addressResponse.data.exists);
@@ -391,12 +385,28 @@ const Cart = () => {
                                                 className="align-middle"
                                                 style={{ textAlign: "left", paddingLeft: "20px", border: "none" }}
                                             >
-                                                <Link to={`/ShopDetail?id=${item.productId}`} style={{ color: "black" }}>
-                                                    <img src={item.image} style={{ width: 60 }} alt={item.name} /> {item.name}
+                                                <Link to={`/ShopDetail?id=${item.productId}`} style={{
+                                                    color: "black",
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center'
+                                                }}>
+                                                    <img src={item.image} style={{ width: 60, marginRight: '10px' }} alt={item.name} />
+                                                    <span
+                                                        style={{
+                                                            display: '-webkit-box',
+                                                            WebkitBoxOrient: 'vertical',
+                                                            overflow: 'hidden',
+                                                            WebkitLineClamp: 2,
+                                                            lineHeight: '1.2em',
+                                                            maxHeight: '2.4em', // Adjust this based on line height (lineHeight * 2)
+                                                            textOverflow: 'ellipsis'
+                                                        }}
+                                                    >
+                                                        {item.name}
+                                                    </span>
                                                 </Link>
                                             </td>
                                             <td className="align-middle" style={{ border: "none", position: "relative" }}>
-
                                                 <button
                                                     onMouseDown={(event) => toggleDropdown(item.productId, item.cartdetailid)}
                                                     style={{

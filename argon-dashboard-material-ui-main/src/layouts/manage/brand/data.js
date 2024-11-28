@@ -85,7 +85,7 @@ const BrandTable = ({ onEditClick }) => {
                         },
                     }}
                 >
-                    <i className="bi bi-pencil-square"></i> Edit
+                    <i className="bi bi-pencil-square"></i> Sửa
                 </ArgonTypography>
                 <ArgonTypography
                     px={1}
@@ -101,7 +101,7 @@ const BrandTable = ({ onEditClick }) => {
                         },
                     }}
                 >
-                    <i className="bi bi-trash3"></i> Remove
+                    <i className="bi bi-trash3"></i> Xóa
                 </ArgonTypography>
             </ArgonBox>
         ),

@@ -246,7 +246,6 @@ function ShopDetail() {
             navigate("/Cart");
         } catch (error) {
             console.error("Error adding to cart:", error);
-          
         }
     };
     const [activeTab, setActiveTab] = useState("tab-pane-1");
@@ -575,7 +574,7 @@ function ShopDetail() {
                                     onClick={handleAddToCart}
                                     className="btn btn-warning px-3 mr-2"
                                 >
-                                    <i className="fa fa-shopping-cart mr-1"></i> Add To Cart
+                                    <i className="fa fa-shopping-cart mr-1"></i> thêm vào giỏ hàng
                                 </button>
                                 <button className="btn btn-warning px-3" onClick={handleByNow}>
                                     Mua ngay

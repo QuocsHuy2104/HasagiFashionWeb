@@ -118,7 +118,7 @@ function Size() {
                 <ArgonBox mb={3}>
                     <Card>
                         <ArgonBox display="flex" justifyContent="space-between" p={3}>
-                            <ArgonTypography variant="h6">Manage Size</ArgonTypography>
+                            <ArgonTypography variant="h6">Quản lý kích thước</ArgonTypography>
                         </ArgonBox>
                         <ArgonBox
                             p={3}
@@ -130,7 +130,7 @@ function Size() {
                                 <ArgonBox mb={3} position="relative">
                                     <ArgonInput
                                         type="text"
-                                        placeholder="Nhập Size"
+                                        placeholder="Tên kích thước"
                                         size="large"
                                         name="name"
                                         fullWidth
@@ -148,7 +148,7 @@ function Size() {
                                 {/* Submit Button */}
                                 <ArgonBox mb={3}>
                                     <ArgonButton type="submit" size="large" color="info" fullWidth={true}>
-                                        {formData.id ? "Update" : "Save"}
+                                        {formData.id ? "Sửa" : "Lưu"}
                                     </ArgonButton>
                                 </ArgonBox>
                             </ArgonBox>
