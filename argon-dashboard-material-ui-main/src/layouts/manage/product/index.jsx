@@ -39,6 +39,7 @@ function Product() {
         isActive: true,
     });
 
+
     const [categories, setCategories] = useState([]);
     const [brands, setBrands] = useState([]);
     const [errors, setErrors] = useState({});
@@ -304,7 +305,7 @@ function Product() {
         console.log("Set selected product for detail view:", product);
     };
 
-    const { columns, rows } = ProductTable({
+    const { columns, rows, refreshProducts } = ProductTable({
         onEditClick: handleEditClick,
         setSelectedProduct: setSelectedProduct,
         searchKeyword: searchKeyword,
@@ -617,13 +618,13 @@ function Product() {
                                     mb={3}
                                     p={2}
                                     display="flex"
-                                    justifyContent="space-between"
+                                    justifyContent="space-evenly"
                                     alignItems="center"
                                     border="1px solid #e0e0e0"
                                     borderRadius="8px"
                                     bgcolor="#f9f9f9"
                                 >
-                                    <ArgonBox width="30%">
+                                    <ArgonBox width="22%">
                                         <ArgonInput
                                             type="text"
                                             placeholder="🔍 Tìm kiếm..."
@@ -640,7 +641,7 @@ function Product() {
                                         />
                                     </ArgonBox>
 
-                                    <ArgonBox width="30%">
+                                    <ArgonBox width="22%">
                                         <select
                                             style={{
                                                 padding: "12px 16px",
@@ -663,7 +664,7 @@ function Product() {
                                         </select>
                                     </ArgonBox>
 
-                                    <ArgonBox width="30%">
+                                    <ArgonBox width="22%">
                                         <select
                                             style={{
                                                 padding: "12px 16px",
@@ -685,8 +686,23 @@ function Product() {
                                             ))}
                                         </select>
                                     </ArgonBox>
-                                </ArgonBox>
 
+                                    <ArgonBox width="22%">
+                                        <ArgonButton
+                                            variant="contained"
+                                            color="primary"
+                                            style={{
+                                                padding: "12px 24px",
+                                                borderRadius: "8px",
+                                                fontSize: "14px",
+                                                fontWeight: "bold",
+                                            }}
+                                            onClick={refreshProducts}
+                                        >
+                                            🔄 Làm mới danh sách
+                                        </ArgonButton>
+                                    </ArgonBox>
+                                </ArgonBox>
 
 
                                 <ArgonBox

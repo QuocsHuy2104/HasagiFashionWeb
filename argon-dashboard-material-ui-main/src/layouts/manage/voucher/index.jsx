@@ -71,36 +71,59 @@ function Voucher() {
 
     const validateForm = () => {
         let isValid = true;
-        Object.keys(formData).forEach((key) => {
-            if (key !== "id" && key !== "userCount") {
-                if (formData[key] === "" || formData[key] === null || formData[key] === undefined) {
-                    toast.error(`Trường ${key} không được để trống.`);
-                    isValid = false;
-                }
-            }
-        });
-        if (
-            formData.discountPercentage &&
-            (isNaN(formData.discountPercentage) ||
-                parseFloat(formData.discountPercentage) <= 0 ||
-                parseFloat(formData.discountPercentage) > 100)
+    
+        if (!formData.code || formData.code.trim() === "") {
+            toast.error("Trường mã voucher không được để trống.");
+            isValid = false;
+        }
+    
+        if (!formData.discountPercentage) {
+            toast.error("Trường giảm giá không được để trống.");
+            isValid = false;
+        } else if (
+            isNaN(formData.discountPercentage) ||
+            parseFloat(formData.discountPercentage) <= 0 ||
+            parseFloat(formData.discountPercentage) > 100
         ) {
             toast.error("Giảm giá phải là số lớn hơn 0 và nhỏ hơn hoặc bằng 100.");
             isValid = false;
         }
+    
+        if (!formData.minimumOrderValue || isNaN(formData.minimumOrderValue)) {
+            toast.error("Trường giá trị đơn hàng tối thiểu phải là số hợp lệ.");
+            isValid = false;
+        }
+    
+        if (!formData.maxDiscount || isNaN(formData.maxDiscount)) {
+            toast.error("Trường giảm giá tối đa phải là số hợp lệ.");
+            isValid = false;
+        }
+    
+        if (!formData.quantity || isNaN(formData.quantity)) {
+            toast.error("Trường số lượng phải là số hợp lệ.");
+            isValid = false;
+        }
+    
         const currentDate = new Date().toISOString().split("T")[0];
-        if (!formData.id && formData.startDate && formData.startDate < currentDate) {
+        if (!formData.startDate) {
+            toast.error("Ngày bắt đầu không được để trống.");
+            isValid = false;
+        } else if (!formData.id && formData.startDate < currentDate) {
             toast.error("Ngày bắt đầu không được trước ngày hiện tại khi tạo mới.");
             isValid = false;
         }
-        if (formData.startDate && formData.endDate && formData.endDate < formData.startDate) {
+    
+        if (!formData.endDate) {
+            toast.error("Ngày kết thúc không được để trống.");
+            isValid = false;
+        } else if (formData.endDate < formData.startDate) {
             toast.error("Ngày kết thúc không được trước ngày bắt đầu.");
             isValid = false;
         }
-
+    
         return isValid;
     };
-
+    
 
 
     const handleSubmit = async (e) => {
