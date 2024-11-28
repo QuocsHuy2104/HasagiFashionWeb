@@ -8,8 +8,9 @@ import ArgonTypography from "../../../components/ArgonTypography";
 import Table from "../../../examples/Tables/Table";
 import VoucherTable from "./data";
 import VoucherHistoryTable from "./voucherHistory";
-import VoucherService from "../../../services/VoucherServices"; // Đổi SizeServices thành VoucherService
-import { toast } from "react-toastify";
+import VoucherService from "../../../services/VoucherServices";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Footer from "../../../examples/Footer";
 import DashboardNavbar from "../../../examples/Navbars/DashboardNavbar";
 import { Tabs, Tab } from '@mui/material';
@@ -70,66 +71,43 @@ function Voucher() {
 
     const validateForm = () => {
         let isValid = true;
-        const newErrors = {
-            code: false,
-            discountPercentage: false,
-            minimumOrderValue: false,
-            maxDiscount: false,
-            quantity: false,
-            usageCount: false,
-            startDate: false,
-            endDate: false,
-        };
-
-        // Lấy ngày hiện tại
-        const currentDate = new Date().toISOString().split("T")[0]; // Định dạng thành yyyy-mm-dd
-
-        // Kiểm tra mã voucher
-        if (!formData.code.trim()) {
-            newErrors.code = "Voucher code is required.";
+        Object.keys(formData).forEach((key) => {
+            if (key !== "id" && key !== "userCount") {
+                if (formData[key] === "" || formData[key] === null || formData[key] === undefined) {
+                    toast.error(`Trường ${key} không được để trống.`);
+                    isValid = false;
+                }
+            }
+        });
+        if (
+            formData.discountPercentage &&
+            (isNaN(formData.discountPercentage) ||
+                parseFloat(formData.discountPercentage) <= 0 ||
+                parseFloat(formData.discountPercentage) > 100)
+        ) {
+            toast.error("Giảm giá phải là số lớn hơn 0 và nhỏ hơn hoặc bằng 100.");
+            isValid = false;
+        }
+        const currentDate = new Date().toISOString().split("T")[0];
+        if (!formData.id && formData.startDate && formData.startDate < currentDate) {
+            toast.error("Ngày bắt đầu không được trước ngày hiện tại khi tạo mới.");
+            isValid = false;
+        }
+        if (formData.startDate && formData.endDate && formData.endDate < formData.startDate) {
+            toast.error("Ngày kết thúc không được trước ngày bắt đầu.");
             isValid = false;
         }
 
-        // Kiểm tra giá trị giảm giá
-        if (!formData.discountPercentage || isNaN(formData.discountPercentage) || parseFloat(formData.discountPercentage) <= 0) {
-            newErrors.discountPercentage = "Discount must be a number greater than 0.";
-            isValid = false;
-        }
-
-        // Kiểm tra giá trị đơn hàng tối thiểu
-        if (!formData.minimumOrderValue || isNaN(formData.minimumOrderValue) || parseFloat(formData.minimumOrderValue) <= 0) {
-            newErrors.minimumOrderValue = "Minimum order value must be a number greater than 0.";
-            isValid = false;
-        }
-
-        // Kiểm tra ngày bắt đầu
-        if (!formData.startDate) {
-            newErrors.startDate = "Start date is required.";
-            isValid = false;
-        } else if (formData.startDate < currentDate) {
-            newErrors.startDate = "Start date cannot be before the current date.";
-            isValid = false;
-        }
-
-        // Kiểm tra ngày kết thúc
-        if (!formData.endDate) {
-            newErrors.endDate = "End date is required.";
-            isValid = false;
-        } else if (formData.endDate < formData.startDate) {
-            newErrors.endDate = "End date cannot be before the start date.";
-            isValid = false;
-        }
-
-        setErrors(newErrors);
         return isValid;
     };
+
 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!validateForm()) {
-            return; // Stop submission if validation fails
+            return;
         }
 
         const data = {
@@ -153,10 +131,10 @@ function Voucher() {
                 result = await VoucherService.createVoucher(data);
                 setVouchers([...vouchers, result.data]);
             }
-            toast.success("Voucher saved successfully");
+            toast.success("Lưu voucher thành công!");
             resetForm();
         } catch (error) {
-            toast.error(`Error: ${error.response ? error.response.data : error.message}`);
+            toast.error(`Lỗi: ${error.response ? error.response.data : error.message}`);
         }
     };
 
@@ -221,6 +199,7 @@ function Voucher() {
 
     return (
         <DashboardLayout>
+            <ToastContainer />
             <DashboardNavbar />
             <ArgonBox py={3}>
                 <ArgonBox mb={3}>
@@ -230,7 +209,6 @@ function Voucher() {
                         </ArgonBox>
                         <ArgonBox p={3} component="form" role="form" onSubmit={handleSubmit} sx={{ borderRadius: '0 0 15px 15px' }}>
                             <ArgonBox mx={3}>
-                                {/* Voucher Code Input */}
                                 <ArgonBox mb={3} position="relative">
                                     <ArgonInput
                                         type="text"
@@ -242,15 +220,9 @@ function Voucher() {
                                         error={!!errors.code}
                                         sx={{ bgcolor: 'white', borderRadius: '8px' }}
                                     />
-                                    {errors.code && (
-                                        <ArgonTypography variant="caption" color="error">
-                                            {errors.code}
-                                        </ArgonTypography>
-                                    )}
                                 </ArgonBox>
 
                                 <Grid container spacing={3}>
-                                    {/* Discount Percentage Input */}
                                     <Grid item xs={12} sm={6}>
                                         <ArgonBox mb={3} position="relative">
                                             <ArgonInput
@@ -263,15 +235,8 @@ function Voucher() {
                                                 error={!!errors.discountPercentage}
                                                 sx={{ bgcolor: 'white', borderRadius: '8px', width: '100%' }}
                                             />
-                                            {errors.discountPercentage && (
-                                                <ArgonTypography variant="caption" color="error">
-                                                    {errors.discountPercentage}
-                                                </ArgonTypography>
-                                            )}
                                         </ArgonBox>
                                     </Grid>
-
-                                    {/* Minimum Order Value Input */}
                                     <Grid item xs={12} sm={6}>
                                         <ArgonBox mb={3} position="relative">
                                             <ArgonInput
@@ -284,18 +249,12 @@ function Voucher() {
                                                 error={!!errors.quantity}
                                                 sx={{ bgcolor: 'white', borderRadius: '8px', width: '100%' }}
                                             />
-                                            {errors.quantity && (
-                                                <ArgonTypography variant="caption" color="error">
-                                                    {errors.quantity}
-                                                </ArgonTypography>
-                                            )}
                                         </ArgonBox>
                                     </Grid>
                                 </Grid>
 
 
                                 <Grid container spacing={3}>
-                                    {/* Minimum Order Value Input */}
                                     <Grid item xs={12} sm={6}>
                                         <ArgonBox mb={3} position="relative">
                                             <ArgonInput
@@ -308,14 +267,8 @@ function Voucher() {
                                                 error={!!errors.minimumOrderValue}
                                                 sx={{ bgcolor: 'white', borderRadius: '8px', width: '100%' }}
                                             />
-                                            {errors.minimumOrderValue && (
-                                                <ArgonTypography variant="caption" color="error">
-                                                    {errors.minimumOrderValue}
-                                                </ArgonTypography>
-                                            )}
                                         </ArgonBox>
                                     </Grid>
-                                    {/* Discount Percentage Input */}
                                     <Grid item xs={12} sm={6}>
                                         <ArgonBox mb={3} position="relative">
                                             <ArgonInput
@@ -328,11 +281,6 @@ function Voucher() {
                                                 error={!!errors.maxDiscount}
                                                 sx={{ bgcolor: 'white', borderRadius: '8px', width: '100%' }}
                                             />
-                                            {errors.maxDiscount && (
-                                                <ArgonTypography variant="caption" color="error">
-                                                    {errors.maxDiscount}
-                                                </ArgonTypography>
-                                            )}
                                         </ArgonBox>
                                     </Grid>
                                 </Grid>
@@ -350,15 +298,9 @@ function Voucher() {
                                                 error={!!errors.startDate}
                                                 sx={{ bgcolor: 'white', borderRadius: '8px', width: '100%' }}
                                             />
-                                            {errors.startDate && (
-                                                <ArgonTypography variant="caption" color="error">
-                                                    {errors.startDate}
-                                                </ArgonTypography>
-                                            )}
                                         </ArgonBox>
                                     </Grid>
 
-                                    {/* End Date Input */}
                                     <Grid item xs={12} sm={6}>
                                         <ArgonBox mb={3} position="relative">
                                             <ArgonInput
@@ -371,16 +313,10 @@ function Voucher() {
                                                 error={!!errors.endDate}
                                                 sx={{ bgcolor: 'white', borderRadius: '8px', width: '100%' }}
                                             />
-                                            {errors.endDate && (
-                                                <ArgonTypography variant="caption" color="error">
-                                                    {errors.endDate}
-                                                </ArgonTypography>
-                                            )}
                                         </ArgonBox>
                                     </Grid>
                                 </Grid>
 
-                                {/* Submit Button */}
                                 <ArgonBox mb={3} sx={{ width: { xs: '50%', sm: '10%', md: '10%' } }}>
                                     <ArgonButton type="submit" size="large" color="info" fullWidth>
                                         {formData.id ? "Cập nhật" : "Tạo"}
@@ -392,11 +328,10 @@ function Voucher() {
                 </ArgonBox>
 
 
-                {/* Voucher Table */}
                 <ArgonBox sx={{ bgcolor: '#f5f5f5', borderRadius: '10px 10px 0 0' }}>
                     <Tabs value={activeTab} onChange={handleTabChange} sx={{ mb: 1 }}>
-                        <Tab label="Còn hạn" sx={{ minWidth: '100px', padding: '0 16px' }} />
-                        <Tab label="Hết hạn" sx={{ minWidth: '100px', padding: '0 16px' }} />
+                        <Tab label="Còn hạn" sx={{ minWidth: '100px', padding: '0 20px' }} />
+                        <Tab label="Hết hạn" sx={{ minWidth: '100px', padding: '0 20px' }} />
                     </Tabs>
 
                     {activeTab === 0 && (
