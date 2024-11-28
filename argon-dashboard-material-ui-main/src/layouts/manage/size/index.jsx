@@ -14,16 +14,15 @@ import { toast } from "react-toastify";
 function Size() {
     const [formData, setFormData] = useState({
         id: "",
-        name: "",  // Thay đổi 'size' thành 'name'
+        name: "",
     });
 
     const [errors, setErrors] = useState({
-        name: false,  // Thay đổi 'size' thành 'name'
+        name: false,
     });
 
     const [sizes, setSizes] = useState([]);
 
-    // Fetch size data
     const fetchData = async () => {
         try {
             const response = await SizesService.getAllSizes();
@@ -46,27 +45,37 @@ function Size() {
 
     const validateForm = () => {
         let isValid = true;
-        const newErrors = { name: false };  // Thay đổi 'size' thành 'name'
+        const newErrors = { name: false };
 
-        // Validation: Name cannot be empty
-        if (!formData.name.trim()) {  // Thay đổi 'size' thành 'name'
+        if (!formData.name.trim()) {
             newErrors.name = "Size name is required.";
             isValid = false;
+        } else if (isSizeNameDuplicate(formData.name)) {
+            newErrors.name = true;
+            toast.warn("Tên size đã tồn tại!!!");
         }
 
         setErrors(newErrors);
         return isValid;
     };
 
+    const isSizeNameDuplicate = (sizeName) => {
+        const existingSizeNames = sizes.map((size) => size.name.trim().toLowerCase());
+        return existingSizeNames.includes(sizeName.trim().toLowerCase());
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validate form
         if (!validateForm()) {
             return;
         }
+        if (isSizeNameDuplicate(formData.name)) {
+            return;
+        }
 
-        const data = { name: formData.name };  // Thay đổi 'size' thành 'name'
+
+        const data = { name: formData.name };
 
         try {
             let result;
@@ -77,7 +86,7 @@ function Size() {
                 result = await SizesService.createSize(data);
                 toast.success("Size created successfully");
             }
-            fetchData(); // Refresh data after create/update
+            fetchData();
             resetForm();
         } catch (error) {
             toast.error(`Error: ${error.response ? error.response.data : error.message}`);
@@ -122,7 +131,7 @@ function Size() {
                 <ArgonBox mb={3}>
                     <Card>
                         <ArgonBox display="flex" justifyContent="space-between" p={3}>
-                            <ArgonTypography variant="h6">Manage Size</ArgonTypography>
+                            <ArgonTypography variant="h6">Quản lý Size</ArgonTypography>
                         </ArgonBox>
                         <ArgonBox
                             p={3}
@@ -131,17 +140,16 @@ function Size() {
                             onSubmit={handleSubmit}
                         >
                             <ArgonBox mx={3}>
-                                {/* Size Name Input */}
                                 <ArgonBox mb={3} position="relative">
                                     <ArgonInput
                                         type="text"
-                                        placeholder="Size Name"
+                                        placeholder="Nhập size"
                                         size="large"
-                                        name="name"  // Thay đổi 'size' thành 'name'
+                                        name="name"
                                         fullWidth
-                                        value={formData.name}  // Thay đổi 'size' thành 'name'
+                                        value={formData.name}
                                         onChange={handleChange}
-                                        error={!!errors.name}  // Thay đổi 'size' thành 'name'
+                                        error={!!errors.name}
                                     />
                                     {errors.name && (
                                         <ArgonTypography variant="caption" color="error">
@@ -150,10 +158,9 @@ function Size() {
                                     )}
                                 </ArgonBox>
 
-                                {/* Submit Button */}
                                 <ArgonBox mb={3}>
                                     <ArgonButton type="submit" size="large" color="info" fullWidth={true}>
-                                        {formData.id ? "Update" : "Save"}
+                                        {formData.id ? "Cập nhật" : "Thêm"}
                                     </ArgonButton>
                                 </ArgonBox>
                             </ArgonBox>

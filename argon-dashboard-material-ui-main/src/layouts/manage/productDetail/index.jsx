@@ -26,12 +26,6 @@ import Box from "@mui/material/Box";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-
-
-// toast.warn("Thêm thành công");
-// toast.error("Có lỗi xảy ra khi xử lý thanh toán VNPAY.");
-// toast.success(`Áp dụng mã giảm giá ${voucher.code} thành công!`);
-
 function ProductDetail() {
     const location = useLocation();
     const product = location.state?.product;
@@ -318,8 +312,8 @@ function ProductDetail() {
                                     <h2>{product.name}</h2>
                                     <p>Giá: {product.importPrice} VNĐ</p>
                                     <p>Số lượng: {product.importQuantity}</p>
-                                    <p>Danh mục: {product.categoryDTOResp.name}</p>
-                                    <p>Thương hiệu: {product.trademarkDTOResp.name}</p>
+                                    <p>Danh mục: {product.categoryDTOResponse?.name}</p>
+                                    <p>Thương hiệu: {product.brandDTOResponse?.name}</p>
                                 </div>
                             ) : (
                                 <p>Không tìm thấy sản phẩm</p>

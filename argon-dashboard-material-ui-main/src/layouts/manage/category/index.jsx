@@ -7,8 +7,7 @@ import ArgonInput from "../../../components/ArgonInput";
 import ArgonButton from "../../../components/ArgonButton";
 import ArgonBox from "../../../components/ArgonBox";
 import ArgonTypography from "../../../components/ArgonTypography";
-import Table from "../../../examples/Tables/Table";
-import CategoryTable from "./data";
+import DataTable from "./data";
 import CategoriesService from "../../../services/CategoryServices";
 import { Image } from "react-bootstrap";
 import { ToastContainer, toast } from 'react-toastify';
@@ -25,10 +24,6 @@ function Category() {
   const [categories, setCategories] = useState([]);
   const [errors, setErrors] = useState({ name: false, image: false });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const fetchData = async () => {
     try {
       const response = await CategoriesService.getAllCategories();
@@ -37,6 +32,11 @@ function Category() {
       console.log(err);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
 
   const handleChange = (e) => {
     setFormData({
@@ -55,28 +55,33 @@ function Category() {
 
   const validateForm = () => {
     const newErrors = { name: false, image: false };
-
-    // Kiểm tra tên danh mục
     if (!formData.name.trim()) {
       newErrors.name = true;
       toast.warn("Vui lòng nhập tên danh mục!!!");
     } else if (/\d/.test(formData.name)) {
       newErrors.name = true;
       toast.warn("Tên danh mục không được nhập số!!!");
+    } else if (isCategoryNameDuplicate(formData.name)) {
+      newErrors.name = true;
+      toast.warn("Tên danh mục đã tồn tại!!!");
     }
 
-    // Kiểm tra ảnh
     if (!formData.image) {
       newErrors.image = true;
       toast.warn("Vui lòng chọn ảnh danh mục!!!");
     }
 
-    setErrors(newErrors); 
+    setErrors(newErrors);
     console.log("Form errors: ", newErrors);
 
-    return !newErrors.name && !newErrors.image; 
+    return !newErrors.name && !newErrors.image;
   };
 
+
+  const isCategoryNameDuplicate = (categoryName) => {
+    const existingCategoryNames = categories.map((category) => category.name.trim().toLowerCase());
+    return existingCategoryNames.includes(categoryName.trim().toLowerCase());
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -84,7 +89,11 @@ function Category() {
     const isValid = validateForm();
     if (!isValid) {
       console.log("Form is invalid. Aborting submit.");
-      return; 
+      return;
+    }
+
+    if (isCategoryNameDuplicate(formData.name)) {
+      return;
     }
 
     try {
@@ -151,13 +160,13 @@ function Category() {
         toast.success("Thêm danh mục thành công");
       }
 
+      fetchData();
       resetForm();
     } catch (error) {
       console.error("Unexpected error:", error);
       toast.error("Có lỗi xảy ra. Vui lòng thử lại!");
     }
   };
-
 
   const resetForm = () => {
     setFormData({
@@ -175,12 +184,12 @@ function Category() {
     try {
       await CategoriesService.deleteCategory(id);
       setCategories(categories.filter(cate => cate.id !== id));
+      fetchData();
     } catch (error) {
       console.error("Error deleting category", error);
     }
   };
 
-  const { columns, rows } = CategoryTable({ onEditClick: handleEditClick, onDeleteClick: handleDeleteClick });
 
   return (
     <DashboardLayout>
@@ -272,7 +281,7 @@ function Category() {
                       value={formData.name}
                       onChange={handleChange}
                     />
-  
+
                   </ArgonBox>
                 </ArgonBox>
 
@@ -290,18 +299,11 @@ function Category() {
       <ArgonBox>
         <ArgonBox mb={3}>
           <Card>
-            <ArgonBox
-              sx={{
-                "& .MuiTableRow-root:not(:last-child)": {
-                  "& td": {
-                    borderBottom: ({ borders: { borderWidth, borderColor } }) =>
-                      `${borderWidth[1]} solid ${borderColor}`,
-                  },
-                },
-              }}
-            >
-              <Table columns={columns} rows={rows} />
-            </ArgonBox>
+            <DataTable
+              categories={categories}
+              onEditClick={handleEditClick}
+              onDeleteClick={handleDeleteClick}
+            />
           </Card>
         </ArgonBox>
       </ArgonBox>

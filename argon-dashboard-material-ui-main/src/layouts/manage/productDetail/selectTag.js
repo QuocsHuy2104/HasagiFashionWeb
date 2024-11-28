@@ -23,8 +23,6 @@ const MenuProps = {
 
 export default function MultipleSelectCheckmarks({ model, selectedModel = [], onChange, nameTag }) {
     const [selectedValues, setSelectedValues] = React.useState(Array.isArray(selectedModel) ? selectedModel : []);
-
-    // Sync initial selectedModel prop with internal state
     React.useEffect(() => {
         setSelectedValues(Array.isArray(selectedModel) ? selectedModel : []);
     }, [selectedModel]);
@@ -32,7 +30,7 @@ export default function MultipleSelectCheckmarks({ model, selectedModel = [], on
     const handleSelectionChange = (event) => {
         const { value } = event.target;
         setSelectedValues(value);
-        onChange(value); // Pass updated selection to parent component
+        onChange(value); 
     };
 
     return (

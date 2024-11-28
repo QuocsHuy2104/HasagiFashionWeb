@@ -9,21 +9,22 @@ import ArgonTypography from "../../../components/ArgonTypography";
 import DataTable from "./data";
 import Footer from "../../../examples/Footer";
 import ColorsService from "../../../services/ColorServices";
-import { toast } from "react-toastify";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Color() {
     const [formData, setFormData] = useState({
         id: "",
-        name: "",  // Thay đổi 'color' thành 'name'
+        name: "",
     });
 
     const [errors, setErrors] = useState({
-        name: false,  // Thay đổi 'color' thành 'name'
+        name: false,
     });
 
     const [colors, setColors] = useState([]);
 
-    // Fetch color data
+
     const fetchData = async () => {
         try {
             const response = await ColorsService.getAllColors();
@@ -46,38 +47,48 @@ function Color() {
 
     const validateForm = () => {
         let isValid = true;
-        const newErrors = { name: false };  // Thay đổi 'color' thành 'name'
-
-        // Validation: Name cannot be empty
-        if (!formData.name.trim()) {  // Thay đổi 'color' thành 'name'
-            newErrors.name = "Color name is required.";
+        const newErrors = { name: false };
+        if (!formData.name.trim()) {
+            newErrors.name = true;
+            toast.warn("Vui lòng nhập tên màu!!!");
             isValid = false;
-        }
+        } else if (isColorNameDuplicate(formData.name)) {
+            newErrors.name = true;
+            toast.warn("Tên màu đã tồn tại!!!");
+          }
 
         setErrors(newErrors);
         return isValid;
     };
 
+    const isColorNameDuplicate = (colorName) => {
+        const existingColorNames = colors.map((color) => color.name.trim().toLowerCase());
+        return existingColorNames.includes(colorName.trim().toLowerCase());
+      };
+      
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        // Validate form
         if (!validateForm()) {
             return;
         }
 
-        const data = { name: formData.name };  // Thay đổi 'color' thành 'name'
+        if (isColorNameDuplicate(formData.name)) {
+            return; 
+          }
+
+        const data = { name: formData.name };
 
         try {
             let result;
             if (formData.id) {
                 result = await ColorsService.updateColor(formData.id, data);
-                toast.success("Color updated successfully");
+                toast.success("Cập nhật màu thành công");
             } else {
                 result = await ColorsService.createColor(data);
-                toast.success("Color created successfully");
+                toast.success("Thêm màu thành công!");
             }
-            fetchData(); // Refresh data after create/update
+            fetchData();
             resetForm();
         } catch (error) {
             toast.error(`Error: ${error.response ? error.response.data : error.message}`);
@@ -87,19 +98,18 @@ function Color() {
     const resetForm = () => {
         setFormData({
             id: "",
-            name: "",  // Thay đổi 'color' thành 'name'
+            name: "",
         });
-        setErrors({ name: false });  // Thay đổi 'color' thành 'name'
+        setErrors({ name: false });
     };
 
     const handleEditClick = (color) => {
         setFormData({
             id: color.id,
-            name: color.name,  // Thay đổi 'color' thành 'name'
+            name: color.name,
         });
     };
 
-    // Handle deletion of selected rows
     const handleDeleteClick = async (selectedRows) => {
         if (selectedRows.length === 0) return;
 
@@ -112,17 +122,18 @@ function Color() {
                 toast.error(`Error deleting color with ID ${id}`);
             }
         }
-        fetchData(); // Refresh data after deletion
+        fetchData();
     };
 
     return (
         <DashboardLayout>
+            <ToastContainer />
             <DashboardNavbar />
             <ArgonBox py={3}>
                 <ArgonBox mb={3}>
                     <Card>
                         <ArgonBox display="flex" justifyContent="space-between" p={3}>
-                            <ArgonTypography variant="h6">Manage Color</ArgonTypography>
+                            <ArgonTypography variant="h6">Quản lý màu sắc</ArgonTypography>
                         </ArgonBox>
                         <ArgonBox
                             p={3}
@@ -131,17 +142,16 @@ function Color() {
                             onSubmit={handleSubmit}
                         >
                             <ArgonBox mx={3}>
-                                {/* Color Name Input */}
                                 <ArgonBox mb={3} position="relative">
                                     <ArgonInput
                                         type="text"
-                                        placeholder="Color Name"
+                                        placeholder="Nhập tên màu sắc"
                                         size="large"
-                                        name="name"  // Thay đổi 'color' thành 'name'
+                                        name="name"  
                                         fullWidth
-                                        value={formData.name}  // Thay đổi 'color' thành 'name'
+                                        value={formData.name}  
                                         onChange={handleChange}
-                                        error={!!errors.name}  // Thay đổi 'color' thành 'name'
+                                        error={!!errors.name}  
                                     />
                                     {errors.name && (
                                         <ArgonTypography variant="caption" color="error">
@@ -149,11 +159,9 @@ function Color() {
                                         </ArgonTypography>
                                     )}
                                 </ArgonBox>
-
-                                {/* Submit Button */}
                                 <ArgonBox mb={3}>
                                     <ArgonButton type="submit" size="large" color="info" fullWidth={true}>
-                                        {formData.id ? "Update" : "Save"}
+                                        {formData.id ? "Cập nhật" : "Lưu"}
                                     </ArgonButton>
                                 </ArgonBox>
                             </ArgonBox>
