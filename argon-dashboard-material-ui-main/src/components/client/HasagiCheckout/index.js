@@ -38,7 +38,6 @@ const Checkout = () => {
     const [vouchers, setVouchers] = useState([]);
     const [usedVouchers, setUsedVouchers] = useState([]);
     const [accountId, setAccountId] = useState(Cookies.get('accountId'));
-    const [showVouchers, setShowVouchers] = useState(false);
 
 
 
