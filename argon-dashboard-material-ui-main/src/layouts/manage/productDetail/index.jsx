@@ -257,7 +257,7 @@ function ProductDetail() {
                                             </ArgonBox>
 
                                             <ArgonBox>
-                                                <ArgonTypography variant="caption">{product.categoryDTOResp.name}</ArgonTypography>
+                                                <ArgonTypography variant="caption">{product.categoryDTOResponse.name}</ArgonTypography>
                                             </ArgonBox>
                                         </ArgonBox>
 
@@ -267,7 +267,7 @@ function ProductDetail() {
                                             </ArgonBox>
 
                                             <ArgonBox>
-                                                <ArgonTypography variant="caption">{product.trademarkDTOResp.name}</ArgonTypography>
+                                                <ArgonTypography variant="caption">{product.brandDTOResponse.name}</ArgonTypography>
                                             </ArgonBox>
                                         </ArgonBox>
 

@@ -99,8 +99,8 @@ function Shop() {
     }, []);
 
     const filteredProducts = products.filter(product => {
-        const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.categoryDTOResp?.id);
-        const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(product.trademarkDTOResp?.id);
+        const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.categoryDTOResponse?.id);
+        const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(product.brandDTOResponse?.id);
         const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLowerCase());
 
         return matchesCategory && matchesBrand && matchesSearchTerm;

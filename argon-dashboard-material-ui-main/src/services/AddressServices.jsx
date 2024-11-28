@@ -6,11 +6,11 @@ const AddressService = {
     getAllAddress: () => apiClient.get("/addresses/account"),
     getAddress: () => apiClient.get('/addresses/exists'),
     createAddress: (formData) => {
-        apiClient.post('/addresses', formData, { withCredentials: true })
+        apiClient.post('/addresses/create/data', formData, { withCredentials: true })
     },
 
     createAddressFirst: (formData) => {
-        return apiClient.post('/addresses/create', formData, { withCredentials: true });
+        return apiClient.post('/addresses/create/first', formData, { withCredentials: true });
     },
 
     removeAddress: async (id) => {

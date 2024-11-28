@@ -1,20 +1,16 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { useNavigate } from 'react-router-dom';
-
-// Argon Dashboard 2 MUI components
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
 import ArgonAvatar from "components/ArgonAvatar";
 import ArgonBadge from "components/ArgonBadge";
+import Switch from '@mui/material/Switch';
+import { toast } from "react-toastify";
 
 import ProductService from "services/ProductServices";
 
 function Product({ image, video, name, importprice }) {
-    const defaultImage = "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930";
-    const imageUrl = image && image !== '' ? image : defaultImage;
-    const videoUrl = video && video !== '' ? video : "";
-
     return (
         <ArgonBox display="flex" alignItems="center" px={1} py={0.5}>
             {image && (
@@ -49,7 +45,7 @@ Product.propTypes = {
     importprice: PropTypes.number,
 };
 
-const ProductTable = ({ onEditClick, setSelectedProduct }) => {
+const ProductTable = ({ onEditClick, setSelectedProduct, searchKeyword, selectedCategory, selectedBrand }) => {
     const [products, setProducts] = useState([]);
     const navigate = useNavigate();
 
@@ -65,6 +61,26 @@ const ProductTable = ({ onEditClick, setSelectedProduct }) => {
 
         fetchData();
     }, []);
+
+
+    const handleStatusToggle = async (product) => {
+        try {
+            const updatedProduct = { ...product, isActive: !product.isActive };
+            console.log('Cập nhật trạng thái mới:', updatedProduct.isActive);
+
+            await ProductService.updateProduct(product.id, updatedProduct);
+            setProducts((prevProducts) =>
+                prevProducts.map((p) => (p.id === product.id ? updatedProduct : p))
+            );
+
+            toast.success("Cập nhật trạng thái thành công!");
+        } catch (error) {
+            console.error("Error updating product status", error);
+            toast.error("Cập nhật trạng thái thất bại!!!");
+        }
+    };
+
+
 
     const handleEditClick = (product) => {
         if (onEditClick) onEditClick(product);
@@ -97,30 +113,41 @@ const ProductTable = ({ onEditClick, setSelectedProduct }) => {
     };
 
     const formatImportPrice = (importPrice) => {
-        if (!importPrice) return "0đ"; // Default value if importPrice is not available
+        if (!importPrice) return "0đ";
 
         const prices = importPrice.split('-').map(price => {
             const trimmedPrice = price.trim();
-            const numericPrice = parseFloat(trimmedPrice); // Convert string to number
-            const integerPrice = Math.floor(numericPrice); // Remove decimal places
-            return `${formatNumber(integerPrice)}đ`; // Format number and prefix with 'đ'
+            const numericPrice = parseFloat(trimmedPrice);
+            const integerPrice = Math.floor(numericPrice);
+            return `${formatNumber(integerPrice)}đ`;
         });
 
-        return prices.join(' - '); // Join formatted prices with ' - '
+        return prices.join(' - ');
     };
 
+    const filteredProducts = products
+        .filter((product) =>
+            product.name.toLowerCase().includes(searchKeyword.toLowerCase())
+        )
+        .filter((product) => {
+            if (selectedCategory && product.categoryDTOResponse?.id !== parseInt(selectedCategory)) {
+                return false;
+            }
+            if (selectedBrand && product.brandDTOResponse?.id !== parseInt(selectedBrand)) {
+                return false;
+            }
+            return true;
+        });
 
-    const rows = products.map(product => ({
+    const rows = filteredProducts.map(product => ({
         SanPham: (
             <Product
-                image={product.image ? product.image : null} // Chỉ truyền dữ liệu image nếu có
-                video={product.video ? product.video : null} // Chỉ truyền dữ liệu video nếu có
+                image={product.image ? product.image : null}
+                video={product.video ? product.video : null}
                 name={product.name || "Unknown Product"}
                 importprice={formatImportPrice(product.importPrice)}
             />
         ),
-
-
         SoLuong: (
             <ArgonTypography variant="caption" color="secondary" fontWeight="medium">
                 {product.importQuantity > 0 ? product.importQuantity || "N/A" : "0"}
@@ -130,12 +157,11 @@ const ProductTable = ({ onEditClick, setSelectedProduct }) => {
             <ArgonTypography variant="caption" color="secondary" fontWeight="medium">
                 {formatDate(product.createDate)}
             </ArgonTypography>
-
         ),
         DanhMuc: (
             <ArgonBadge
                 variant="gradient"
-                badgeContent={product.categoryDTOResp?.name || "Unknown"}
+                badgeContent={product.categoryDTOResponse?.name || "Unknown"}
                 color="primary"
                 size="sm"
                 sx={{
@@ -149,7 +175,7 @@ const ProductTable = ({ onEditClick, setSelectedProduct }) => {
         ThuongHieu: (
             <ArgonBadge
                 variant="gradient"
-                badgeContent={product.trademarkDTOResp?.name || "Unknown"}
+                badgeContent={product.brandDTOResponse?.name || "Unknown"}
                 color="info"
                 size="sm"
                 sx={{
@@ -159,6 +185,15 @@ const ProductTable = ({ onEditClick, setSelectedProduct }) => {
                     borderRadius: "10px",
                 }}
             />
+        ),
+        TrangThai: (
+            <Switch
+                checked={product.isActive}
+                onChange={() => handleStatusToggle(product)}
+                color="primary"
+                inputProps={{ "aria-label": "controlled" }}
+            />
+
         ),
         ThaoTac: (
             <ArgonBox display="flex" justifyContent="space-between" alignItems="center">
@@ -205,6 +240,7 @@ const ProductTable = ({ onEditClick, setSelectedProduct }) => {
             { name: "NgayTao", align: "center" },
             { name: "DanhMuc", align: "center" },
             { name: "ThuongHieu", align: "center" },
+            { name: "TrangThai", align: "center" },
             { name: "ThaoTac", align: "center" },
         ],
         rows,
@@ -216,6 +252,10 @@ const ProductTable = ({ onEditClick, setSelectedProduct }) => {
 ProductTable.propTypes = {
     onEditClick: PropTypes.func.isRequired,
     setSelectedProduct: PropTypes.func.isRequired,
+    searchKeyword: PropTypes.string.isRequired,
+    selectedCategory: PropTypes.string,
+    selectedBrand: PropTypes.string,
 };
+
 
 export default ProductTable;

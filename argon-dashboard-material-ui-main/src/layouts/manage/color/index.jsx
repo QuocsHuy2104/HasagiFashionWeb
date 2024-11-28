@@ -15,14 +15,15 @@ import 'react-toastify/dist/ReactToastify.css';
 function Color() {
     const [formData, setFormData] = useState({
         id: "",
-        name: "", 
+        name: "",
     });
 
     const [errors, setErrors] = useState({
-        name: false,  
+        name: false,
     });
 
     const [colors, setColors] = useState([]);
+
 
     const fetchData = async () => {
         try {
@@ -46,36 +47,48 @@ function Color() {
 
     const validateForm = () => {
         let isValid = true;
-        const newErrors = { name: false };  
-
-        if (!formData.name.trim()) {  
-            newErrors.name = "Màu không được bỏ trống";
+        const newErrors = { name: false };
+        if (!formData.name.trim()) {
+            newErrors.name = true;
+            toast.warn("Vui lòng nhập tên màu!!!");
             isValid = false;
-        }
+        } else if (isColorNameDuplicate(formData.name)) {
+            newErrors.name = true;
+            toast.warn("Tên màu đã tồn tại!!!");
+          }
 
         setErrors(newErrors);
         return isValid;
     };
 
+    const isColorNameDuplicate = (colorName) => {
+        const existingColorNames = colors.map((color) => color.name.trim().toLowerCase());
+        return existingColorNames.includes(colorName.trim().toLowerCase());
+      };
+      
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (!validateForm()) {
             return;
         }
 
-        const data = { name: formData.name };  
+        if (isColorNameDuplicate(formData.name)) {
+            return; 
+          }
+
+        const data = { name: formData.name };
 
         try {
             let result;
             if (formData.id) {
                 result = await ColorsService.updateColor(formData.id, data);
-                toast.success("Sửa thành công");
+                toast.success("Cập nhật màu thành công");
             } else {
                 result = await ColorsService.createColor(data);
-                toast.success("Thêm thành công");
+                toast.success("Thêm màu thành công!");
             }
-            fetchData(); 
+            fetchData();
             resetForm();
         } catch (error) {
             toast.error(`Error: ${error.response ? error.response.data : error.message}`);
@@ -85,15 +98,15 @@ function Color() {
     const resetForm = () => {
         setFormData({
             id: "",
-            name: "", 
+            name: "",
         });
-        setErrors({ name: false }); 
+        setErrors({ name: false });
     };
 
     const handleEditClick = (color) => {
         setFormData({
             id: color.id,
-            name: color.name,  
+            name: color.name,
         });
     };
 
@@ -103,12 +116,13 @@ function Color() {
         for (const id of selectedRows) {
             try {
                 await ColorsService.deleteColor(id);
-                toast.success(`Xóa thành công`);
+                toast.success(`Color with ID ${id} deleted successfully`);
             } catch (error) {
-                toast.error(`Lỗi khi xóa`);
+                console.error(`Error deleting color with ID ${id}`, error);
+                toast.error(`Error deleting color with ID ${id}`);
             }
         }
-        fetchData(); 
+        fetchData();
     };
 
     return (
@@ -128,17 +142,16 @@ function Color() {
                             onSubmit={handleSubmit}
                         >
                             <ArgonBox mx={3}>
-                                {/* Color Name Input */}
                                 <ArgonBox mb={3} position="relative">
                                     <ArgonInput
                                         type="text"
-                                        placeholder="Tên màu"
+                                        placeholder="Nhập tên màu sắc"
                                         size="large"
                                         name="name"  
                                         fullWidth
-                                        value={formData.name}
+                                        value={formData.name}  
                                         onChange={handleChange}
-                                        error={!!errors.name} 
+                                        error={!!errors.name}  
                                     />
                                     {errors.name && (
                                         <ArgonTypography variant="caption" color="error">
@@ -148,7 +161,7 @@ function Color() {
                                 </ArgonBox>
                                 <ArgonBox mb={3}>
                                     <ArgonButton type="submit" size="large" color="info" fullWidth={true}>
-                                        {formData.id ? "Sửa" : "Lưu"}
+                                        {formData.id ? "Cập nhật" : "Lưu"}
                                     </ArgonButton>
                                 </ArgonBox>
                             </ArgonBox>

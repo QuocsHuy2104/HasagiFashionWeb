@@ -103,10 +103,10 @@ const VoucherTable = ({ onEditClick }) => {
             setVouchers((prevVouchers) =>
                 prevVouchers.map((v) => (v.id === voucher.id ? updatedVoucher : v))
             );
-            toast.success("Voucher status updated successfully");
+            toast.success("Cập nhật trạng thái thành công!");
         } catch (error) {
             console.error("Error updating voucher status", error);
-            toast.error("Failed to update voucher status");
+            toast.error("Cập nhật trạng thái thất bại!!!");
         }
     };
 
@@ -114,10 +114,10 @@ const VoucherTable = ({ onEditClick }) => {
         try {
             await VouchersService.deleteVoucher(id);
             setVouchers(vouchers.filter(voucher => voucher.id !== id));
-            toast.success("Delete voucher successful");
+            toast.success("Xóa voucher thành công");
         } catch (error) {
             console.error("There was an error deleting the item!", error);
-            toast.error("Error deleting voucher");
+            toast.error("Xóa voucher thất bại!!!");
         }
     };
 
