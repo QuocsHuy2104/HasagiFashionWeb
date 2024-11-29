@@ -2,7 +2,7 @@ import apiClient from "config/axiosConfig";
 
 const ProductService = {
   getAllProducts: () => apiClient.get('/admin/product'),
-  
+
   getProductID: (id) => apiClient.get(`/admin/product/${id}`),
 
   createProduct: (productData) => apiClient.post('/admin/product', productData),
@@ -11,7 +11,7 @@ const ProductService = {
 
   updateQuantity: id => apiClient.put(`/admin/product/quantity/${id}`, id),
 
-  updatePrice: id => apiClient.put(`/admin/product/price/${id}`, id),
+  updatePrice: id => apiClient.put(`admin/product/price/${id}`)
 }
 
 export default ProductService;

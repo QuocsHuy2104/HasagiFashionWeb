@@ -13,7 +13,7 @@ import ArgonButton from "../../../components/ArgonButton";
 import { Grid, InputAdornment } from "@mui/material";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import DataGridDemo from './data';
-import ProductDetailService from "services/ProductDetailService";
+import ProductDetailService from "services/ProductDetailServices";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { toast, ToastContainer } from 'react-toastify';
@@ -152,6 +152,7 @@ function ProductDetail() {
             console.error(e)
         }
     }
+
     const updatePriceProduct = async () => {
         try {
             const resp = await ProductService.updatePrice(product.id);
@@ -192,7 +193,7 @@ function ProductDetail() {
             const responses = await Promise.all(savePromises);
             toast.success("Product detail create successfully!");
             updateQuantityProduct();
-            updatePriceProduct();
+            updatePrice()
             refreshData()
             setFormData({
                 id: '',
@@ -203,7 +204,6 @@ function ProductDetail() {
             });
             setSelectedSize([]);
             setSelectedColor([]);
-            
         } catch (e) {
             console.error("Error saving product details:", e);
         
@@ -483,7 +483,7 @@ function ProductDetail() {
                     </Card>
                 </ArgonBox>
             </ArgonBox>
-            <ProductFormDialog open={dialogOpen} onClose={handleCloseDialog} colors={colors} sizes={sizes} initialData={selectedRow} productID={product.id} refreshData={refreshData} updateQuantity={updateQuantityProduct} />
+            <ProductFormDialog open={dialogOpen} onClose={handleCloseDialog} colors={colors} sizes={sizes} initialData={selectedRow} productID={product.id} refreshData={refreshData} updateQuantity={updateQuantityProduct} updatePrice={updatePrice} />
             <ToastContainer />
         </DashboardLayout>
     );

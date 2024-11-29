@@ -128,7 +128,6 @@ const Backup = ({ show, onClose }) => {
         }
     };
 
-
     useEffect(() => {
         const fetchProvinces = async () => {
             try {
@@ -205,6 +204,7 @@ const Backup = ({ show, onClose }) => {
             wardCode: selectedWard,
         };
 
+
         try {
             const response = await AddressService.createAddressFirst(formData);
 
@@ -223,8 +223,24 @@ const Backup = ({ show, onClose }) => {
         } catch (error) {
             console.error("Error submitting address:", error);
             alert("Không thể lưu địa chỉ. Vui lòng thử lại.");
+
         }
     };
+
+    useEffect(() => {
+        const checkUserAddresses = async () => {
+            try {
+                const response = await AddressService.getAllAddress();
+                const userHasAddresses = response.data.length > 0;
+                setIsAddressAvailable(userHasAddresses);
+                if (!userHasAddresses) setStatus(true);
+            } catch (error) {
+                console.error("Error checking user addresses:", error);
+                alert("Không thể kiểm tra địa chỉ của bạn.");
+            }
+        };
+        checkUserAddresses();
+    }, []);
 
     useEffect(() => {
         const checkUserAddresses = async () => {
@@ -254,18 +270,7 @@ const Backup = ({ show, onClose }) => {
         label: ward.WardName,
     }));
 
-    const resetForm = () => {
-        setFullName("");
-        setNumBerPhone("");
-        setAddress("");
-        setSelectedProvince("");
-        setSelectedDistrict("");
-        setSelectedWard("");
-        setErrors({});
-        setIsSubmitted(false);
-        setDistricts([]);
-        setWards([]);
-    };
+
 
     const handleModalClose = () => {
         resetForm(); // Reset form data

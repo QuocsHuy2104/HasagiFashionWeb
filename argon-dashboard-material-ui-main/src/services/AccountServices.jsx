@@ -5,12 +5,12 @@ const AccountService = {
         return apiClient.get("/admin/account");
     },
 
-    getAccountById: (id) => { // Add the id parameter
+    getAccountById: (id) => {
         return apiClient.get(`/admin/account/${id}`);
     },
 
     saveAccount: (formData) => {
-        const url = formData.id
+        const url = formData.id 
             ? `/admin/account/${formData.id}`
             : "/admin/account";
         const method = formData.id ? "PUT" : "POST";
@@ -28,6 +28,7 @@ const AccountService = {
 
     dismissalAccount: id => apiClient.put(`/admin/account/dismissal/${id}`),
 
+    getAuthor: () => apiClient.get('/admin/account/my-info'),
 
 }
 

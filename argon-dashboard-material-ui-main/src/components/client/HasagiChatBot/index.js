@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import CategoryService from '../../../services/CategoryServices';
 import BrandService from '../../../services/BrandServices';
-import ProductService from '../../../services/ProductServices';
 import VoucherService from '../../../services/VoucherServices';
-import ProductDetailService from 'services/ProductDetailService';
 import { CircularProgress, IconButton, Box, Avatar } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import MicIcon from '@mui/icons-material/Mic';
+import ProductDetailService from 'services/ProductDetailServices';
 
 function Gemini() {
     const [question, setQuestion] = useState('');

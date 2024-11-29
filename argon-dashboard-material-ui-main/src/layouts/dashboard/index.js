@@ -42,37 +42,8 @@ import gradientLineChartData from "layouts/dashboard/data/gradientLineChartData"
 import salesTableData from "layouts/dashboard/data/salesTableData";
 import categoriesListData from "layouts/dashboard/data/categoriesListData";
 
-
-import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-
 function Default() {
   const { size } = typography;
-  const [role, setRole] = useState('');
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      try {
-        const response = await axios.get('http://localhost:8080/api/user/role', { withCredentials: true });
-        const userRole = response.data.role;
-        setRole(userRole);
-
-        if (userRole === 'ADMIN') {
-          navigate('/dashboard');
-        } else {
-          navigate('/trang-chu');
-        }
-      } catch (error) {
-        console.error("Failed to fetch user role", error);
-      }
-    };
-
-    fetchUserRole();
-  }, [navigate]);
-
   return (
     <DashboardLayout>
       <DashboardNavbar />

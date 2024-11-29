@@ -15,7 +15,8 @@ import ArgonBox from "components/ArgonBox";
 import About from "components/client/HasagiAbout";
 import Category from "layouts/manage/category";
 import Brand from "layouts/manage/brand";
-import FeatureSection from "layouts/clientuser/home";
+// import FeatureSection from "layouts/clientuser";
+import FeatureSection from "layouts/clientuser/index";
 import OrderDetail from "layouts/manage/orderdetail";
 import Role from "layouts/manage/role";
 import ShopDetail from "components/client/HasagiShopDetail";
@@ -29,11 +30,13 @@ import SignUp from "layouts/authentication/sign-up";
 import Complete from "components/client/HasagiComplete";
 import History from "components/client/HasagiHistory";
 import HistoryOrderDetail from "components/client/HasagiHistoryDetail";
+import ProductDetail from "layouts/manage/productDetail";
+import { isAuthenticated } from "utils/Authen";
+import { Navigate } from "react-router-dom";
+import NotFoundPage from "components/client/Hasagi404";
 import Voucher from "layouts/manage/voucher";
 import ChatBot from "components/client/HasagiChatBot";
 import QA from "components/client/HasagiQ&A";
-import ProductDetail from "layouts/manage/productDetail";
-// import Notfound from "components/client/Hasagi404"
 const routes = [
   {
     type: "route",
@@ -52,7 +55,7 @@ const routes = [
     icon: (
       <ArgonBox component="i" color="warning" fontSize="14px" className="ni ni-single-copy-04" />
     ),
-    component: <SignIn />,
+    component: isAuthenticated() ? <Navigate to="/" /> : <SignIn />,
   },
   {
     name: "Sign Up",
@@ -270,13 +273,11 @@ const routes = [
     showInSidenav: true,
   },
   {
-    // type: "route",
-    name: "Shop",
+    name: "shop",
     key: "shop",
-    route: "/Shop",
+    route: "/shop",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
     component: <Shop />,
-    showInSidenav: true,
   },
   {
     // type: "route",
@@ -288,7 +289,7 @@ const routes = [
     showInSidenav: true,
   },
   {
-    // type: "route",
+    // type: "route", 
     name: "Contact",
     key: "contact",
     route: "/Contact",
@@ -337,6 +338,13 @@ const routes = [
     route: "/history-order/:orderId",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
     component: <HistoryOrderDetail />,
+    showInSidenav: true,
+  },
+  {
+    name: "NotFound",
+    key: "not-found",
+    route: "/not-found",
+    component: <NotFoundPage />,
     showInSidenav: true,
   },
 ];

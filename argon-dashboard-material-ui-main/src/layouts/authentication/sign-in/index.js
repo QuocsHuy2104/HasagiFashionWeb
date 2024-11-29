@@ -25,7 +25,6 @@ function Illustration() {
 
   const handleSetRememberMe = () => setRememberMe(!rememberMe);
 
-  // Update the validation to check for username instead of email
   const validateForm = () => {
     let formErrors = {};
 

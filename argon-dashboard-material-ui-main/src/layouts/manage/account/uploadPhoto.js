@@ -3,7 +3,7 @@ import { Box, Typography } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { styled } from "@mui/system";
 import PropTypes from "prop-types";
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"; // Firebase storage import
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 
 // Custom styles for the upload container
@@ -50,11 +50,11 @@ const Overlay = styled(Box)(({ theme }) => ({
 const UploadPhoto = ({ onFileUpload }) => {
     const [imagePreview, setImagePreview] = useState(null);
     const [error, setError] = useState("");
-    const [uploading, setUploading] = useState(false); // Track uploading state
+    const [uploading, setUploading] = useState(false); 
 
     const handleUpload = (event) => {
         const file = event.target.files[0];
-        const fileSizeLimit = 3 * 1024 * 1024; // 3 MB limit
+        const fileSizeLimit = 3 * 1024 * 1024; 
 
         if (file) {
             if (file.size > fileSizeLimit) {
@@ -63,7 +63,7 @@ const UploadPhoto = ({ onFileUpload }) => {
             }
 
             setError("");
-            setUploading(true); // Set uploading to true
+            setUploading(true);
 
             // Display the image preview
             const reader = new FileReader();
@@ -89,13 +89,12 @@ const UploadPhoto = ({ onFileUpload }) => {
                   setUploading(false);
               },
               async () => {
-                  // When the upload completes
                   try {
                       const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
                       setUploading(false);
                       console.log("File available at:", downloadURL);
 
-                      onFileUpload(downloadURL); // Pass the URL to the parent component
+                      onFileUpload(downloadURL); 
                   } catch (error) {
                       console.error("Error getting download URL:", error);
                       setError("Error getting the download URL.");

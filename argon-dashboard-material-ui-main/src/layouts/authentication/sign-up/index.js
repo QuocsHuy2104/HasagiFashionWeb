@@ -24,11 +24,19 @@ function Cover() {
     let formErrors = {};
 
     // Kiểm tra họ tên
-    if (!username) formErrors.username = "Vui lòng nhập tên đăng nhập.";
+    const specialCharRegex = /[^a-zA-Z0-9 ]/;
+
+    if (!username) {
+      formErrors.username = "Vui lòng nhập tên đăng nhập.";
+    } else if (specialCharRegex.test(username)) {
+      formErrors.username = "Tên đăng nhập không được chứa các ký tự đặc biệt.";
+    } else if (username.length < 3 || username.length > 10) {
+      formErrors.username = "Tên đăng nhập phải có độ dài từ 3 đến 10 ký tự.";
+    }
     if (!fullName) formErrors.fullName = "Vui lòng nhập họ tên.";
 
     // Kiểm tra email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail\.com|fpt\.edu\.vn)$/;
     if (!email) formErrors.email = "Vui lòng nhập email.";
     else if (!emailRegex.test(email)) formErrors.email = "Email không hợp lệ.";
 
@@ -78,8 +86,12 @@ function Cover() {
         console.error("Đăng ký không thành công:", errorText);
         if (errorText.includes("Email này đã tồn tại")) {
           setMessage("Email này đã tồn tại");
-        } else if (errorText.includes("Username này đã tồn tại")) {
-          setMessage("Username này đã tồn tại");
+        } else if (errorText.includes("Tên đăng nhập này đã tồn tại")) {
+          setMessage("Tên đăng nhập này đã tồn tại");
+        } else if (errorText.includes("Tên đăng nhập không được chứa các ký tự đặc biệt")) {
+          setMessage("Tên đăng nhập không được chứa các ký tự đặc biệt");
+        } else if (errorText.includes("Tên đăng nhập phải có độ dài từ 3 đến 10 ký tự")) {
+          setMessage("Tên đăng nhập phải có độ dài từ 3 đến 10 ký tự");
         } else {
           setMessage("Đăng ký không thành công. Vui lòng thử lại.");
         }
