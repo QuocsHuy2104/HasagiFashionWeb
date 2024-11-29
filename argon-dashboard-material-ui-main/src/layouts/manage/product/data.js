@@ -63,9 +63,16 @@ const ProductTable = ({ onEditClick, setSelectedProduct, searchKeyword, selected
         fetchData();
     }, []);
 
-    const refreshProducts = () => {
-        fetchData();
+    const refreshProducts = async () => {
+        try {
+            await fetchData();
+            toast.success("Làm mới danh sách sản phẩm thành công!");
+        } catch (error) {
+            console.error("Error refreshing products:", error);
+            toast.error("Làm mới danh sách sản phẩm thất bại!");
+        }
     };
+
 
     const handleStatusToggle = async (product) => {
         try {

@@ -31,6 +31,8 @@ function Voucher() {
     });
 
     const [activeTab, setActiveTab] = useState(0);
+    const [searchKeyword, setSearchKeyword] = useState("");
+    const [searchHistory, setSearchHistory] = useState("");
 
     const handleTabChange = (event, newValue) => {
         setActiveTab(newValue);
@@ -71,12 +73,12 @@ function Voucher() {
 
     const validateForm = () => {
         let isValid = true;
-    
+
         if (!formData.code || formData.code.trim() === "") {
             toast.error("Trường mã voucher không được để trống.");
             isValid = false;
         }
-    
+
         if (!formData.discountPercentage) {
             toast.error("Trường giảm giá không được để trống.");
             isValid = false;
@@ -88,22 +90,22 @@ function Voucher() {
             toast.error("Giảm giá phải là số lớn hơn 0 và nhỏ hơn hoặc bằng 100.");
             isValid = false;
         }
-    
+
         if (!formData.minimumOrderValue || isNaN(formData.minimumOrderValue)) {
             toast.error("Trường giá trị đơn hàng tối thiểu phải là số hợp lệ.");
             isValid = false;
         }
-    
+
         if (!formData.maxDiscount || isNaN(formData.maxDiscount)) {
             toast.error("Trường giảm giá tối đa phải là số hợp lệ.");
             isValid = false;
         }
-    
+
         if (!formData.quantity || isNaN(formData.quantity)) {
             toast.error("Trường số lượng phải là số hợp lệ.");
             isValid = false;
         }
-    
+
         const currentDate = new Date().toISOString().split("T")[0];
         if (!formData.startDate) {
             toast.error("Ngày bắt đầu không được để trống.");
@@ -112,7 +114,7 @@ function Voucher() {
             toast.error("Ngày bắt đầu không được trước ngày hiện tại khi tạo mới.");
             isValid = false;
         }
-    
+
         if (!formData.endDate) {
             toast.error("Ngày kết thúc không được để trống.");
             isValid = false;
@@ -120,10 +122,10 @@ function Voucher() {
             toast.error("Ngày kết thúc không được trước ngày bắt đầu.");
             isValid = false;
         }
-    
+
         return isValid;
     };
-    
+
 
 
     const handleSubmit = async (e) => {
@@ -212,13 +214,18 @@ function Voucher() {
 
 
 
-    const { columns, rows } = VoucherTable({
+    const { columns, rows, refreshVouchers } = VoucherTable({
         onEditClick: handleEditClick,
         onDeleteClick: handleDeleteClick,
+        searchKeyword: searchKeyword,
     });
 
 
-    const { columnsHistory, rowsHistory } = VoucherHistoryTable({ onEditClick: handleEditClick, onDeleteClick: handleDeleteClick });
+    const { columnsHistory, rowsHistory, refreshHistory } = VoucherHistoryTable({
+        onEditClick: handleEditClick,
+        onDeleteClick: handleDeleteClick,
+        searchHistory: searchHistory
+    });
 
     return (
         <DashboardLayout>
@@ -359,12 +366,101 @@ function Voucher() {
 
                     {activeTab === 0 && (
                         <Card sx={{ mb: 3, borderRadius: '10px', boxShadow: 3 }}>
+                            <ArgonBox
+                                mb={3}
+                                p={2}
+                                display="flex"
+                                justifyContent="flex-start"
+                                alignItems="center"
+                                border="1px solid #e0e0e0"
+                                borderRadius="8px"
+                                bgcolor="#f9f9f9"
+                                gap="16px"
+                            >
+                                <ArgonBox width="30%">
+                                    <ArgonInput
+                                        type="text"
+                                        placeholder="🔍 Tìm kiếm..."
+                                        style={{
+                                            padding: "12px 16px",
+                                            borderRadius: "8px",
+                                            border: "1px solid #ddd",
+                                            boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+                                            width: "100%",
+                                            backgroundColor: "#fff",
+                                            fontSize: "14px",
+                                        }}
+                                        onChange={(e) => setSearchKeyword(e.target.value)}
+                                    />
+                                </ArgonBox>
+
+                                <ArgonBox>
+                                    <ArgonButton
+                                        variant="contained"
+                                        color="primary"
+                                        style={{
+                                            padding: "12px 24px",
+                                            borderRadius: "8px",
+                                            fontSize: "14px",
+                                            fontWeight: "bold",
+                                        }}
+                                        onClick={refreshVouchers}
+                                    >
+                                        🔄 Làm mới danh sách
+                                    </ArgonButton>
+                                </ArgonBox>
+                            </ArgonBox>
                             <Table columns={columns} rows={rows} />
                         </Card>
                     )}
 
                     {activeTab === 1 && (
                         <Card sx={{ mb: 3, borderRadius: '10px', boxShadow: 3 }}>
+                            <ArgonBox
+                                mb={3}
+                                p={2}
+                                display="flex"
+                                justifyContent="flex-start"
+                                alignItems="center"
+                                border="1px solid #e0e0e0"
+                                borderRadius="8px"
+                                bgcolor="#f9f9f9"
+                                gap="16px"
+                            >
+                                <ArgonBox width="30%">
+                                    <ArgonInput
+                                        type="text"
+                                        placeholder="🔍 Tìm kiếm..."
+                                        style={{
+                                            padding: "12px 16px",
+                                            borderRadius: "8px",
+                                            border: "1px solid #ddd",
+                                            boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+                                            width: "100%",
+                                            backgroundColor: "#fff",
+                                            fontSize: "14px",
+                                        }}
+                                        onChange={(e) => setSearchHistory(e.target.value)}
+                                    />
+                                </ArgonBox>
+
+                                <ArgonBox>
+                                    <ArgonButton
+                                        variant="contained"
+                                        color="primary"
+                                        style={{
+                                            padding: "12px 24px",
+                                            borderRadius: "8px",
+                                            fontSize: "14px",
+                                            fontWeight: "bold",
+                                        }}
+                                        onClick={refreshVouchers}
+                                    >
+                                        🔄 Làm mới danh sách
+                                    </ArgonButton>
+                                </ArgonBox>
+                            </ArgonBox>
+
                             <Table columns={columnsHistory} rows={rowsHistory} />
                         </Card>
                     )}

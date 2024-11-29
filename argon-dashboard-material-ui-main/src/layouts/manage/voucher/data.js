@@ -76,25 +76,34 @@ const formatDate = (dateString) => {
     return `${day}-${month}-${year}`;
 };
 
-const VoucherTable = ({ onEditClick }) => {
+const VoucherTable = ({ onEditClick, searchKeyword }) => {
     const [vouchers, setVouchers] = useState([]);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await VouchersService.getAllVouchers();
-                const currentDate = new Date();
-
-                // Filter out expired vouchers
-                const activeVouchers = response.data.filter(voucher => new Date(voucher.endDate) >= currentDate);
-                setVouchers(activeVouchers || []);
-            } catch (err) {
-                console.log(err);
-            }
-        };
-
         fetchData();
     }, []);
+
+    const fetchData = async () => {
+        try {
+            const response = await VouchersService.getAllVouchers();
+            const currentDate = new Date();
+            const activeVouchers = response.data.filter(voucher => new Date(voucher.endDate) >= currentDate);
+            setVouchers(activeVouchers || []);
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
+    const refreshVouchers = async () => {
+        try {
+            await fetchData();
+            toast.success("Làm mới danh sách phiếu giảm giá thành công!");
+        } catch (error) {
+            console.error("Error refreshing products:", error);
+            toast.error("Làm mới danh sách phiếu giảm giá thất bại!");
+        }
+    };
+
 
     const handleStatusToggle = async (voucher) => {
         try {
@@ -121,7 +130,12 @@ const VoucherTable = ({ onEditClick }) => {
         }
     };
 
-    const rows = vouchers.map(voucher => ({
+    const filteredVouchers = vouchers
+        .filter((voucher) =>
+            voucher.code.toLowerCase().includes(searchKeyword.toLowerCase())
+        )
+
+    const rows = filteredVouchers.map(voucher => ({
         MAGIAMGIA: <VoucherCode code={voucher.code} />,
         GIAM: <VoucherDiscount discount={voucher.discountPercentage} />,
         GIATOITHIEU: <VoucherMinOrder minOrder={voucher.minimumOrderValue} />,
@@ -198,11 +212,12 @@ const VoucherTable = ({ onEditClick }) => {
         rows,
     };
 
-    return voucherTableData;
+    return { ...voucherTableData, refreshVouchers };
 };
 
 VoucherTable.propTypes = {
     onEditClick: PropTypes.func.isRequired,
+    searchKeyword: PropTypes.string.isRequired,
 };
 
 export default VoucherTable;

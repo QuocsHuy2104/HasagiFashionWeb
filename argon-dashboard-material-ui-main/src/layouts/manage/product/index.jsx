@@ -259,9 +259,6 @@ function Product() {
     };
 
 
-
-
-
     const handleApiError = (error) => {
         const errorMsg = error.response?.data?.message || error.message || 'An error occurred.';
         toast.error(`Error: ${errorMsg}`);
