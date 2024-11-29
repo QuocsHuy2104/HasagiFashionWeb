@@ -409,12 +409,10 @@ const Checkout = () => {
     const [searchText, setSearchText] = useState("");
     const [open, setOpen] = useState(false);
 
-    // Hàm mở Dialog
     const handleClickOpen = () => {
         setOpen(true);
     };
 
-    // Hàm đóng Dialog
     const handleClose = () => {
         setOpen(false);
     };
@@ -425,8 +423,6 @@ const Checkout = () => {
         setAppliedVoucherId(voucher.id);
         toast.success(`Áp dụng mã giảm giá ${voucher.code} thành công!`);
     };
-
-
 
     const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
@@ -444,14 +440,11 @@ const Checkout = () => {
             };
         })
         .sort((a, b) => {
-            // Đưa voucher khớp từ khóa tìm kiếm lên đầu
             const aMatchesSearch = a.code.toLowerCase().includes(searchText.toLowerCase());
             const bMatchesSearch = b.code.toLowerCase().includes(searchText.toLowerCase());
 
-            if (aMatchesSearch && !bMatchesSearch) return -1; // a khớp tìm kiếm, b không khớp
-            if (!aMatchesSearch && bMatchesSearch) return 1;  // b khớp tìm kiếm, a không khớp
-
-            // Nếu cả hai cùng khớp hoặc không khớp, sắp xếp theo discountAmount
+            if (aMatchesSearch && !bMatchesSearch) return -1;
+            if (!aMatchesSearch && bMatchesSearch) return 1;
             return b.discountAmount - a.discountAmount;
         });
 
@@ -604,40 +597,59 @@ const Checkout = () => {
 
                                     <Dialog open={open} onClose={handleClose}>
                                         <DialogTitle style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '0' }}>
-                                            {/* Danh sách phiếu giảm giá */}
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
                                                 Danh sách phiếu giảm giá
                                             </div>
+                                            <div style={{ position: "relative", display: "inline-block" }}>
+                                                <Dropdown>
+                                                    <Dropdown.Toggle
+                                                        variant="link"
+                                                        bsPrefix="icon-button"
+                                                        style={{
+                                                            color: "black",
+                                                            fontSize: "1.2rem",
+                                                            textDecoration: "none",
+                                                            position: "relative",
+                                                            paddingBottom: "0",
+                                                            display: "flex",
+                                                            alignItems: "center",
+                                                        }}
+                                                    >
+                                                        Hỗ Trợ{" "}
+                                                        <AiOutlineQuestionCircle size={20} style={{ marginLeft: "8px" }} />
+                                                    </Dropdown.Toggle>
 
-                                            {/* Hỗ trợ */}
-                                            <Dropdown>
-                                                <Dropdown.Toggle
-                                                    variant="link"
-                                                    bsPrefix="icon-button"
-                                                    style={{
-                                                        color: 'black',
-                                                        fontSize: '1.2rem',
-                                                        textDecoration: 'none',
-                                                        position: 'relative',
-                                                        paddingBottom: '0',
-                                                        display: 'flex',
-                                                        alignItems: 'center', // Căn giữa biểu tượng và chữ
-                                                    }}
-                                                >
-                                                    Hỗ trợ <AiOutlineQuestionCircle size={40} style={{ marginLeft: '8px' }} />
-                                                </Dropdown.Toggle>
-
-                                                <Dropdown.Menu
-                                                    style={{
-                                                        marginTop: '0',
-                                                        paddingTop: '0',
-                                                    }}
-                                                >
-                                                    <Dropdown.Item href="#action1">Hướng dẫn sử dụng</Dropdown.Item>
-                                                    <Dropdown.Item href="#action2">Chính sách giảm giá</Dropdown.Item>
-                                                    <Dropdown.Item href="#action3">Liên hệ hỗ trợ</Dropdown.Item>
-                                                </Dropdown.Menu>
-                                            </Dropdown>
+                                                    <Dropdown.Menu
+                                                        style={{
+                                                            marginTop: "0",
+                                                            padding: "20px",
+                                                            width: "300px",
+                                                            border: "1px solid #ccc",
+                                                            borderRadius: "8px",
+                                                            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                                                        }}
+                                                    >
+                                                        <div>
+                                                            <h5 style={{ fontWeight: "bold", marginBottom: "10px" }}>Hỗ Trợ</h5>
+                                                            <div>
+                                                                <h6 style={{ fontWeight: "bold", marginBottom: "5px" }}>
+                                                                    <strong>Cách Sử Dụng phiếu giảm giá</strong>
+                                                                </h6>
+                                                                <p style={{ fontSize: "0.9rem", marginBottom: "10px" }}>
+                                                                    Để có thể áp dụng mã của phiếu giảm giá, bạn hãy chọn nút Sao chép mã để
+                                                                    áp dụng giảm giá vào đơn hàng của bạn.
+                                                                </p>
+                                                                <h6 style={{ fontWeight: "bold", marginBottom: "5px" }}>
+                                                                    <strong>Cách Tìm phiếu giảm giá</strong>
+                                                                </h6>
+                                                                <p style={{ fontSize: "0.9rem" }}>
+                                                                    Bạn có thể tìm thấy phiếu giảm giá xuyên suốt trang Hasagi Fashion. Mẹo riêng cho bạn, hãy vào trang chủ của shop để có thể sao chép ưu đãi tốt nhất nhé!
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </Dropdown.Menu>
+                                                </Dropdown>
+                                            </div>
                                         </DialogTitle>
                                         <hr />
                                         <ArgonBox style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', paddingTop: '0px', paddingBottom: '10px' }}>
@@ -669,11 +681,19 @@ const Checkout = () => {
                                                     variant="warning"
                                                     onClick={() => {
                                                         const voucher = vouchers.find((v) => v.code.toLowerCase() === searchText.toLowerCase());
-                                                        if (voucher && !usedVouchers.some((usedVoucher) => usedVoucher.id === voucher.id)) {
-                                                            handleApplyVoucher(voucher);
-                                                            setAppliedVoucherId(voucher.id);
+                                                        if (voucher) {
+                                                            if (totalAmount >= voucher.minimumOrderValue) {
+                                                                if (!usedVouchers.some((usedVoucher) => usedVoucher.id === voucher.id)) {
+                                                                    handleApplyVoucher(voucher);
+                                                                    setAppliedVoucherId(voucher.id);
+                                                                } else {
+                                                                    toast.error('Mã giảm giá đã sử dụng.');
+                                                                }
+                                                            } else {
+                                                                toast.warn(`Giá trị hóa đơn tối thiểu để áp dụng voucher là ${voucher.minimumOrderValue.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}đ.`);
+                                                            }
                                                         } else {
-                                                            toast.error('Mã giảm giá không hợp lệ hoặc đã sử dụng.');
+                                                            toast.error('Mã giảm giá không hợp lệ.');
                                                         }
                                                     }}
                                                     style={{
@@ -686,6 +706,7 @@ const Checkout = () => {
                                                 >
                                                     Áp dụng
                                                 </ArgonButton>
+
                                             </ArgonBox>
                                         </ArgonBox>
 
@@ -796,7 +817,7 @@ const Checkout = () => {
                                                                         )}
                                                                     </div>
                                                                     <Card.Text style={{ fontSize: '0.8rem', color: '#6c757d', textAlign: 'left' }}>
-                                                                        Giảm {voucher.discountPercentage}% khi hóa đơn từ {voucher.minimumOrderValue}đ, giảm tối đa: {voucher.maxDiscount}đ
+                                                                        Giảm {voucher.discountPercentage}% khi hóa đơn từ {voucher.minimumOrderValue.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}đ, giảm tối đa: {voucher.maxDiscount.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}đ
 
                                                                         <div style={{ marginTop: '4px', fontSize: '0.8rem' }}>
                                                                             HSD: {formatDate(voucher.endDate)}
@@ -863,17 +884,27 @@ const Checkout = () => {
                                             variant="warning"
                                             onClick={() => {
                                                 const voucher = vouchers.find(v => v.code.toLowerCase() === searchText.toLowerCase());
-                                                if (voucher && !usedVouchers.some(usedVoucher => usedVoucher.id === voucher.id)) {
-                                                    handleApplyVoucher(voucher);
-                                                    setAppliedVoucherId(voucher.id); // Cập nhật voucher đã áp dụng
+
+                                                if (voucher) {
+                                                    if (totalAmount >= voucher.minimumOrderValue) {
+                                                        if (!usedVouchers.some(usedVoucher => usedVoucher.id === voucher.id)) {
+                                                            handleApplyVoucher(voucher);
+                                                            setAppliedVoucherId(voucher.id);
+                                                        } else {
+                                                            toast.error('Voucher đã được sử dụng.');
+                                                        }
+                                                    } else {
+                                                        toast.warn(`Giá trị hóa đơn tối thiểu để áp dụng voucher là ${voucher.minimumOrderValue.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}đ.`);
+                                                    }
                                                 } else {
-                                                    toast.error('Voucher không hợp lệ hoặc đã sử dụng.');
+                                                    toast.error('Voucher không hợp lệ.');
                                                 }
                                             }}
                                             style={{ marginLeft: '8px', padding: '6px 14px', fontSize: '0.8rem' }}
                                         >
                                             Áp dụng
                                         </Button>
+
                                     </ArgonBox>
 
                                     <div className="border-bottom pt-4" style={{ padding: '0 20px' }}>
