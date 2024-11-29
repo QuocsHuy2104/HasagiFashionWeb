@@ -215,7 +215,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Quản lý Voucher",
+    name: "Quản lý phiếu giảm giá",
     key: "voucher",
     route: "/manage/voucher",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,

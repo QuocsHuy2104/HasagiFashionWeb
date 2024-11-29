@@ -49,18 +49,29 @@ const ProductTable = ({ onEditClick, setSelectedProduct, searchKeyword, selected
     const [products, setProducts] = useState([]);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const productResponse = await ProductService.getAllProducts();
-                setProducts(productResponse.data || []);
-            } catch (err) {
-                console.error("Failed to fetch products:", err);
-            }
-        };
+    const fetchData = async () => {
+        try {
+            const productResponse = await ProductService.getAllProducts();
+            setProducts(productResponse.data || []);
+        } catch (err) {
+            console.error("Failed to fetch products:", err);
+        }
+    };
 
+
+    useEffect(() => {
         fetchData();
     }, []);
+
+    const refreshProducts = async () => {
+        try {
+            await fetchData();
+            toast.success("Làm mới danh sách sản phẩm thành công!");
+        } catch (error) {
+            console.error("Error refreshing products:", error);
+            toast.error("Làm mới danh sách sản phẩm thất bại!");
+        }
+    };
 
 
     const handleStatusToggle = async (product) => {
@@ -246,7 +257,7 @@ const ProductTable = ({ onEditClick, setSelectedProduct, searchKeyword, selected
         rows,
     };
 
-    return authorsTableData;
+    return { ...authorsTableData, refreshProducts };
 };
 
 ProductTable.propTypes = {

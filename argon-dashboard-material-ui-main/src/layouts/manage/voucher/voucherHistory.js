@@ -3,7 +3,8 @@ import PropTypes from "prop-types";
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
 import VouchersService from "../../../services/VoucherServices";
-import Switch from '@mui/material/Switch';
+import Switch from "@mui/material/Switch";
+import { toast } from "react-toastify";
 
 function VoucherCode({ code }) {
     return (
@@ -22,7 +23,7 @@ VoucherCode.propTypes = {
 function VoucherQuantity({ quantity }) {
     return (
         <ArgonTypography variant="caption" color="secondary" fontWeight="bold">
-            {`${quantity}`}
+            {quantity}
         </ArgonTypography>
     );
 }
@@ -34,7 +35,7 @@ VoucherQuantity.propTypes = {
 function VoucherMaxDiscount({ maxDiscount }) {
     return (
         <ArgonTypography variant="caption" color="secondary" fontWeight="bold">
-            {`${maxDiscount}`}
+            {maxDiscount}
         </ArgonTypography>
     );
 }
@@ -46,7 +47,7 @@ VoucherMaxDiscount.propTypes = {
 function VoucherDiscount({ discount }) {
     return (
         <ArgonTypography variant="caption" color="secondary" fontWeight="bold">
-            {`${discount}%`}
+            {discount}%
         </ArgonTypography>
     );
 }
@@ -58,7 +59,7 @@ VoucherDiscount.propTypes = {
 function VoucherMinOrder({ minOrder }) {
     return (
         <ArgonTypography variant="caption" color="secondary" fontWeight="bold">
-            {`${minOrder.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}đ`}
+            {minOrder.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}đ
         </ArgonTypography>
     );
 }
@@ -69,40 +70,54 @@ VoucherMinOrder.propTypes = {
 
 const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
 };
 
-const VoucherHistoryTable = () => {
+const VoucherHistoryTable = ({ searchHistory, onEditClick, handleStatusToggle, deleteItem }) => {
     const [vouchers, setVouchers] = useState([]);
 
+    const fetchData = async () => {
+        try {
+            const response = await VouchersService.getAllVouchers();
+            const currentDate = new Date();
+            const expiredVouchers = response.data.filter(
+                (voucher) => new Date(voucher.endDate) < currentDate
+            );
+            setVouchers(expiredVouchers || []);
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await VouchersService.getAllVouchers();
-                const currentDate = new Date();
-
-                // Lọc chỉ lấy những voucher đã hết hạn
-                const expiredVouchers = response.data.filter(voucher => new Date(voucher.endDate) < currentDate);
-                setVouchers(expiredVouchers || []);
-            } catch (err) {
-                console.log(err);
-            }
-        };
-
         fetchData();
     }, []);
 
+    const refreshHistory = async () => {
+        try {
+            await fetchData();
+            toast.success("Làm mới danh sách phiếu giảm giá thành công!");
+        } catch (error) {
+            console.error("Error refreshing vouchers:", error);
+            toast.error("Làm mới danh sách phiếu giảm giá thất bại!");
+        }
+    };
+
+    const filteredHistory = vouchers.filter((voucher) => {
+        const searchQuery = typeof searchHistory === "string" ? searchHistory.toLowerCase() : "";
+        return voucher.code.toLowerCase().includes(searchQuery);
+    });
 
 
-    const rowsHistory = vouchers.map(voucher => ({
+    const rowsHistory = filteredHistory.map((voucher) => ({
         MAGIAMGIA: <VoucherCode code={voucher.code} />,
+        SOLUONG: <VoucherQuantity quantity={voucher.quantity} />,
         GIAM: <VoucherDiscount discount={voucher.discountPercentage} />,
         GIATOITHIEU: <VoucherMinOrder minOrder={voucher.minimumOrderValue} />,
         GIAMTOIDA: <VoucherMaxDiscount maxDiscount={voucher.maxDiscount} />,
-        SOLUONG: <VoucherQuantity quantity={voucher.quantity} />,
         NGAYBATDAU: (
             <ArgonTypography variant="caption" color="textPrimary">
                 {formatDate(voucher.startDate)}
@@ -157,7 +172,6 @@ const VoucherHistoryTable = () => {
                 </ArgonTypography>
             </ArgonBox>
         ),
-
     }));
 
     const voucherHistoryTableData = {
@@ -175,11 +189,18 @@ const VoucherHistoryTable = () => {
         rowsHistory,
     };
 
-    return voucherHistoryTableData;
+    return { ...voucherHistoryTableData, refreshHistory };
 };
 
 VoucherHistoryTable.propTypes = {
+    searchHistory: PropTypes.string,
     onEditClick: PropTypes.func.isRequired,
+    handleStatusToggle: PropTypes.func.isRequired,
+    deleteItem: PropTypes.func.isRequired,
+};
+
+VoucherHistoryTable.defaultProps = {
+    searchHistory: "",
 };
 
 export default VoucherHistoryTable;

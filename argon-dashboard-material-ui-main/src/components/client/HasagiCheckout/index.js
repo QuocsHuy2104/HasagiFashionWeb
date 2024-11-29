@@ -540,17 +540,22 @@ const Checkout = () => {
                                         </div>
                                         <div className="d-flex align-items-center">
                                             <button
-                                                className="btn btn-outline-warning btn-sm ml-2"
+                                                className="btn-sm ml-2"
                                                 style={{
                                                     fontWeight: "bold",
                                                     fontSize: "0.9rem",
                                                     marginRight: "15px",
                                                     marginTop: "-10px",
+                                                    border: "none",
+                                                    boxShadow: "none",
+                                                    color: "black",
+                                                    backgroundColor: "white"
                                                 }}
                                                 onClick={() => setShowModal(true)}
                                             >
                                                 Thay Đổi
                                             </button>
+
                                         </div>
                                     </>
                                 ) : (
@@ -725,29 +730,77 @@ const Checkout = () => {
                                         <div className="payment-options d-flex ml-3">
                                             {showPaymentButtons && (
                                                 <>
-                                                    <ArgonButton
-                                                        className={`custom-btn payment-btn ${selectedPayment === "Direct Check" ? "active" : ""
-                                                            }`}
+                                                    <button
+                                                        style={{
+                                                            border: selectedPayment === "ShopeePay" ? "2px solid #e63946" : "1px solid #ddd",
+                                                            borderRadius: "6px",
+                                                            padding: "10px 20px",
+                                                            marginRight: "12px",
+                                                            backgroundColor: selectedPayment === "ShopeePay" ? "#fff" : "#f9f9f9",
+                                                            color: selectedPayment === "ShopeePay" ? "#e63946" : "#333",
+                                                            fontWeight: selectedPayment === "ShopeePay" ? "bold" : "normal",
+                                                            cursor: "pointer",
+                                                            display: "flex",
+                                                            alignItems: "center",
+                                                            justifyContent: "center",
+                                                            minWidth: "150px",
+                                                            fontSize: "14px",
+                                                            transition: "all 0.3s ease",
+                                                        }}
+                                                        onClick={() => handleButtonClick("Bank Transfer")}
+                                                        onMouseEnter={(e) => {
+                                                            e.currentTarget.style.backgroundColor = "#fff";
+                                                            e.currentTarget.style.borderColor = "#e63946";
+                                                            e.currentTarget.style.color = "#e63946";
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            e.currentTarget.style.backgroundColor =
+                                                                selectedPayment === "ShopeePay" ? "#fff" : "#f9f9f9";
+                                                            e.currentTarget.style.borderColor =
+                                                                selectedPayment === "ShopeePay" ? "#e63946" : "#ddd";
+                                                            e.currentTarget.style.color =
+                                                                selectedPayment === "ShopeePay" ? "#e63946" : "#333";
+                                                        }}
+                                                    >
+                                                        Thẻ tín dụng
+                                                    </button>
+                                                    <button
+                                                        style={{
+                                                            border: selectedPayment === "CashOnDelivery" ? "2px solid #e63946" : "1px solid #ddd",
+                                                            borderRadius: "6px",
+                                                            padding: "10px 20px",
+                                                            backgroundColor: selectedPayment === "CashOnDelivery" ? "#fff" : "#f9f9f9",
+                                                            color: selectedPayment === "CashOnDelivery" ? "#e63946" : "#333",
+                                                            fontWeight: selectedPayment === "CashOnDelivery" ? "bold" : "normal",
+                                                            cursor: "pointer",
+                                                            display: "flex",
+                                                            alignItems: "center",
+                                                            justifyContent: "center",
+                                                            minWidth: "150px",
+                                                            fontSize: "14px",
+                                                            transition: "all 0.3s ease",
+                                                        }}
                                                         onClick={() => handleButtonClick("Direct Check")}
+                                                        onMouseEnter={(e) => {
+                                                            e.currentTarget.style.backgroundColor = "#fff";
+                                                            e.currentTarget.style.borderColor = "#e63946";
+                                                            e.currentTarget.style.color = "#e63946";
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            e.currentTarget.style.backgroundColor =
+                                                                selectedPayment === "CashOnDelivery" ? "#fff" : "#f9f9f9";
+                                                            e.currentTarget.style.borderColor =
+                                                                selectedPayment === "CashOnDelivery" ? "#e63946" : "#ddd";
+                                                            e.currentTarget.style.color =
+                                                                selectedPayment === "CashOnDelivery" ? "#e63946" : "#333";
+                                                        }}
                                                     >
                                                         Thanh toán khi nhận hàng
-                                                    </ArgonButton>
-                                                    <ArgonButton
-                                                        className={`custom-btn payment-btn ${selectedPayment === "Bank Transfer" ? "active" : ""
-                                                            }`}
-                                                        onClick={() => handleButtonClick("Bank Transfer")}
-                                                    >
-                                                        Bank Transfer
-                                                    </ArgonButton>
+                                                    </button>
                                                 </>
                                             )}
                                         </div>
                                     </h5>
-                                    {!selectedPayment && (
-                                        <div className="alert alert-danger" role="alert">
-                                            Vui lòng chọn phương thức thanh toán.
-                                        </div>
-                                    )}
                                     {selectedPayment === "Direct Check" && (
                                         <div className="payment-description mb-3">
                                             <p>
@@ -766,34 +819,56 @@ const Checkout = () => {
                                             </div>
 
                                             {/* Hỗ trợ */}
-                                            <Dropdown>
-                                                <Dropdown.Toggle
-                                                    variant="link"
-                                                    bsPrefix="icon-button"
-                                                    style={{
-                                                        color: 'black',
-                                                        fontSize: '1.2rem',
-                                                        textDecoration: 'none',
-                                                        position: 'relative',
-                                                        paddingBottom: '0',
-                                                        display: 'flex',
-                                                        alignItems: 'center', // Căn giữa biểu tượng và chữ
-                                                    }}
-                                                >
-                                                    Hỗ trợ <AiOutlineQuestionCircle size={40} style={{ marginLeft: '8px' }} />
-                                                </Dropdown.Toggle>
+                                            <div style={{ position: "relative", display: "inline-block" }}>
+                                                <Dropdown>
+                                                    <Dropdown.Toggle
+                                                        variant="link"
+                                                        bsPrefix="icon-button"
+                                                        style={{
+                                                            color: "black",
+                                                            fontSize: "1.2rem",
+                                                            textDecoration: "none",
+                                                            position: "relative",
+                                                            paddingBottom: "0",
+                                                            display: "flex",
+                                                            alignItems: "center",
+                                                        }}
+                                                    >
+                                                        Hỗ Trợ{" "}
+                                                        <AiOutlineQuestionCircle size={20} style={{ marginLeft: "8px" }} />
+                                                    </Dropdown.Toggle>
 
-                                                <Dropdown.Menu
-                                                    style={{
-                                                        marginTop: '0',
-                                                        paddingTop: '0',
-                                                    }}
-                                                >
-                                                    <Dropdown.Item href="#action1">Hướng dẫn sử dụng</Dropdown.Item>
-                                                    <Dropdown.Item href="#action2">Chính sách giảm giá</Dropdown.Item>
-                                                    <Dropdown.Item href="#action3">Liên hệ hỗ trợ</Dropdown.Item>
-                                                </Dropdown.Menu>
-                                            </Dropdown>
+                                                    <Dropdown.Menu
+                                                        style={{
+                                                            marginTop: "0",
+                                                            padding: "20px",
+                                                            width: "300px",
+                                                            border: "1px solid #ccc",
+                                                            borderRadius: "8px",
+                                                            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                                                        }}
+                                                    >
+                                                        <div>
+                                                            <h5 style={{ fontWeight: "bold", marginBottom: "10px" }}>Hỗ Trợ</h5>
+                                                            <div>
+                                                                <h6 style={{ fontWeight: "bold", marginBottom: "5px" }}>
+                                                                    <strong>Cách Sử Dụng phiếu giảm giá</strong>
+                                                                </h6>
+                                                                <p style={{ fontSize: "0.7rem", marginBottom: "10px" }}>
+                                                                    Để có thể áp dụng mã của phiếu giảm giá, bạn hãy chọn nút Sao chép mã để
+                                                                    áp dụng giảm giá vào đơn hàng của bạn.
+                                                                </p>
+                                                                <h6 style={{ fontWeight: "bold", marginBottom: "5px" }}>
+                                                                    <strong>Cách Tìm phiếu giảm giá</strong>
+                                                                </h6>
+                                                                <p style={{ fontSize: "0.7rem" }}>
+                                                                    Bạn có thể tìm thấy phiếu giảm giá xuyên suốt trang Hasagi Fashion. Mẹo riêng cho bạn, hãy vào trang chủ của shop để có thể sao chép ưu đãi tốt nhất nhé!
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </Dropdown.Menu>
+                                                </Dropdown>
+                                            </div>
                                         </DialogTitle>
                                         <hr />
                                         <ArgonBox style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', paddingTop: '0px', paddingBottom: '10px' }}>
@@ -825,11 +900,19 @@ const Checkout = () => {
                                                     variant="warning"
                                                     onClick={() => {
                                                         const voucher = vouchers.find((v) => v.code.toLowerCase() === searchText.toLowerCase());
-                                                        if (voucher && !usedVouchers.some((usedVoucher) => usedVoucher.id === voucher.id)) {
-                                                            handleApplyVoucher(voucher);
-                                                            setAppliedVoucherId(voucher.id);
+                                                        if (voucher) {
+                                                            if (totalAmount >= voucher.minimumOrderValue) {
+                                                                if (!usedVouchers.some((usedVoucher) => usedVoucher.id === voucher.id)) {
+                                                                    handleApplyVoucher(voucher);
+                                                                    setAppliedVoucherId(voucher.id);
+                                                                } else {
+                                                                    toast.error('Mã giảm giá đã sử dụng.');
+                                                                }
+                                                            } else {
+                                                                toast.warn(`Giá trị hóa đơn tối thiểu để áp dụng voucher là ${voucher.minimumOrderValue.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}đ.`);
+                                                            }
                                                         } else {
-                                                            toast.error('Mã giảm giá không hợp lệ hoặc đã sử dụng.');
+                                                            toast.error('Mã giảm giá không hợp lệ.');
                                                         }
                                                     }}
                                                     style={{
@@ -991,18 +1074,18 @@ const Checkout = () => {
                                             >
                                                 Thanh toán khi nhận hàng
                                             </label>
-                                            <ArgonButton
-                                                className="change-payment-btn btn-custom"
+                                            <button
+                                                className="change-payment-btn"
+                                                style={{ border: 'none', boxShadow: 'none', fontSize: "17px", fontWeight: "bold", marginTop: "-5px", backgroundColor: "white", marginLeft: "15px" }}
                                                 onClick={handleChangePaymentMethod}
                                             >
                                                 Thay đổi
-                                            </ArgonButton>
+                                            </button>
                                         </div>
                                     )}
                                     <Button variant="contained" color="warning" onClick={handleClickOpen}>
                                         Áp dụng mã giảm giá
                                     </Button>
-
                                     <ArgonBox controlId="searchVoucher" style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
                                         <ArgonInput
                                             type="text"
@@ -1020,14 +1103,28 @@ const Checkout = () => {
                                             variant="warning"
                                             onClick={() => {
                                                 const voucher = vouchers.find(v => v.code.toLowerCase() === searchText.toLowerCase());
-                                                if (voucher && !usedVouchers.some(usedVoucher => usedVoucher.id === voucher.id)) {
-                                                    handleApplyVoucher(voucher);
-                                                    setAppliedVoucherId(voucher.id); // Cập nhật voucher đã áp dụng
+
+                                                if (voucher) {
+                                                    if (totalAmount >= voucher.minimumOrderValue) {
+                                                        if (!usedVouchers.some(usedVoucher => usedVoucher.id === voucher.id)) {
+                                                            handleApplyVoucher(voucher);
+                                                            setAppliedVoucherId(voucher.id);
+                                                        } else {
+                                                            toast.error('Voucher đã được sử dụng.');
+                                                        }
+                                                    } else {
+                                                        toast.warn(`Giá trị hóa đơn tối thiểu để áp dụng voucher là ${voucher.minimumOrderValue.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}đ.`);
+                                                    }
                                                 } else {
-                                                    toast.error('Voucher không hợp lệ hoặc đã sử dụng.');
+                                                    toast.error('Voucher không hợp lệ.');
                                                 }
                                             }}
-                                            style={{ marginLeft: '8px', padding: '6px 14px', fontSize: '0.8rem' }}
+                                            style={{
+                                                marginLeft: '8px',
+                                                padding: '15px 14px',
+                                                fontSize: '0.8rem',
+                                                whiteSpace: 'nowrap', // Prevents text from wrapping into a new line
+                                            }}
                                         >
                                             Áp dụng
                                         </Button>
