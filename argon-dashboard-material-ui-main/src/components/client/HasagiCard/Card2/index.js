@@ -39,11 +39,9 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                 overflow: 'hidden'
             }}
         >
-
-
             <MuiLink href={`ShopDetails/${id}`} target="_blank" rel="noreferrer">
                 <ArgonBox
-                    mt={2}
+                    mt={1}
                     mx={2}
                     style={{
                         overflow: 'hidden',
@@ -67,12 +65,11 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                     />
                 </ArgonBox>
 
-                <ArgonTypography variant="h5" component="p" color="text" my={2}>{name}</ArgonTypography>
+                <ArgonTypography variant="h5" component="p" color="text" textAlign="center" mt={2}>  {name} </ArgonTypography>
 
-                <ArgonBox display="flex" alignItems="center">
+                <ArgonBox display="flex" alignItems="center" justifyContent='center' my={1}>
                     <ArgonTypography
-                        variant="body2"
-                        component="p"
+                        variant="button"
                         color="secondary"
                         style={{ textDecoration: 'line-through' }}
                     >
@@ -80,13 +77,37 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                     </ArgonTypography>
 
                     <ArgonTypography
-                        variant="subtitle2"
-                        component="p"
+                        variant="button"
                         color="error"
-                        style={{ marginLeft: '8px' }}
+                        style={{ marginLeft: '4px' }}
                     >
-                        {price} VNĐ
+                        {(() => {
+                            const salePercent = parseFloat(sale);
+                            if (isNaN(salePercent)) {
+                                return "Invalid sale percent";
+                            }
+
+                            const prices = price
+                                .split('-')
+                                .map(p => parseFloat(p.replace(/\s/g, '')));
+
+                            if (prices.length === 1) {
+                                // Single price case
+                                const salePrice = prices[0] - prices[0] * (salePercent / 100);
+                                return `${salePrice.toLocaleString()} VNĐ`;
+                            } else if (prices.length === 2) {
+                                // Range price case
+                                const salePrice1 = prices[0] - prices[0] * (salePercent / 100);
+                                const salePrice2 = prices[1] - prices[1] * (salePercent / 100);
+                                return `${salePrice1.toLocaleString()} - ${salePrice2.toLocaleString()} VNĐ`;
+                            }
+
+                            return "Invalid price format";
+                        })()}
                     </ArgonTypography>
+
+
+
                 </ArgonBox>
             </MuiLink>
 
@@ -99,7 +120,7 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                     position: 'absolute',
                     top: 15,
                     left: 15,
-                    fontSize: '13px'
+                    fontSize: '12px'
                 }}
             >
                 -{sale}%
@@ -107,8 +128,8 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
 
             <FavoriteBorderIcon
                 sx={{
-                    width: '2em',
-                    height: '2em',
+                    width: '1.7em',
+                    height: '1.7em',
                     position: 'absolute',
                     top: 15,
                     right: 15,
@@ -123,28 +144,28 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                     <SearchOutlinedIcon
                         onClick={handleOpenPopup}
                         sx={{
-                            width: '2em',
-                            height: '2em',
+                            width: '1.7em',
+                            height: '1.7em',
                             position: 'absolute',
-                            top: 60,
+                            top: 57,
                             right: 15,
                             backgroundColor: '#F9F9F9',
                             padding: '5px',
-                            borderRadius: '50%',
+                            borderRadius: '12px',
                             cursor: 'pointer'
                         }}
                     />
 
                     <ShoppingCartIcon
                         sx={{
-                            width: '2em',
-                            height: '2em',
+                            width: '1.7em',
+                            height: '1.7em',
                             position: 'absolute',
-                            top: 110,
+                            top: 102,
                             right: 15,
                             backgroundColor: '#F9F9F9',
                             padding: '5px',
-                            borderRadius: '50%',
+                            borderRadius: '12px',
                             cursor: 'pointer'
                         }}
                     />

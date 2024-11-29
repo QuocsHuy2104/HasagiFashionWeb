@@ -29,7 +29,8 @@ const HomeService = {
             throw error;
         }
     },
-    getCartByAccount: () => apiClient.get('/web/small-cart')
+    getCartByAccount: () => apiClient.get('/web/small-cart'),
+    getCategoryHeader: () => apiClient.get('/public/home/category')
 
 }
 

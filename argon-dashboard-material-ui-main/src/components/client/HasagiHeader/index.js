@@ -11,15 +11,17 @@ import ArgonTypography from 'components/ArgonTypography';
 import logo from 'components/client/assets/images/logo-ct-dark.png';
 import ArgonAvatar from 'components/ArgonAvatar';
 
-import PersonIcon from '@mui/icons-material/Person';
 import ReorderIcon from '@mui/icons-material/Reorder';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-import CategoriesService from 'services/CategoryServices';
-import BrandsService from 'services/BrandServices';
 import { jwtDecode } from 'jwt-decode';
 import AccountService from 'services/AccountServices';
-import AnchorTemporaryDrawer from '../HasagiDrawer';
+import BottomTemporaryDrawer from '../HasagiDrawer';
+import HomeService from 'services/HomeServices';
+import { SupervisedUserCircleOutlined } from '@mui/icons-material';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser } from '@fortawesome/free-regular-svg-icons';
+import { faCartArrowDown } from '@fortawesome/free-solid-svg-icons';
 
 function ElevationScroll(props) {
     const { children, window } = props;
@@ -64,20 +66,22 @@ export default function Header(props) {
 
     const handleMouseEnter = () => setIsHovering(true);
     const handleMouseLeave = () => setIsHovering(false);
-    const fetchData = async () => {
-        const [categories, brands] = await Promise.all([
-            CategoriesService.getAllCategories()
-        ])
-    }
+    const [categories, setCategories] = React.useState([]);
 
-    React.useEffect(async () => {
-        try {
-            const resp = await AccountService.getAuthor();
-            setAuthor(resp.data);
-        } catch (err) {
-            console.error(err)
-        }
-    }, [])
+    React.useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const resp = await AccountService.getAuthor();
+                const cateResp = await HomeService.getCategoryHeader();
+                setCategories(cateResp.data);
+                setAuthor(resp.data);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchData();
+    }, []);
+
 
     return (
         <>
@@ -122,11 +126,11 @@ export default function Header(props) {
                                     </MuiLink>
 
                                     <MuiLink href="/new" sx={{ paddingRight: 3 }}>
-                                        <ArgonTypography variant="h5">MỚI</ArgonTypography>
+                                        <ArgonTypography variant="h5">Liên Hệ</ArgonTypography>
                                     </MuiLink>
 
                                     <MuiLink href="/ao-thun" sx={{ paddingRight: 3 }}>
-                                        <ArgonTypography variant="h5">ÁO THUN NAM NỮ</ArgonTypography>
+                                        <ArgonTypography variant="h5">Giới Thiệu</ArgonTypography>
                                     </MuiLink>
 
                                     {/* Icons with Hover */}
@@ -153,63 +157,52 @@ export default function Header(props) {
                                                 bgColor='secondary'
                                                 variant='gradient'
                                             >
-
                                                 <ArgonBox
                                                     display="grid"
-                                                    gridTemplateColumns="repeat(5, 1fr)"
-                                                    gap={2}
+                                                    gridTemplateColumns="repeat(5, 1fr)" // 5 cột
+                                                    gap={2} // Khoảng cách giữa các ô
                                                 >
-                                                    <ArgonBox p={2} color='white' display='flex' flexDirection='column' >
-                                                        <MuiLink href='#'>Áo Thun Trơn</MuiLink>
-                                                        <MuiLink href='#'>Áo Thun Cổ Tròn</MuiLink>
-                                                        <MuiLink href='#'>Áo Thun In Hình</MuiLink>
-                                                    </ArgonBox>
-                                                    <ArgonBox p={2} border="1px solid lightgray" color='white' display='flex' flexDirection='column'>
-                                                        <MuiLink href='#'>Áo POLO Trơn</MuiLink>
-                                                        <MuiLink href='#'>Áo POLO In Hình</MuiLink>
-                                                        <MuiLink href='#'>Áo POLO dáng rộng</MuiLink>
-                                                        <MuiLink href='#'>Áo POLO dáng vừa</MuiLink>
-                                                    </ArgonBox>
-                                                    <ArgonBox p={2} border="1px solid lightgray" color='white' display='flex' flexDirection='column'>
-                                                        <ArgonTypography>Column 3</ArgonTypography>
-                                                    </ArgonBox>
-                                                    <ArgonBox p={2} border="1px solid lightgray" color='white' display='flex' flexDirection='column'>
-                                                        <ArgonTypography>Column 4</ArgonTypography>
-                                                    </ArgonBox>
-                                                    <ArgonBox p={2} border="1px solid lightgray" color='white' display='flex' flexDirection='column'>
-                                                        <ArgonTypography>Column 5</ArgonTypography>
-                                                    </ArgonBox>
+                                                    {categories.map((cate, index) => (
+                                                        <ArgonBox
+                                                            key={index}
+                                                            p={2}
+                                                            color="white"
+                                                            display="flex"
+                                                            flexDirection="column"
+                                                            alignItems="center"
+                                                        >
+                                                            <MuiLink href={`/${cate.name}`} underline="hover">
+                                                                <ArgonTypography>{cate.name}</ArgonTypography>
+                                                            </MuiLink>
+                                                        </ArgonBox>
+                                                    ))}
                                                 </ArgonBox>
                                             </ArgonBox>
                                         )}
+
                                     </ArgonBox>
                                 </ArgonBox>
 
-                                <ArgonBox>
-                                    {user == null ? (
-                                        <ArgonBox display="flex" alignItems="center" justifyContent='space-between'>
-                                            <ArgonBox display='flex' justifyContent='space-between' alignItems='center' mt={1}>
-                                                <MuiLink href='/authentication/sign-in' sx={{ marginRight: 1 }}>
-                                                    <ArgonTypography variant="inherit">Đăng Nhập</ArgonTypography>
-                                                </MuiLink>
+                                <ArgonBox display='flex' justifyContent='space-between' alignItems='center' >
 
-                                                <ArgonBox display='block' height='25px' width='2px' bgColor='dark' broderRadius='lg' sx={{ marginRight: 1 }}></ArgonBox>
-
-                                                <MuiLink href='/authentication/sign-up'>
-                                                    <ArgonTypography variant="inherit">Đăng Ký</ArgonTypography>
-                                                </MuiLink>
+                                    <ArgonBox>
+                                        {user == null ? (
+                                            <MuiLink href='/authentication/sign-in' sx={{ marginRight: 1 }}>
+                                                <FontAwesomeIcon icon={faUser} />
+                                            </MuiLink>
+                                        ) : (
+                                            <ArgonBox display='flex' justifyContent='space-evenly' alignItems='center'>
+                                                <ArgonAvatar src={author.avatar !== '' ? author.avatar : "https://bit.ly/3I3pbe6"} alt="Avatar" size="md" sx={{ marginRight: 1 }} bgColor='light' />
+                                                <ArgonTypography variant="inherit">xin chào {author.username}</ArgonTypography>
                                             </ArgonBox>
-                                        </ArgonBox>
-                                    ) : (
-                                        <ArgonBox display='flex' justifyContent='space-evenly' alignItems='center'>
-                                            <ArgonAvatar src={author.avatar !== '' ? author.avatar : "https://bit.ly/3I3pbe6"} alt="Avatar" size="md" sx={{ marginRight: 1 }} bgColor='light' />
-                                            <ArgonTypography variant="inherit">xin chào {author.username}</ArgonTypography>
-                                        </ArgonBox>
-                                    )}
-                                </ArgonBox>
+                                        )}
+                                    </ArgonBox>
 
-                                <ArgonBox p={3}>
-                                    <AnchorTemporaryDrawer />
+                                    <ArgonBox>
+                                        <FontAwesomeIcon icon={faCartArrowDown} />
+                                    </ArgonBox>
+
+                                    <BottomTemporaryDrawer />
                                 </ArgonBox>
                             </ArgonBox>
                         </Toolbar>

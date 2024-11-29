@@ -153,6 +153,14 @@ function ProductDetail() {
         }
     }
 
+    const updatePriceProduct = async () => {
+        try {
+            const resp = await ProductService.updatePrice(product.id);
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prevState => ({
@@ -185,6 +193,7 @@ function ProductDetail() {
             const responses = await Promise.all(savePromises);
             toast.success("Product detail create successfully!");
             updateQuantityProduct();
+            updatePrice()
             refreshData()
             setFormData({
                 id: '',
@@ -474,7 +483,7 @@ function ProductDetail() {
                     </Card>
                 </ArgonBox>
             </ArgonBox>
-            <ProductFormDialog open={dialogOpen} onClose={handleCloseDialog} colors={colors} sizes={sizes} initialData={selectedRow} productID={product.id} refreshData={refreshData} updateQuantity={updateQuantityProduct} />
+            <ProductFormDialog open={dialogOpen} onClose={handleCloseDialog} colors={colors} sizes={sizes} initialData={selectedRow} productID={product.id} refreshData={refreshData} updateQuantity={updateQuantityProduct} updatePrice={updatePrice} />
             <ToastContainer />
         </DashboardLayout>
     );

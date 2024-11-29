@@ -28,14 +28,13 @@ const ImageCarousel = () => {
         return <p>Loading banners...</p>;
     }
 
-    // Giới hạn số lượng banner nhỏ (sử dụng URL cụ thể cho banner nhỏ)
     const smallBannerUrl = "https://vending-cdn.kootoro.com/torov-cms/upload/image/1669358914523-kh%C3%A1i%20ni%E1%BB%87m%20qu%E1%BA%A3ng%20c%C3%A1o%20banner%20tr%C3%AAn%20website.jpg"; // Use the specific URL you provided
     const smallBannerUrl1 = "https://img.timviec.com.vn/2021/07/banner-la-gi-1.jpg"; // Use the specific URL you provided
 
     return (
         <ArgonBox mt={5}>
             {/* Container cho ảnh lớn và banner nhỏ */}
-            <div className="container-fluid mb-1" style={{paddingTop: '0px'}}>
+            <div style={{paddingTop: '0px'}}>
             <div style={styles.mainContainer}>
                 {/* Ảnh lớn */}
                 <div className="carousel-container" style={styles.carouselContainer}>
@@ -103,13 +102,11 @@ const styles = {
         fontSize: '2rem',
         color: 'white',
         background: 'rgba(0, 0, 0, 0.3)',
-        marginLeft: '40px',
     },
     customNextIcon: {
         fontSize: '2rem',
         color: 'white',
         background: 'rgba(0, 0, 0, 0.3)',
-        marginRight: '40px',
     },
     smallBannersContainer: {
         flex: '1',
