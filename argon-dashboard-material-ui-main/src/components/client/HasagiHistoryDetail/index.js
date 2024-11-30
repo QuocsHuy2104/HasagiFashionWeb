@@ -75,27 +75,35 @@ const HistoryOrderDetail = () => {
   if (error) {
     return <div>{error}</div>;
   }
-
   const subtotalList = orderDetails.map((item) => item.productPrice * item.productQuantity);
   const totalSubtotal = subtotalList.reduce((total, subtotal) => total + subtotal, 0);
-
-  const discountRate = voucherPrice ? voucherPrice / 100 : 0;
-  const discountedSubtotal = totalSubtotal * (1 - discountRate);
-
+  
+  // Áp dụng giảm giá trực tiếp từ voucher (giảm tối đa không vượt quá totalSubtotal)
+  const diccount = voucherPrice ? Math.min(voucherPrice, totalSubtotal) : 0;
+  
+  // Tổng tiền sau khi áp dụng giảm giá
+  const discountedSubtotal = totalSubtotal - diccount;
+  
+  // Tổng tiền cuối cùng (bao gồm phí vận chuyển)
   const finalTotal = discountedSubtotal + shippingFee;
-
-  const diccount = (totalSubtotal * voucherPrice) / 100;
-
+  
+  // Định dạng số tiền giảm giá và tổng tiền cuối cùng
   const formattedDiscountedTotal = new Intl.NumberFormat("vi-VN", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 3,
   }).format(diccount);
-
+  
   const formattedFinalTotal = new Intl.NumberFormat("vi-VN", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 3,
   }).format(finalTotal);
-
+  
+  console.log({
+    totalSubtotal,
+    diccount: formattedDiscountedTotal,
+    finalTotal: formattedFinalTotal,
+  });
+  
   const goBack = () => {
     navigate(`/History`);
   };

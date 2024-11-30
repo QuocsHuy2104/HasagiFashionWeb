@@ -154,7 +154,7 @@ function Order() {
   };
 
   const columns = [
-    { field: "fullNameAddress", headerName: "Full Name", flex: 1 },
+    { field: "fullName", headerName: "Full Name", flex: 1 },
     { field: "orderDate", headerName: "Order Date", flex: 1 },
     { field: "numberPhone", headerName: "Phone Number", flex: 1 },
     { field: "amount", headerName: "Amount", flex: 1 },

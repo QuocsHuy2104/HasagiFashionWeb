@@ -10,7 +10,6 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { ToastContainer, toast } from "react-toastify";
 import CheckoutService from "../../../services/CheckoutServices";
-import aboutImage5 from "layouts/assets/img/product-1.jpg";
 import Swal from "sweetalert2";
 import { Card, Container, Button, Dropdown } from "react-bootstrap";
 import ArgonInput from "../../../components/ArgonInput";
@@ -41,7 +40,8 @@ const Checkout = () => {
     const [vouchers, setVouchers] = useState([]);
     const [usedVouchers, setUsedVouchers] = useState([]);
     const [accountId] = useState(Cookies.get('accountId'));
-
+    const [images, setImages] = useState([]);
+    
     useEffect(() => {
         return () => {
             clos;
@@ -52,7 +52,6 @@ const Checkout = () => {
         setTimeout(() => {
             setIsLoading(false);
         }, 700);
-
         const fetchAddress = async () => {
             try {
                 const addressesId = new URLSearchParams(window.location.search).get("id");
@@ -63,13 +62,39 @@ const Checkout = () => {
                 } else {
                     console.error("No address ID found in the URL");
                 }
+
+                // Lấy dữ liệu cartItems từ localStorage
+                const cartItemsBackup = JSON.parse(localStorage.getItem("cartItemsBackup")) || [];
+                setCartItems(cartItemsBackup);
+
+                // Nếu có cartItems, thực hiện lấy hình ảnh
+                if (cartItemsBackup.length > 0) {
+                    const imageRequests = cartItemsBackup.map((item) =>
+                        axios
+                            .get(
+                                `http://localhost:3000/api/public/webShopDetail/product-detail/${item.productId}`
+                            )
+                            .then((res) => ({ productId: item.productId, data: res.data }))
+                    );
+
+                    // Chờ tất cả API hoàn thành
+                    const imagesData = await Promise.all(imageRequests);
+
+                    // Chuyển đổi thành object để dễ truy cập
+                    const imagesMap = imagesData.reduce((acc, { productId, data }) => {
+                        acc[productId] = data;
+                        return acc;
+                    }, {});
+
+                    // Cập nhật state với hình ảnh
+                    setImages(imagesMap);
+                }
             } catch (error) {
                 console.error("Error fetching address:", error);
             }
         };
+
         fetchAddress();
-        const cartItemsBackup = JSON.parse(localStorage.getItem("cartItemsBackup")) || [];
-        setCartItems(cartItemsBackup);
     }, []);
 
     useEffect(() => {
@@ -626,83 +651,86 @@ const Checkout = () => {
                                     </tr>
                                 </thead>
                                 <tbody style={{ fontSize: "16px" }}>
-                                    {cartItems.map((item, index) => (
-                                        <tr
-                                            key={index}
-                                            style={{ verticalAlign: "middle", borderBottom: "1px solid #ddd" }}
-                                        >
-                                            <td style={{ padding: "8px 16px" }}>
-                                                <div className="d-flex align-items-center">
-                                                    <img
-                                                        src={item.image || aboutImage5}
-                                                        style={{ width: 60, marginRight: "15px", borderRadius: "5px" }}
-                                                        alt="Product"
-                                                    />
-                                                    <span
-                                                        style={{
-                                                            fontWeight: "medium",
-                                                            display: '-webkit-box',
-                                                            WebkitBoxOrient: 'vertical',
-                                                            overflow: 'hidden',
-                                                            WebkitLineClamp: 2,
-                                                            lineHeight: '1.2em',
-                                                            maxHeight: '2.4em', // Adjust to fit exactly two lines
-                                                            textOverflow: 'ellipsis'
-                                                        }}
-                                                    >
-                                                        {item.name}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td className="py-4 d-flex justify-content-center align-items-center" style={{ padding: "8px 16px" }}>
-                                                <div style={{ textAlign: "center" }}>
-                                                    Loại: <span style={{ fontWeight: "medium" }}>{item.color}</span>,{" "}
-                                                    <span style={{ fontWeight: "medium" }}>{item.size}</span>
-                                                </div>
-                                            </td>
-                                            <td className="py-4" style={{ padding: "8px 16px", textAlign: "center" }}>
-                                                <div>
-                                                    <span
-                                                        style={{
-                                                            textDecoration: "underline",
-                                                            fontSize: "10px",
-                                                            fontWeight: "normal",
-                                                            transform: "translateY(-3px)", // Adjust the value as needed
-                                                            display: "inline-block",
-                                                        }}
-                                                    >
-                                                        đ
-                                                    </span>
-                                                    <span style={{ marginLeft: "1px" }}>
-                                                        {new Intl.NumberFormat("vi-VN").format(item.price)}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td className="py-4" style={{ padding: "8px 16px", textAlign: "center" }}>
-                                                <div>
-                                                    <span style={{ fontWeight: "medium" }}>{item.quantity}</span>
-                                                </div>
-                                            </td>
-                                            <td className="py-4" style={{ padding: "8px 16px", textAlign: "center" }}>
-                                                <div>
-                                                    <span
-                                                        style={{
-                                                            textDecoration: "underline",
-                                                            fontSize: "10px",
-                                                            fontWeight: "normal",
-                                                            transform: "translateY(-3px)", // Adjust the value as needed
-                                                            display: "inline-block",
-                                                        }}
-                                                    >
-                                                        đ
-                                                    </span>
-                                                    <span style={{ marginLeft: "2px" }}>
-                                                        {new Intl.NumberFormat("vi-VN").format(item.price * item.quantity)}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {cartItems.map((item, index) => {
+                                        const matchingImage = images[item.productId]?.find(
+                                            (image) => image.colorsDTO.id === item.colorId
+                                        );
+                                        return (
+                                            <tr
+                                                key={index}
+                                                style={{ verticalAlign: "middle", borderBottom: "1px solid #ddd" }}
+                                            >
+                                                <td style={{ padding: "8px 16px" }}>
+                                                    <div className="d-flex align-items-center">
+                                                        {matchingImage && (
+                                                            <img
+                                                                src={matchingImage.imageDTOResponse[0]?.url}
+                                                                alt={item.name}
+                                                                style={{
+                                                                    width: "45px",
+                                                                    height: "45px",
+                                                                    marginRight: "10px",
+                                                                }}
+                                                            />
+                                                        )}
+                                                        {/* <img
+                              src={item.image || aboutImage5}
+                              style={{ width: 60, marginRight: "15px", borderRadius: "5px" }}
+                              alt="Product"
+                            /> */}
+                                                        <span style={{ fontWeight: "medium" }}>{item.name}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="py-4" style={{ padding: "8px 16px" }}>
+                                                    <div>
+                                                        Loại: <span style={{ fontWeight: "medium" }}>{item.color}</span>,{" "}
+                                                        <span style={{ fontWeight: "medium" }}>{item.size}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="py-4" style={{ padding: "8px 16px", textAlign: "center" }}>
+                                                    <div>
+                                                        <span
+                                                            style={{
+                                                                textDecoration: "underline",
+                                                                fontSize: "10px",
+                                                                fontWeight: "normal",
+                                                                transform: "translateY(-3px)", // Adjust the value as needed
+                                                                display: "inline-block",
+                                                            }}
+                                                        >
+                                                            đ
+                                                        </span>
+                                                        <span style={{ marginLeft: "1px" }}>
+                                                            {new Intl.NumberFormat("vi-VN").format(item.price)}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="py-4" style={{ padding: "8px 16px", textAlign: "center" }}>
+                                                    <div>
+                                                        <span style={{ fontWeight: "medium" }}>{item.quantity}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="py-4" style={{ padding: "8px 16px", textAlign: "center" }}>
+                                                    <div>
+                                                        <span
+                                                            style={{
+                                                                textDecoration: "underline",
+                                                                fontSize: "10px",
+                                                                fontWeight: "normal",
+                                                                transform: "translateY(-3px)", // Adjust the value as needed
+                                                                display: "inline-block",
+                                                            }}
+                                                        >
+                                                            đ
+                                                        </span>
+                                                        <span style={{ marginLeft: "2px" }}>
+                                                            {new Intl.NumberFormat("vi-VN").format(item.price * item.quantity)}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>

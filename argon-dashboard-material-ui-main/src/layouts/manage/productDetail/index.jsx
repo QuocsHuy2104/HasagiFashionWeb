@@ -153,7 +153,7 @@ function ProductDetail() {
         }
     }
 
-    const updatePriceProduct = async () => {
+    const updatePrice = async () => {
         try {
             const resp = await ProductService.updatePrice(product.id);
         } catch (e) {
@@ -206,10 +206,10 @@ function ProductDetail() {
             setSelectedColor([]);
         } catch (e) {
             console.error("Error saving product details:", e);
-        
+
             // Use e.response?.data or e.message if available, otherwise show a default error message
             const errorMessage = e.response?.data || "An unexpected error occurred.";
-            
+
             toast.error(errorMessage);
         }
     };
@@ -265,20 +265,16 @@ function ProductDetail() {
                                             <ArgonBox width='75px'>
                                                 <ArgonTypography variant="button">Brand</ArgonTypography>
                                             </ArgonBox>
-
                                             <ArgonBox>
                                                 <ArgonTypography variant="caption">{product.brandDTOResponse.name}</ArgonTypography>
                                             </ArgonBox>
                                         </ArgonBox>
-
                                     </ArgonBox>
                                 </Grid>
                             </Grid>
                         </ArgonBox>
-
                         <ArgonBox mx={7}>
                             <ArgonBox component="form" role="form" onSubmit={handleSubmit}>
-
                                 <ArgonBox
                                     display="flex"
                                     flexDirection="column"

@@ -1,6 +1,7 @@
+
 import PropTypes from "prop-types";
 import Card from "@mui/material/Card";
-import MuiLink from "@mui/material/Link";
+import { Link } from "react-router-dom";
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
@@ -39,7 +40,7 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                 overflow: 'hidden'
             }}
         >
-            <MuiLink href={`ShopDetails/${id}`} target="_blank" rel="noreferrer">
+            <Link to={`/ShopDetail?id=${id}`}>
                 <ArgonBox
                     mt={1}
                     mx={2}
@@ -65,18 +66,18 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                     />
                 </ArgonBox>
 
-                <ArgonTypography variant="h5" component="p" color="text" textAlign="center" mt={2}>  {name} </ArgonTypography>
+                <ArgonTypography variant="button" component="p" color="text" textAlign="center" mt={2}>  {name} </ArgonTypography>
 
                 <ArgonBox display="flex" alignItems="center" justifyContent='center' my={1}>
                     <ArgonTypography
                         variant="button"
-                        color="secondary"
-                        style={{ textDecoration: 'line-through' }}
+                        color="error"
+                        // style={{ textDecoration: 'line-through' }}
                     >
                         {price} VNĐ
                     </ArgonTypography>
 
-                    <ArgonTypography
+                    {/* <ArgonTypography    
                         variant="button"
                         color="error"
                         style={{ marginLeft: '4px' }}
@@ -104,14 +105,14 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
 
                             return "Invalid price format";
                         })()}
-                    </ArgonTypography>
+                    </ArgonTypography> */}
 
 
 
                 </ArgonBox>
-            </MuiLink>
+            </Link>
 
-            <ArgonBox
+            {/* <ArgonBox
                 color='white'
                 bgColor='error'
                 borderRadius='md'
@@ -124,9 +125,9 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                 }}
             >
                 -{sale}%
-            </ArgonBox>
+            </ArgonBox> */}
 
-            <FavoriteBorderIcon
+            {/* <FavoriteBorderIcon
                 sx={{
                     width: '1.7em',
                     height: '1.7em',
@@ -137,7 +138,7 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                     padding: '5px',
                     borderRadius: '12px'
                 }}
-            />
+            /> */}
 
             {hover && (
                 <>

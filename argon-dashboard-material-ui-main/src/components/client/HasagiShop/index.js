@@ -480,7 +480,7 @@ function Shop() {
                                                         height: "auto",
                                                     }}
                                                 >
-                                                    <div
+                                                    {/* <div
                                                         style={{
                                                             position: "absolute",
                                                             top: "10px",
@@ -493,17 +493,17 @@ function Shop() {
                                                         }}
                                                     >
                                                         {product.sale}%
-                                                    </div>
+                                                    </div> */}
                                                     <img
                                                         src={product.image}
                                                         alt={product.name}
                                                         style={{
-                                                            width: "100%",
-                                                            height: "auto",
+                                                            width: "auto",
+                                                            height: "350px",
                                                             transition: "transform 0.3s ease",
                                                         }}
                                                     />
-                                                    <div
+                                                    {/* <div
                                                         className="icon-container"
                                                         style={{
                                                             position: "absolute",
@@ -543,7 +543,7 @@ function Shop() {
                                                                 backgroundColor: "white",
                                                             }}
                                                         />
-                                                    </div>
+                                                    </div> */}
                                                 </div>
 
 
@@ -593,7 +593,6 @@ function Shop() {
                 </div >
             </div >
             <Footer />
-            <ChatBot />
         </>
     );
 }

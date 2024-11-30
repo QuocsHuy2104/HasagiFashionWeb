@@ -197,15 +197,15 @@ const ProductTable = ({ onEditClick, setSelectedProduct, searchKeyword, selected
                 }}
             />
         ),
-        TrangThai: (
-            <Switch
-                checked={product.isActive}
-                onChange={() => handleStatusToggle(product)}
-                color="primary"
-                inputProps={{ "aria-label": "controlled" }}
-            />
+        // TrangThai: (
+        //     <Switch
+        //         checked={product.isActive}
+        //         onChange={() => handleStatusToggle(product)}
+        //         color="primary"
+        //         inputProps={{ "aria-label": "controlled" }}
+        //     />
 
-        ),
+        // ),
         ThaoTac: (
             <ArgonBox display="flex" justifyContent="space-between" alignItems="center">
                 <ArgonTypography
@@ -251,7 +251,7 @@ const ProductTable = ({ onEditClick, setSelectedProduct, searchKeyword, selected
             { name: "NgayTao", align: "center" },
             { name: "DanhMuc", align: "center" },
             { name: "ThuongHieu", align: "center" },
-            { name: "TrangThai", align: "center" },
+            // { name: "TrangThai", align: "center" },
             { name: "ThaoTac", align: "center" },
         ],
         rows,

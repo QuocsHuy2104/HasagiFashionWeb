@@ -5,24 +5,24 @@ import Header from 'components/client/HasagiHeader';
 import Footer from 'components/client/HasagiFooter'
 import Coupon from "./coupon";
 import Policy from "./policy";
-import Voucher from "./voucher";
 import ImageCarousel from "components/client/HasagiCarousel";
 import FeaturedProducts from "./sanpham";
 import ChatBot from "components/client/HasagiChatBot";
+import VoucherList from "components/client/HasagiVorcher";
 
 const FeaturesAndAbout = () => {
   return (
     <>
       <Header />
-      <ArgonBox px={20}>
+      <ArgonBox pt={10} px={20}>
         <ImageCarousel />
         <Policy />
 
-        <Voucher />
+        <VoucherList />
         <FeaturedProducts />
       </ArgonBox>
       <Coupon />
-      <ChatBot />
+    
       <Footer /> 
     </>
   )

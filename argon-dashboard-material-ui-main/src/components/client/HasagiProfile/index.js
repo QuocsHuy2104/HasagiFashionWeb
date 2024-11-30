@@ -15,20 +15,17 @@ const Profile = () => {
   const menuItems = [
     { name: "Tài Khoản Của Tôi", hasSubItems: true },
     { name: "Đơn Mua" },
-    { name: "Kho Voucher", isNew: true },
   ];
 
   const subMenuItems = [
     { name: "Hồ Sơ", parent: "Tài Khoản Của Tôi" },
     { name: "Địa Chỉ", parent: "Tài Khoản Của Tôi" },
     { name: "Đổi Mật Khẩu", parent: "Tài Khoản Của Tôi" },
-    { name: "Kho Voucher", parent: "Tài Khoản Của Tôi" },
   ];
 
   const urlMapping = {
     "Tài Khoản Của Tôi": "my-account",
     "Đơn Mua": "purchase",
-    "Kho Voucher": "voucher-store",
     "Hồ Sơ": "profile",
     "Địa Chỉ": "address",
     "Đổi Mật Khẩu": "change-password",
