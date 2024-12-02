@@ -20,7 +20,7 @@ const Complete = () => {
         const transactionStatus = params.get('vnp_TransactionStatus');
         const selectedPayment = Cookies.get('selectedPayment');
 
-        if (selectedPayment !== 'Direct Check' && (responseCode !== '00' || transactionStatus !== '00')) {
+        if (selectedPayment !== 'Cod' && (responseCode !== '00' || transactionStatus !== '00')) {
             navigate(`/Checkout?id=${addressId}`);
         } else {
             const handleRemoveItems = async () => {

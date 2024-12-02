@@ -61,7 +61,7 @@ const indexHistory = () => {
   const [comment, setComment] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage] = useState("");
-
+  const [images, setImages] = useState([]);
   const paperRef = useRef(null);
   const searchInputRef = useRef(null);
   const [stickyStyle, setStickyStyle] = useState({ position: "relative" });
@@ -80,7 +80,23 @@ const indexHistory = () => {
     const fetchOrderHistory = async () => {
       try {
         const response = await HistoryOrderService.getHistory();
-        setOrders(response.data);
+        const ordersData = response.data;
+        setOrders(ordersData);
+        const allProducts = ordersData.flatMap(order => order.products || []);
+
+        const imageRequests = allProducts.map((product) =>
+          axios
+            .get(
+              `http://localhost:3000/api/public/webShopDetail/product-detail/${product.productId}`
+            )
+            .then((res) => ({ productId: product.productId, data: res.data }))
+        );
+        const imagesData = await Promise.all(imageRequests);
+        const imagesMap = imagesData.reduce((acc, { productId, data }) => {
+          acc[productId] = data;
+          return acc;
+        }, {});
+        setImages(imagesMap);
       } catch (error) {
         setError("Failed to fetch order history.");
       } finally {
@@ -585,73 +601,69 @@ const indexHistory = () => {
                       />
                       {order.products && order.products.length > 0 ? (
                         <Box display="flex" flexDirection="column">
-                          {order.products.map((product, index) => (
-                            <Box
-                              display="flex"
-                              alignItems="center"
-                              key={index}
-                              style={{ marginBottom: "25px", marginTop: "-15px" }}
-                            >
-                              <img
-                                src={product.productImage}
-                                alt="Product"
-                                style={{ width: "100px", marginRight: "16px" }}
-                              />
-                              <Box>
-                                <Box display="flex" justifyContent="space-between">
-                                  <Typography variant="body2" gutterBottom>
-                                    {product.productName}
-                                  </Typography>
-                                  {order.statusSlug === "hoan-thanh" && product.canReview && (
-                                    <Typography
-                                      variant="body2"
-                                      color="textSecondary"
-                                      onClick={() => handleReviewClick(product)}
-                                      style={{ marginLeft: "600px", color: "black" }}
-                                    >
-                                      Đánh giá
+                          {order.products.map((product, index) => {
+                            const matchingImage = images[product.productId]?.find(
+                              (image) => image.colorsDTO?.id === product.colorId
+                            );
+
+                            return (
+                              <Box
+                                display="flex"
+                                alignItems="center"
+                                key={index}
+                                style={{ marginBottom: "25px", marginTop: "-15px" }}
+                              >
+                                {matchingImage && (
+                                  <img
+                                    src={matchingImage.imageDTOResponse[0]?.url}
+                                    alt={product.productName || "Product"}
+                                    style={{ width: "80px", marginRight: "16px", height: "100px" }}
+                                  />
+                                )}
+                                <Box>
+                                  <Box display="flex" justifyContent="space-between">
+                                    <Typography variant="body2" gutterBottom>
+                                      {product.productName}
                                     </Typography>
-                                  )}
-                                </Box>
-                                <Typography
-                                  variant="body2"
-                                  color="textSecondary"
-                                  style={{ color: "black" }}
-                                >
-                                  Phân loại hàng: {product.color}, {product.size}
-                                </Typography>
-                                <Box display="flex" justifyContent="space-between">
-                                  <Typography variant="body2" style={{ color: "black" }}>
-                                    Số lượng: {product.productQuantity}
-                                  </Typography>
+                                    {order.statusSlug === "hoan-thanh" && product.canReview && (
+                                      <Typography
+                                        variant="body2"
+                                        color="textSecondary"
+                                        onClick={() => handleReviewClick(product)}
+                                        style={{ marginLeft: "600px", color: "black" }}
+                                      >
+                                        Đánh giá
+                                      </Typography>
+                                    )}
+                                  </Box>
                                   <Typography
                                     variant="body2"
-                                    style={{
-                                      color: "#ee4d2d",
-                                      fontSize: "16px",
-                                      position: "relative",
-                                      display: "inline-block",
-                                      marginLeft: "680px",
-                                    }}
+                                    color="textSecondary"
+                                    style={{ color: "black" }}
                                   >
-                                    <span
+                                    Phân loại hàng: {product.color}, {product.size}
+                                  </Typography>
+                                  <Box display="flex" justifyContent="space-between">
+                                    <Typography variant="body2" style={{ color: "black" }}>
+                                      Số lượng: {product.productQuantity}
+                                    </Typography>
+                                    <Typography
+                                      variant="body2"
                                       style={{
-                                        textDecoration: "underline",
-                                        fontSize: "13px",
-                                        fontWeight: "normal",
-                                        position: "absolute",
-                                        top: 0,
-                                        left: "-10px",
+                                        color: "#ee4d2d",
+                                        fontSize: "16px",
+                                        position: "relative",
+                                        display: "inline-block",
+                                        marginLeft: "690px",
                                       }}
                                     >
-                                      đ
-                                    </span>
-                                    {new Intl.NumberFormat("vi-VN").format(product.productPrice)}
-                                  </Typography>
+                                      {new Intl.NumberFormat("vi-VN").format(product.productPrice)}đ
+                                    </Typography>
+                                  </Box>
                                 </Box>
                               </Box>
-                            </Box>
-                          ))}
+                            );
+                          })}
                         </Box>
                       ) : (
                         <Typography variant="body2" color="textSecondary">
@@ -692,22 +704,10 @@ const indexHistory = () => {
                             alignItems: "center",
                           }}
                         >
-                          <span
-                            style={{
-                              textDecoration: "underline",
-                              fontSize: "15px",
-                              fontWeight: "normal",
-                              position: "absolute",
-                              top: 0,
-                              left: "-10px",
-                            }}
-                          >
-                            đ
-                          </span>
-                          {new Intl.NumberFormat("vi-VN").format(order.amount)}
+                          {new Intl.NumberFormat("vi-VN").format(order.amount)}đ
                         </Typography>
                       </div>
-                      <Box display="flex" justifyContent="flex-end" mt={2}>
+                      <Box display="flex" justifyContent="flex-end" mt={2}> 
                         {order.statusSlug === "dang-xu-ly" ? (
                           <MuiButton
                             variant="contained"

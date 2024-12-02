@@ -77,33 +77,33 @@ const HistoryOrderDetail = () => {
   }
   const subtotalList = orderDetails.map((item) => item.productPrice * item.productQuantity);
   const totalSubtotal = subtotalList.reduce((total, subtotal) => total + subtotal, 0);
-  
+
   // Áp dụng giảm giá trực tiếp từ voucher (giảm tối đa không vượt quá totalSubtotal)
   const diccount = voucherPrice ? Math.min(voucherPrice, totalSubtotal) : 0;
-  
+
   // Tổng tiền sau khi áp dụng giảm giá
   const discountedSubtotal = totalSubtotal - diccount;
-  
+
   // Tổng tiền cuối cùng (bao gồm phí vận chuyển)
   const finalTotal = discountedSubtotal + shippingFee;
-  
+
   // Định dạng số tiền giảm giá và tổng tiền cuối cùng
   const formattedDiscountedTotal = new Intl.NumberFormat("vi-VN", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 3,
   }).format(diccount);
-  
+
   const formattedFinalTotal = new Intl.NumberFormat("vi-VN", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 3,
   }).format(finalTotal);
-  
+
   console.log({
     totalSubtotal,
     diccount: formattedDiscountedTotal,
     finalTotal: formattedFinalTotal,
   });
-  
+
   const goBack = () => {
     navigate(`/History`);
   };
@@ -207,12 +207,12 @@ const HistoryOrderDetail = () => {
                   >
                     Trở lại
                   </h5>
-                  {(status === "Đã hủy" ) && (
+                  {(status === "Đã hủy") && (
                     <span style={{ marginLeft: "auto", fontSize: "15px", color: "#6c757d" }}>
                       Yêu cầu vào: {orderDate}
                     </span>
                   )}
-                  {status !== "Đã hủy"  && (
+                  {status !== "Đã hủy" && (
                     <span style={{ marginLeft: "auto", fontSize: "18px", color: "#ed4600c9" }}>
                       {status}
                     </span>
@@ -334,7 +334,7 @@ const HistoryOrderDetail = () => {
                     <img
                       src={item.productImage}
                       alt="Product"
-                      style={{ width: "100px", marginRight: "16px" }}
+                      style={{ width: "80px", marginRight: "16px", height: "110px"}}
                     />
                     <Box>
                       <Typography variant="h6" gutterBottom>
@@ -588,7 +588,7 @@ const HistoryOrderDetail = () => {
                     </TableContainer>
                   </>
                 )}
-                {(status === "Đã hủy" ) && (
+                {(status === "Đã hủy") && (
                   <>
                     <TableContainer
                       component={Paper}
