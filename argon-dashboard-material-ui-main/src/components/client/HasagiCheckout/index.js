@@ -4,6 +4,7 @@ import Footer from "components/client/HasagiFooter";
 import aboutImage5 from "layouts/assets/img/cod.png";
 import aboutImage6 from "layouts/assets/img/vnpay.png";
 import aboutImage7 from "layouts/assets/img/payos.png";
+import aboutImage8 from "layouts/assets/img/puches1.png";
 import axios from "axios";
 import AddressSelection from "components/client/HasagiBackup/index1";
 import Swal from "sweetalert2";
@@ -599,7 +600,7 @@ const Checkout = () => {
         },
         checkoutButton: {
             width: "100%",
-            background: "#ffc107",
+            background: "rgb(244 79 30 / 99%)",
             border: "none",
             padding: "10px",
             marginTop: "20px",
@@ -698,7 +699,7 @@ const Checkout = () => {
                     {address ? (
                         <div style={styles.addressSection}>
                             <div style={styles.addressText}>
-                            <i className="fa fa-map-marker-alt" style={{ color: 'red', fontSize: '1.2rem' }}></i>
+                                <i className="fa fa-map-marker-alt" style={{ color: 'red', fontSize: '1.2rem' }}></i>
                                 <span>
                                     <strong>   {address.fullName} </strong> (+84){" "}
                                     {address.numberPhone.startsWith("0")
@@ -785,7 +786,7 @@ const Checkout = () => {
                     ) : null}
                     <div style={styles.total}>
                         <h3>Tổng thanh toán</h3>
-                        <h3 style={{color: "red"}}>  {new Intl.NumberFormat("vi-VN").format(
+                        <h3 style={{ color: "red" }}>  {new Intl.NumberFormat("vi-VN").format(
                             cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) -
                             (selectedVoucher ? Math.min(
                                 cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) * selectedVoucher.discountPercentage / 100,
@@ -830,7 +831,11 @@ const Checkout = () => {
                             </div>
                         ))}
                     </div>
-                    <button style={styles.checkoutButton} onClick={handleClick}>Mua hàng</button>
+                    <button style={styles.checkoutButton} onClick={handleClick}>
+                        <img src={aboutImage8} alt="icon" style={{ width: '20px', marginRight: '8px',marginBottom: "4px" }} />
+                        Mua hàng
+                    </button>
+
                 </div>
             </div>
             <Footer />

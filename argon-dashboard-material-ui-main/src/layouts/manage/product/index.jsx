@@ -99,13 +99,23 @@ function Product() {
 
     const handleVideoChange = (event) => {
         const file = event.target.files[0];
-        if (file && file instanceof Blob) {
-            setFormData((prevData) => ({
-                ...prevData,
-                video: file,
-            }));
-        } else {
-            console.error("Invalid video file");
+        const maxVideoSize = 100 * 1024 * 1024; 
+
+        if (file) {
+            if (file.size > maxVideoSize) {
+                toast.error("Video không được vượt quá 100MB!");
+                event.target.value = "";
+                return;
+            }
+
+            if (file instanceof Blob) {
+                setFormData((prevData) => ({
+                    ...prevData,
+                    video: file,
+                }));
+            } else {
+                console.error("Invalid video file");
+            }
         }
     };
 

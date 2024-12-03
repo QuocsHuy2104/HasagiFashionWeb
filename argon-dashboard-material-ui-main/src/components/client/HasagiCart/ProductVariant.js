@@ -48,6 +48,15 @@ const ProductVariant = ({ onClose, cartDetailId, productId, colorId, sizeId }) =
       } else {
         console.error("Product detail not found or no images available");
       }
+      const checkedItems =
+        JSON.parse(localStorage.getItem("checkedItems" + productId + colorId + sizeId)) || [];
+
+      if (checkedItems && checkedItems.length > 0) {
+        localStorage.setItem(
+          "checkedItems" + productId + colorId + sizeId,
+          JSON.stringify([Number(productId), selectedColor, selectedSize])
+        );
+      }
     } catch (error) {
       console.error("Error fetching product options or images:", error);
       setError("Failed to fetch product options or images. Please try again later.");
@@ -63,11 +72,20 @@ const ProductVariant = ({ onClose, cartDetailId, productId, colorId, sizeId }) =
     if (selectedColor && selectedSize) {
       try {
         await CartService.getCartUpdate(cartDetailId, selectedColor, selectedSize, productId);
+        const checkedItemsKey = `checkedItems${productId}${colorId}${sizeId}`;
+        const newCheckedItemsKey = `checkedItems${productId}${selectedColor}${selectedSize}`;
+        const checkedItems = JSON.parse(localStorage.getItem(checkedItemsKey)) || [];
+        if (checkedItems.length > 0) {
+          localStorage.removeItem(checkedItemsKey);
+          localStorage.setItem(
+            newCheckedItemsKey,
+            JSON.stringify([Number(productId), selectedColor, selectedSize])
+          );
+        }
         onClose();
       } catch (error) {
         setError(error.message || "Failed to update product option");
-        console.log("Error during cart update:", error);
-        setSuccess(null);
+        console.error("Error during cart update:", error);
       }
     } else {
       setError("Please select both color and size before submitting");

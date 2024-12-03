@@ -23,7 +23,9 @@ const Cart = () => {
   const [selectAll, setSelectAll] = useState(false);
   const [showBackupModal, setShowBackupModal] = useState(false);
   const [images, setImages] = useState([]);
+  const [checkedItems, setCheckedItems] = useState([]);
   const navigate = useNavigate();
+
   const fetchCartItems = async () => {
     const accountId = Cookies.get("accountId");
 
@@ -50,20 +52,33 @@ const Cart = () => {
           .then((res) => ({ productId: item.productId, data: res.data }))
       );
 
-      // Chờ tất cả API hoàn thành
       const imagesData = await Promise.all(imageRequests);
 
-      // Chuyển đổi thành object để dễ truy cập
       const imagesMap = imagesData.reduce((acc, { productId, data }) => {
         acc[productId] = data;
         return acc;
       }, {});
 
-      // Cập nhật state với hình ảnh
       setImages(imagesMap);
 
-      // console.log("Cart Response:", cartResponse.data);
-      // console.log("Address Response:", addressResponse.data);
+      const updatedCartItems = reversedCartData.map((item) => {
+        const checkedItems =
+          JSON.parse(
+            localStorage.getItem("checkedItems" + item.productId + item.colorId + item.sizeId)
+          ) || [];
+        const isChecked = checkedItems.includes(item.productId);
+        const checked = isChecked
+          ? checkedItems.includes(item.colorId) && checkedItems.includes(item.sizeId)
+          : "";
+        console.log(`Product ID: ${item.productId}, Is Checked: ${isChecked}`);
+        return {
+          ...item,
+          selected: checked,
+        };
+      });
+
+      setCartItems(updatedCartItems);
+      //setCheckedItems(updatedCartItems);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -72,7 +87,15 @@ const Cart = () => {
   };
 
   useEffect(() => {
+    const handleBeforeUnload = () => {
+      localStorage.clear();
+    };
     fetchCartItems();
+    window.onbeforeunload = handleBeforeUnload;
+
+    return () => {
+      window.onbeforeunload = null; 
+    };
   }, []);
 
   const calculateSubtotal = () => {
@@ -109,11 +132,12 @@ const Cart = () => {
     }
   };
 
-  const handleRemoveItem = async (itemId) => {
+  const handleRemoveItem = async (itemId, productId, colorId, sizeId) => {
     const accountId = Cookies.get("accountId");
     try {
       await axios.delete(`http://localhost:3000/api/cart/remove/${itemId}?accountId=${accountId}`);
       setCartItems(cartItems.filter((item) => item.cartdetailid !== itemId));
+      localStorage.removeItem("checkedItems" + productId + colorId + sizeId);
       toast.success("Xóa sản phẩm thành công.");
     } catch (error) {
       console.error("Error removing item:", error);
@@ -124,15 +148,47 @@ const Cart = () => {
   const handleSelectAllChange = () => {
     const newSelectAll = !selectAll;
     setSelectAll(newSelectAll);
-    setCartItems(cartItems.map((item) => ({ ...item, selected: newSelectAll })));
+    const updatedCartItems = cartItems.map((item) => ({ ...item, selected: newSelectAll }));
+    setCartItems(updatedCartItems);
+    if (newSelectAll) {
+      const selectedKeys = updatedCartItems.map(
+        (item) => `checkedItems${item.productId}${item.colorId}${item.sizeId}`
+      );
+      selectedKeys.forEach((key, index) => {
+        const item = updatedCartItems[index]; // Tương ứng với từng sản phẩm
+        localStorage.setItem(key, JSON.stringify([item.productId, item.colorId, item.sizeId]));
+      });
+    } else {
+      localStorage.clear();
+    }
   };
 
-  const handleCheckboxChange = (itemId) => {
+  const handleCheckboxChange = (itemId, productId, colorId, sizeId) => {
+    const checkedItems =
+      JSON.parse(localStorage.getItem("checkedItems" + productId + colorId + sizeId)) || [];
+
+    if (checkedItems && checkedItems.length > 0) {
+      localStorage.removeItem("checkedItems" + productId + colorId + sizeId);
+    } else {
+      cartItems.map((item) =>
+        item.productId === productId
+          ? localStorage.setItem(
+              "checkedItems" + productId + colorId + sizeId,
+              JSON.stringify([Number(productId), item.colorId, item.sizeId])
+            )
+          : item
+      );
+    }
+    let updatedCheckedItems = [...checkedItems];
+    if (updatedCheckedItems.includes(productId)) {
+      updatedCheckedItems = updatedCheckedItems.filter((id) => id === productId); // Bỏ chọn
+    } else {
+      updatedCheckedItems.push(productId); // Chọn
+    }
     const updatedCartItems = cartItems.map((item) =>
       item.cartdetailid === itemId ? { ...item, selected: !item.selected } : item
     );
     setCartItems(updatedCartItems);
-
     const allSelected = updatedCartItems.every((item) => item.selected);
     setSelectAll(allSelected);
   };
@@ -171,6 +227,7 @@ const Cart = () => {
       await axios.delete("http://localhost:8080/api/cart/delete", { data: selectedIds });
       setCartItems(cartItems.filter((item) => !selectedIds.includes(item.cartdetailid)));
       setSelectAll(false);
+      localStorage.clear();
       toast.success("Xóa sản phẩm thành công.");
     } catch (error) {
       console.error("Error deleting items:", error);
@@ -202,7 +259,22 @@ const Cart = () => {
         prevItems.map((item) => (item.id === id ? { ...item, isDropdownVisible: false } : item))
       );
       const response = await CartService.getCart();
-      setCartItems(response.data);
+
+      const updatedCartItems = response.data.reverse().map((item) => {
+        const checkedItemsKey = `checkedItems${item.productId}${item.colorId}${item.sizeId}`;
+        const checkedItems = JSON.parse(localStorage.getItem(checkedItemsKey)) || [];
+        const isChecked =
+          checkedItems.includes(item.productId) &&
+          checkedItems.includes(item.colorId) &&
+          checkedItems.includes(item.sizeId);
+
+        return {
+          ...item,
+          selected: isChecked ? true : false,
+        };
+      });
+
+      setCartItems(updatedCartItems);
     } catch (error) {
       console.error("Error fetching updated cart:", error);
     }
@@ -387,7 +459,7 @@ const Cart = () => {
                           <input
                             type="checkbox"
                             checked={item.selected}
-                            onChange={() => handleCheckboxChange(item.cartdetailid)}
+                            onChange={() => handleCheckboxChange(item.cartdetailid, item.productId)}
                             style={{ transform: "scale(1.5)" }}
                           />
                         </td>
@@ -511,19 +583,8 @@ const Cart = () => {
                           )}
                         </td>
                         <td className="align-middle" style={{ border: "none" }}>
-                          <span
-                            style={{
-                              textDecoration: "underline",
-                              fontSize: "10px",
-                              fontWeight: "normal",
-                              transform: "translateY(-3px)", // Adjust the value as needed
-                              display: "inline-block",
-                            }}
-                          >
-                            đ
-                          </span>
                           <span style={{ marginLeft: "1px" }}>
-                            {new Intl.NumberFormat("vi-VN").format(item.price)}
+                            {new Intl.NumberFormat("vi-VN").format(item.price)}đ
                           </span>
                         </td>
 
@@ -595,19 +656,8 @@ const Cart = () => {
                         </td>
 
                         <td className="align-middle" style={{ border: "none" }}>
-                          <span
-                            style={{
-                              textDecoration: "underline",
-                              fontSize: "10px",
-                              fontWeight: "normal",
-                              transform: "translateY(-3px)", // Adjust the value as needed
-                              display: "inline-block",
-                            }}
-                          >
-                            đ
-                          </span>
                           <span style={{ marginLeft: "1px" }}>
-                            {new Intl.NumberFormat("vi-VN").format(item.price * item.quantity)}
+                            {new Intl.NumberFormat("vi-VN").format(item.price * item.quantity)}đ
                           </span>
                         </td>
                         <td className="align-middle" style={{ border: "none" }}>
@@ -655,19 +705,8 @@ const Cart = () => {
                 <div className="d-flex align-items-center">
                   <h5 className="font-weight-medium mb-0">
                     Tổng thanh toán ({countSelectedItems()} sản phẩm):{" "}
-                    <span
-                      style={{
-                        textDecoration: "underline",
-                        fontSize: "13px",
-                        fontWeight: "normal",
-                        transform: "translateY(-4px)", // Adjust the value as needed
-                        display: "inline-block",
-                      }}
-                    >
-                      đ
-                    </span>
                     <span style={{ marginLeft: "1px" }}>
-                      {new Intl.NumberFormat("vi-VN").format(total)}
+                      {new Intl.NumberFormat("vi-VN").format(total)}đ
                     </span>
                   </h5>
                   <button

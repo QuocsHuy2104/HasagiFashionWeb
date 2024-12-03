@@ -545,18 +545,6 @@ const Header = ({ onSearch }) => {
                                     </div>
                                     <span
                                       style={{
-                                        textDecoration: "underline",
-                                        fontSize: "10px",
-                                        fontWeight: "normal",
-                                        transform: "translateY(-1px)",
-                                        display: "inline-block",
-                                        color: "red",
-                                      }}
-                                    >
-                                      đ
-                                    </span>
-                                    <span
-                                      style={{
                                         marginLeft: "1px",
                                         color: "red",
                                         fontSize: "16px",
@@ -564,7 +552,7 @@ const Header = ({ onSearch }) => {
                                         marginRight: "5%",
                                       }}
                                     >
-                                      {new Intl.NumberFormat("vi-VN").format(product.price)}
+                                      {new Intl.NumberFormat("vi-VN").format(product.price)}đ
                                     </span>
                                   </li>
                                 );

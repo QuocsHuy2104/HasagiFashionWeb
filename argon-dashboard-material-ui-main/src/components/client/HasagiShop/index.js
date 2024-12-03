@@ -11,15 +11,11 @@ import { Card, Typography } from '@mui/material';
 import { Form } from 'react-bootstrap';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
-import ChatBot from "components/client/HasagiChatBot";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import SearchIcon from "@mui/icons-material/Search";
 
 function Shop() {
     const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [productsPerPage] = useState(20);
+    const [productsPerPage] = useState(8);
     const [isLoading, setIsLoading] = useState(true);
     const [sortOption, setSortOption] = useState("default");
     const [categories, setCategories] = useState([]);
@@ -186,15 +182,13 @@ function Shop() {
                     </div>
                 </div>
             )}
-
             <HasagiNav onSearch={handleSearch} />
             <div className="container-fluid ">
-                <div className="row px-xl-5" style={{marginTop: "120px"}}>
+                <div className="row px-xl-5" style={{ marginTop: "120px" }}>
                     <div className="col-3">
                         <h5 className="section-title position-relative text-uppercase mb-3">
                             <span className="bg-white pr-3">Lọc theo:</span>
                         </h5>
-
                         <div className="filter-options card p-3 mb-4" style={{
                             border: '1px solid #ddd',
                             borderRadius: '8px',
@@ -234,7 +228,6 @@ function Shop() {
                                 </div>
                             </div>
                         </div>
-
                         <div className="filter-options card p-3 mb-4" style={{
                             border: '1px solid #ddd',
                             borderRadius: '8px',
@@ -258,22 +251,18 @@ function Shop() {
                                     range
                                 />
                                 <p>Từ: {value[0].toLocaleString('vi-VN')}đ - Đến: {value[1].toLocaleString('vi-VN')}đ</p>
-
                                 <style>
                                     {`
                                         .rc-slider-rail {
                                         background-color: #ccc; /* Màu của thanh chưa được kéo */
                                         }
-
                                         .rc-slider-track {
                                         background-color: #ffcc00; /* Màu của thanh khi kéo (vàng đậm) */
                                         }
-
                                         .rc-slider-handle {
                                         border-color: #ffcc00; /* Màu của nút kéo */
                                         background-color: #ffcc00; /* Màu nền của nút kéo */
                                         }
-
                                         .rc-slider-handle:focus {
                                         border-color: #ffcc00; /* Màu của nút kéo khi focus */
                                         }
@@ -281,7 +270,6 @@ function Shop() {
                                 </style>
                             </div>
                         </div>
-
                         <div className="filter-options card p-3 mb-4" style={{
                             border: '1px solid #ddd',
                             borderRadius: '8px',
@@ -353,12 +341,8 @@ function Shop() {
                                         />
                                     ))}
                                 </div>
-
-
                             </div>
                         </div>
-
-
                         <div className="filter-options card p-3 mb-4" style={{
                             border: '1px solid #ddd',
                             borderRadius: '8px',
@@ -439,10 +423,9 @@ function Shop() {
                             <div
                                 className="product-list"
                                 style={{
-                                    display: "flex",
-                                    flexWrap: "wrap",
-                                    gap: "20px",
-                                    justifyContent: "space-between",
+                                    display: "grid",
+                                    gridTemplateColumns: "repeat(4, 1fr)", // 4 cột
+                                    gap: "20px", // Khoảng cách giữa các sản phẩm
                                 }}
                             >
                                 {currentProducts.map((product, index) => (
@@ -450,22 +433,28 @@ function Shop() {
                                         key={index}
                                         className="product-card"
                                         style={{
-                                            width: "calc(25% - 20px)",
                                             position: "relative",
                                             overflow: "hidden",
+                                            transition: "all 0.3s ease",
+                                            transform: "scale(1)",
+                                            boxShadow: "0px 0px 0px rgba(0, 0, 0, 0)",
                                         }}
                                         onMouseEnter={(e) => {
-                                            const iconContainer = e.currentTarget.querySelector('.icon-container');
-                                            if (iconContainer) {
-                                                iconContainer.style.opacity = '1';
-                                                iconContainer.style.pointerEvents = 'auto';
+                                            e.currentTarget.style.transform = "scale(1.03)";
+                                            e.currentTarget.style.boxShadow = "0 10px 15px rgba(0, 0, 0, 0.2)";
+                                            const image = e.currentTarget.querySelector("img");
+                                            if (image) {
+                                                image.style.transform = "scale(1.1)";
+                                                image.style.opacity = "0.9";
                                             }
                                         }}
                                         onMouseLeave={(e) => {
-                                            const iconContainer = e.currentTarget.querySelector('.icon-container');
-                                            if (iconContainer) {
-                                                iconContainer.style.opacity = '0';
-                                                iconContainer.style.pointerEvents = 'none';
+                                            e.currentTarget.style.transform = "scale(1)";
+                                            e.currentTarget.style.boxShadow = "0px 0px 0px rgba(0, 0, 0, 0)";
+                                            const image = e.currentTarget.querySelector("img");
+                                            if (image) {
+                                                image.style.transform = "scale(1)";
+                                                image.style.opacity = "1";
                                             }
                                         }}
                                     >
@@ -480,87 +469,30 @@ function Shop() {
                                                         height: "auto",
                                                     }}
                                                 >
-                                                    {/* <div
-                                                        style={{
-                                                            position: "absolute",
-                                                            top: "10px",
-                                                            left: "10px",
-                                                            backgroundColor: "#F30", // Nền mờ cho dễ đọc
-                                                            color: "white",
-                                                            padding: "1px 7px",
-                                                            borderRadius: "5px",
-                                                            zIndex: 5,
-                                                        }}
-                                                    >
-                                                        {product.sale}%
-                                                    </div> */}
                                                     <img
                                                         src={product.image}
                                                         alt={product.name}
                                                         style={{
-                                                            width: "auto",
+                                                            width: "100%",
                                                             height: "350px",
-                                                            transition: "transform 0.3s ease",
+                                                            transition: "transform 0.3s ease, opacity 0.3s ease",
                                                         }}
                                                     />
-                                                    {/* <div
-                                                        className="icon-container"
-                                                        style={{
-                                                            position: "absolute",
-                                                            top: "10px",
-                                                            right: "10px",
-                                                            zIndex: 10,
-                                                            display: "flex",
-                                                            flexDirection: "column",
-                                                            alignItems: "center",
-                                                            gap: "15px", // Tăng khoảng cách giữa các icon
-                                                            opacity: 0,
-                                                            pointerEvents: "none",
-                                                            transition: "opacity 0.3s ease",
-                                                        }}
-                                                    >
-                                                        <FavoriteBorderIcon
-                                                            className="icon"
-                                                            style={{
-                                                                fontSize: "50px !important",
-                                                                color: "black",
-                                                                backgroundColor: "white",
-                                                            }} // Kích cỡ icon lớn hơn
-                                                        />
-                                                        <ShoppingCartIcon
-                                                            className="icon"
-                                                            style={{
-                                                                fontSize: "50px !important",
-                                                                color: "black",
-                                                                backgroundColor: "white",
-                                                            }}
-                                                        />
-                                                        <SearchIcon
-                                                            className="icon"
-                                                            style={{
-                                                                fontSize: "50px !important",
-                                                                color: "black",
-                                                                backgroundColor: "white",
-                                                            }}
-                                                        />
-                                                    </div> */}
                                                 </div>
-
-
                                                 <div className="card-content" style={{ padding: "10px" }}>
-                                                    <div style={{ fontWeight: "bold" }}>{product.name || "Product Name Goes Here"}</div>
-                                                    <Typography variant="body2">
+                                                    <div style={{ fontSize: "15px" }}>
+                                                        {product.name || "Product Name Goes Here"}
+                                                    </div>
+                                                    <Typography variant="body2" style={{color: "red", fontWeight: "bold"}}>
                                                         {formatImportPrice(product.importPrice)}
                                                     </Typography>
-                                                    <Typography variant="body2">
+                                                    <Typography variant="body2" style={{fontWeight: "bold"}}>
                                                         <p>⭐ {calculateAverageStars(product.id)}</p>
                                                     </Typography>
                                                 </div>
                                             </Card>
                                         </Link>
                                     </div>
-
-
                                 ))}
                             </div>
 

@@ -2,7 +2,6 @@ import Dashboard from "layouts/dashboard";
 import Profile from "components/client/HasagiProfile";
 import Color from "layouts/manage/color";
 import Size from "layouts/manage/size";
-import Status from "layouts/manage/status";
 import Banner from "layouts/manage/banner";
 import Order from "layouts/manage/order";
 import Account from "layouts/manage/account";
@@ -64,7 +63,7 @@ const routes = [
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
     component: <SignUp />,
   },
-  { type: "title", title: "Account Pages", key: "account-pages" },
+  { type: "title", title: "Trang tài khoản", key: "account-pages" },
   {
     type: "route",
     name: "Profile",
@@ -73,7 +72,7 @@ const routes = [
     icon: <ArgonBox component="i" color="dark" fontSize="14px" className="ni ni-single-02" />,
     component: <Profile />,
   },
-  { type: "title", title: "Management pages", key: "manage-pages" },
+  { type: "title", title: "Trang quản lý", key: "manage-pages" },
   {
     type: "route",
     name: "Quản lý người dùng",
@@ -199,14 +198,6 @@ const routes = [
     route: "/manage/order",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
     component: <Order />,
-  },
-  {
-    type: "route",
-    name: "Quản lý trạng thái",
-    key: "status",
-    route: "/manage/status",
-    icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
-    component: <Status />,
   },
   {
     type: "route",

@@ -21,7 +21,15 @@ const Complete = () => {
         const selectedPayment = Cookies.get('selectedPayment');
 
         if (selectedPayment !== 'Cod' && (responseCode !== '00' || transactionStatus !== '00')) {
-            navigate(`/Checkout?id=${addressId}`);
+            axios
+            .delete('http://localhost:3000/api/order/deleteMostRecentOrder')
+            .then((response) => {
+              console.log(response.data); 
+              navigate(`/Checkout?id=${addressId}`);
+            })
+            .catch((error) => {
+              console.error('Error deleting the most recent order:', error);
+            });
         } else {
             const handleRemoveItems = async () => {
                 const cartItemsBackup = JSON.parse(localStorage.getItem('cartItemsBackup')) || [];
@@ -144,12 +152,14 @@ const Complete = () => {
                 denyButtonText: 'Xem hóa đơn',
                 preConfirm: () => {
                     navigate('/feature-section');
+                    Cookies.remove('selectedPayment');
                 },
                 denyButtonColor: '#3085d6',
                 confirmButtonColor: '#d33',
             }).then((result) => {
                 if (result.isDenied) {
                     navigate("/History", { state: { activeTab: 'dang-giao' } });
+                    Cookies.remove('selectedPayment');
                 }
             });
             setAlertShown(true);

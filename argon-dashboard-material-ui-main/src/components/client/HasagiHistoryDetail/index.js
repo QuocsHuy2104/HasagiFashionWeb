@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
-import Cookies from "js-cookie";
+import axios from "axios";
 import { Table, TableBody, TableCell, TableContainer, TableRow } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faReceipt, faTruck, faBoxOpen, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
@@ -24,27 +24,24 @@ const HistoryOrderDetail = () => {
   const [orderDate, setOrderDate] = useState("");
   const [voucherPrice, setVoucherPrice] = useState("");
   const [cancelReason, setCancelReason] = useState("");
+  const [images, setImages] = useState([]);
 
   useEffect(() => {
-    const accountId = Cookies.get("accountId");
-    if (!accountId) {
-      navigate(`/authentication/sign-in`);
-      return;
-    }
     if (orderId) {
-      fetch(`http://localhost:8080/api/history-order/${orderId}`)
-        .then((response) => {
+      const fetchOrderDetails = async () => {
+        try {
+          const response = await fetch(`http://localhost:8080/api/history-order/${orderId}`);
           if (!response.ok) {
             throw new Error("Network response was not ok");
           }
-          return response.json();
-        })
-        .then((data) => {
+
+          const data = await response.json();
           setOrderDetails(data);
+
           if (data.length > 0) {
             const fee = data[0].shippingFee;
-
             setShippingFee(fee);
+
             const orderStatus = data[0].statusName;
             setStatus(orderStatus);
 
@@ -58,17 +55,38 @@ const HistoryOrderDetail = () => {
               ? format(new Date(orderDate), "HH:mm dd-MM-yyyy")
               : "Date not available";
             setOrderDate(formattedOrderDate);
+
             setVoucherPrice(data[0].voucher);
             setCancelReason(data[0].reason);
             setFullNameAdd(data[0].name);
+
+            // Fetch additional image data for each product
+            const imageRequests = data.map((product) =>
+              axios
+                .get(
+                  `http://localhost:3000/api/public/webShopDetail/product-detail/${product.productId}`
+                )
+                .then((res) => ({ productId: product.productId, data: res.data }))
+            );
+
+            const imagesData = await Promise.all(imageRequests);
+            const imagesMap = imagesData.reduce((acc, { productId, data }) => {
+              acc[productId] = data;
+              return acc;
+            }, {});
+
+            setImages(imagesMap);
           }
+
           setLoading(false);
-        })
-        .catch((error) => {
+        } catch (error) {
           console.error("Error fetching order details:", error);
           setError("Order not found");
           setLoading(false);
-        });
+        }
+      };
+
+      fetchOrderDetails();
     }
   }, [orderId]);
 
@@ -324,64 +342,57 @@ const HistoryOrderDetail = () => {
                   }}
                 />
 
-                {orderDetails.map((item, index) => (
-                  <Box
-                    display="flex"
-                    alignItems="center"
-                    style={{ marginBottom: "25px", marginTop: "-15px" }}
-                    key={index}
-                  >
-                    <img
-                      src={item.productImage}
-                      alt="Product"
-                      style={{ width: "80px", marginRight: "16px", height: "110px"}}
-                    />
-                    <Box>
-                      <Typography variant="h6" gutterBottom>
-                        {item.productName}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary" style={{ color: "black" }}>
-                        Phân loại hàng: {item.size}, {item.color}
-                      </Typography>
-                      <Box display="flex" justifyContent="space-between">
-                        <Typography
-                          variant="body2"
-                          color="textSecondary"
-                          style={{ color: "black" }}
-                        >
-                          Số lượng: {item.productQuantity}
+                {orderDetails.map((item, index) => {
+                  // Find the matching image based on productId and colorId
+                  const matchingImage = images[item.productId]?.find(
+                    (image) => image.colorsDTO?.id === item.colorId
+                  );
+
+                  return (
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      style={{ marginBottom: "25px", marginTop: "-15px" }}
+                      key={index}
+                    >
+                      {matchingImage && (
+                        <img
+                          src={matchingImage.imageDTOResponse[0]?.url}
+                          alt="Product"
+                          style={{ width: "80px", marginRight: "16px", height: "110px"}}
+                        />
+                      )}
+                      <Box>
+                        <Typography variant="h6" gutterBottom>
+                          {item.productName}
                         </Typography>
-                        <Typography
-                          variant="body2"
-                          color="textSecondary"
-                          style={{
-                            color: "#ee4d2d",
-                            fontSize: "16px",
-                            position: "relative",
-                            display: "inline-block",
-                            marginLeft: "710px",
-                          }}
-                        >
-                          <span
+                        <Typography variant="body2" color="textSecondary" style={{ color: "black" }}>
+                          Phân loại hàng: {item.size}, {item.color}
+                        </Typography>
+                        <Box display="flex" justifyContent="space-between">
+                          <Typography variant="body2" color="textSecondary" style={{ color: "black" }}>
+                            Số lượng: {item.productQuantity}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="textSecondary"
                             style={{
-                              textDecoration: "underline",
-                              fontSize: "10px",
-                              fontWeight: "normal",
-                              transform: "translateY(-3px)", // Adjust the value as needed
+                              color: "#ee4d2d",
+                              fontSize: "16px",
+                              position: "relative",
                               display: "inline-block",
-                              color: "red",
+                              marginLeft: "710px",
                             }}
                           >
-                            đ
-                          </span>
-                          <span style={{ marginLeft: "2px" }}>
-                            {new Intl.NumberFormat("vi-VN").format(item.productPrice)}
-                          </span>
-                        </Typography>
+                            <span style={{ marginLeft: "2px" }}>
+                              {new Intl.NumberFormat("vi-VN").format(item.productPrice)}đ
+                            </span>
+                          </Typography>
+                        </Box>
                       </Box>
                     </Box>
-                  </Box>
-                ))}
+                  );
+                })}
 
                 <section
                   style={{
@@ -418,19 +429,8 @@ const HistoryOrderDetail = () => {
                                 position: "relative",
                               }}
                             >
-                              <span
-                                style={{
-                                  textDecoration: "underline",
-                                  fontSize: "10px",
-                                  fontWeight: "normal",
-                                  transform: "translateY(-3px)", // Adjust the value as needed
-                                  display: "inline-block",
-                                }}
-                              >
-                                đ
-                              </span>
                               <span style={{ marginLeft: "2px" }}>
-                                {new Intl.NumberFormat("vi-VN").format(totalSubtotal)}
+                                {new Intl.NumberFormat("vi-VN").format(totalSubtotal)}đ
                               </span>
                             </TableCell>
                           </TableRow>
@@ -453,19 +453,8 @@ const HistoryOrderDetail = () => {
                                 position: "relative",
                               }}
                             >
-                              <span
-                                style={{
-                                  textDecoration: "underline",
-                                  fontSize: "10px",
-                                  fontWeight: "normal",
-                                  transform: "translateY(-3px)", // Adjust the value as needed
-                                  display: "inline-block",
-                                }}
-                              >
-                                đ
-                              </span>
                               <span style={{ marginLeft: "2px" }}>
-                                {new Intl.NumberFormat("vi-VN").format(shippingFee)}
+                                {new Intl.NumberFormat("vi-VN").format(shippingFee)}đ
                               </span>
                             </TableCell>
                           </TableRow>
@@ -489,21 +478,10 @@ const HistoryOrderDetail = () => {
                                   position: "relative",
                                 }}
                               >
-                                <span
-                                  style={{
-                                    textDecoration: "underline",
-                                    fontSize: "10px",
-                                    fontWeight: "normal",
-                                    transform: "translateY(-3px)", // Adjust the value as needed
-                                    display: "inline-block",
-                                  }}
-                                >
-                                  đ
-                                </span>
                                 <span style={{ marginLeft: "2px" }}>
                                   {new Intl.NumberFormat("vi-VN", { minimumFractionDigits: 3 })
                                     .format(formattedDiscountedTotal)
-                                    .replace(/,/g, ".")}
+                                    .replace(/,/g, ".")}đ
                                 </span>
                               </TableCell>
                             </TableRow>
@@ -527,21 +505,10 @@ const HistoryOrderDetail = () => {
                                 position: "relative",
                               }}
                             >
-                              <span
-                                style={{
-                                  textDecoration: "underline",
-                                  fontSize: "10px",
-                                  fontWeight: "normal",
-                                  transform: "translateY(-3px)", // Adjust the value as needed
-                                  display: "inline-block",
-                                }}
-                              >
-                                đ
-                              </span>
                               <span style={{ marginLeft: "2px" }}>
                                 {new Intl.NumberFormat("vi-VN", { minimumFractionDigits: 3 })
                                   .format(formattedFinalTotal)
-                                  .replace(/,/g, ".")}
+                                  .replace(/,/g, ".")}đ
                               </span>
                             </TableCell>
                           </TableRow>

@@ -124,7 +124,7 @@ function ShopDetail() {
   const fetchProductDetail = async () => {
     try {
       if (!productId) throw new Error("Product ID is missing");
-
+      localStorage.clear();
       const response = await cartService.getProductDetail({
         productId,
         sizeId: selectedSize || null,
@@ -215,11 +215,21 @@ function ShopDetail() {
         quantity,
         productId,
       });
+
+      const checkedItems = JSON.parse(localStorage.getItem("checkedItems")) || [];
+      if (!checkedItems.includes(productId)) {
+        checkedItems.push(productId);
+      }
+      localStorage.setItem(
+        "checkedItems" + productId + selectedColor + selectedSize,
+        JSON.stringify([Number(checkedItems), selectedColor, selectedSize])
+      );
       navigate("/Cart");
     } catch (error) {
       console.error("Error adding to cart:", error);
     }
   };
+  
   const [activeTab, setActiveTab] = useState("tab-pane-1");
 
   const handleTabClick = (tabId) => {
@@ -236,7 +246,7 @@ function ShopDetail() {
     const [minPrice, maxPrice] = importPrice.split("-").map((price) => parseFloat(price));
     return minPrice === maxPrice
       ? new Intl.NumberFormat("vi-VN").format(minPrice)
-      : `${new Intl.NumberFormat("vi-VN").format(minPrice)} - ${new Intl.NumberFormat(
+      : `${new Intl.NumberFormat("vi-VN").format(minPrice)}đ - ${new Intl.NumberFormat(
           "vi-VN"
         ).format(maxPrice)}`;
   };
@@ -756,19 +766,7 @@ function ShopDetail() {
                   marginLeft: "15px",
                 }}
               >
-                <span
-                  style={{
-                    textDecoration: "underline",
-                    fontSize: "18px",
-                    fontWeight: "normal",
-                    position: "absolute",
-                    top: 0,
-                    left: "-10px",
-                  }}
-                >
-                  đ
-                </span>
-                {formattedPrice}
+                {formattedPrice}đ
               </h6>
 
               <div className="mb-4 mt-2" id="color-input-list">
