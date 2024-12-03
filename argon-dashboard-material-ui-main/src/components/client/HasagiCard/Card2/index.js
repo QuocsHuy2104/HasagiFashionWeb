@@ -8,9 +8,29 @@ import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useState } from "react";
 import ProductPopup from "components/client/HasagiPopup";
+function formatPrice(price) {
+    if (!price || typeof price !== "string") {
+        return "N/A"; // Handle missing or invalid price
+    }
+    try {
+        const parts = price.trim().split("-").map(part =>
+            Number(part.trim().replace(/\s/g, "")) // Remove spaces inside the price range
+        );
 
-function HasagiCard2({ image, name, id, price, sale = 0 }) {
+        if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+            return `${parts[0].toLocaleString("vi-VN")} đ - ${parts[1].toLocaleString("vi-VN")} đ`;
+        } else if (parts.length === 1 && !isNaN(parts[0])) {
+            return `${parts[0].toLocaleString("vi-VN")} đ`;
+        } else {
+            return "N/A";
+        }
+    } catch (error) {
+        console.error("Error formatting price:", error);
+        return "N/A";
+    }
+}
 
+function HasagiCard2({ image, name, id, price }) {
     const [hover, setHover] = useState(false);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [selectedProductId, setSelectedProductId] = useState(null);
@@ -32,14 +52,15 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
             style={{
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center',
+                justifyContent: 'start',
                 alignItems: 'center',
                 height: '100%',
                 position: 'relative',
                 overflow: 'hidden'
             }}
         >
-            <MuiLink href={`ShopDetails/${id}`} target="_blank" rel="noreferrer">
+            {/* Image and Name */}
+            <MuiLink href={`ShopDetails?id=${id}`} rel="noreferrer">
                 <ArgonBox
                     mt={1}
                     mx={2}
@@ -52,9 +73,9 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                 >
                     <ArgonBox
                         component="img"
-                        src={image}
-                        alt={name}
-                        height="275px"
+                        src={image || 'https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930'}
+                        alt={name || 'No Image Available'}
+                        height="475px"
                         width="auto"
                         borderRadius="lg"
                         style={{
@@ -62,83 +83,42 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                             transform: hover ? 'scale(1.1)' : 'scale(1)',
                             overflow: 'hidden',
                         }}
+                        onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = 'https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930';
+                        }}
                     />
                 </ArgonBox>
 
-                <ArgonTypography variant="h5" component="p" color="text" textAlign="center" mt={2}>  {name} </ArgonTypography>
+                <ArgonTypography
+                    variant="h5"
+                    color="text"
+                    mt={2}
+                    textAlign='center'
+                    style={{
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        width: '100%',
+                    }}
+                >
+                    {name}
+                </ArgonTypography>
 
-                <ArgonBox display="flex" alignItems="center" justifyContent='center' my={1}>
-                    <ArgonTypography
-                        variant="button"
-                        color="secondary"
-                        style={{ textDecoration: 'line-through' }}
-                    >
-                        {price} VNĐ
-                    </ArgonTypography>
 
+                {/* Price */}
+                <ArgonBox display="flex" alignItems="center" justifyContent='center' my={1} mb={3}>
                     <ArgonTypography
                         variant="button"
                         color="error"
-                        style={{ marginLeft: '4px' }}
+                        style={{ fontWeight: 'bold' }}
                     >
-                        {(() => {
-                            const salePercent = parseFloat(sale);
-                            if (isNaN(salePercent)) {
-                                return "Invalid sale percent";
-                            }
-
-                            const prices = price
-                                .split('-')
-                                .map(p => parseFloat(p.replace(/\s/g, '')));
-
-                            if (prices.length === 1) {
-                                // Single price case
-                                const salePrice = prices[0] - prices[0] * (salePercent / 100);
-                                return `${salePrice.toLocaleString()} VNĐ`;
-                            } else if (prices.length === 2) {
-                                // Range price case
-                                const salePrice1 = prices[0] - prices[0] * (salePercent / 100);
-                                const salePrice2 = prices[1] - prices[1] * (salePercent / 100);
-                                return `${salePrice1.toLocaleString()} - ${salePrice2.toLocaleString()} VNĐ`;
-                            }
-
-                            return "Invalid price format";
-                        })()}
+                        {formatPrice(price)}
                     </ArgonTypography>
-
-
-
                 </ArgonBox>
             </MuiLink>
 
-            <ArgonBox
-                color='white'
-                bgColor='error'
-                borderRadius='md'
-                p={1} shadow='lg'
-                sx={{
-                    position: 'absolute',
-                    top: 15,
-                    left: 15,
-                    fontSize: '12px'
-                }}
-            >
-                -{sale}%
-            </ArgonBox>
-
-            <FavoriteBorderIcon
-                sx={{
-                    width: '1.7em',
-                    height: '1.7em',
-                    position: 'absolute',
-                    top: 15,
-                    right: 15,
-                    backgroundColor: '#F9F9F9',
-                    padding: '5px',
-                    borderRadius: '12px'
-                }}
-            />
-
+            {/* Hover Icons */}
             {hover && (
                 <>
                     <SearchOutlinedIcon
@@ -147,7 +127,7 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                             width: '1.7em',
                             height: '1.7em',
                             position: 'absolute',
-                            top: 57,
+                            top: 17,
                             right: 15,
                             backgroundColor: '#F9F9F9',
                             padding: '5px',
@@ -161,7 +141,7 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                             width: '1.7em',
                             height: '1.7em',
                             position: 'absolute',
-                            top: 102,
+                            top: 62,
                             right: 15,
                             backgroundColor: '#F9F9F9',
                             padding: '5px',
@@ -171,6 +151,8 @@ function HasagiCard2({ image, name, id, price, sale = 0 }) {
                     />
                 </>
             )}
+
+            {/* Product Popup */}
             <ProductPopup open={isPopupOpen} handleClose={handleClosePopup} id={selectedProductId} />
         </Card>
     );
@@ -181,7 +163,6 @@ HasagiCard2.propTypes = {
     name: PropTypes.string.isRequired,
     id: PropTypes.number.isRequired,
     price: PropTypes.string.isRequired,
-    sale: PropTypes.number.isRequired,
 };
 
 export default HasagiCard2;

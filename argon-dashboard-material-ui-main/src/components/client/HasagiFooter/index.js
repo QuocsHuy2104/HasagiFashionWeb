@@ -39,11 +39,11 @@ const Footer = () => {
                             <MuiLink href='/' sx={{ marginBottom: '15px', maxWidth: '50%', display: 'block' }}>
                                 <ArgonBox
                                     component='img'
-                                    src='https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/footers2_one_logo.png?1713464283843'
+                                    src='https://firebasestorage.googleapis.com/v0/b/crud-app-js-4f2e0.appspot.com/o/avatars%2FScreenshot%202024-11-20%20103532.png?alt=media&token=cf81112a-8f45-431e-abc6-bb48df0369b4'
                                     alt='Logo'
                                     width='100%' />
                             </MuiLink>
-                            <ArgonTypography variant='button' color='secondary' sx={{ maxWidth: '85%', fontSize: '15px', lineHeight: '1.7rem', margin: '0' }}>F1GENZ SHOES luôn cam kết, đảm bảo đưa sản phẩm trực tiếp từ nhà sản xuất đến tay người dùng và kiểm soát được chất lượng để đáp ứng được nhu cầu ngày càng cao của khách hàng. Tất cả các sản phẩm tại F1GENZ SHOES đều có nguồn gốc xuất xứ rõ ràng, chất lượng.</ArgonTypography>
+                            <ArgonTypography variant='button' color='secondary' sx={{ maxWidth: '85%', fontSize: '15px', lineHeight: '1.7rem', margin: '0' }}>HASAGHIFASHION luôn cam kết, đảm bảo đưa sản phẩm trực tiếp từ nhà sản xuất đến tay người dùng và kiểm soát được chất lượng để đáp ứng được nhu cầu ngày càng cao của khách hàng. Tất cả các sản phẩm tại HASAGHIFASHION đều có nguồn gốc xuất xứ rõ ràng, chất lượng.</ArgonTypography>
                         </ArgonBox>
                         <ArgonBox width='22.5%'
                             sx={{

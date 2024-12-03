@@ -1,74 +1,86 @@
-import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types'; // Import PropTypes if needed for future props
-import ArgonBox from 'components/ArgonBox';
-import ArgonTypography from 'components/ArgonTypography';
-import HasagiCard2 from 'components/client/HasagiCard/Card2';
+import React, { useEffect, useState } from "react";
+import Slider from "react-slick";
+import { Box } from "@mui/material";
+import ArgonBox from "components/ArgonBox";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import HomeService from "services/HomeServices";
+import HasagiCard2 from "components/client/HasagiCard/Card2";
+import ArgonTypography from "components/ArgonTypography";
+import MuiLink from '@mui/material/Link';
+import { faArrowAltCircleRight } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function FeaturedProducts() {
     const [products, setProducts] = useState([]);
 
     useEffect(() => {
-        const fetchFeaturedProducts = async () => {
+        const fetchProducts = async () => {
             try {
-                const resp = await HomeService.getNewProducts();
-                console.log(resp.data);
-                setProducts(resp.data || []);
-            } catch (error) {
-                console.error('Error fetching featured products:', error);
+                const res = await HomeService.getNewProducts();
+                setProducts(res.data);
+            } catch (err) {
+                console.error(err);
             }
         };
-        fetchFeaturedProducts();
+        fetchProducts();
     }, []);
 
+    const settings = {
+        dots: true,
+        infinite: true,
+        speed: 500,
+        slidesToShow: 4,
+        slidesToScroll: 1,
+        responsive: [
+            {
+                breakpoint: 1024,
+                settings: { slidesToShow: 4 },
+            },
+            {
+                breakpoint: 768,
+                settings: { slidesToShow: 2 },
+            },
+            {
+                breakpoint: 480,
+                settings: { slidesToShow: 1 },
+            },
+        ],
+    };
+
     return (
-        <ArgonBox py={8} style={{ width: '100%' }}>
-            <ArgonBox
-                borderRadius="lg"
-                p="25px"
-                style={{
-                    background: 'linear-gradient(to right, #ff5f6d, #ffc371)', // Gradient background
-                    width: '100%',
-                }}
-            >
-                <ArgonBox
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                    flexWrap="wrap"
-                    mb={4}
-                >
-                    <ArgonTypography variant="h4" color="white">
-                        Sản phẩm nổi bật
-                    </ArgonTypography>
-                </ArgonBox>
-                <ArgonBox display="flex" flexWrap="wrap" justifyContent="center" style={{ width: '100%' }}>
-                    {products.length == 0 ? (
-                        <ArgonTypography variant="h6" color="text" textAlign="center">
-                            Không có sản phẩm nào.
-                        </ArgonTypography>
-                    ) : (
-                        products.map((product) => {
-                            return (
-                                <ArgonBox key={product.id} mx={1} mb={2} style={{ flex: '1 0 23%', maxWidth: '23%' }}>
-                                    <HasagiCard2
-                                        image={product.image || 'https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930'}
-                                        name={product.name}
-                                        id={product.id}
-                                        price={product.importPrice}
-                                        sale={product.sale === null ? 0 : product.sale}
-                                    />
-                                </ArgonBox>
-                            )
-                        })
-                    )}
-                </ArgonBox>
+        <ArgonBox py={8} style={{ width: "100%" }}>
+            <ArgonBox display="flex" justifyContent="space-between">
+                <ArgonTypography variant="h3">Sản phẩm nổi bật</ArgonTypography>
+                <MuiLink href="/Shop">
+                    <ArgonTypography variant="h4">Xem thêm <FontAwesomeIcon icon={faArrowAltCircleRight} /></ArgonTypography>
+                </MuiLink>
             </ArgonBox>
+            <Box py={3}>
+                <Slider {...settings}>
+                    {products.length > 0 ? (
+                        products.map((product, index) => (
+                            <Box
+                                key={product.id || index}
+                                sx={{
+                                    px: 1, 
+                                }}
+                            >
+                                <HasagiCard2
+                                    image={product.image}
+                                    name={product.name}
+                                    id={product.id}
+                                    price={product.importPrice}
+                                />
+                            </Box>
+                        ))
+                    ) : (
+                        <div>Không có sản phẩm nổi bật</div>
+                    )}
+                </Slider>
+            </Box>
         </ArgonBox>
     );
 }
-
-FeaturedProducts.propTypes = {
-};
 
 export default FeaturedProducts;

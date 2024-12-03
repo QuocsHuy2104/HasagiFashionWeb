@@ -284,7 +284,7 @@ function Account() {
                   />
                 </ArgonBox>
 
-                <ArgonBox mb={3} mx={3}>
+                {/* <ArgonBox mb={3} mx={3}>
                   <Box sx={{ flexGrow: 1 }}>
                     <Grid container spacing={2}>
                       {permissions.length > 0 ? (
@@ -316,7 +316,7 @@ function Account() {
                       )}
                     </Grid>
                   </Box>
-                </ArgonBox>
+                </ArgonBox> */}
 
                 <ArgonBox mb={3} mx={3} sx={{ width: { sm: '50%', md: '20%' } }}>
                   <ArgonButton type="submit" size="large" color="info" fullWidth>

@@ -9,6 +9,8 @@ import Voucher from "./voucher";
 import ImageCarousel from "components/client/HasagiCarousel";
 import FeaturedProducts from "./sanpham";
 import ChatBot from "components/client/HasagiChatBot";
+import ListCategories from './categories'
+import SaleProduct from "./saleProduct";
 
 const FeaturesAndAbout = () => {
   return (
@@ -17,13 +19,14 @@ const FeaturesAndAbout = () => {
       <ArgonBox px={20}>
         <ImageCarousel />
         <Policy />
-
         <Voucher />
         <FeaturedProducts />
+        <ListCategories />
+        <SaleProduct />
       </ArgonBox>
       <Coupon />
       <ChatBot />
-      <Footer /> 
+      <Footer />
     </>
   )
 };
