@@ -30,7 +30,9 @@ export default function SaleProduct() {
         const fetchProducts = async () => {
             try {
                 const res = await HomeService.getProductSale();
-                setProducts(res?.data || []); // Ensure the result is always an array
+                // Filter products with sale > 0
+                const filteredProducts = res?.data?.filter((product) => product.sale > 0) || [];
+                setProducts(filteredProducts); 
             } catch (error) {
                 console.error("Error fetching sale products:", error);
             }
@@ -58,7 +60,7 @@ export default function SaleProduct() {
             <Box sx={{ flexGrow: 1, padding: 2 }}>
                 <Grid container spacing={2}>
                     {products.length > 0 ? (
-                        products.slice(0, 8).map((product) => (
+                        products.map((product) => (
                             <Grid item xs={12} sm={6} md={3} key={product.id}>
                                 <Card
                                     onMouseEnter={() => setHoveredProductId(product.id)}
@@ -73,7 +75,7 @@ export default function SaleProduct() {
                                         overflow: "hidden",
                                     }}
                                 >
-                                    <MuiLink href={`ShopDetails?id=${product.id}`} rel="noreferrer">
+                                    <MuiLink href={`ShopDetail?id=${product.id}`} rel="noreferrer">
                                         <ArgonBox
                                             mt={1}
                                             mx={2}
@@ -117,11 +119,10 @@ export default function SaleProduct() {
                                             {product.name}
                                         </ArgonTypography>
 
-
                                         <ArgonBox display="flex" alignItems="center" justifyContent="center" my={1}>
                                             {(() => {
                                                 const salePercent = parseFloat(product.sale);
-                                                const price = product.price ? parseFloat(product.price.toString().replace(/\s/g, "")) : 0;
+                                                const price = product.importPrice ? parseFloat(product.importPrice.toString().replace(/\s/g, "")) : 0;
 
                                                 if (!isNaN(salePercent) && salePercent > 0 && !isNaN(price)) {
                                                     const salePrice = price - (price * salePercent) / 100; // Tính giá sau giảm

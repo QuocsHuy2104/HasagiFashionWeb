@@ -24,7 +24,7 @@ function ShopDetail() {
   const [selectedSize, setSelectedSize] = useState(null);
   const [totalPrice, setTotalPrice] = useState(0);
   const location = useLocation();
-
+  const [sale, setSale] = useState(0);
   const query = new URLSearchParams(location.search);
   const productId = query.get("id");
 
@@ -107,16 +107,20 @@ function ShopDetail() {
 
   const handleAddToCart = async () => {
     try {
-      cartService.addToCart({
+      // Gọi API để thêm sản phẩm vào giỏ hàng
+      const response = await cartService.addToCart({
         colorId: selectedColor,
         sizeId: selectedSize,
         quantity,
         productId,
       });
-      toast.success("Sản phẩm đã được thêm vào giỏ hàng thành công!");
+
+      if (response.status >= 200 || response.status < 300) {
+        toast.success("Sản phẩm đã được thêm vào giỏ hàng thành công!");
+      }
     } catch (error) {
-      console.error("Error adding to cart:", error);
-      toast.error("Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.");
+      // console.error("Error adding to cart:", error);
+      toast.error(error.response.data);
     }
   };
 
@@ -133,7 +137,7 @@ function ShopDetail() {
 
       const productData = response.data;
       //console.log("Fetched Product Data:", productData);
-
+      setSale(productData.sale);
       setProduct(productData);
       setMediaList(productData);
       if (selectedColor && selectedSize) {
@@ -209,24 +213,28 @@ function ShopDetail() {
 
   const handleByNow = async () => {
     try {
-      await cartService.addToCart({
+      const response = await cartService.addToCart({
         colorId: selectedColor,
         sizeId: selectedSize,
         quantity,
         productId,
       });
 
-      const checkedItems = JSON.parse(localStorage.getItem("checkedItems")) || [];
-      if (!checkedItems.includes(productId)) {
-        checkedItems.push(productId);
+      // Kiểm tra phản hồi từ server để quyết định hiển thị thông báo
+      if (response.status >= 200 || response.status < 300) {
+        const checkedItems = JSON.parse(localStorage.getItem("checkedItems")) || [];
+        if (!checkedItems.includes(productId)) {
+          checkedItems.push(productId);
+        }
+        localStorage.setItem(
+          "checkedItems" + productId + selectedColor + selectedSize,
+          JSON.stringify([Number(checkedItems), selectedColor, selectedSize])
+        );
       }
-      localStorage.setItem(
-        "checkedItems" + productId + selectedColor + selectedSize,
-        JSON.stringify([Number(checkedItems), selectedColor, selectedSize])
-      );
+
       navigate("/Cart");
     } catch (error) {
-      console.error("Error adding to cart:", error);
+      toast.error(error.response.data);
     }
   };
   
@@ -238,17 +246,39 @@ function ShopDetail() {
 
   const formatImportPrice = (importPrice) => {
     if (typeof importPrice === "number") {
-      return new Intl.NumberFormat("vi-VN").format(importPrice);
+      const finalPrice = sale > 0 ? importPrice * (1 - sale / 100) : importPrice;
+      return new Intl.NumberFormat("vi-VN").format(finalPrice);
     }
+
     if (!importPrice || typeof importPrice !== "string" || !importPrice.includes("-")) {
       return "N/A";
     }
+
     const [minPrice, maxPrice] = importPrice.split("-").map((price) => parseFloat(price));
+    const discountedMinPrice = sale > 0 ? minPrice * (1 - sale / 100) : minPrice;
+    const discountedMaxPrice = sale > 0 ? maxPrice * (1 - sale / 100) : maxPrice;
+
+    return discountedMinPrice === discountedMaxPrice
+      ? `${new Intl.NumberFormat("vi-VN").format(discountedMinPrice)}`
+      : `${new Intl.NumberFormat("vi-VN").format(discountedMinPrice)}đ - ${new Intl.NumberFormat(
+        "vi-VN"
+      ).format(discountedMaxPrice)}`;
+  };
+
+  const formatOriginalPrice = (importPrice) => {
+    if (typeof importPrice === "number") {
+      return new Intl.NumberFormat("vi-VN").format(importPrice);
+    }
+
+    if (!importPrice || typeof importPrice !== "string" || !importPrice.includes("-")) {
+      return "N/A";
+    }
+
+    const [minPrice, maxPrice] = importPrice.split("-").map((price) => parseFloat(price));
+
     return minPrice === maxPrice
-      ? new Intl.NumberFormat("vi-VN").format(minPrice)
-      : `${new Intl.NumberFormat("vi-VN").format(minPrice)}đ - ${new Intl.NumberFormat(
-          "vi-VN"
-        ).format(maxPrice)}`;
+      ? `${new Intl.NumberFormat("vi-VN").format(minPrice)}đ`
+      : `${new Intl.NumberFormat("vi-VN").format(minPrice)}đ - ${new Intl.NumberFormat("vi-VN").format(maxPrice)}đ`;
   };
 
   const formattedPrice = formatImportPrice(totalPrice);
@@ -362,41 +392,49 @@ function ShopDetail() {
     setCurrentMedia(previousCurrentMedia);
   };
 
-  const handleNext = () => {
-    if (startIndex + maxVisibleImages < images.length) {
-      setStartIndex(startIndex + 1); // Tăng vị trí bắt đầu
+  const handlePrev = () => {
+    if (startIndex > 0) {
+      setStartIndex(startIndex - 1); // Giảm startIndex khi nhấn nút Prev
     }
   };
 
-  const handlePrev = () => {
-    if (startIndex > 0) {
-      setStartIndex(startIndex - 1); // Giảm vị trí bắt đầu
+  const handleNext = () => {
+    if (startIndex + maxVisibleImages < uniqueColors.length) {
+      setStartIndex(startIndex + 1); // Tăng startIndex khi nhấn nút Next
     }
   };
 
   useEffect(() => {
     const preloadNextAndPrev = () => {
-      if (images.length > 0) {
-        // Preload ảnh tiếp theo
-        const nextIndex = (startIndex + maxVisibleImages) % images.length;
-        const nextImage = images[nextIndex]?.imageDTOResponse[0]?.url;
-        if (nextImage) {
-          const imgNext = new Image();
-          imgNext.src = nextImage;
-        }
+      if (uniqueColors.length > 0) {
+        const nextColorIndex = (startIndex + 1) % uniqueColors.length;
+        const nextColorId = uniqueColors[nextColorIndex]?.id;
 
-        // Preload ảnh trước đó
-        const prevIndex = (startIndex - 1 + images.length) % images.length;
-        const prevImage = images[prevIndex]?.imageDTOResponse[0]?.url;
-        if (prevImage) {
-          const imgPrev = new Image();
-          imgPrev.src = prevImage;
-        }
+        const nextImages = images.filter((image) => image?.colorsDTO?.id === nextColorId);
+
+        nextImages?.slice(0, 3).forEach((image) => {
+          const img = new Image();
+          img.src = image?.imageDTOResponse[0]?.url;
+        });
+
+        const prevColorIndex = (startIndex - 1 + uniqueColors.length) % uniqueColors.length;
+        const prevColorId = uniqueColors[prevColorIndex]?.id;
+
+        const prevImages = images.filter((image) => image?.colorsDTO?.id === prevColorId);
+
+        prevImages?.slice(0, 3).forEach((image) => {
+          const img = new Image();
+          img.src = image?.imageDTOResponse[0]?.url;
+        });
       }
     };
 
     preloadNextAndPrev();
-  }, [startIndex, images]);
+  }, [startIndex, uniqueColors, images]);
+
+  const thumbnailWidth = 92.3; 
+  const thumbnailGap = 10; 
+  const thumbnailOffset = -(startIndex * (thumbnailWidth + thumbnailGap));
 
   useEffect(() => {
     if (product?.video) {
@@ -455,7 +493,7 @@ function ShopDetail() {
                   maxWidth: "500px",
                 }}
               >
-                {/* Video */}
+                {/* Video của Product */}
                 {product.video && (
                   <video
                     ref={videoRef}
@@ -470,17 +508,18 @@ function ShopDetail() {
                       marginTop: "15px",
                       objectFit: "contain",
                       position: "absolute",
-                      backgroundColor: "#f5f5f5", // Màu nền để lấp đầy vùng trống (tùy chọn)
-                      aspectRatio: "9 / 16", // Tỉ lệ khung hình bạn muốn
+                      backgroundColor: "#f5f5f5",
+                      aspectRatio: "9 / 16",
                       top: 0,
                       left: 0,
-                      opacity: currentMedia === 0 ? 1 : 0, // Hiệu ứng mờ
+                      opacity: currentMedia === 0 ? 1 : 0, // Hiệu ứng mờ khi video biến mất
                       zIndex: currentMedia === 0 ? 2 : 1, // Video nằm trên khi hiển thị
+                      transition: "opacity 0.5s ease-in-out", // Thêm hiệu ứng chuyển mờ
                     }}
                   />
                 )}
 
-                {/* Ảnh */}
+                {/* Ảnh của Product */}
                 <img
                   src={currentImage}
                   style={{
@@ -490,87 +529,86 @@ function ShopDetail() {
                     boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
                     position: "absolute",
                     objectFit: "contain", // Đảm bảo ảnh vừa với khung
-                    aspectRatio: "9 / 16", // Tỉ lệ khung hình bạn muốn
+                    aspectRatio: "9 / 16",
                     backgroundColor: "#f5f5f5",
                     top: 0,
                     left: 0,
-                    //opacity: (!product.video || currentMedia === 1) && fadeIn ? 1 : 0,
                     zIndex: !product.video || currentMedia === 1 ? 2 : 1,
-                    transition: "opacity 0s ease-in-out", // Thêm hiệu ứng chuyển mờ
+                    transition: "opacity 0.5s ease-in-out", // Thêm hiệu ứng chuyển mờ
                   }}
                 />
               </div>
 
-              {/* Thumbnail Gallery */}
+              {/* Nút điều hướng bên trái */}
+              {uniqueColors?.length > maxVisibleImages && (
+                <div
+                  style={{
+                    position: "absolute",
+                    left: "12px",
+                    top: "85.55%",
+                    transform: "translateY(-50%)",
+                    cursor: "pointer",
+                    fontSize: "24px",
+                    color: "#fff",
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    borderRadius: "0%",
+                    height: "45px",
+                    width: "30px",
+                    zIndex: 1,
+                    userSelect: "none",
+                  }}
+                  disabled={startIndex === 0}
+                  onClick={() => handlePrev()}
+                >
+                  ←
+                </div>
+              )}
+{/* Thumbnail Gallery */}
               <div
                 style={{
-                  position: "absolute",
-                  display: "flex",
-                  gap: "10px",
-                  marginTop: "530px",
-                  left: "11px", // Nút điều hướng bên trái
-                  right: "0", // Nút điều hướng bên phải
+                  position: "relative",
+                  width: "510px",
+                  height: "86px",
+                  overflow: "hidden",
+                  top: "530px",
                 }}
               >
-                {/* Nút điều hướng bên trái */}
-                {images?.length > maxVisibleImages && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      left: "0px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      cursor: "pointer",
-                      fontSize: "24px",
-                      color: "#fff",
-                      backgroundColor: "rgba(0, 0, 0, 0.5)",
-                      borderRadius: "0%",
-                      height: "45px",
-                      width: "30px",
-                      zIndex: 1,
-                      userSelect: "none", // Không cho phép bôi đen
-                    }}
-                    disabled={startIndex === 0}
-                    onClick={() => handlePrev()}
-                  >
-                    ←
-                  </div>
-                )}
-
-                {[product].map((media, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      position: "relative",
-                      display: "flex",
-                      gap: "10px",
-                    }}
-                  >
-                    {/* Tam giác nút phát */}
-                    {media.video && (
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "10px",
+                    left: "12px",
+                    right: "0",
+                    transition: "transform 0.5s ease",
+                    transform: `translateX(${thumbnailOffset}px)`,
+                  }}
+                >
+                  {/* Phần hiển thị cho các ảnh video của product */}
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    {/* Nút phát video nếu tồn tại */}
+                    {product.video && (
                       <div
                         style={{
                           position: "absolute",
                           top: "50%",
                           left: "47px",
                           transform: "translate(-50%, -50%)",
-                          width: "35px", // Kích thước hình tròn
+                          width: "35px",
                           height: "35px",
-                          backgroundColor: "rgba(0, 0, 0, 0.7)", // Màu nền tối (có độ trong suốt)
-                          borderRadius: "50%", // Biến thành hình tròn
+                          backgroundColor: "rgba(0, 0, 0, 0.7)",
+                          borderRadius: "50%",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          zIndex: 2,
                           cursor: "pointer",
                         }}
-                        onClick={() => handleThumbnailClick("", 0)} // Gọi hành động khi nhấp vào nút
+                        onClick={() => handleThumbnailClick(product.video, 0)} // Click video thumbnail của product
                       >
                         <div
                           style={{
                             width: "0",
                             height: "0",
-                            borderLeft: "10px solid #fff", // Tam giác màu trắng
+                            borderLeft: "10px solid #fff",
                             borderTop: "6px solid transparent",
                             borderBottom: "6px solid transparent",
                           }}
@@ -578,10 +616,10 @@ function ShopDetail() {
                       </div>
                     )}
 
-                    {/* Video nếu tồn tại */}
-                    {media.video && (
+                    {/* Thumbnail video của product */}
+                    {product.video && (
                       <video
-                        src={media.video}
+                        src={product.video}
                         muted
                         autoPlay={false}
                         style={{
@@ -591,101 +629,108 @@ function ShopDetail() {
                           border:
                             currentMedia === 0 ? "2px solid #ffb524" : "1px solid transparent",
                         }}
-                        onClick={() => handleThumbnailClick("", 0)}
-                        onMouseEnter={() => handleThumbnailHover("", 0)}
+                        onClick={() => handleThumbnailClick(product.video, 0)} // Click vào video thumbnail
+                        onMouseEnter={() => handleThumbnailHover(product.video, 0)} // Hover video thumbnail
                       />
                     )}
-
-                    {/* Ảnh nếu tồn tại */}
-                    {media.image && (
+{/* Thumbnail ảnh của product */}
+                    {product.image && (
                       <div
                         style={{
                           width: "92.3px",
                           height: "86px",
                           cursor: "pointer",
                           border:
-                            (!media.video && currentMedia === 0) || currentMedia === 1
-                              ? "2px solid #ffb524"
-                              : "1px solid transparent",
-                          display: "flex", // Để căn chỉnh hình ảnh chính giữa (nếu cần)
-                          justifyContent: "center",
-                          alignItems: "center",
-                          boxSizing: "border-box", // Đảm bảo kích thước bao gồm cả border
-                        }}
-                        onClick={() =>
-                          handleThumbnailClick(product?.video ? media?.image : media?.image, 1)
-                        }
-                        onMouseEnter={() =>
-                          handleThumbnailHover(product?.video ? media?.image : media?.image, 1)
-                        }
-                      >
-                        <img
-                          src={media.image}
-                          alt={`Thumbnail ${index}`}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                          }}
-                        />
-                      </div>
-                    )}
-
-                    {images.slice(startIndex, startIndex + maxVisibleImages).map((image, index) => (
-                      <div
-                        key={index}
-                        style={{
-                          width: "92.3px",
-                          height: "86px",
-                          cursor: "pointer",
-                          border:
-                            currentImage === image?.imageDTOResponse[0]?.url
+                            (!product.video && currentMedia === 0) || currentMedia === 1
                               ? "2px solid #ffb524"
                               : "1px solid transparent",
                           display: "flex",
                           justifyContent: "center",
                           alignItems: "center",
+                          boxSizing: "border-box",
                         }}
-                        onClick={() => handleThumbnailClick(image?.imageDTOResponse[0]?.url)}
-                        onMouseEnter={() => handleThumbnailHover(image?.imageDTOResponse[0]?.url)}
+                        onClick={() => handleThumbnailClick(product.image, 1)} // Click vào ảnh thumbnail
+                        onMouseEnter={() => handleThumbnailHover(product.image, 1)} // Hover ảnh thumbnail
                       >
                         <img
-                          src={image?.imageDTOResponse[0]?.url}
-                          alt={`Thumbnail ${index}`}
+                          src={product.image}
+                          alt="Product Thumbnail"
                           style={{
                             width: "100%",
                             height: "100%",
                           }}
                         />
                       </div>
-                    ))}
+                    )}
                   </div>
-                ))}
-                {/* Nút điều hướng bên phải */}
-                {images?.length > maxVisibleImages && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      right: "22px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      cursor: "pointer",
-                      fontSize: "24px",
-                      color: "#fff",
-                      backgroundColor: "rgba(0, 0, 0, 0.5)",
-                      borderRadius: "0%",
-                      height: "45px",
-                      width: "30px",
-                      // cursor:
-                      //   startIndex + maxVisibleImages >= images.length ? "not-allowed" : "pointer",
-                      userSelect: "none", // Không cho phép bôi đen
-                    }}
-                    disabled={startIndex + maxVisibleImages >= images.length}
-                    onClick={() => handleNext()}
-                  >
-                    →
-                  </div>
-                )}
+
+                  {/* Phần hiển thị cho các ảnh của productDetail */}
+                  {uniqueColors.map((color, idx) => {
+                    const matchingImages = images?.find(
+                      (image) => image?.colorsDTO?.id === color?.id
+                    );
+
+                    return (
+                      <div key={color?.id}>
+                        {matchingImages && (
+                          <div
+                            style={{
+                              width: "92.3px",
+                              height: "86px",
+                              cursor: "pointer",
+                              border:
+                                currentImage === matchingImages?.imageDTOResponse[0]?.url
+                                  ? "2px solid #ffb524"
+                                  : "1px solid transparent",
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                            }}
+                            onClick={() =>
+                              handleThumbnailClick(matchingImages?.imageDTOResponse[0]?.url)
+                            }
+                            onMouseEnter={() =>
+                              handleThumbnailHover(matchingImages?.imageDTOResponse[0]?.url)
+                            }
+                          >
+                            <img
+                              src={matchingImages?.imageDTOResponse[0]?.url}
+                              alt={`Thumbnail ${idx}`}
+                              style={{
+width: "100%",
+                                height: "100%",
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
+              {/* Nút điều hướng bên phải */}
+              {uniqueColors?.length > maxVisibleImages && (
+                <div
+                  style={{
+                    position: "absolute",
+                    right: "21px",
+                    top: "85.55%",
+                    transform: "translateY(-50%)",
+                    cursor: "pointer",
+                    fontSize: "24px",
+                    color: "#fff",
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    borderRadius: "0%",
+                    height: "45px",
+                    width: "30px",
+                    userSelect: "none",
+                  }}
+                  disabled={startIndex + maxVisibleImages >= images.length}
+                  onClick={() => handleNext()}
+                >
+                  →
+                </div>
+              )}
             </div>
           </div>
           <div className="col-lg-7 mb-30" style={{ marginLeft: "-15px" }}>
@@ -758,7 +803,7 @@ function ShopDetail() {
                 className="mb-3"
                 style={{
                   fontFamily: "Arial, sans-serif",
-                  color: "red",
+                  color: "red",  // Màu đỏ cho giá đã giảm
                   fontSize: "30px",
                   fontWeight: "bold",
                   position: "relative",
@@ -766,7 +811,41 @@ function ShopDetail() {
                   marginLeft: "15px",
                 }}
               >
-                {formattedPrice}đ
+                {formattedPrice}đ  {/* Giá đã giảm */}
+              </h6>
+
+              <h6
+                className="mb-3"
+                style={{
+                  fontFamily: "Arial, sans-serif",
+                  color: "#999",  // Màu xám cho giá gốc
+                  fontSize: "30px",
+                  fontWeight: "bold",
+                  textDecoration: "line-through",  // Gạch ngang giá gốc
+                  position: "relative",
+                  display: "inline-block",
+                  marginLeft: "15px",
+                }}
+              >
+                {formatOriginalPrice(totalPrice)}  {/* Giá chưa giảm */}
+              </h6>
+
+              <h6
+                className="mb-3"
+                style={{
+                  fontFamily: "Arial, sans-serif",
+                  color: "red",  // Màu đỏ cho tỷ lệ giảm giá
+                  fontSize: "20px",
+                  fontWeight: "bold",
+                  position: "relative",
+                  display: "inline-block",
+                  marginLeft: "15px",
+                  backgroundColor: "#f8d7da", // Nền màu hồng nhạt cho phần giảm giá
+                  padding: "5px 10px",
+                  borderRadius: "5px",
+                }}
+              >
+                -{sale}%  {/* Hiển thị tỷ lệ giảm giá */}
               </h6>
 
               <div className="mb-4 mt-2" id="color-input-list">

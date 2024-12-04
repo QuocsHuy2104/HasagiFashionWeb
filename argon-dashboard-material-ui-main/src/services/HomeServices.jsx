@@ -31,7 +31,7 @@ const HomeService = {
     },
     getCartByAccount: () => apiClient.get('/web/small-cart'),
     getCategoryHeader: () => apiClient.get('/public/home/category'),
-    getProductSale: () => apiClient.get('/public/home/top-discounts')
+    getProductSale: () => apiClient.get('/productUS/product/sale')
 
 }
 

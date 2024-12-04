@@ -18,9 +18,9 @@ const FeaturesAndAbout = () => {
         <ImageCarousel />
         <Policy />
         <Voucher />
-        <FeaturedProducts />
-        <ListCategories />
         <SaleProduct />
+        <ListCategories />
+        <FeaturedProducts />
       </ArgonBox>
       <ChatBot />
       <Footer />

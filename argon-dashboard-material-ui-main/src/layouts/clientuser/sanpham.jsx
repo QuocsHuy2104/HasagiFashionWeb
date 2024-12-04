@@ -32,21 +32,23 @@ function FeaturedProducts() {
         speed: 500,
         slidesToShow: 4,
         slidesToScroll: 1,
+        rows: 2, // Thêm dòng thứ hai
         responsive: [
             {
                 breakpoint: 1024,
-                settings: { slidesToShow: 4 },
+                settings: { slidesToShow: 4, rows: 2 },
             },
             {
                 breakpoint: 768,
-                settings: { slidesToShow: 2 },
+                settings: { slidesToShow: 2, rows: 2 },
             },
             {
                 breakpoint: 480,
-                settings: { slidesToShow: 1 },
+                settings: { slidesToShow: 1, rows: 2 },
             },
         ],
     };
+    
 
     return (
         <ArgonBox py={8} style={{ width: "100%" }}>
