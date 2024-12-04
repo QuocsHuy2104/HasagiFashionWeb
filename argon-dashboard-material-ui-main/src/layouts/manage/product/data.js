@@ -91,8 +91,6 @@ const ProductTable = ({ onEditClick, setSelectedProduct, searchKeyword, selected
         }
     };
 
-
-
     const handleEditClick = (product) => {
         if (onEditClick) onEditClick(product);
     };
@@ -102,21 +100,6 @@ const ProductTable = ({ onEditClick, setSelectedProduct, searchKeyword, selected
             setSelectedProduct(product);
             navigate('/manage/product-detail', { state: { product } });
         }
-    };
-
-    const formatDate = (dateString) => {
-        if (!dateString) return "N/A";
-
-        const date = new Date(dateString);
-
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-
-        return `${day}-${month}-${year}\n${hours}:${minutes}`;
     };
 
     const formatNumber = (num) => {
@@ -162,11 +145,6 @@ const ProductTable = ({ onEditClick, setSelectedProduct, searchKeyword, selected
         SoLuong: (
             <ArgonTypography variant="caption" color="secondary" fontWeight="medium">
                 {product.importQuantity > 0 ? product.importQuantity || "N/A" : "0"}
-            </ArgonTypography>
-        ),
-        NgayTao: (
-            <ArgonTypography variant="caption" color="secondary" fontWeight="medium">
-                {formatDate(product.createDate)}
             </ArgonTypography>
         ),
         DanhMuc: (
@@ -248,7 +226,6 @@ const ProductTable = ({ onEditClick, setSelectedProduct, searchKeyword, selected
         columns: [
             { name: "SanPham", align: "left" },
             { name: "SoLuong", align: "center" },
-            { name: "NgayTao", align: "center" },
             { name: "DanhMuc", align: "center" },
             { name: "ThuongHieu", align: "center" },
             // { name: "TrangThai", align: "center" },

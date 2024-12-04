@@ -8,6 +8,7 @@ import "components/client/assets/css/phanloai1.css";
 import Select from "react-select";
 import AddressService from '../../../services/AddressServices';
 import { useLocation } from 'react-router-dom';
+
 const Backup = ({ show, onClose }) => {
     const [fullName, setFullName] = useState("");
     const [numberPhone, setNumBerPhone] = useState("");
@@ -21,7 +22,7 @@ const Backup = ({ show, onClose }) => {
     const [status, setStatus] = useState(false);
     const [isAddressAvailable, setIsAddressAvailable] = useState(true);
     const [errors, setErrors] = useState({});
-    const [isSubmitted, setIsSubmitted] = useState(false); // New state variable
+    const [isSubmitted, setIsSubmitted] = useState(false); 
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -236,7 +237,6 @@ const Backup = ({ show, onClose }) => {
                 if (!userHasAddresses) setStatus(true);
             } catch (error) {
                 console.error("Error checking user addresses:", error);
-                alert("Không thể kiểm tra địa chỉ của bạn.");
             }
         };
         checkUserAddresses();

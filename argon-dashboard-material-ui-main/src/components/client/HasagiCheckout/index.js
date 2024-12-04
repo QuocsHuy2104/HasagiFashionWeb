@@ -61,8 +61,6 @@ const Checkout = () => {
                 if (addressesId) {
                     const response = await axios.get(`http://localhost:3000/api/addresses/${addressesId}`);
                     setAddress(response.data);
-                    console.log(response.data);
-
                     await fetchProvinces();
                 } else {
                     console.error("No address ID found in the URL");
