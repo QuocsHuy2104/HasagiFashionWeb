@@ -7,7 +7,7 @@ const CartService = {
 
 getCartUpdate: async (cartDetailId, selectedColor, selectedSize, productId) => {
     try {
-        const response = await apiClient.put(`/cart/updateOfOption/${cartDetailId}?colorId=${selectedColor.id}&sizeId=${selectedSize.id}&productId=${productId}`);
+        const response = await apiClient.put(`/cart/updateOfOption/${cartDetailId}?colorId=${selectedColor}&sizeId=${selectedSize}&productId=${productId}`);
         return response.data; 
     } catch (error) {
         console.error("Error during cart update:", error);

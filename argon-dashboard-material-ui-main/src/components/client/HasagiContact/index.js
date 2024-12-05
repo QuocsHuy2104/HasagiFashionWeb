@@ -19,7 +19,7 @@ const Contact = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("https://formsubmit.co/letuankiet140804@gmail.com", {
+      const response = await fetch("https://formsubmit.co/hasagifashion@gmail.com", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -57,7 +57,7 @@ const Contact = () => {
           }}
         >
           <div className="row g-4">
-            <div className="col-12 mb-4">
+            <div className="col-12 pt-4">
               <iframe
                 className="rounded w-100"
                 style={{
@@ -65,7 +65,7 @@ const Contact = () => {
                   border: "none",
                   borderRadius: "12px",
                 }}
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3928.904341867053!2d105.76483937480711!3d10.024752290081928!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31a08945c836ec51%3A0x5c0b3d42b2ac9fdb!2sCHILL%20COFFEE!5e0!3m2!1sen!2s!4v1722940658661!5m2!1sen!2s"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3929.4204947420244!2d105.75565247499516!3d9.982081490122443!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31a08906415c355f%3A0x416815a99ebd841e!2zVHLGsOG7nW5nIENhbyDEkeG6s25nIEZQVCBQb2x5dGVjaG5pYw!5e0!3m2!1svi!2s!4v1733293984809!5m2!1svi!2s"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
               ></iframe>
@@ -189,7 +189,7 @@ const Contact = () => {
                   <FaMapMarkerAlt style={{ fontSize: "2rem", color: "#ff5722", marginRight: "1rem" }} />
                   <div>
                     <h5 style={{ marginBottom: "0.5rem", fontWeight: "bold" }}>Địa chỉ:</h5>
-                    <p style={{ margin: 0 }}>49 Đ. 3 Tháng 2, Xuân Khánh, Ninh Kiều, Cần Thơ, VietNam</p>
+                    <p style={{ margin: 0 }}>Toà nhà FPT Polytechnic, Đ. Số 22, Thường Thạnh, Cái Răng, Cần Thơ, Việt Nam</p>
                   </div>
                 </div>
                 <div

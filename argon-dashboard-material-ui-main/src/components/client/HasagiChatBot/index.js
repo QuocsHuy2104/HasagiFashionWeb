@@ -62,7 +62,7 @@ function Gemini() {
 
     const isGreeting = (text) => {
         const greetings = [
-            { en: ["hi", "hello", "hey"], vi: ["chào", "xin chào", "alo"] },
+            { en: ["hi", "hello", "hey"], vi: ["chào bạn", "xin chào", "alo"] },
         ];
         const lang = detectLanguage(text);
         const keywords = greetings.find((g) => g[lang]);

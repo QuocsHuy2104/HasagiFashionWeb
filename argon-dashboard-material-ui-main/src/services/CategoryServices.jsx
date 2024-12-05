@@ -9,19 +9,22 @@ const CategoriesService = {
     createCategory: (category) => {
         return apiClient.post("/admin/category", category, {
             headers: {
-                'Content-Type': 'application/json', 
+                'Content-Type': 'application/json',
             },
         });
     },
 
-    updateCategory: (id, category) => apiClient.put(`/admin/category/${id}`, category),
+    updateCategory: (id, category) => {
+        return apiClient.put(`/admin/category/${id}`, category, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    },
 
     deleteCategory: (id) => apiClient.delete(`/admin/category/${id}`),
 
-    //user
     getAllCategoriesUS: () => apiClient.get("/user/category"),
 };
 
 export default CategoriesService;
-
-

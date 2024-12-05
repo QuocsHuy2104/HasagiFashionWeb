@@ -42,37 +42,8 @@ import gradientLineChartData from "layouts/dashboard/data/gradientLineChartData"
 import salesTableData from "layouts/dashboard/data/salesTableData";
 import categoriesListData from "layouts/dashboard/data/categoriesListData";
 
-
-import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-
 function Default() {
   const { size } = typography;
-  const [role, setRole] = useState('');
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      try {
-        const response = await axios.get('http://localhost:8080/api/user/role', { withCredentials: true });
-        const userRole = response.data.role;
-        setRole(userRole);
-
-        if (userRole === 'ADMIN') {
-          navigate('/dashboard');
-        } else {
-          navigate('/trang-chu');
-        }
-      } catch (error) {
-        console.error("Failed to fetch user role", error);
-      }
-    };
-
-    fetchUserRole();
-  }, [navigate]);
-
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -80,10 +51,10 @@ function Default() {
         <Grid container spacing={3} mb={3}>
           <Grid item xs={12} md={6} lg={3}>
             <DetailedStatisticsCard
-              title="today's money"
-              count="$53,000"
+              title="Tiền hôm nay"
+              count="53,000đ"
               icon={{ color: "info", component: <i className="ni ni-money-coins" /> }}
-              percentage={{ color: "success", count: "+55%", text: "since yesterday" }}
+              percentage={{ color: "success", count: "+55%", text: "kể từ hôm qua" }}
             />
           </Grid>
           <Grid item xs={12} md={6} lg={3}>

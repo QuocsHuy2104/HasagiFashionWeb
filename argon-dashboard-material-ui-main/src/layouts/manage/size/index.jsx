@@ -73,10 +73,7 @@ function Size() {
         if (isSizeNameDuplicate(formData.name)) {
             return;
         }
-
-
         const data = { name: formData.name };
-
         try {
             let result;
             if (formData.id) {

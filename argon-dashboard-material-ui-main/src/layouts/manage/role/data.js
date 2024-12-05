@@ -45,24 +45,13 @@ const RoleTable = ({ onEditClick }) => {
         onEditClick(role);
     };
 
-    const deleteItem = async (name) => {
-        try {
-            await RolesService.deleteRole(name);
-            setRoles(roles.filter(role => role.name !== name));
-            toast.success("Delete role successful");
-        } catch (error) {
-            console.error("There was an error deleting the item!", error);
-            toast.error("Error deleting role");
-        }
-    };
-
     const rows = roles.map(role => ({
-        role: (
+        VaiTro: (
             <Role
                 name={role.name}
             />
         ),
-        action: (
+        ThaoTac: (
             <ArgonBox display="flex" justifyContent="space-between" alignItems="center">
                 <ArgonTypography
                     px={1}
@@ -78,23 +67,7 @@ const RoleTable = ({ onEditClick }) => {
                         },
                     }}
                 >
-                    <i className="bi bi-pencil-square"></i> Edit
-                </ArgonTypography>
-                <ArgonTypography
-                    px={1}
-                    component="span"
-                    variant="caption"
-                    color="error"
-                    fontWeight="medium"
-                    onClick={() => deleteItem(role.name)}
-                    sx={{
-                        cursor: "pointer",
-                        "&:hover": {
-                            textDecoration: "underline",
-                        },
-                    }}
-                >
-                    <i className="bi bi-trash3"></i> Remove
+                    <i className="bi bi-pencil-square"></i> Sửa
                 </ArgonTypography>
             </ArgonBox>
         ),
@@ -102,8 +75,8 @@ const RoleTable = ({ onEditClick }) => {
 
     const roleTableData = {
         columns: [
-            { name: "role", align: "left" },
-            { name: "action", align: "center" },
+            { name: "VaiTro", align: "left" },
+            { name: "ThaoTac", align: "center" },
         ],
         rows,
     };

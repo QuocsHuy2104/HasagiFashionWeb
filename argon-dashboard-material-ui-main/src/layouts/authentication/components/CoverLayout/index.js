@@ -27,10 +27,8 @@ import ArgonTypography from "components/ArgonTypography";
 import DefaultNavbar from "examples/Navbars/DefaultNavbar";
 import PageLayout from "examples/LayoutContainers/PageLayout";
 
-// Authentication layout components
-import Footer from "layouts/authentication/components/Footer";
 
-function CoverLayout({ title, description, image, imgPosition, button, children }) {
+function CoverLayout({ title, description, image, imgPosition, children }) {
   return (
     <PageLayout>
       <ArgonBox mt={4}>
@@ -107,7 +105,6 @@ CoverLayout.propTypes = {
   description: PropTypes.string,
   image: PropTypes.string.isRequired,
   imgPosition: PropTypes.string,
-  button: PropTypes.object,
   children: PropTypes.node.isRequired,
 };
 

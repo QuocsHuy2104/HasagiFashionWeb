@@ -9,7 +9,12 @@ import giaohangnhanh from 'components/client/assets/images/giaohangnhanh.jpg';
 import doitra from 'components/client/assets/images/doitra.jpg';
 import tuvan from 'components/client/assets/images/tuvan.jpg';
 import sumenh from 'components/client/assets/images/sumenh.jpg';
-
+import lap from "components/client/assets/images/z6040871339788_04705e690bae09e3b73cae448d7bd4a8.jpg"
+import khanh from "components/client/assets/images/z6040871339791_2559764bd6f935b1a8364aaaceea193a.jpg"
+import khang from "components/client/assets/images/z6040871339792_8cddf8dbc80eed664e510fbb49906100.jpg"
+import ky from "components/client/assets/images/z6040871339793_73f2b947d976e9bd1894389b0156b547.jpg"
+import day from "components/client/assets/images/z6040871339794_2fd8d508db0891331d5d0871273b74c8.jpg"
+import kiet from "components/client/assets/images/z6040871339795_a50e97d3599ecbae63774f2535abcaae.jpg"
 const AboutShop = () => {
     return (
         <>
@@ -336,7 +341,7 @@ const AboutShop = () => {
                         <div className="row" style={{ justifyContent: "center" }}>
                             <div className="col-md-2 col-sm-6 mb-4">
                                 <img
-                                    src="uploads/kiet.jpg"
+                                    src={kiet}
                                     alt="Thành viên 1"
                                     style={{
                                         borderRadius: "50%",
@@ -350,7 +355,7 @@ const AboutShop = () => {
                             </div>
                             <div className="col-md-2 col-sm-6 mb-4">
                                 <img
-                                    src="uploads/day.jpg"
+                                    src={day}
                                     alt="Thành viên 2"
                                     style={{
                                         borderRadius: "50%",
@@ -364,7 +369,7 @@ const AboutShop = () => {
                             </div>
                             <div className="col-md-2 col-sm-6 mb-4">
                                 <img
-                                    src="uploads/khang.jpg"
+                                    src={khang}
                                     alt="Thành viên 3"
                                     style={{
                                         borderRadius: "50%",
@@ -378,7 +383,7 @@ const AboutShop = () => {
                             </div>
                             <div className="col-md-2 col-sm-6 mb-4">
                                 <img
-                                    src="uploads/lap.jpg"
+                                    src={lap}
                                     alt="Thành viên 4"
                                     style={{
                                         borderRadius: "50%",
@@ -392,7 +397,7 @@ const AboutShop = () => {
                             </div>
                             <div className="col-md-2 col-sm-6 mb-4">
                                 <img
-                                    src="uploads/khanh.png"
+                                    src={khanh}
                                     alt="Thành viên 5"
                                     style={{
                                         borderRadius: "50%",
@@ -406,7 +411,7 @@ const AboutShop = () => {
                             </div>
                             <div className="col-md-2 col-sm-6 mb-4">
                                 <img
-                                    src="uploads/ky.jpg"
+                                    src={ky}
                                     alt="Thành viên 6"
                                     style={{
                                         borderRadius: "50%",

@@ -99,13 +99,23 @@ function Product() {
 
     const handleVideoChange = (event) => {
         const file = event.target.files[0];
-        if (file && file instanceof Blob) {
-            setFormData((prevData) => ({
-                ...prevData,
-                video: file,
-            }));
-        } else {
-            console.error("Invalid video file");
+        const maxVideoSize = 100 * 1024 * 1024;
+
+        if (file) {
+            if (file.size > maxVideoSize) {
+                toast.error("Video không được vượt quá 100MB!");
+                event.target.value = "";
+                return;
+            }
+
+            if (file instanceof Blob) {
+                setFormData((prevData) => ({
+                    ...prevData,
+                    video: file,
+                }));
+            } else {
+                console.error("Invalid video file");
+            }
         }
     };
 
@@ -133,9 +143,6 @@ function Product() {
         if (!formData.name.trim()) {
             newErrors.name = true;
             toast.warn("Vui lòng nhập tên sản phẩm!!!");
-        } else if (/\d/.test(formData.name)) {
-            newErrors.name = true;
-            toast.warn("Tên sản phẩm không được nhập số!!!");
         }
 
         if (!formData.description.trim()) {

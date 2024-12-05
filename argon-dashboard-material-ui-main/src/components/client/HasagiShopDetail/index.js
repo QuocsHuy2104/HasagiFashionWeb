@@ -1,480 +1,1050 @@
-import React, { useEffect, useState } from "react";
-import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
-import 'layouts/assets/css/style.css';
+import React, { useEffect, useState, useRef } from "react";
+import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
+import "layouts/assets/css/style.css";
 import HasagiNav from "components/client/HasagiHeader";
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link, json } from "react-router-dom";
 import Footer from "components/client/HasagiFooter";
 import cartService from "../../../services/ProductDetail";
 import Cookies from "js-cookie";
-import { toast, ToastContainer } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { toast, ToastContainer } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import reviewsService from "services/ReviewsServices";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faStar as solidStar } from "@fortawesome/free-solid-svg-icons";
+import { faStar as regularStar } from "@fortawesome/free-regular-svg-icons";
 import ReviewList from "../HasagiReview/reviewList";
-
+import aboutImage from "layouts/assets/img/h1.jpg";
 
 function ShopDetail() {
-    const [product, setProduct] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [quantity, setQuantity] = useState(1);
-    const [selectedColor, setSelectedColor] = useState(null);
-    const [selectedSize, setSelectedSize] = useState(null);
-    const [totalPrice, setTotalPrice] = useState(0);
-    const [isFavorite, setIsFavorite] = useState(false);
-    const location = useLocation();
+  const [product, setProduct] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [quantity, setQuantity] = useState(1);
+  const [selectedColor, setSelectedColor] = useState(null);
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const location = useLocation();
+
+  const query = new URLSearchParams(location.search);
+  const productId = query.get("id");
+
+
+  const navigate = useNavigate();
+  const [reviews, setReviews] = useState([]);
+  const [quantityPDT, setQuantityPDT] = useState(0);
+  const [currentMedia, setCurrentMedia] = useState(0); // 0: Video, 1: Ảnh
+  const [currentImage, setCurrentImage] = useState(""); // Ảnh hiện tại
+  const [startIndex, setStartIndex] = useState(0);
+  const videoRef = useRef(null); // Tham chiếu đến phần tử video
+  const [mediaList, setMediaList] = useState([]);
+  const maxVisibleImages = product?.video ? 3 : 4;
+  const [previousImage, setPreviousImage] = useState(); // Lưu lại hình ảnh trước khi hover
+  const [previousCurrentMedia, setPreviousCurrentMedia] = useState(); // Lưu lại hình ảnh trước khi hover
+  const [images, setImages] = useState([]);
+
+  const fetchReviews = async (productId) => {
+    try {
+      const productReviews = await reviewsService.getReviewsByProduct(productId);
+      console.log("Fetched reviews for product:", productReviews);
+
+      if (Array.isArray(productReviews)) {
+        const sortedReviews = productReviews.sort((a, b) => b.star - a.star);
+        setReviews(sortedReviews);
+      } else {
+        console.error("Expected an array but got:", productReviews);
+        setReviews([]);
+      }
+    } catch (error) {
+      console.error("Error fetching reviews for product:", error);
+      setReviews([]);
+    }
+  };
+
+  const calculateAverageStars = () => {
+    if (reviews.length === 0) return 0;
+
+    const totalStars = reviews.reduce((sum, review) => sum + review.star, 0);
+    return (totalStars / reviews.length).toFixed(1);
+  };
+
+  const averageStars = calculateAverageStars();
+
+  useEffect(() => {
     const query = new URLSearchParams(location.search);
-    const productId = query.get('id');
-    const [favoriteCount, setFavoriteCount] = useState(0);
-    const navigate = useNavigate();
-    const [reviews, setReviews] = useState([]);
-    const [quantityPDT, setQuantityPDT] = useState([]);
+    const productId = query.get("id");
 
+    if (productId) {
+      fetchReviews(productId);
+    }
+  }, [location]);
 
-    const fetchReviews = async (productId) => {
-        if (!productId) {
-            console.error("Product ID is undefined");
-            return;
-        }
-
-        try {
-            const productReviews = await reviewsService.getReviewsByProduct(productId);
-            console.log('Fetched reviews for product:', productReviews);
-
-            if (Array.isArray(productReviews)) {
-                const sortedReviews = productReviews.sort((a, b) => b.star - a.star);
-                setReviews(sortedReviews);
-            } else {
-                console.error('Expected an array but got:', productReviews);
-                setReviews([]);
-            }
-        } catch (error) {
-            console.error('Error fetching reviews for product:', error);
-            setReviews([]);
-        }
-    };
-
-
-    useEffect(() => {
-        const query = new URLSearchParams(location.search);
-        const productId = query.get('id');
-
-        console.log("Product ID from URL:", productId);
-
-        if (productId) {
-            console.log("Calling fetchReviews with productId:", productId);
-            fetchReviews(productId);
-        } else {
-            console.error("Product ID is missing in the URL");
-        }
-    }, [location]);
-
-
-
-    const getUniqueSizes = (sizes) => {
-        return (sizes || []).reduce((unique, size) => {
-            if (!unique.some(item => item.id === size.id)) {
-                unique.push(size);
-            }
-            return unique;
-        }, []);
-    };
-
-    const getUniqueColors = (colors = []) => {
-        return colors.reduce((unique, color) => {
-            if (!unique.some(item => item.id === color.id)) {
-                unique.push(color);
-            }
-            return unique;
-        }, []);
-    };
-
-
-    const uniqueSizes = product ? getUniqueSizes(product.sizes) : [];
-    const uniqueColors = product ? getUniqueColors(product.colors) : [];
-
-    React.useEffect(() => {
-        setTimeout(() => {
-            setIsLoading(false);
-        }, 700);
+  const getUniqueSizes = (sizes) => {
+    return sizes?.reduce((unique, size) => {
+      if (!unique?.some((item) => item.id === size.id)) {
+        unique?.push(size);
+      }
+      return unique;
     }, []);
+  };
 
-    const handleAddToCart = async () => {
-        if (!product || !selectedColor || !selectedSize) {
-            toast.error('Vui lòng chọn màu sắc và kích thước.');
-            return;
-        }
+  const getUniqueColors = (colors) => {
+    return colors?.reduce((unique, color) => {
+      if (!unique?.some((item) => item.id === color.id)) {
+        unique?.push(color);
+      }
+      return unique;
+    }, []);
+  };
 
-        try {
-            cartService.addToCart({
-                colorId: selectedColor,
-                sizeId: selectedSize,
-                quantity,
-                productId,
-            });
-            Cookies.set('productId', productId);
-            toast.success('Sản phẩm đã được thêm vào giỏ hàng thành công!');
-        } catch (error) {
-            console.error('Error adding to cart:', error);
-            toast.error('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.');
+  const uniqueSizes = product ? getUniqueSizes(product.sizes) : [];
+  const uniqueColors = product ? getUniqueColors(product.colors) : [];
+
+  React.useEffect(() => {
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 700);
+  }, []);
+
+  const handleAddToCart = async () => {
+    try {
+      cartService.addToCart({
+        colorId: selectedColor,
+        sizeId: selectedSize,
+        quantity,
+        productId,
+      });
+      toast.success("Sản phẩm đã được thêm vào giỏ hàng thành công!");
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      toast.error("Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.");
+    }
+  };
+
+
+  const fetchProductDetail = async () => {
+    try {
+      if (!productId) throw new Error("Product ID is missing");
+      localStorage.clear();
+      const response = await cartService.getProductDetail({
+        productId,
+        sizeId: selectedSize || null,
+        colorId: selectedColor || null,
+      });
+
+      const productData = response.data;
+      //console.log("Fetched Product Data:", productData);
+
+      setProduct(productData);
+      setMediaList(productData);
+      if (selectedColor && selectedSize) {
+        fetchPrice(productId, selectedColor, selectedSize);
+      } else {
+        setTotalPrice(productData?.importPrice);
+        setQuantityPDT(productData?.importQuantity);
+      }
+      //console.log("Total Price Set To:", productData.importPrice);
+
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+    }
+  };
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/api/public/webShopDetail/product-detail/${productId}`
+        );
+        const data = response.data;
+
+        // Nếu tồn tại productDetail, lấy danh sách imageDTOResponse
+        if (data) {
+          setImages(data);
+        } else {
+          console.error("Product detail not found or no images available");
         }
+      } catch (error) {
+        console.error("Error fetching images:", error);
+      }
     };
 
-    const fetchFavoriteCount = async (productId) => {
-        try {
-            const response = await axios.get(`http://localhost:8080/api/favorites/count`, {
-                params: { productId }
-            });
-            return response.data;
-        } catch (error) {
-            console.error('Error fetching favorite count:', error);
-            return 0;
-        }
-    };
-    const checkFavoriteStatus = async (productId) => {
-        try {
-            // Await the response from cartService.checkFavorite
-            const favoriteResponse = await cartService.checkFavorite(productId);
+    fetchImages();
+  }, [productId]);
 
-            // Log the full response to check its structure
-            console.log(favoriteResponse);
+  useEffect(() => {
+    if (productId) {
+      fetchProductDetail();
+    }
+  }, [productId, selectedSize, selectedColor]);
 
-            // Ensure the data property exists and then use it
-            if (favoriteResponse && favoriteResponse.data !== undefined) {
-                setIsFavorite(favoriteResponse.data);  // This should now work
-            } else {
-                console.error('Favorite response is missing data');
-            }
-        } catch (error) {
-            console.error("Error checking favorite status:", error);
-        }
-    };
-    const fetchProductDetail = async () => {
-        const accountId = Cookies.get('accountId');
-        if (!accountId) {
-            navigate(`/authentication/sign-in`);
-            return;
-        }
-        try {
-            if (!productId) throw new Error("Product ID is missing");
+  useEffect(() => {
+    if (productId) {
+      fetchReviews();
+    }
+  }, [productId]);
 
-            const response = await cartService.getProductDetail({
-                productId,
-                sizeId: selectedSize || null
-            });
+  const fetchPrice = async (productId, colorId, sizeId) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/public/webShopDetail/price`, {
+        params: { productId, colorId, sizeId },
+      });
+      const { price, quantity } = response.data;
+      setTotalPrice(price);
+      setQuantityPDT(quantity);
+    } catch (error) {
+      console.error("Error fetching price:", error);
+      toast.error("Đã xảy ra lỗi khi lấy giá sản phẩm. Vui lòng thử lại sau.");
+    }
+  };
 
-            const productData = response.data;
-            if (!productData) {
-                throw new Error("Product data is missing in response");
-            }
+  useEffect(() => {
+    if (selectedColor && selectedSize) {
+      fetchPrice(productId, selectedColor, selectedSize);
+    }
+    if (!selectedColor) {
+      fetchProductDetail();
+    }
+  }, [selectedColor, selectedSize, quantity]);
 
-            console.log("Fetched Product Data:", productData);
 
-            // Sử dụng giá trị mặc định nếu `importPrice` hoặc `importQuantity` không hợp lệ
-            setProduct(productData);
-            setTotalPrice(productData.importPrice ?? 0); // Giá mặc định là 0 nếu `importPrice` là null
-            console.log("Total Price Set To:", productData.importPrice ?? 0);
-            setQuantityPDT(productData.importQuantity ?? 1); // Số lượng mặc định là 1 nếu `importQuantity` là null hoặc 0
 
-            const countRSN = await fetchFavoriteCount(productId);
-            setFavoriteCount(countRSN);
-            checkFavoriteStatus(productId);
-        } catch (error) {
-            console.error("Error fetching product details:", error);
-        }
-    };
+  const handleByNow = async () => {
+    try {
+      await cartService.addToCart({
+        colorId: selectedColor,
+        sizeId: selectedSize,
+        quantity,
+        productId,
+      });
 
-    useEffect(() => {
-        if (productId) {
-            fetchProductDetail();
-        }
-    }, [productId, selectedSize]);
+      const checkedItems = JSON.parse(localStorage.getItem("checkedItems")) || [];
+      if (!checkedItems.includes(productId)) {
+        checkedItems.push(productId);
+      }
+      localStorage.setItem(
+        "checkedItems" + productId + selectedColor + selectedSize,
+        JSON.stringify([Number(checkedItems), selectedColor, selectedSize])
+      );
+      navigate("/Cart");
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+    }
+  };
+  
+  const [activeTab, setActiveTab] = useState("tab-pane-1");
 
-    useEffect(() => {
-        if (productId) {
+  const handleTabClick = (tabId) => {
+    setActiveTab(tabId);
+  };
 
-            fetchReviews();
-        }
-    }, [productId])
+  const formatImportPrice = (importPrice) => {
+    if (typeof importPrice === "number") {
+      return new Intl.NumberFormat("vi-VN").format(importPrice);
+    }
+    if (!importPrice || typeof importPrice !== "string" || !importPrice.includes("-")) {
+      return "N/A";
+    }
+    const [minPrice, maxPrice] = importPrice.split("-").map((price) => parseFloat(price));
+    return minPrice === maxPrice
+      ? new Intl.NumberFormat("vi-VN").format(minPrice)
+      : `${new Intl.NumberFormat("vi-VN").format(minPrice)}đ - ${new Intl.NumberFormat(
+          "vi-VN"
+        ).format(maxPrice)}`;
+  };
 
-    const fetchPrice = async (productId, colorId, sizeId) => {
-        try {
-            const response = await axios.get(`http://localhost:8080/api/product-detail/price`, {
-                params: { productId, colorId, sizeId }
-            });
-            setTotalPrice(response.data * quantity); // cập nhật giá với số lượng
-        } catch (error) {
-            console.error('Error fetching price:', error);
-            toast.error('Đã xảy ra lỗi khi lấy giá sản phẩm. Vui lòng thử lại sau.');
-        }
-    };
+  const formattedPrice = formatImportPrice(totalPrice);
 
-    // Gọi API để cập nhật giá mỗi khi chọn color hoặc size
-    useEffect(() => {
-        if (selectedColor && selectedSize) {
-            fetchPrice(productId, selectedColor, selectedSize);
-        }
-    }, [selectedColor, selectedSize, quantity]);
-
-    const handleAddFavorite = async () => {
-        const accountId = Cookies.get('accountId');
-        if (!accountId) {
-            navigate(`/authentication/sign-in`);
-            return;
-        }
-        if (!product) return;
-        try {
-            await cartService.addToFavorites(product.id);
-            setIsFavorite(true);
-            const count = await fetchFavoriteCount(product.id);
-            setFavoriteCount(count);
-        } catch (error) {
-            console.error('Error adding to favorites:', error.response?.data || error.message);
-        }
-    };
-
-    const handleRemoveFavorite = async () => {
-        const accountId = Cookies.get('accountId');
-        if (!accountId) {
-            navigate(`/authentication/sign-in`);
-            return;
-        }
-        if (!product) return;
-        try {
-            const productId = product.id;
-            await cartService.removeFromFavorites(productId);
-            setIsFavorite(false);
-            const count = await fetchFavoriteCount(productId);
-            setFavoriteCount(count);
-        } catch (error) {
-            console.error('Error removing from favorites:', error.response?.data || error.message);
-        }
-    };
-
-    const handleByNow = async () => {
-        if (!product || !selectedColor || !selectedSize) {
-            toast.error('Vui lòng chọn màu sắc và kích thước.');
-            return;
-        }
-
-        try {
-            await cartService.addToCart({
-                colorId: selectedColor,
-                sizeId: selectedSize,
-                quantity,
-                productId,
-            });
-            navigate('/Cart')
-        } catch (error) {
-            console.error('Error adding to cart:', error);
-            toast.error('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.');
-        }
-    };
-    const [activeTab, setActiveTab] = useState('tab-pane-1');
-
-    const handleTabClick = (tabId) => {
-        setActiveTab(tabId);
-    };
-
-    if (!product) return <div></div>;
+  const renderStars = (average) => {
+    const fullStars = Math.floor(average);
+    const partialStar = average % 1;
+    const emptyStars = 5 - fullStars - (partialStar > 0 ? 1 : 0);
 
     return (
-        <>
-            {isLoading && (
-                <div className="loader">
-                    <div className="loader-inner">
-                        <div className="circle"></div>
-                    </div>
-                </div>
-            )}
-            <HasagiNav />
-            <ToastContainer />
-            <div className="container-fluid">
-                <div className="row px-xl-5 py-5">
-                    <div className="col-12">
-                        <nav className="breadcrumb bg-light mb-30">
-                            <a className="breadcrumb-item text-dark" href="/feature-section">Trang chủ</a>
-                            <a className="breadcrumb-item text-dark" href="/Shop">Sản phẩm</a>
-                            <span className="breadcrumb-item active">Sản phẩm chi tiết</span>
-                        </nav>
-                    </div>
-                </div>
-            </div>
-            <div className="container-fluid pb-5" style={{ maxWidth: "1400px" }}>
-                <div className="row px-xl-5">
-                    <div className="col-lg-5 mb-30">
-                        <div className="product-thumbnail">
-                            <img src={product.image} alt="" className="product-thumbnail-img" />
-                        </div>
-                    </div>
-                    <div className="col-lg-7 h-auto mb-30">
-                        <div className="h-100 bg-light p-30 pt-4">
-                            <h3 className="font-weight-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>{product.name}</h3>
-                            <div className="d-flex mb-3">
-                                <div className="text-primary mr-3">
-                                    <small className="fas fa-star"></small>
-                                    <small className="fas fa-star"></small>
-                                    <small className="fas fa-star"></small>
-                                    <small className="fas fa-star-half-alt"></small>
-                                    <small className="far fa-star"></small>
-                                </div>
-                                <small className="pt-1">(99 Reviews)</small>
-                            </div>
-                            <h3 className="font-weight-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>{totalPrice}</h3>
-                            <h3 className="font-medium-semi-bold mb-3" style={{ fontFamily: `"Times New Roman", Times, serif` }}>Số lượng: {product.importQuantity || "N/A"}</h3>
-                            <div className="d-flex mb-3" id="size-input-list">
-                                <strong className="text-dark mr-3">Sizes:</strong>
-                                {product.sizes.length > 0 ? (
-                                    <form>
-                                        {uniqueSizes.map((size) => (
-                                            <div key={size.id} className="custom-control custom-radio custom-control-inline">
-                                                <input
-                                                    type="radio"
-                                                    className="custom-control-input"
-                                                    id={`size-${size.id}`}
-                                                    name="size"
-                                                    value={size.id}
-                                                    onChange={(e) => setSelectedSize(e.target.value)} // Update size state
-                                                />
-                                                <label className="custom-control-label" htmlFor={`size-${size.id}`}>
-                                                    {size.name}
-                                                </label>
-                                            </div>
-                                        ))}
-                                    </form>
-                                ) : (
-                                    <span>No sizes available.</span>
-                                )}
-                            </div>
-                            <div className="d-flex mb-4" id="color-input-list">
-                                <strong className="text-dark mr-3">Colors:</strong>
-                                {product.colors.length > 0 ? (
-                                    <form>
-                                        {uniqueColors.map((color) => (
-                                            <div key={color.id} className="custom-control custom-radio custom-control-inline">
-                                                <input
-                                                    type="radio"
-                                                    className="custom-control-input"
-                                                    id={`color-${color.id}`}
-                                                    name="color"
-                                                    value={color.id}
-                                                    onChange={(e) => setSelectedColor(e.target.value)}
-                                                />
-                                                <label className="custom-control-label" htmlFor={`color-${color.id}`}>
-                                                    {color.name}
-                                                </label>
-                                            </div>
-                                        ))}
-                                    </form>
-                                ) : (
-                                    <span>No colors available.</span>
-                                )}
-                            </div>
+      <div style={{ display: "flex", gap: "5px" }}>
+        {Array.from({ length: fullStars }).map((_, index) => (
+          <FontAwesomeIcon
+            key={`full-${index}`}
+            icon={solidStar}
+            style={{ color: "orange", fontSize: "12px" }}
+          />
+        ))}
 
-                            <div className="d-flex align-items-center mb-4 pt-1">
-                                <div className="input-group quantity mr-3" style={{ width: '130px' }}>
-                                    <div className="input-group-btn">
-                                        <button
-                                            className="btn btn-primary btn-minus"
-                                            onClick={() => setQuantity(quantity - 1)}
-                                            disabled={quantity <= 1}
-                                            style={{ marginRight: '5px' }}
-                                        >
-                                            <i className="fa fa-minus"></i>
-                                        </button>
-                                    </div>
-                                    <input
-                                        id="inputAmount"
-                                        type="text"
-                                        className="form-control bg-secondary border-0 text-center"
-                                        value={quantity}
-                                        readOnly
-                                    />
-                                    <div className="input-group-btn">
-                                        <button
-                                            className="btn btn-primary btn-plus"
-                                            onClick={() => setQuantity(quantity + 1)}
-                                            style={{ marginLeft: '5px' }}
-                                        >
-                                            <i className="fa fa-plus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="d-flex align-items-center py-1">
-                                <button id="cartBtn" onClick={handleAddToCart} className="btn btn-primary px-3 mr-2">
-                                    <i className="fa fa-shopping-cart mr-1"></i> Add To Cart
-                                </button>
-                                <button className="btn btn-primary px-3" onClick={handleByNow}>
-                                    Mua ngay
-                                </button>
-                            </div>
-                            <div className="d-flex align-items-center py-2">
-                                {isFavorite ? (
-                                    <span
-                                        onClick={handleRemoveFavorite}
-                                        className="d-flex align-items-center"
-                                        style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
-                                    >
-                                        <AiFillHeart size={24} className="text-danger" />
-                                        <span style={{ marginLeft: '10px', color: 'black' }}>Yêu thích ({favoriteCount})</span>
-                                    </span>
-                                ) : (
-                                    <span
-                                        onClick={handleAddFavorite}
-                                        className="d-flex align-items-center"
-                                        style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
-                                    >
-                                        <AiOutlineHeart size={24} className="text-danger" />
-                                        <span style={{ marginLeft: '10px', color: 'black' }}>Yêu thích ({favoriteCount})</span>
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="row px-xl-5">
-                    <div className="col">
-                        <div className="bg-light p-30">
-                            <div className="nav nav-tabs mb-4">
-                                <a
-                                    className={`nav-item nav-link text-dark ${activeTab === 'tab-pane-1' ? 'active' : ''}`}
-                                    onClick={() => handleTabClick('tab-pane-1')}
-                                >
-                                    Description
-                                </a>
-                                <a
-                                    className={`nav-item nav-link text-dark ${activeTab === 'tab-pane-2' ? 'active' : ''}`}
-                                    onClick={() => handleTabClick('tab-pane-2')}
-                                >
-                                    Information
-                                </a>
-                                <a
-                                    className={`nav-item nav-link text-dark ${activeTab === 'tab-pane-3' ? 'active' : ''}`}
-                                    onClick={() => handleTabClick('tab-pane-3')}
-                                >
-                                    Reviews ({reviews.length})
-                                </a>
-                            </div>
-                            <div className="tab-content">
-                                <div className={`tab-pane fade ${activeTab === 'tab-pane-1' ? 'show active' : ''}`} id="tab-pane-1">
-                                    <h4 className="mb-3">Product Description</h4>
-                                    <p>Eos no lorem eirmod diam diam, eos elitr et gubergren diam sea...</p>
-                                </div>
-                                <div className={`tab-pane fade ${activeTab === 'tab-pane-2' ? 'show active' : ''}`} id="tab-pane-2">
-                                    <h4 className="mb-3">Additional Information</h4>
-                                    <p>Eos no lorem eirmod diam diam, eos elitr et gubergren diam sea...</p>
-                                </div>
-                                <div className={`tab-pane fade ${activeTab === 'tab-pane-3' ? 'show active' : ''}`} id="tab-pane-3">
-                                    <ReviewList />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        {partialStar > 0 && (
+          <div style={{ position: "relative", width: "24px", overflow: "hidden" }}>
+            <FontAwesomeIcon
+              icon={regularStar}
+              style={{
+                color: "#ccc",
+                fontSize: "20px",
+                position: "absolute",
+                width: "100%",
+                height: "100%",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                width: "100%",
+                height: "100%",
+                clipPath: `inset(0 ${100 - partialStar * 100}% 0 0)`,
+              }}
+            >
+              <FontAwesomeIcon
+                icon={solidStar}
+                style={{
+                  color: "orange",
+                  fontSize: "20px",
+                  width: "100%",
+                  height: "100%",
+                  marginBottom: "8px",
+                }}
+              />
             </div>
-            <Footer />
-        </>
-    )
+          </div>
+        )}
+
+        {Array.from({ length: emptyStars }).map((_, index) => (
+          <FontAwesomeIcon
+            key={`empty-${index}`}
+            icon={regularStar}
+            style={{ color: "orange", fontSize: "11px" }}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  // Hàm formatNumber để định dạng số
+  const formatNumber = (number) => {
+    if (number >= 1000) {
+      const formatted = (number / 1000).toFixed(1); // Chia cho 1000 và giữ 1 chữ số thập phân
+      return `${formatted}k`.replace(".", ","); // Thay dấu "." thành dấu ","
+    }
+    return number; // Trả về số gốc nếu nhỏ hơn 1000
+  };
+
+  useEffect(() => {
+    // Dừng video khi rời khỏi trang
+    const handleBeforeUnload = () => {
+      if (videoRef.current) {
+        videoRef.current.pause();
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      // Dọn dẹp event khi component bị unmount
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
+  // Hàm xử lý khi click vào thumbnail
+  const handleThumbnailClick = (imageURL, index) => {
+    setCurrentImage(imageURL);
+    setCurrentMedia(index);
+  };
+
+  // Hàm xử lý hover lên thumbnail
+  const handleThumbnailHover = (imageURL, index) => {
+    setCurrentImage(imageURL);
+    setCurrentMedia(index); // Cập nhật trạng thái media khi hover
+  };
+
+  const handleButtonlHover = (imageUrl, index) => {
+    setPreviousImage(currentImage); // Lưu lại hình ảnh hiện tại trước khi thay đổi
+    setPreviousCurrentMedia(currentMedia);
+    setCurrentImage(imageUrl); // Cập nhật hình ảnh mới khi hover
+    setCurrentMedia(index); // Cập nhật trạng thái media khi hover
+  };
+
+  const handleButtonLeave = () => {
+    setCurrentImage(previousImage); // Trả lại hình ảnh cũ khi bỏ hover
+    setCurrentMedia(previousCurrentMedia);
+  };
+
+  const handleNext = () => {
+    if (startIndex + maxVisibleImages < images.length) {
+      setStartIndex(startIndex + 1); // Tăng vị trí bắt đầu
+    }
+  };
+
+  const handlePrev = () => {
+    if (startIndex > 0) {
+      setStartIndex(startIndex - 1); // Giảm vị trí bắt đầu
+    }
+  };
+
+  useEffect(() => {
+    const preloadNextAndPrev = () => {
+      if (images.length > 0) {
+        // Preload ảnh tiếp theo
+        const nextIndex = (startIndex + maxVisibleImages) % images.length;
+        const nextImage = images[nextIndex]?.imageDTOResponse[0]?.url;
+        if (nextImage) {
+          const imgNext = new Image();
+          imgNext.src = nextImage;
+        }
+
+        // Preload ảnh trước đó
+        const prevIndex = (startIndex - 1 + images.length) % images.length;
+        const prevImage = images[prevIndex]?.imageDTOResponse[0]?.url;
+        if (prevImage) {
+          const imgPrev = new Image();
+          imgPrev.src = prevImage;
+        }
+      }
+    };
+
+    preloadNextAndPrev();
+  }, [startIndex, images]);
+
+  useEffect(() => {
+    if (product?.video) {
+      // Nếu có video, sử dụng currentImage
+      setCurrentImage(currentImage); // Giữ nguyên currentImage nếu có video
+    } else {
+      // Nếu không có video, đặt currentImage bằng product.image
+      setCurrentImage(product?.image);
+    }
+  }, [product?.video, product?.image]); // Phụ thuộc vào product.video và product.image
+
+  if (!product) return <div></div>;
+
+  return (
+    <>
+      {isLoading && (
+        <div className="loader">
+          <div className="loader-inner">
+            <div className="circle"></div>
+          </div>
+        </div>
+      )}
+      <HasagiNav />
+      <ToastContainer />
+      <div className="container-fluid">
+        <div
+          className="row px-xl-5"
+          style={{
+            marginLeft: "55px",
+            fontSize: "15px",
+            paddingTop: "105px",
+            marginBottom: "-10px",
+          }}
+        >
+          <div className="col-12">
+            <nav className="breadcrumb bg-light mb-30">
+              <a className="breadcrumb-item text-dark" href="/feature-section">
+                Trang chủ
+              </a>
+              <a className="breadcrumb-item text-dark" href="/Shop">
+                Sản phẩm
+              </a>
+              <span className="breadcrumb-item active">{product.name}</span>
+            </nav>
+          </div>
+        </div>
+      </div>
+      <div className="container-fluid pb-5" style={{ maxWidth: "1400px" }}>
+        <div className="row px-xl-5" style={{ marginLeft: "10px", height: "700px" }}>
+          <div className="col-lg-5 mb-30 bg-white">
+            <div className="product-thumbnail" style={{ textAlign: "center" }}>
+              <div
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  maxWidth: "500px",
+                }}
+              >
+                {/* Video */}
+                {product.video && (
+                  <video
+                    ref={videoRef}
+                    src={product.video}
+                    autoPlay
+                    muted
+                    controls
+                    loop={false} // Không lặp
+                    style={{
+                      width: "100%",
+                      maxHeight: "500px",
+                      marginTop: "15px",
+                      objectFit: "contain",
+                      position: "absolute",
+                      backgroundColor: "#f5f5f5", // Màu nền để lấp đầy vùng trống (tùy chọn)
+                      aspectRatio: "9 / 16", // Tỉ lệ khung hình bạn muốn
+                      top: 0,
+                      left: 0,
+                      opacity: currentMedia === 0 ? 1 : 0, // Hiệu ứng mờ
+                      zIndex: currentMedia === 0 ? 2 : 1, // Video nằm trên khi hiển thị
+                    }}
+                  />
+                )}
+
+                {/* Ảnh */}
+                <img
+                  src={currentImage}
+                  style={{
+                    width: "100%",
+                    maxHeight: "500px",
+                    marginTop: "15px",
+                    boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
+                    position: "absolute",
+                    objectFit: "contain", // Đảm bảo ảnh vừa với khung
+                    aspectRatio: "9 / 16", // Tỉ lệ khung hình bạn muốn
+                    backgroundColor: "#f5f5f5",
+                    top: 0,
+                    left: 0,
+                    //opacity: (!product.video || currentMedia === 1) && fadeIn ? 1 : 0,
+                    zIndex: !product.video || currentMedia === 1 ? 2 : 1,
+                    transition: "opacity 0s ease-in-out", // Thêm hiệu ứng chuyển mờ
+                  }}
+                />
+              </div>
+
+              {/* Thumbnail Gallery */}
+              <div
+                style={{
+                  position: "absolute",
+                  display: "flex",
+                  gap: "10px",
+                  marginTop: "530px",
+                  left: "11px", // Nút điều hướng bên trái
+                  right: "0", // Nút điều hướng bên phải
+                }}
+              >
+                {/* Nút điều hướng bên trái */}
+                {images?.length > maxVisibleImages && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: "0px",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      cursor: "pointer",
+                      fontSize: "24px",
+                      color: "#fff",
+                      backgroundColor: "rgba(0, 0, 0, 0.5)",
+                      borderRadius: "0%",
+                      height: "45px",
+                      width: "30px",
+                      zIndex: 1,
+                      userSelect: "none", // Không cho phép bôi đen
+                    }}
+                    disabled={startIndex === 0}
+                    onClick={() => handlePrev()}
+                  >
+                    ←
+                  </div>
+                )}
+
+                {[product].map((media, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      position: "relative",
+                      display: "flex",
+                      gap: "10px",
+                    }}
+                  >
+                    {/* Tam giác nút phát */}
+                    {media.video && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "50%",
+                          left: "47px",
+                          transform: "translate(-50%, -50%)",
+                          width: "35px", // Kích thước hình tròn
+                          height: "35px",
+                          backgroundColor: "rgba(0, 0, 0, 0.7)", // Màu nền tối (có độ trong suốt)
+                          borderRadius: "50%", // Biến thành hình tròn
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          zIndex: 2,
+                          cursor: "pointer",
+                        }}
+                        onClick={() => handleThumbnailClick("", 0)} // Gọi hành động khi nhấp vào nút
+                      >
+                        <div
+                          style={{
+                            width: "0",
+                            height: "0",
+                            borderLeft: "10px solid #fff", // Tam giác màu trắng
+                            borderTop: "6px solid transparent",
+                            borderBottom: "6px solid transparent",
+                          }}
+                        ></div>
+                      </div>
+                    )}
+
+                    {/* Video nếu tồn tại */}
+                    {media.video && (
+                      <video
+                        src={media.video}
+                        muted
+                        autoPlay={false}
+                        style={{
+                          width: "92.3px",
+                          height: "86px",
+                          cursor: "pointer",
+                          border:
+                            currentMedia === 0 ? "2px solid #ffb524" : "1px solid transparent",
+                        }}
+                        onClick={() => handleThumbnailClick("", 0)}
+                        onMouseEnter={() => handleThumbnailHover("", 0)}
+                      />
+                    )}
+
+                    {/* Ảnh nếu tồn tại */}
+                    {media.image && (
+                      <div
+                        style={{
+                          width: "92.3px",
+                          height: "86px",
+                          cursor: "pointer",
+                          border:
+                            (!media.video && currentMedia === 0) || currentMedia === 1
+                              ? "2px solid #ffb524"
+                              : "1px solid transparent",
+                          display: "flex", // Để căn chỉnh hình ảnh chính giữa (nếu cần)
+                          justifyContent: "center",
+                          alignItems: "center",
+                          boxSizing: "border-box", // Đảm bảo kích thước bao gồm cả border
+                        }}
+                        onClick={() =>
+                          handleThumbnailClick(product?.video ? media?.image : media?.image, 1)
+                        }
+                        onMouseEnter={() =>
+                          handleThumbnailHover(product?.video ? media?.image : media?.image, 1)
+                        }
+                      >
+                        <img
+                          src={media.image}
+                          alt={`Thumbnail ${index}`}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    {images.slice(startIndex, startIndex + maxVisibleImages).map((image, index) => (
+                      <div
+                        key={index}
+                        style={{
+                          width: "92.3px",
+                          height: "86px",
+                          cursor: "pointer",
+                          border:
+                            currentImage === image?.imageDTOResponse[0]?.url
+                              ? "2px solid #ffb524"
+                              : "1px solid transparent",
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                        onClick={() => handleThumbnailClick(image?.imageDTOResponse[0]?.url)}
+                        onMouseEnter={() => handleThumbnailHover(image?.imageDTOResponse[0]?.url)}
+                      >
+                        <img
+                          src={image?.imageDTOResponse[0]?.url}
+                          alt={`Thumbnail ${index}`}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ))}
+                {/* Nút điều hướng bên phải */}
+                {images?.length > maxVisibleImages && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      right: "22px",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      cursor: "pointer",
+                      fontSize: "24px",
+                      color: "#fff",
+                      backgroundColor: "rgba(0, 0, 0, 0.5)",
+                      borderRadius: "0%",
+                      height: "45px",
+                      width: "30px",
+                      // cursor:
+                      //   startIndex + maxVisibleImages >= images.length ? "not-allowed" : "pointer",
+                      userSelect: "none", // Không cho phép bôi đen
+                    }}
+                    disabled={startIndex + maxVisibleImages >= images.length}
+                    onClick={() => handleNext()}
+                  >
+                    →
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="col-lg-7 mb-30" style={{ marginLeft: "-15px" }}>
+            <div
+              className="h-100 bg-white pt-3 "
+              style={{
+                paddingLeft: "20px", // padding trái
+                paddingRight: "20px", // padding phải
+              }}
+            >
+              <h4
+                className="mb-2"
+                style={{
+                  fontFamily: "Arial, sans-serif",
+                  fontSize: "20px",
+                  lineHeight: 1.5,
+                  wordWrap: "break-word",
+                  whiteSpace: "normal",
+                }}
+              >
+                {product.name}
+              </h4>
+
+              <div
+                className="d-flex align-items-center mb-3"
+                style={{ fontSize: "17px", color: "#555" }}
+              >
+                {/* Phần hiển thị số sao và sao */}
+                <div className="d-flex align-items-center">
+                  <span
+                    style={{
+                      color: "#555",
+                      marginRight: "5px",
+                      textDecoration: "underline",
+                      textUnderlineOffset: "5px",
+                    }}
+                  >
+                    {averageStars}
+                  </span>
+
+                  <div style={{ marginTop: "1px" }}>{renderStars(averageStars)}</div>
+                </div>
+
+                {/* Đường phân cách */}
+                <div
+                  style={{
+                    height: "16px",
+                    width: "1px",
+                    backgroundColor: "#ddd",
+                    margin: "0 10px",
+                  }}
+                />
+
+                {/* Phần hiển thị số lượng đánh giá */}
+                <div className="d-flex align-items-center">
+                  <span
+                    style={{
+                      marginRight: "3px",
+                      textDecoration: "underline",
+                      textUnderlineOffset: "5px",
+                    }}
+                  >
+                    {formatNumber(reviews.length)}
+                  </span>
+                  <small style={{ color: "#888" }}>Đánh Giá</small>
+                </div>
+              </div>
+
+              <h6
+                className="mb-3"
+                style={{
+                  fontFamily: "Arial, sans-serif",
+                  color: "red",
+                  fontSize: "30px",
+                  fontWeight: "bold",
+                  position: "relative",
+                  display: "inline-block",
+                  marginLeft: "15px",
+                }}
+              >
+                {formattedPrice}đ
+              </h6>
+
+              <div className="mb-4 mt-2" id="color-input-list">
+                <div className="row">
+                  <div className="col-2">
+                    {product?.colors?.length > 0 && (
+                      <span className="text-dark mr-3" style={{ fontSize: "17px" }}>
+                        Màu
+                      </span>
+                    )}
+                  </div>
+                  <div className="col-9" style={{ maxHeight: "150px", overflowY: "auto" }}>
+                    {product?.colors?.length > 0 && (
+                      <div>
+                        {uniqueColors?.map((color) => {
+                          // Tìm ảnh tương ứng với màu trong images
+                          const matchingImage = images?.find(
+                            (image) => image?.colorsDTO?.id === color?.id
+                          );
+
+                          return (
+                            <button
+                              key={color.id}
+                              className={`variant-button ${
+                                selectedColor === color.id ? "selected" : ""
+                              } ${!color.check ? "disabled" : ""}`}
+                              onClick={() => {
+                                setSelectedColor((prevSelected) => {
+                                  const newSelectedColor =
+                                    prevSelected === color.id ? null : color.id;
+                                  setQuantity(1);
+                                  if (matchingImage) {
+                                    setCurrentImage(matchingImage?.imageDTOResponse[0]?.url);
+                                    setPreviousImage(matchingImage?.imageDTOResponse[0]?.url); // Cập nhật hình ảnh cũ khi chọn
+                                    setCurrentMedia(color.name);
+                                    setPreviousCurrentMedia(color.name);
+                                  }
+                                  return newSelectedColor;
+                                });
+                              }}
+                              onMouseEnter={() =>
+                                handleButtonlHover(
+                                  matchingImage?.imageDTOResponse[0]?.url,
+                                  color.name
+                                )
+                              }
+                              onMouseLeave={!color.check ? null : handleButtonLeave} // Trả lại hình ảnh cũ khi bỏ hover
+                              style={{
+                                marginRight: "10px",
+                                cursor: !color.check ? "not-allowed" : "pointer",
+                                opacity: !color.check ? 0.5 : 1,
+                                marginBottom: "10px",
+                              }}
+                              disabled={!color.check}
+                            >
+                              {/* Ảnh nhỏ trước tên màu */}
+                              {matchingImage && (
+                                <img
+                                  key={matchingImage?.colorsDTO?.id}
+                                  src={matchingImage?.imageDTOResponse[0]?.url}
+                                  alt={color.name}
+                                  style={{
+                                    width: "25px", // Kích thước ảnh nhỏ
+                                    height: "25px", // Kích thước ảnh nhỏ
+                                    marginRight: "10px", // Khoảng cách giữa ảnh và tên màu
+                                  }}
+                                />
+                              )}
+
+                              {/* Tên màu */}
+                              {color.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="mb-4" id="size-input-list">
+                <div className="row">
+                  <div className="col-3">
+                    {product?.sizes?.length > 0 && (
+                      <span className="text-dark mr-3" style={{ fontSize: "17px" }}>
+                        Kích thước
+                      </span>
+                    )}
+                  </div>
+                  <div
+                    className="col-9"
+                    style={{ marginLeft: "-100px", maxHeight: "150px", overflowY: "auto" }}
+                  >
+                    {product?.sizes?.length > 0 && (
+                      <div style={{ marginLeft: "40px" }}>
+                        {uniqueSizes?.map((size) => (
+                          <button
+                            key={size.id}
+                            className={`variant-button ${
+                              selectedSize === size.id ? "selected" : ""
+                            } ${!size.check ? "disabled" : ""}`}
+                            onClick={() => {
+                              setSelectedSize((prevSelected) => {
+                                const newSelectedSize = prevSelected === size.id ? null : size.id;
+                                setQuantity(1);
+                                return newSelectedSize;
+                              });
+                            }}
+                            style={{
+                              marginRight: "10px",
+                              cursor: !size.check ? "not-allowed" : "pointer",
+                              opacity: !size.check ? 0.5 : 1,
+                              marginBottom: "10px",
+                            }}
+                            disabled={!size.check}
+                          >
+                            {size.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="align-items-center mb-4 pt-1">
+                <div className="row">
+                  <div className="col-2">
+                    <span className="text-dark" style={{ fontSize: "17px" }}>
+                      Số lượng
+                    </span>
+                  </div>
+                  <div className="col-10">
+                    <div className="input-group quantity mr-3">
+                      <div className="input-group-btn">
+                        <button
+                          className="btn btn-primary btn-minus"
+                          onClick={() => setQuantity(Math.max(quantity - 1, 1))}
+                          style={{
+                            borderRadius: "0px",
+                            backgroundColor: "#ffb524",
+                            marginRight: "1px",
+                            boxShadow: "none",
+                          }}
+                          disabled={!selectedColor || !selectedSize}
+                        >
+                          <i className="fa fa-minus"></i>
+                        </button>
+                      </div>
+                      <input
+                        id="inputAmount"
+                        type="text"
+                        className="form-control bg-white text-center"
+                        value={quantity}
+                        onBlur={(e) => {
+                          if (e.target.value === "" || !selectedColor || !selectedSize) {
+                            setQuantity(1);
+                          }
+                        }}
+                        onInput={(e) => {
+                          e.target.value = e.target.value.replace(/[^0-9]/g, "");
+                          setQuantity(Math.min(Math.max(e.target.value, 1), quantityPDT));
+                        }}
+                        style={{
+                          boxShadow: "none",
+                          borderLeft: "none",
+                          borderRight: "none",
+                          borderTop: "1px solid #ffb524",
+                          borderBottom: "1px solid #ffb524",
+                          height: "35.22px",
+                          maxWidth: "100px",
+                          top: "0.699px",
+                        }}
+                        disabled={!selectedColor || !selectedSize}
+                      />
+                      <div className="input-group-btn">
+                        <button
+                          className="btn btn-primary btn-plus"
+                          onClick={() => setQuantity(Math.min(quantity + 1, quantityPDT))}
+                          style={{
+                            backgroundColor: "#ffb524",
+                            borderRadius: "0px",
+                            marginLeft: "1px",
+                            boxShadow: "none",
+                          }}
+                          disabled={!selectedColor || !selectedSize}
+                        >
+                          <i className="fa fa-plus"></i>
+                        </button>
+                      </div>
+                      <span
+                        style={{
+                          fontFamily: "Arial, sans-serif",
+                          alignSelf: "center",
+                          fontSize: "15px",
+                          color: "#777",
+                          marginLeft: "10px",
+                        }}
+                      >
+                        {quantityPDT} sản phẩm có sẵn
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="d-flex align-items-center py-1">
+                <button
+                  id="cartBtn"
+                  onClick={handleAddToCart}
+                  className="btn btn-warning px-3 mr-2"
+                >
+                  <i className="fa fa-shopping-cart mr-1"></i> Thêm vào giỏ hàng
+                </button>
+                <button className="btn btn-warning px-3" onClick={handleByNow}>
+                  Mua ngay
+                </button>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+        <div className="row px-xl-5">
+          <div className="col">
+            <div className="bg-light" style={{ marginBottom: "-50px" }}>
+              <div className="nav nav-tabs mb-4">
+                <a
+                  className={`nav-item nav-link text-dark ${
+                    activeTab === "tab-pane-1" ? "active" : ""
+                  }`}
+                  onClick={() => handleTabClick("tab-pane-1")}
+                >
+                  Chi tiết sản phẩm
+                </a>
+                <a
+                  className={`nav-item nav-link text-dark ${
+                    activeTab === "tab-pane-2" ? "active" : ""
+                  }`}
+                  onClick={() => handleTabClick("tab-pane-2")}
+                >
+                  Mô tả sản phẩm
+                </a>
+                <a
+                  className={`nav-item nav-link text-dark ${
+                    activeTab === "tab-pane-3" ? "active" : ""
+                  }`}
+                  onClick={() => handleTabClick("tab-pane-3")}
+                >
+                  Đánh giá ({reviews.length})
+                </a>
+              </div>
+              <div className="tab-content">
+                <div
+                  className={`tab-pane fade ${activeTab === "tab-pane-1" ? "show active" : ""}`}
+                  id="tab-pane-1"
+                >
+                  <p>Danh mục: {product.category}</p>
+                  <p>Kho: {product.importQuantity || "N/A"}</p>
+                  <p>Thương hiệu: {product.trademark}</p>
+                </div>
+                <div
+                  className={`tab-pane fade ${activeTab === "tab-pane-2" ? "show active" : ""}`}
+                  id="tab-pane-2"
+                >
+                  <p>{product.description}</p>
+                </div>
+                <div
+                  className={`tab-pane fade ${activeTab === "tab-pane-3" ? "show active" : ""}`}
+                  id="tab-pane-3"
+                >
+                  <ReviewList />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <Footer />
+    </>
+  );
 }
 
 export default ShopDetail;

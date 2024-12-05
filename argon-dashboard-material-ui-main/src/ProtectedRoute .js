@@ -13,7 +13,7 @@ function ProtectedRoute({ children }) {
 
   try {
     const decodedToken = jwtDecode(token);
-    const currentTime = Date.now() / 1000;
+    const currentTime = Date.now() / 10000;
 
     if (decodedToken.exp < currentTime) {
       Cookies.remove("user");
@@ -21,7 +21,7 @@ function ProtectedRoute({ children }) {
     }
 
     if (decodedToken.scope === 'ROLE_USER') {
-      return <Navigate to="/authentication/sign-in" />;
+      return <Navigate to="/feature-section" />;
     }
   } catch (error) {
     return <Navigate to="/authentication/sign-in" />;

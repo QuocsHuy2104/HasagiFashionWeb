@@ -25,13 +25,12 @@ function Illustration() {
 
   const handleSetRememberMe = () => setRememberMe(!rememberMe);
 
-  // Update the validation to check for username instead of email
   const validateForm = () => {
     let formErrors = {};
 
-    if (!username.trim()) formErrors.username = "Please enter a username.";
+    if (!username.trim()) formErrors.username = "Vui lòng nhập tên người dùng.";
 
-    if (!password.trim()) formErrors.password = "Please enter a password.";
+    if (!password.trim()) formErrors.password = "Vui lòng nhập mật khẩu.";
 
     return formErrors;
   };
@@ -61,7 +60,6 @@ function Illustration() {
           ? new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000) // 30 days
           : new Date(new Date().getTime() + 60 * 60 * 1000); // 1 hour
 
-
         const token = response.data.token;
 
         Cookies.set('user', token, { expires: expirationTime });
@@ -70,14 +68,13 @@ function Illustration() {
 
         navigate("/");
       }
-
     } catch (error) {
       if (error.response) {
-        setMessage(error.response.data.message || "Login failed. Please try again.");
+        setMessage(error.response.data.message || "Đăng nhập không thành công. Vui lòng thử lại.");
       } else if (error.request) {
-        setMessage("No response from server. Please check your network.");
+        setMessage("Không có phản hồi từ máy chủ. Vui lòng kiểm tra mạng của bạn.");
       } else {
-        setMessage("Login failed. Please try again.");
+        setMessage("Đăng nhập không thành công. Vui lòng thử lại.");
       }
     } finally {
       setLoading(false);
@@ -87,19 +84,19 @@ function Illustration() {
 
   return (
     <IllustrationLayout
-      title="Sign-in"
-      description="Please, enter your username and password"
+      title="Đăng nhập"
+      description="Vui lòng nhập tài khoản và mật khẩu của bạn"
       illustration={{
         image: bgImage,
-        title: "\"Attention is the new currency\"",
-        description: "The more effortless writing looks, the more effort the writer actually put into the process.",
+        title: "\"Chúc bạn có ngày mới vui vẻ\"",
+        description: "Viết càng dễ dàng thì người viết càng bỏ nhiều công sức vào quá trình viết.",
       }}
     >
       <ArgonBox component="form" role="form" onSubmit={handleLogin}>
         <ArgonBox mb={2}>
           <ArgonInput
             type="text"
-            placeholder="Username"
+            placeholder="Tên đăng nhập"
             size="large"
             name="username"
             value={username}
@@ -113,7 +110,7 @@ function Illustration() {
         <ArgonBox mb={2}>
           <ArgonInput
             type="password"
-            placeholder="Password"
+            placeholder="Mật khẩu"
             size="large"
             name="password"
             value={password}
@@ -131,25 +128,37 @@ function Illustration() {
             </ArgonTypography>
           </ArgonBox>
         )}
-        <ArgonBox display="flex" alignItems="center">
-          <Switch checked={rememberMe} onChange={handleSetRememberMe} />
+        <ArgonBox display="flex" justifyContent="space-between" alignItems="center">
+          <ArgonBox display="flex" alignItems="center">
+            <Switch checked={rememberMe} onChange={handleSetRememberMe} />
+            <ArgonTypography
+              variant="button"
+              fontWeight="regular"
+              onClick={handleSetRememberMe}
+              sx={{ cursor: "pointer", userSelect: "none" }}
+            >
+              &nbsp;&nbsp;Remember me
+            </ArgonTypography>
+          </ArgonBox>
           <ArgonTypography
+            component={Link}
+            to="/forgot-password" 
             variant="button"
             fontWeight="regular"
-            onClick={handleSetRememberMe}
             sx={{ cursor: "pointer", userSelect: "none" }}
           >
-            &nbsp;&nbsp;Remember me
+            Quên mật khẩu
           </ArgonTypography>
         </ArgonBox>
+
         <ArgonBox mt={4} mb={1}>
           <ArgonButton color="info" size="large" fullWidth type="submit" disabled={loading}>
-            {loading ? "Loading..." : "Sign-in"}
+            {loading ? "Loading..." : "Đăng nhập"}
           </ArgonButton>
         </ArgonBox>
         <ArgonBox mt={3} textAlign="center">
           <ArgonTypography variant="button" color="text" fontWeight="regular">
-            Dont have an account?{" "}
+            Bạn không có tài khoản?{" "}
             <ArgonTypography
               component={Link}
               to="/authentication/sign-up"
@@ -157,7 +166,7 @@ function Illustration() {
               color="info"
               fontWeight="medium"
             >
-              Sign-up
+              Đăng ký
             </ArgonTypography>
           </ArgonTypography>
         </ArgonBox>

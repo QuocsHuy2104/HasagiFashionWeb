@@ -5,18 +5,18 @@ const VoucherService = {
 
     getActiveVouchers: async () => {
         const response = await apiClient.get("/admin/coupon");
-        return response.data.filter(coupon => coupon.isActive);
+        return response.data.filter(voucher => voucher.isActive);
     },
 
-    getVoucherById: (couponId) => apiClient.get(`/admin/coupon/${couponId}`),
+    getVoucherById: (voucherId) => apiClient.get(`/admin/coupon/${voucherId}`),
 
-    createVoucher: (coupon) => apiClient.post("/admin/coupon", coupon),
+    createVoucher: (voucher) => apiClient.post("/admin/coupon", voucher),
 
-    updateVoucher: (id, coupon) => apiClient.put(`/admin/coupon/${id}`, coupon),
+    updateVoucher: (id, voucher) => apiClient.put(`/admin/coupon/${id}`, voucher),
 
     deleteVoucher: (id) => apiClient.delete(`/admin/coupon/${id}`),
 
-    getUsedVouchersByAccount: (accountId) => apiClient.get(`/admin/coupon/${accountId}/used-coupons`)
+    getUsedVouchersByAccount: (accountId) => apiClient.get(`/admin/coupon/${accountId}/used-vouchers`)
 };
 
 export default VoucherService;

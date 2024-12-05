@@ -258,8 +258,8 @@ const VoucherList = () => {
         speed: 500,
         slidesToShow: Math.min(4, availableVouchers.length),
         slidesToScroll: 1,
-        nextArrow: <CustomNextArrow />,
-        prevArrow: <CustomPrevArrow />,
+        // nextArrow: <CustomNextArrow />,
+        // prevArrow: <CustomPrevArrow />,
         responsive: [
             {
                 breakpoint: 1024,
@@ -302,14 +302,9 @@ const VoucherList = () => {
 
     return (
         <>
-            <div className="container-fluid pt-3">
-                <Typography variant="h2" className="section-title position-relative text-uppercase mx-xl-5 mb-3">
-                    <span className="bg-secondary pr-3">VOUCHER</span>
-                </Typography>
-            </div>
-
+            
             <div style={{ position: "relative" }}>
-                <Slider {...sliderSettings} className="px-xl-5 pb-3">
+                <Slider {...sliderSettings} className="pb-3 pt-4">
                     {availableVouchers.length === 0 ? (
                         <Typography variant="h6">Không có voucher nào.</Typography>
                     ) : (

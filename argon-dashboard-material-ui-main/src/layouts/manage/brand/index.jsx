@@ -60,9 +60,6 @@ function Brand() {
     if (!formData.name.trim()) {
       newErrors.name = true;
       toast.warn("Vui lòng nhập tên thương hiệu!!!");
-    } else if (isBrandNameDuplicate(formData.name)) {
-      newErrors.name = true;
-      toast.warn("Tên danh mục đã tồn tại!!!");
     }
     if (!formData.image) {
       newErrors.image = true;
@@ -75,10 +72,6 @@ function Brand() {
     return !newErrors.name && !newErrors.image;
   };
 
-  const isBrandNameDuplicate = (brandName) => {
-    const existingBrandNames = brands.map((brand) => brand.name.trim().toLowerCase());
-    return existingBrandNames.includes(brandName.trim().toLowerCase());
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -86,11 +79,6 @@ function Brand() {
     const isValid = validateForm();
     if (!isValid) {
       console.log("Form is invalid. Aborting submit.");
-      return;
-    }
-
-    if (isBrandNameDuplicate(formData.name)) {
-      toast.error("Tên thương hiệu đã tồn tại. Không thể thêm mới!");
       return;
     }
 

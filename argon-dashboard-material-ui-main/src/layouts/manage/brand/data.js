@@ -70,7 +70,7 @@ export default function DataTable({ brands, onEditClick, onDeleteClick }) {
                     } else if (result.dismiss === Swal.DismissReason.cancel) {
                         Swal.fire({
                             title: "Đã hủy",
-                            text: "Màu không bị xóa.",
+                            text: "Thương hiệu không bị xóa.",
                             icon: "error",
                             backdrop: 'rgba(0, 0, 0, 0)',
                         });
