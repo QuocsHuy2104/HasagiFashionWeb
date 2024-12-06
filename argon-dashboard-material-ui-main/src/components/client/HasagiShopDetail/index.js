@@ -644,34 +644,7 @@ function ShopDetail() {
                       />
                     )}
                     {/* Thumbnail ảnh của product */}
-                    {product.image && (
-                      <div
-                        style={{
-                          width: "92.3px",
-                          height: "86px",
-                          cursor: "pointer",
-                          border:
-                            (!product.video && currentMedia === 0) || currentMedia === 1
-                              ? "2px solid #ffb524"
-                              : "1px solid transparent",
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          boxSizing: "border-box",
-                        }}
-                        onClick={() => handleThumbnailClick(product.image, 1)} // Click vào ảnh thumbnail
-                        onMouseEnter={() => handleThumbnailHover(product.image, 1)} // Hover ảnh thumbnail
-                      >
-                        <img
-                          src={product.image}
-                          alt="Product Thumbnail"
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                          }}
-                        />
-                      </div>
-                    )}
+                    
                   </div>
 
                   {/* Phần hiển thị cho các ảnh của productDetail */}
@@ -686,7 +659,7 @@ function ShopDetail() {
                           <div
                             style={{
                               width: "92.3px",
-                              height: "130px",
+                              height: "86px",
                               cursor: "pointer",
                               border:
                                 currentImage === matchingImages?.imageDTOResponse[0]?.url
@@ -709,6 +682,9 @@ function ShopDetail() {
                               style={{
                                 width: "100%",
                                 height: "100%",
+                                objectFit: "contain",
+                                backgroundColor: "#f5f5f5",
+                                display: "block",
                               }}
                             />
                           </div>

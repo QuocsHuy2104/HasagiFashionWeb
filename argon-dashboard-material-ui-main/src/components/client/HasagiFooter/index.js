@@ -66,7 +66,6 @@ const Footer = () => {
                             }}>
                             <ArgonTypography variant='h4' mb='17px' display='flex' justifyContent='space-between' alignItems='center'>Về chúng tôi</ArgonTypography>
                             <ArgonTypography variant='button' color='secondary' sx={{ maxWidth: '85%', fontSize: '15px', lineHeight: '1.7rem', margin: '0' }}>
-                                <MuiLink href='/introduce'>Hỏi đáp</MuiLink><br />
                                 <MuiLink href='/Q&A'>Chính sách đổi trả</MuiLink><br />
                                 <MuiLink href='/Q&A'>Chính sách bảo mật</MuiLink><br />
                                 <MuiLink href='/Q&A'>Điều khoản dịch vụ</MuiLink><br />
