@@ -25,7 +25,9 @@ function ShopDetail() {
   const query = new URLSearchParams(location.search);
   const productId = query.get("id");
   const [error, setError] = useState("");
-
+  const [colorName, setColorName] = useState("");
+  const [sizename, setSizeName] = useState("");
+  const [tooltip, setTooltip] = useState(null);
   const navigate = useNavigate();
   const [reviews, setReviews] = useState([]);
   const [quantityPDT, setQuantityPDT] = useState(0);
@@ -866,7 +868,7 @@ function ShopDetail() {
 
 
               <div className="mb-4 mt-2" id="color-input-list">
-                <div className="row">
+              <div className="row">
                   <div className="col-2">
                     {product?.colors?.length > 0 && (
                       <span className="text-dark mr-3" style={{ fontSize: "17px" }}>
@@ -874,66 +876,101 @@ function ShopDetail() {
                       </span>
                     )}
                   </div>
-                  <div className="col-9" style={{ maxHeight: "150px", overflowY: "auto" }}>
+                  <div
+                    className="col-9"
+                    style={{
+                      maxHeight: "150px",
+                      overflowY: "auto",
+                      position: "relative", // Đảm bảo tooltip được đặt đúng vị trí
+                    }}
+                  >
                     {product?.colors?.length > 0 && (
                       <div>
                         {uniqueColors?.map((color) => {
-                          // Tìm ảnh tương ứng với màu trong images
                           const matchingImage = images?.find(
                             (image) => image?.colorsDTO?.id === color?.id
                           );
 
                           return (
-                            <button
+                            <div
                               key={color.id}
-                              className={`variant-button ${selectedColor === color.id ? "selected" : ""
-                                } ${!color.check ? "disabled" : ""}`}
-                              onClick={() => {
-                                setSelectedColor((prevSelected) => {
-                                  const newSelectedColor =
-                                    prevSelected === color.id ? null : color.id;
-                                  setQuantity(1);
-                                  if (matchingImage) {
-                                    setCurrentImage(matchingImage?.imageDTOResponse[0]?.url);
-                                    setPreviousImage(matchingImage?.imageDTOResponse[0]?.url); // Cập nhật hình ảnh cũ khi chọn
-                                    setCurrentMedia(color.name);
-                                    setPreviousCurrentMedia(color.name);
-                                  }
-                                  return newSelectedColor;
-                                });
-                              }}
-                              onMouseEnter={() =>
-                                handleButtonlHover(
-                                  matchingImage?.imageDTOResponse[0]?.url,
-                                  color.name
-                                )
-                              }
-                              onMouseLeave={!color.check ? null : handleButtonLeave} // Trả lại hình ảnh cũ khi bỏ hover
                               style={{
-                                marginRight: "10px",
-                                cursor: !color.check ? "not-allowed" : "pointer",
-                                opacity: !color.check ? 0.5 : 1,
-                                marginBottom: "10px",
+                                display: "inline-block",
+                                marginRight: "10px", // Khoảng cách ngang giữa các nút
+                                marginBottom: "10px", // Khoảng cách dọc giữa các hàng
                               }}
-                              disabled={!color.check}
+                              onMouseEnter={(e) => {
+                                if (!color.check) {
+                                  setTooltip({
+                                    message: `Màu ${color.name} của kích thước ${sizename} đã hết, vui lòng chọn màu khác.`,
+                                    x: e.clientX,
+                                    y: e.clientY,
+                                  });
+                                }
+                              }}
+                              onMouseMove={(e) => {
+                                if (tooltip) {
+                                  setTooltip({
+                                    ...tooltip,
+                                    x: e.clientX,
+                                    y: e.clientY,
+                                  });
+                                }
+                              }}
+                              onMouseLeave={() => setTooltip(null)}
                             >
-                              {/* Ảnh nhỏ trước tên màu */}
-                              {matchingImage && (
-                                <img
-                                  key={matchingImage?.colorsDTO?.id}
-                                  src={matchingImage?.imageDTOResponse[0]?.url}
-                                  alt={color.name}
-                                  style={{
-                                    width: "25px", // Kích thước ảnh nhỏ
-                                    height: "25px", // Kích thước ảnh nhỏ
-                                    marginRight: "10px", // Khoảng cách giữa ảnh và tên màu
-                                  }}
-                                />
-                              )}
+                              <button
+                                className={`variant-button ${
+                                  selectedColor === color.id ? "selected" : ""
+                                } ${!color.check ? "disabled" : ""}`}
+                                onClick={() => {
+                                  setSelectedColor((prevSelected) => {
+                                    const newSelectedColor =
+                                      prevSelected === color.id ? null : color.id;
+                                    prevSelected === color.id
+                                      ? setColorName("")
+: setColorName(color.name);
+                                    setQuantity(1);
+                                    if (matchingImage) {
+                                      setCurrentImage(matchingImage?.imageDTOResponse[0]?.url);
+                                      setPreviousImage(matchingImage?.imageDTOResponse[0]?.url); // Cập nhật hình ảnh cũ khi chọn
+                                      setCurrentMedia(color.name);
+                                      setPreviousCurrentMedia(color.name);
+                                    }
+                                    return newSelectedColor;
+                                  });
+                                }}
+                                onMouseEnter={() =>
+                                  handleButtonlHover(
+                                    matchingImage?.imageDTOResponse[0]?.url,
+                                    color.name
+                                  )
+                                }
+                                onMouseLeave={!color.check ? null : handleButtonLeave} // Trả lại hình ảnh cũ khi bỏ hover
+                                style={{
+                                  cursor: !color.check ? "not-allowed" : "pointer",
+                                  opacity: !color.check ? 0.5 : 1,
+                                }}
+                                disabled={!color.check}
+                              >
+                                {/* Ảnh nhỏ trước tên màu */}
+                                {matchingImage && (
+                                  <img
+                                    key={matchingImage?.colorsDTO?.id}
+                                    src={matchingImage?.imageDTOResponse[0]?.url}
+                                    alt={color.name}
+                                    style={{
+                                      width: "25px",
+                                      height: "25px",
+                                      marginRight: "10px",
+                                    }}
+                                  />
+                                )}
 
-                              {/* Tên màu */}
-                              {color.name}
-                            </button>
+                                {/* Tên màu */}
+                                {color.name}
+                              </button>
+                            </div>
                           );
                         })}
                       </div>
@@ -942,7 +979,7 @@ function ShopDetail() {
                 </div>
               </div>
               <div className="mb-4" id="size-input-list">
-                <div className="row">
+              <div className="row">
                   <div className="col-3">
                     {product?.sizes?.length > 0 && (
                       <span className="text-dark mr-3" style={{ fontSize: "17px" }}>
@@ -952,33 +989,89 @@ function ShopDetail() {
                   </div>
                   <div
                     className="col-9"
-                    style={{ marginLeft: "-100px", maxHeight: "150px", overflowY: "auto" }}
+                    style={{
+                      marginLeft: "-100px",
+                      maxHeight: "150px",
+                      overflowY: "auto",
+                      position: "relative",
+                    }}
                   >
                     {product?.sizes?.length > 0 && (
                       <div style={{ marginLeft: "40px" }}>
                         {uniqueSizes?.map((size) => (
-                          <button
+                          <div
                             key={size.id}
-                            className={`variant-button ${selectedSize === size.id ? "selected" : ""
-                              } ${!size.check ? "disabled" : ""}`}
-                            onClick={() => {
-                              setSelectedSize((prevSelected) => {
-                                const newSelectedSize = prevSelected === size.id ? null : size.id;
-                                setQuantity(1);
-                                return newSelectedSize;
-                              });
-                            }}
                             style={{
-                              marginRight: "10px",
-                              cursor: !size.check ? "not-allowed" : "pointer",
-                              opacity: !size.check ? 0.5 : 1,
-                              marginBottom: "10px",
+                              display: "inline-block",
+                              marginRight: "10px", // Khoảng cách giữa các nút theo chiều ngang
+                              marginBottom: "10px", // Khoảng cách giữa các hàng
                             }}
-                            disabled={!size.check}
+                            onMouseEnter={(e) => {
+                              if (!size.check) {
+                                setTooltip({
+                                  message: `Kích thước ${size.name} của màu ${colorName} đã hết, vui lòng chọn kích thước khác.`,
+                                  x: e.clientX,
+                                  y: e.clientY,
+                                });
+                              }
+                            }}
+                            onMouseMove={(e) => {
+                              if (tooltip) {
+                                setTooltip({
+                                  ...tooltip,
+                                  x: e.clientX,
+                                  y: e.clientY,
+                                });
+                              }
+                            }}
+                            onMouseLeave={() => setTooltip(null)}
                           >
-                            {size.name}
-                          </button>
+                            <button
+                              className={`variant-button ${
+                                selectedSize === size.id ? "selected" : ""
+                              } ${!size.check ? "disabled" : ""}`}
+                              onClick={() => {
+                                if (size.check) {
+                                  setSelectedSize((prevSelected) => {
+                                    const newSelectedSize =
+                                      prevSelected === size.id ? null : size.id;
+                                    prevSelected === size.id
+                                      ? setSizeName("")
+                                      : setSizeName(size.name);
+                                    setQuantity(1);
+                                    return newSelectedSize;
+});
+                                }
+                              }}
+                              style={{
+                                cursor: !size.check ? "not-allowed" : "pointer",
+                                opacity: !size.check ? 0.5 : 1,
+                              }}
+                              disabled={!size.check}
+                            >
+                              {size.name}
+                            </button>
+                          </div>
                         ))}
+                        {tooltip && (
+                          <div
+                            style={{
+                              position: "fixed",
+                              top: tooltip.y + 20,
+                              left: tooltip.x - 40,
+                              backgroundColor: "#333",
+                              color: "#fff",
+                              padding: "5px 10px",
+                              borderRadius: "0px",
+                              fontSize: "12px",
+                              pointerEvents: "none",
+                              whiteSpace: "nowrap",
+                              zIndex: 1000,
+                            }}
+                          >
+                            {tooltip.message}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

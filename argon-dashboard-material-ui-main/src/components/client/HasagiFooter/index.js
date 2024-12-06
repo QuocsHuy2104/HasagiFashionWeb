@@ -2,10 +2,7 @@ import React from "react";
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
 import MuiLink from "@mui/material/Link";
-import { FaFacebookF, FaTwitter, FaYoutube, FaLinkedinIn, FaTiktok } from 'react-icons/fa';
-import { Container } from "@mui/material";
-import ArgonInput from "components/ArgonInput";
-import ArgonButton from "components/ArgonButton";
+import logo from "../../../assets/images/logo2.jpg";
 
 const Footer = () => {
     return (
@@ -39,11 +36,11 @@ const Footer = () => {
                             <MuiLink href='/' sx={{ marginBottom: '15px', maxWidth: '50%', display: 'block' }}>
                                 <ArgonBox
                                     component='img'
-                                    src='https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/footers2_one_logo.png?1713464283843'
+                                    src={logo}
                                     alt='Logo'
                                     width='100%' />
                             </MuiLink>
-                            <ArgonTypography variant='button' color='secondary' sx={{ maxWidth: '85%', fontSize: '15px', lineHeight: '1.7rem', margin: '0' }}>F1GENZ SHOES luôn cam kết, đảm bảo đưa sản phẩm trực tiếp từ nhà sản xuất đến tay người dùng và kiểm soát được chất lượng để đáp ứng được nhu cầu ngày càng cao của khách hàng. Tất cả các sản phẩm tại F1GENZ SHOES đều có nguồn gốc xuất xứ rõ ràng, chất lượng.</ArgonTypography>
+                            <ArgonTypography variant='button' color='secondary' sx={{ maxWidth: '85%', fontSize: '15px', lineHeight: '1.7rem', margin: '0' }}>HASAGIFASHION luôn cam kết, đảm bảo đưa sản phẩm trực tiếp từ nhà sản xuất đến tay người dùng và kiểm soát được chất lượng để đáp ứng được nhu cầu ngày càng cao của khách hàng. Tất cả các sản phẩm tại HASAGI FASHION đều có nguồn gốc xuất xứ rõ ràng, chất lượng.</ArgonTypography>
                         </ArgonBox>
                         <ArgonBox width='22.5%'
                             sx={{
@@ -69,10 +66,10 @@ const Footer = () => {
                             }}>
                             <ArgonTypography variant='h4' mb='17px' display='flex' justifyContent='space-between' alignItems='center'>Về chúng tôi</ArgonTypography>
                             <ArgonTypography variant='button' color='secondary' sx={{ maxWidth: '85%', fontSize: '15px', lineHeight: '1.7rem', margin: '0' }}>
-                                <MuiLink href='/introduce'>Gioi Thieu</MuiLink><br />
-                                <MuiLink href='/policy'>Chinh sach doi tra</MuiLink><br />
-                                <MuiLink href='/security'>Chinh sach bao mat</MuiLink><br />
-                                <MuiLink href='/service'>Dieu khoan dich vu</MuiLink><br />
+                                <MuiLink href='/introduce'>Hỏi đáp</MuiLink><br />
+                                <MuiLink href='/Q&A'>Chính sách đổi trả</MuiLink><br />
+                                <MuiLink href='/Q&A'>Chính sách bảo mật</MuiLink><br />
+                                <MuiLink href='/Q&A'>Điều khoản dịch vụ</MuiLink><br />
                             </ArgonTypography>
                         </ArgonBox>
 
@@ -84,10 +81,10 @@ const Footer = () => {
                             }}>
                             <ArgonTypography variant='h4' mb='17px' display='flex' justifyContent='space-between' alignItems='center'>Doanh Mục</ArgonTypography>
                             <ArgonTypography variant='button' color='secondary' sx={{ maxWidth: '85%', fontSize: '15px', lineHeight: '1.7rem', margin: '0' }}>
-                                <MuiLink href='/shop'>Sản Phẩm</MuiLink><br />
-                                <MuiLink href='/policy'>Áo Sơ Mi</MuiLink><br />
-                                <MuiLink href='/security'>Áo POLO</MuiLink><br />
-                                <MuiLink href='/service'>Thương Hiệu GUCCI</MuiLink><br />
+                                <MuiLink href='/Shop'>Sản Phẩm</MuiLink><br />
+                                <MuiLink href='/About'>Giới thiệu</MuiLink><br />
+                                <MuiLink href='/Contact'>Liên hệ</MuiLink><br />
+                                <MuiLink href='/Q&A'>Hỏi đáp</MuiLink><br />
                             </ArgonTypography>
                         </ArgonBox>
 
@@ -123,7 +120,7 @@ const Footer = () => {
                     <ArgonBox>
                         <ArgonTypography variant='button'>
                             © 2024 - Bản quyền thuộc về
-                            <MuiLink href='/' mx={1}>HASAGHIFASHION</MuiLink>
+                            <MuiLink href='/' mx={1}>HASAGI FASHION</MuiLink>
                         </ArgonTypography>
                     </ArgonBox>
                     <ArgonBox display='flex' justifyContent='space-start' alignItems='center'>

@@ -169,12 +169,22 @@ const Cart = () => {
 
     setCartItems(updatedCartItems);
 
-    try {
-      await axios.put(`http://localhost:3000/api/cart/update/${updatedItem.cartdetailid}`, null, {
-        params: { quantity: updatedItem.quantity },
-      });
-    } catch (error) {
-      console.error("Error updating quantity:", error);
+    if (updatedItem.quantity > 0) {
+      try {
+        await axios.put(`http://localhost:3000/api/cart/update/${updatedItem.cartdetailid}`, null, {
+          params: { quantity: updatedItem.quantity },
+        });
+      } catch (error) {
+        console.error("Error updating quantity:", error);
+      }
+    } else {
+      try {
+        await axios.put(`http://localhost:3000/api/cart/update/${updatedItem.cartdetailid}`, null, {
+          params: { quantity: 1 },
+        });
+      } catch (error) {
+        console.error("Error updating quantity:", error);
+      }
     }
   };
 
