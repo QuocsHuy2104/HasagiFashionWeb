@@ -15,7 +15,7 @@ import 'rc-slider/assets/index.css';
 function Shop() {
     const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [productsPerPage] = useState(8);
+    const [productsPerPage] = useState(12);
     const [isLoading, setIsLoading] = useState(true);
     const [sortOption, setSortOption] = useState("default");
     const [categories, setCategories] = useState([]);
@@ -25,7 +25,7 @@ function Shop() {
     const [searchTerm, setSearchTerm] = useState("");
     const [reviews, setReviews] = useState([]);
     const [value, setValue] = useState([300000, 700000]);
-
+    const [showSaleOnly, setShowSaleOnly] = useState(false);
     const handleSliderChange = (newValue) => {
         setValue(newValue);
     };
@@ -66,9 +66,9 @@ function Shop() {
     useEffect(() => {
         const fetchProductsAndCategories = async () => {
             try {
-                const productResponse = await ProductService.getAllProducts();
-                const categoryResponse = await CategoryService.getAllCategories();
-                const brandResponse = await BrandService.getAllBrands();
+                const productResponse = await ProductService.getAllProductsUS();
+                const categoryResponse = await CategoryService.getAllCategoriesUS();
+                const brandResponse = await BrandService.getAllBrandsUS();
 
                 if (
                     Array.isArray(productResponse.data) &&
@@ -98,8 +98,9 @@ function Shop() {
         const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.categoryDTOResponse?.id);
         const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(product.brandDTOResponse?.id);
         const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSale = !showSaleOnly || product.sale > 0;
 
-        return matchesCategory && matchesBrand && matchesSearchTerm;
+        return matchesCategory && matchesBrand && matchesSearchTerm && matchesSale;
     });
 
     const sortedProducts = filteredProducts.sort((a, b) => {
@@ -268,6 +269,66 @@ function Shop() {
                                         }
                                     `}
                                 </style>
+                            </div>
+                        </div>
+                        <div className="filter-options card p-3 mb-4" style={{
+                            border: '1px solid #ddd',
+                            borderRadius: '8px',
+                            backgroundColor: '#f9f9f9'
+                        }}>
+                            <div className="filter-section mt-0" style={{ padding: '8px 12px' }}>
+                                <h6 className="filter-title text-uppercase mb-2" style={{
+                                    fontSize: '1.5rem',
+                                    color: '#333',
+                                    fontWeight: 600,
+                                    borderBottom: '1px solid #ddd',
+                                    paddingBottom: '5px',
+                                    marginBottom: '3px'
+                                }}>SẢN PHẨM GIẢM GIÁ</h6>
+                                <div className="filter-checkboxes" style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    paddingLeft: '15px',
+                                    maxHeight: '300px',
+                                    overflowY: 'auto',
+                                    scrollbarWidth: 'thin',
+                                    scrollbarColor: '#C0C0C0 #f1f1f1',
+                                }}>
+                                    {/* Checkbox "Tất cả" */}
+                                    <Form.Check
+                                        type="checkbox"
+                                        id="filter-all"
+                                        label="Tất cả"
+                                        checked={selectedCategories.length === 0 && !showSaleOnly}
+                                        onChange={() => {
+                                            setSelectedCategories([]);
+                                            setShowSaleOnly(false);
+                                        }}
+                                        style={{
+                                            cursor: 'pointer',
+                                            fontWeight: 'bold',
+                                            color: '#333',
+                                            marginBottom: '10px',
+                                            fontSize: '19px',
+                                        }}
+                                    />
+
+                                    {/* Checkbox "Sale" */}
+                                    <Form.Check
+                                        type="checkbox"
+                                        id="filter-sale"
+                                        label="Sản phẩm giảm giá"
+                                        checked={showSaleOnly}
+                                        onChange={() => setShowSaleOnly(!showSaleOnly)}
+                                        style={{
+                                            cursor: 'pointer',
+                                            color: '#555',
+                                            transition: 'color 0.3s',
+                                            marginBottom: '10px',
+                                            fontSize: '19px',
+                                        }}
+                                    />
+                                </div>
                             </div>
                         </div>
                         <div className="filter-options card p-3 mb-4" style={{
@@ -465,29 +526,77 @@ function Shop() {
                                                     style={{
                                                         position: "relative",
                                                         overflow: "hidden",
-                                                        width: "100%",
+                                                        width: "110%",
                                                         height: "auto",
                                                     }}
                                                 >
+                                                    {/* Hiển thị hình ảnh sản phẩm */}
                                                     <img
                                                         src={product.image}
                                                         alt={product.name}
                                                         style={{
                                                             width: "100%",
-                                                            height: "450px",
+                                                            height: "350px",
                                                             transition: "transform 0.3s ease, opacity 0.3s ease",
                                                         }}
                                                     />
+
+                                                    {/* Hiển thị nhãn giảm giá */}
+                                                    {product.sale > 0 && (
+                                                        <div
+                                                            style={{
+                                                                position: "absolute",
+                                                                top: "10px",
+                                                                left: "10px",
+                                                                backgroundColor: "#f5365c",
+                                                                color: "white",
+                                                                padding: "5px 10px",
+                                                                borderRadius: "5px",
+                                                                fontSize: "14px",
+                                                            }}
+                                                        >
+                                                            -{product.sale}%
+                                                        </div>
+                                                    )}
                                                 </div>
+
                                                 <div className="card-content" style={{ padding: "10px" }}>
-                                                    <div style={{ fontSize: "15px" }}>
+                                                    {/* Tên sản phẩm */}
+                                                    <div
+                                                        style={{
+                                                            fontSize: "15px",
+                                                            marginBottom: "5px",
+                                                            whiteSpace: "nowrap",
+                                                            overflow: "hidden",
+                                                            textOverflow: "ellipsis",
+                                                        }}
+                                                    >
                                                         {product.name || "Product Name Goes Here"}
                                                     </div>
-                                                    <Typography variant="body2" style={{ color: "red", fontWeight: "bold" }}>
-                                                        {formatImportPrice(product.importPrice)}
-                                                    </Typography>
-                                                    <Typography variant="body2" style={{ fontWeight: "bold" }}>
-                                                        <p>⭐ {calculateAverageStars(product.id)}</p>
+
+                                                    {/* Giá gốc và giá sau giảm */}
+                                                    <div style={{ fontSize: "16px", marginBottom: "5px" }}>
+                                                        {product.sale > 0 ? (
+                                                            <>
+                                                                <span style={{ color: "#f5365c", fontWeight: "bold" }}>
+                                                                    {product.minPrice === product.maxPrice
+                                                                        ? `${(product.minPrice * (1 - product.sale / 100)).toLocaleString()}đ`
+                                                                        : ` ${(product.minPrice * (1 - product.sale / 100)).toLocaleString()}đ`}
+                                                                </span>
+                                                                <span style={{ textDecoration: "line-through", color: "gray", marginLeft: "5px" }}>
+                                                                    {new Intl.NumberFormat("vi-VN").format(product.minPrice)}đ
+                                                                </span>
+                                                            </>
+                                                        ) : (
+                                                            <span style={{ color: "#f5365c", fontWeight: "bold" }}>
+                                                                {new Intl.NumberFormat("vi-VN").format(product.minPrice)}đ
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Đánh giá sản phẩm */}
+                                                    <Typography variant="body2" style={{ fontWeight: "bold", marginTop: "10px" }}>
+                                                        ⭐ {calculateAverageStars(product.id)}
                                                     </Typography>
                                                 </div>
                                             </Card>

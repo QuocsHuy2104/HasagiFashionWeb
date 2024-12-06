@@ -25,7 +25,7 @@ const HistoryOrderDetail = () => {
   const [voucherPrice, setVoucherPrice] = useState("");
   const [cancelReason, setCancelReason] = useState("");
   const [images, setImages] = useState([]);
-
+  const [total, setTotal] = useState("");
   useEffect(() => {
     if (orderId) {
       const fetchOrderDetails = async () => {
@@ -59,7 +59,7 @@ const HistoryOrderDetail = () => {
             setVoucherPrice(data[0].voucher);
             setCancelReason(data[0].reason);
             setFullNameAdd(data[0].name);
-
+              setTotal(data[0].total);
             // Fetch additional image data for each product
             const imageRequests = data.map((product) =>
               axios
@@ -96,9 +96,16 @@ const HistoryOrderDetail = () => {
   const subtotalList = orderDetails.map((item) => item.productPrice * item.productQuantity);
   const totalSubtotal = subtotalList.reduce((total, subtotal) => total + subtotal, 0);
 
+  // Áp dụng giảm giá trực tiếp từ voucher (giảm tối đa không vượt quá totalSubtotal)
   const diccount = voucherPrice ? Math.min(voucherPrice, totalSubtotal) : 0;
+
+  // Tổng tiền sau khi áp dụng giảm giá
   const discountedSubtotal = totalSubtotal - diccount;
+
+  // Tổng tiền cuối cùng (bao gồm phí vận chuyển)
   const finalTotal = discountedSubtotal + shippingFee;
+
+  // Định dạng số tiền giảm giá và tổng tiền cuối cùng
   const formattedDiscountedTotal = new Intl.NumberFormat("vi-VN", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 3,
@@ -499,9 +506,7 @@ const HistoryOrderDetail = () => {
                               }}
                             >
                               <span style={{ marginLeft: "2px" }}>
-                                {new Intl.NumberFormat("vi-VN", { minimumFractionDigits: 3 })
-                                  .format(formattedFinalTotal)
-                                  .replace(/,/g, ".")}đ
+                              {new Intl.NumberFormat("vi-VN").format(total)}đ
                               </span>
                             </TableCell>
                           </TableRow>

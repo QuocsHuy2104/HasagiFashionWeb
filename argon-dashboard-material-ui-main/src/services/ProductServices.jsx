@@ -11,7 +11,9 @@ const ProductService = {
 
   updateQuantity: id => apiClient.put(`/admin/product/quantity/${id}`, id),
 
-  updatePrice: id => apiClient.put(`admin/product/price/${id}`)
+  updatePrice: id => apiClient.put(`admin/product/price/${id}`),
+
+  getAllProductsUS: () => apiClient.get('/public/productUS'),
 }
 
 export default ProductService;
