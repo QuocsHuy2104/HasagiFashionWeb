@@ -588,7 +588,7 @@ const Cart = () => {
                                 textAlign: "left",
                               }}
                             >
-                              <span style={{ color: item.color || "black" }}>
+                              <span>
                                 {item.color || "Chưa chọn màu"}
                               </span>
                               , {item.size || "Chưa chọn kích thước"}
@@ -676,9 +676,13 @@ const Cart = () => {
                               type="text"
                               className="form-control form-control-sm text-center"
                               value={item.quantity}
-                              onChange={(e) =>
-                                handleQuantityChange(item.cartdetailid, 0, e.target.value)
-                              } 
+                              onChange={(e) => {
+                                // Chỉ cho phép nhập số và không cho phép nhập ký tự khác
+                                const value = e.target.value;
+                                if (/^\d*$/.test(value)) {
+                                  handleQuantityChange(item.cartdetailid, 0, value);
+                                }
+                              }}
                               onBlur={(e) => {
                                 const inputValue = e.target.value.trim(); 
                                 if (inputValue === "") {

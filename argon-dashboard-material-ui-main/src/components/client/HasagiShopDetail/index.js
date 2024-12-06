@@ -36,7 +36,7 @@ function ShopDetail() {
   const [startIndex, setStartIndex] = useState(0);
   const videoRef = useRef(null); // Tham chiếu đến phần tử video
   const [mediaList, setMediaList] = useState([]);
-  const maxVisibleImages = product?.video ? 3 : 4;
+  const maxVisibleImages = product?.video ? 4 : 5;
   const [previousImage, setPreviousImage] = useState(); // Lưu lại hình ảnh trước khi hover
   const [previousCurrentMedia, setPreviousCurrentMedia] = useState(); // Lưu lại hình ảnh trước khi hover
   const [images, setImages] = useState([]);
@@ -504,10 +504,10 @@ function ShopDetail() {
                 }}
               >
                 {/* Video của Product */}
-                {product.video && (
+                {product?.video && (
                   <video
                     ref={videoRef}
-                    src={product.video}
+                    src={product?.video}
                     autoPlay
                     muted
                     controls
@@ -587,9 +587,7 @@ function ShopDetail() {
                   style={{
                     display: "flex",
                     gap: "10px",
-                    left: "12px",
-                    right: "0",
-                    transition: "transform 0.5s ease",
+                    marginLeft: product?.video ? 0 : "-10px",
                     transform: `translateX(${thumbnailOffset}px)`,
                   }}
                 >

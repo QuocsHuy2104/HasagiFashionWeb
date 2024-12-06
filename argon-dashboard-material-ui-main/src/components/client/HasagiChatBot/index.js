@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import CategoryService from '../../../services/CategoryServices';
 import BrandService from '../../../services/BrandServices';
+import ProductService from '../../../services/ProductServices';
 import VoucherService from '../../../services/VoucherServices';
+import ProductDetailService from '../../../services/ProductDetailServices';
 import { CircularProgress, IconButton, Box, Avatar } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import MicIcon from '@mui/icons-material/Mic';
-import ProductDetailService from 'services/ProductDetailServices';
 
 function Gemini() {
     const [question, setQuestion] = useState('');
@@ -61,7 +62,7 @@ function Gemini() {
 
     const isGreeting = (text) => {
         const greetings = [
-            { en: ["hi", "hello", "hey"], vi: ["chào", "xin chào", "alo"] },
+            { en: ["hi", "hello", "hey"], vi: ["chào bạn", "xin chào", "alo"] },
         ];
         const lang = detectLanguage(text);
         const keywords = greetings.find((g) => g[lang]);
@@ -80,13 +81,13 @@ function Gemini() {
             address: "49 Đ. 3 Tháng 2, Xuân Khánh, Ninh Kiều, Cần Thơ, VietNam"
         }
     };
-    
+
 
     const generateAIResponse = async (question) => {
         setLoading(true);
         try {
             const language = detectLanguage(question);
-    
+
             const keywords = ["điều khoản", "chính sách", "đổi trả", "bảo mật", "liên hệ"];
             const matchedKeyword = keywords.find((keyword) => question.toLowerCase().includes(keyword));
             if (matchedKeyword) {
@@ -117,13 +118,13 @@ function Gemini() {
                 setLoading(false);
                 return;
             }
-    
+
             const categories = await getCategoryData();
             const brands = await getBrandData();
             const products = await getProductData();
             const productDetails = await getProductDetailData();
             const vouchers = await getVoucherData();
-    
+
             const prompt = `\nCurrent Question: ${question}
             \nData (when available):
             \nCategories: ${JSON.stringify(categories.slice(0, 5))}
@@ -133,15 +134,15 @@ function Gemini() {
             \nVouchers: ${JSON.stringify(vouchers.slice(0, 5))}
             \nTerms and Conditions: ${JSON.stringify(termsAndConditions)}
             \nAnswer in ${language === 'vi' ? 'Vietnamese' : 'English'}.`;
-    
-            const API_KEY = 'AIzaSyCCV3Hqz3iBgTPElgfQao_5m8Zt1518-cM';
+
+            const API_KEY = process.env.REACT_APP_API_KEY;
             const response = await axios.post(
                 `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`,
                 {
                     contents: [{ parts: [{ text: prompt }] }]
                 }
             );
-    
+
             const aiAnswer = response.data.candidates?.[0]?.content?.parts?.[0]?.text || "Không có phản hồi từ AI.";
             setChatHistory((prevHistory) => [
                 ...prevHistory,
@@ -153,7 +154,7 @@ function Gemini() {
             setLoading(false);
         }
     };
-    
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
