@@ -62,13 +62,13 @@ const SelectImage = ({ image, onImageChange }) => {
 const isValidUrl = (props, propName, componentName) => {
     const url = props[propName];
     if (url && typeof url === 'string') {
-        const urlPattern = new RegExp('^(https?:\\/\\/)?' +
-            '((([a-zA-Z0-9$_.+!*\'(),;?&=-]|%[0-9a-fA-F]{2})+@)?' +
-            '((([0-9]{1,3}\\.){3}[0-9]{1,3})|' +
-            '(([a-zA-Z0-9$_.+!*\'(),;?&=-]|%[0-9a-fA-F]{2})+\\.)+[a-zA-Z]{2,}))' +
-            '(:[0-9]{2,5})?' +
-            '(\\/([a-zA-Z0-9$_.+!*\'(),;?&=-]|%[0-9a-fA-F]{2})*)*' +
-            '(\\?[a-zA-Z0-9$_.+!*\'(),;?&=-]|%[0-9a-fA-F]{2})*' +
+        const urlPattern = new RegExp('^(https?:\\/\\/)?' + 
+            '((([a-zA-Z0-9$_.+!*\'(),;?&=-]|%[0-9a-fA-F]{2})+@)?' + 
+            '((([0-9]{1,3}\\.){3}[0-9]{1,3})|' + 
+            '(([a-zA-Z0-9$_.+!*\'(),;?&=-]|%[0-9a-fA-F]{2})+\\.)+[a-zA-Z]{2,}))' + 
+            '(:[0-9]{2,5})?' + 
+            '(\\/([a-zA-Z0-9$_.+!*\'(),;?&=-]|%[0-9a-fA-F]{2})*)*' + 
+            '(\\?[a-zA-Z0-9$_.+!*\'(),;?&=-]|%[0-9a-fA-F]{2})*' + 
             '(#[a-zA-Z0-9$_.+!*\'(),;?&=-]|%[0-9a-fA-F]{2})*$');
         if (!urlPattern.test(url)) {
             return new Error(`Invalid prop \`${propName}\` supplied to \`${componentName}\`. Validation failed.`);

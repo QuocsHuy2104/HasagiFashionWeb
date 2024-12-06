@@ -161,16 +161,25 @@ const AddressSelection = ({ show, onClose }) => {
             <ToastContainer />
             {show && !showBackup && !showBackup1 && (
                 <div className="modal" style={{ display: show ? 'block' : 'none' }}>
-                    <div className="modal-dialog">
-                        <div className="modal-content" style={{ fontSize: '14px', width: "550px" }}>
+                    <div className="modal-dialog" style={{ marginTop: "92px" }}>
+                        <div className="modal-content" style={{ fontSize: '14px', width: '600px' }}>
                             <div className="modal-header">
                                 <h5 className="modal-title" style={{ fontSize: '16px' }}>Địa Chỉ Của Tôi</h5>
                             </div>
-                            <div className="modal-body p-4">
-                                <div className="list-group">
+                            <div className="modal-body">
+                                <div>
                                     {address.map((addr) => (
-                                        <div key={addr.id} className="list-group-item d-flex justify-content-between align-items-center" style={{ padding: '10px 15px' }}>
-                                            <div className="d-flex align-items-center" style={{ justifyContent: 'flex-start' }}>
+                                        <div
+                                            key={addr.id}
+                                            className="d-flex align-items-center justify-content-between"
+                                            style={{
+                                                padding: '10px 15px',
+                                                borderBottom: '1px solid #f0f0f0',
+                                                background: selectedAddress === addr.id ? '#f9f9f9' : '#fff',
+                                                cursor: 'pointer',
+                                            }}
+                                        >
+                                            <div className="d-flex align-items-center">
                                                 <input
                                                     type="radio"
                                                     name="address"
@@ -178,35 +187,74 @@ const AddressSelection = ({ show, onClose }) => {
                                                     onChange={() => handleAddressChange(addr.id, addr.provinceID, addr.districtCode)}
                                                     style={{ marginRight: '10px' }}
                                                 />
-                                                <div className="ms-3" style={{ textAlign: 'left' }}>
+                                                <div>
                                                     <div style={{ fontWeight: '500' }}>
                                                         {addr.fullName} <span style={{ fontSize: '12px' }}>({addr.numberPhone})</span>
                                                     </div>
                                                     <div style={{ fontSize: '12px', color: '#666' }}>
-                                                        {addr.address},
-                                                        {addr.wardName},
-                                                        {addr.districtName},
-                                                        {addr.provinceName}
+                                                        {addr.address}, {addr.wardName}, {addr.districtName}, {addr.provinceName}
                                                     </div>
-                                                    {addr.status && <span className="badge bg-danger" style={{ fontSize: '10px' }}>Mặc định</span>}
+                                                    {addr.status && (
+                                                        <span className="badge bg-danger" style={{ fontSize: '10px', marginTop: '5px' }}>
+                                                            Mặc định
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
-
                                             <button
-                                                className="btn ms-2"
-                                                style={{ transform: "scale(1)", fontSize: "13px" }}
+                                                className="btn btn-link text-primary"
+                                                style={{ fontSize: '13px', padding: '0' }}
                                                 onClick={() => handleAddressUpdate(addr.id)}
                                             >
-                                                Update
+                                                Cập nhật
                                             </button>
                                         </div>
                                     ))}
                                 </div>
+                                <button
+                                    onClick={handleAddAddress}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        padding: '10px',
+                                        border: '1px solid #ccc',
+                                        backgroundColor: '#fff',
+                                        color: '#666',
+                                        fontSize: '14px',
+                                        borderRadius: '5px',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s',
+                                        marginTop: "10px"
+                                    }}
+                                    onMouseOver={(e) => {
+                                        e.target.style.backgroundColor = '#f9f9f9';
+                                        e.target.style.borderColor = '#999';
+                                    }}
+                                    onMouseOut={(e) => {
+                                        e.target.style.backgroundColor = '#fff';
+                                        e.target.style.borderColor = '#ccc';
+                                    }}
+                                >
+                                    <span style={{ fontSize: '18px', marginRight: '8px', fontWeight: 'bold' }}>+</span>
+                                    Thêm Địa Chỉ Mới
+                                </button>
                             </div>
-                            <button className="btn ms-2" style={{ transform: "scale(1)", fontSize: "13px" }} onClick={handleAddAddress}>Thêm địa chỉ mới</button>
-                            <div className="modal-footer">
-                                <ArgonButton className="btn btn-light" onClick={handleClose}>Trở Lại</ArgonButton>
-                                <ArgonButton className="btn" onClick={handleComplete} style={{ fontSize: '14px' }}>Xác nhận</ArgonButton>
+                            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                                <button
+                                    className="btn btn-light"
+                                    onClick={handleClose}
+                                    style={{ fontSize: '14px' }}
+                                >
+                                    Hủy
+                                </button>
+                                <button
+                                    className="btn"
+                                    onClick={handleComplete}
+                                    style={{ fontSize: '14px', backgroundColor: "#E64A19", color: "white" }}
+                                >
+                                    Xác nhận
+                                </button>
                             </div>
                         </div>
                     </div>

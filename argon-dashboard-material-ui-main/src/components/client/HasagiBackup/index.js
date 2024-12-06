@@ -4,11 +4,11 @@ import ArgonInput from "components/ArgonInput";
 import ArgonButton from "components/ArgonButton";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import Cookies from "js-cookie";
 import "components/client/assets/css/phanloai1.css";
 import Select from "react-select";
 import AddressService from '../../../services/AddressServices';
 import { useLocation } from 'react-router-dom';
+
 const Backup = ({ show, onClose }) => {
     const [fullName, setFullName] = useState("");
     const [numberPhone, setNumBerPhone] = useState("");
@@ -22,7 +22,7 @@ const Backup = ({ show, onClose }) => {
     const [status, setStatus] = useState(false);
     const [isAddressAvailable, setIsAddressAvailable] = useState(true);
     const [errors, setErrors] = useState({});
-    const [isSubmitted, setIsSubmitted] = useState(false); // New state variable
+    const [isSubmitted, setIsSubmitted] = useState(false); 
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -129,7 +129,6 @@ const Backup = ({ show, onClose }) => {
         }
     };
 
-
     useEffect(() => {
         const fetchProvinces = async () => {
             try {
@@ -206,6 +205,7 @@ const Backup = ({ show, onClose }) => {
             wardCode: selectedWard,
         };
 
+
         try {
             const response = await AddressService.createAddressFirst(formData);
 
@@ -224,8 +224,23 @@ const Backup = ({ show, onClose }) => {
         } catch (error) {
             console.error("Error submitting address:", error);
             alert("Không thể lưu địa chỉ. Vui lòng thử lại.");
+
         }
     };
+
+    useEffect(() => {
+        const checkUserAddresses = async () => {
+            try {
+                const response = await AddressService.getAllAddress();
+                const userHasAddresses = response.data.length > 0;
+                setIsAddressAvailable(userHasAddresses);
+                if (!userHasAddresses) setStatus(true);
+            } catch (error) {
+                console.error("Error checking user addresses:", error);
+            }
+        };
+        checkUserAddresses();
+    }, []);
 
     useEffect(() => {
         const checkUserAddresses = async () => {

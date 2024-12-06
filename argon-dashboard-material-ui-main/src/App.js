@@ -108,7 +108,6 @@ export default function App() {
       }}
       onClick={handleConfiguratorOpen}
     >
-      <Icon sx={{ fontSize: "1.25rem" }}>settings</Icon>
     </ArgonBox>
   );
 
@@ -117,7 +116,6 @@ export default function App() {
   const shouldShowSidenav = 
     pathname !== "/feature-section" 
     && pathname !== "/ShopDetail" 
-    && pathname !== "/flash-sale/ShopDetail" 
     && pathname !== "/Shop" 
     && pathname !== "/Cart" 
     && pathname !== "/Contact" 

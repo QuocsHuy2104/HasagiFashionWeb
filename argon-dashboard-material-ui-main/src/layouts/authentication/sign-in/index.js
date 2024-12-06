@@ -25,7 +25,6 @@ function Illustration() {
 
   const handleSetRememberMe = () => setRememberMe(!rememberMe);
 
-  // Update the validation to check for username instead of email
   const validateForm = () => {
     let formErrors = {};
 
@@ -57,14 +56,14 @@ function Illustration() {
       );
 
       if (response.status === 200) {
-        const expirationTime = rememberMe
-          ? new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000) // 30 days
-          : new Date(new Date().getTime() + 60 * 60 * 1000); // 1 hour
+        // const expirationTime = rememberMe
+        //   ? new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000) 
+        //   : new Date(new Date().getTime() + 60 * 60 * 1000); 
 
         const token = response.data.token;
 
-        Cookies.set('user', token, { expires: expirationTime });
-        Cookies.set('accountId', response.data.accountId, { expires: expirationTime });
+        Cookies.set('user', token);
+        Cookies.set('accountId', response.data.accountId);
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
         navigate("/");

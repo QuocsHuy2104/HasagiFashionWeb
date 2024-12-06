@@ -68,4 +68,4 @@ MultipleSelectCheckmarks.propTypes = {
     selectModel: PropTypes.arrayOf(PropTypes.string),
     onChange: PropTypes.func.isRequired,
     nameTag: PropTypes.string.isRequired,
-};
+};  

@@ -117,7 +117,7 @@ function Role() {
         <ArgonBox mb={3}>
           <Card>
             <ArgonBox display="flex" justifyContent="space-between" p={3}>
-              <ArgonTypography variant="h6">Manage Role</ArgonTypography>
+              <ArgonTypography variant="h6">Quản lý vai trò</ArgonTypography>
             </ArgonBox>
 
             <ArgonBox p={3} component="form" role="form" onSubmit={handleSubmit}>
@@ -125,7 +125,7 @@ function Role() {
                 <ArgonBox mb={3} position="relative">
                   <ArgonInput
                     type="text"
-                    placeholder="Role Name"
+                    placeholder="Tên vai trò"
                     size="large"
                     name="name"
                     fullWidth
@@ -147,7 +147,7 @@ function Role() {
                     color="info"
                     fullWidth={true}
                   >
-                    {editingRole ? "Update" : "Save"}
+                    {editingRole ? "Sửa" : "Lưu"}
                   </ArgonButton>
                 </ArgonBox>
               </ArgonBox>

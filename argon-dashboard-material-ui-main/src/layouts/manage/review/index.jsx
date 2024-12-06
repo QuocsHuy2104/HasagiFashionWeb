@@ -11,6 +11,7 @@ import ReviewsService from "../../../services/ReviewsServices";
 import { CheckCircle, Cancel } from '@mui/icons-material';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
 import ReviewFilesService from '../../../services/ReviewFileServices';
 import { Modal, Box } from '@mui/material';
 
@@ -32,11 +33,11 @@ function Review() {
             try {
                 const response = await ReviewsService.getAllReviewsAD();
                 setReviews(response.data || []);
-
             } catch (err) {
                 console.log(err);
             }
         };
+
         const fetchReviewFileData = async () => {
             try {
                 const response = await ReviewFilesService.getAllFileReviews();
@@ -86,11 +87,9 @@ function Review() {
             let result;
             const formDataToSend = new FormData();
             formDataToSend.append("adminFeedback", formData.adminFeedBack);
-
             if (formData.id) {
                 result = await ReviewsService.feedBackReview(formData.id, formDataToSend);
                 setReviews(reviews.map(review => review.id === result.data.id ? result.data : review));
-
                 resetForm();
                 toast.success("Phản hồi thành công!");
             } else {
@@ -108,10 +107,17 @@ function Review() {
 
     const resetForm = () => {
         setFormData({
-            id: null,
+            id: null, // Reset id
             adminFeedBack: "",
         });
         setErrors({ adminFeedBack: false });
+    };
+
+    const handleFeedbackClick = (review) => {
+        setFormData({
+            id: review.id,
+            adminFeedBack: review.adminFeedback || "",
+        });
     };
 
     const handleFeedbackClickInternal = (review) => {
@@ -151,7 +157,7 @@ function Review() {
                     {reviews.map(review => {
                         return (
                             <Card key={review.id} style={{ marginBottom: '20px', padding: '20px', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.1)', borderRadius: '10px' }}>
-                                <ArgonTypography variant="h5" style={{ marginBottom: '15px', fontWeight: 'bold', color: '#333' }}>Review Details</ArgonTypography>
+                                <ArgonTypography variant="h5" style={{ marginBottom: '15px', fontWeight: 'bold', color: '#333' }}>Đánh giá chi tiết</ArgonTypography>
                                 <ArgonBox display="flex" gap="2px" flexWrap="wrap" >
                                     {Array.from(new Set(reviewFiles.filter((file) => file.reviewId === review.id && file.videoUrl)
                                         .map((file) => file.videoUrl)))
