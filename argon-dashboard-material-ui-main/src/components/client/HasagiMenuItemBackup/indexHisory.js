@@ -61,7 +61,7 @@ const indexHistory = () => {
   const [comment, setComment] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage] = useState("");
-  const [images, setImages] = useState([]);
+
   const paperRef = useRef(null);
   const searchInputRef = useRef(null);
   const [stickyStyle, setStickyStyle] = useState({ position: "relative" });
@@ -71,6 +71,19 @@ const indexHistory = () => {
   const threshold = 18;
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
+  const [images, setImages] = useState([]);
+  const [openReturnModal, setOpenReturnModal] = useState(false);
+  const [returnReason, setReturnReason] = useState("");
+  const [returnOptions] = useState([
+    "Màu sắc không giống với hình ảnh hoặc mô tả",
+    "Chất liệu sản phẩm không như mong đợi",
+    "Sản phẩm bị lỗi: rách, hỏng hoặc có vết bẩn",
+    "Nhận nhầm sản phẩm hoặc thiếu phụ kiện đi kèm",
+    "Sản phẩm không phù hợp sau khi thử",
+    "Thời gian giao hàng quá lâu khiến tôi không còn nhu cầu",
+    "Tôi không còn nhu cầu sử dụng sản phẩm này nữa",
+  ]);
+  
 
   useEffect(() => {
     if (location.state?.activeTab) {
@@ -125,6 +138,12 @@ const indexHistory = () => {
     setOpenCancelModal(true);
   };
 
+
+  const handleOpenReturnModal = (orderId) => {
+    setSelectedOrderId(orderId);
+    setOpenReturnModal(true);
+  };
+
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
@@ -165,6 +184,28 @@ const indexHistory = () => {
       console.error("There was an error updating the status to complete!", error);
     }
   };
+
+  
+  const handleReturnOrder = async () => {
+    try {
+      await axios.put(
+        `http://localhost:3000/api/history-order/${selectedOrderId}/return`,
+        null,
+        {
+          params: { reason: returnReason },
+        }
+      );
+
+      const response = await HistoryOrderService.getHistory();
+      setOrders(response.data);
+      setOpenReturnModal(false);
+    } catch (error) {
+      console.error("There was an error processing the return request!", error);
+      alert("Không thể xử lý yêu cầu trả hàng. Vui lòng thử lại.");
+    }
+  };
+
+
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -309,12 +350,11 @@ const indexHistory = () => {
           background: "#fff",
         });
       }, 0);
-
-      // Reset trạng thái
       setStar(5);
       setComment("");
       setImageFiles([]);
       setVideoFile(null);
+      handleClose();
     } catch (error) {
       console.error("Lỗi xử lý:", error);
       const errorMessage = error.response?.data?.message || "Có lỗi xảy ra trong quá trình xử lý.";
@@ -478,6 +518,7 @@ const indexHistory = () => {
               <Tab label={`Đã giao (${getOrderCount("da-giao")})`} value="da-giao" />
               <Tab label={`Hoàn thành (${getOrderCount("hoan-thanh")})`} value="hoan-thanh" />
               <Tab label={`Đã hủy (${getOrderCount("da-huy")})`} value="da-huy" />
+              <Tab label={`Trả hàng (${getOrderCount("tra-hang")})`} value="tra-hang" />
             </Tabs>
           </Paper>
           {activeTab === "all" && (
@@ -617,7 +658,7 @@ const indexHistory = () => {
                                   <img
                                     src={matchingImage.imageDTOResponse[0]?.url}
                                     alt={product.productName || "Product"}
-                                    style={{ width: "80px", marginRight: "16px", height: "100px" }}
+                                    style={{ width: "100px", marginRight: "16px", height: "100px" }}
                                   />
                                 )}
                                 <Box>
@@ -644,7 +685,7 @@ const indexHistory = () => {
                                     Phân loại hàng: {product.color}, {product.size}
                                   </Typography>
                                   <Box display="flex" justifyContent="space-between">
-                                    <Typography variant="body2" style={{ color: "black" }}>
+                                    <Typography variant="body2" style={{ color: "black", fontSize: "14px" }}>
                                       Số lượng: {product.productQuantity}
                                     </Typography>
                                     <Typography
@@ -654,10 +695,12 @@ const indexHistory = () => {
                                         fontSize: "16px",
                                         position: "relative",
                                         display: "inline-block",
-                                        marginLeft: "690px",
+                                        marginLeft: "680px",
                                       }}
                                     >
+
                                       {new Intl.NumberFormat("vi-VN").format(product.productPrice)}đ
+
                                     </Typography>
                                   </Box>
                                 </Box>
@@ -704,10 +747,12 @@ const indexHistory = () => {
                             alignItems: "center",
                           }}
                         >
+
                           {new Intl.NumberFormat("vi-VN").format(order.amount)}đ
+
                         </Typography>
                       </div>
-                      <Box display="flex" justifyContent="flex-end" mt={2}> 
+                      <Box display="flex" justifyContent="flex-end" mt={2}>
                         {order.statusSlug === "dang-xu-ly" ? (
                           <MuiButton
                             variant="contained"
@@ -717,17 +762,30 @@ const indexHistory = () => {
                             Hủy đơn
                           </MuiButton>
                         ) : order.statusSlug === "da-giao" ? (
-                          <MuiButton
-                            variant="contained"
-                            onClick={() => handleStatusComplete(order.id)}
-                            style={{
-                              marginRight: "10px",
-                              backgroundColor: "green",
-                              color: "white",
-                            }}
-                          >
-                            Hoàn thành
-                          </MuiButton>
+                          <>
+                            <MuiButton
+                              variant="contained"
+                              onClick={() => handleStatusComplete(order.id)}
+                              style={{
+                                marginRight: "10px",
+                                backgroundColor: "green",
+                                color: "white",
+                              }}
+                            >
+                              Đã nhận được hàng
+                            </MuiButton>
+                            <MuiButton
+                              variant="contained"
+                              onClick={() => handleOpenReturnModal(order.id)}
+                              style={{
+                                backgroundColor: "orange",
+                                color: "white",
+                                marginRight: "10px",
+                              }}
+                            >
+                              Yêu cầu trả hàng
+                            </MuiButton>
+                          </>
                         ) : order.statusSlug === "da-huy" || order.statusSlug === "hoan-thanh" ? (
                           <MuiButton
                             variant="contained"
@@ -741,7 +799,6 @@ const indexHistory = () => {
                             Mua lại
                           </MuiButton>
                         ) : null}
-
                         {order.statusSlug === "da-huy" ? (
                           <MuiButton
                             variant="contained"
@@ -855,6 +912,40 @@ const indexHistory = () => {
             </ArgonButton>
           </Box>
         </MuiModal>
+
+        <MuiModal open={openReturnModal} onClose={() => setOpenReturnModal(false)}>
+          <Box
+            p={3}
+            style={{
+              backgroundColor: "white",
+              width: "300px",
+              margin: "50px auto",
+              borderRadius: "8px",
+            }}
+          >
+            <ArgonTypography variant="h6">Chọn lý do trả hàng</ArgonTypography>
+            <RadioGroup
+              aria-label="cancel-reason"
+              value={returnReason}
+              onChange={(e) => setReturnReason(e.target.value)}  // Ensure this sets the value correctly
+              style={{ marginTop: "15px" }}
+            >
+              {returnOptions.map((option, index) => (
+                <FormControlLabel key={index} value={option} control={<Radio />} label={option} />
+              ))}
+            </RadioGroup>
+
+            <ArgonButton
+              variant="contained"
+              style={{ marginTop: "15px", backgroundColor: "red", color: "white" }}
+              onClick={handleReturnOrder}
+              disabled={!returnReason}
+            >
+              Xác nhận trả hàng
+            </ArgonButton>
+          </Box>
+        </MuiModal>
+
         {selectedProduct && (
           <BootstrapModal show={showReviewModal} size="lg" centered >
             <BootstrapModal.Body>

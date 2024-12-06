@@ -20,16 +20,16 @@ const Complete = () => {
         const transactionStatus = params.get('vnp_TransactionStatus');
         const selectedPayment = Cookies.get('selectedPayment');
 
-        if (selectedPayment !== 'Cod' && (responseCode !== '00' || transactionStatus !== '00')) {
+        if (selectedPayment !== 'COD' && (responseCode !== '00' || transactionStatus !== '00')) {
             axios
-            .delete('http://localhost:3000/api/order/deleteMostRecentOrder')
-            .then((response) => {
-              console.log(response.data); 
-              navigate(`/Checkout?id=${addressId}`);
-            })
-            .catch((error) => {
-              console.error('Error deleting the most recent order:', error);
-            });
+                .delete('http://localhost:3000/api/order/deleteMostRecentOrder')
+                .then((response) => {
+                    console.log(response.data);
+                    navigate(`/Checkout?id=${addressId}`);
+                })
+                .catch((error) => {
+                    console.error('Error deleting the most recent order:', error);
+                });
         } else {
             const handleRemoveItems = async () => {
                 const cartItemsBackup = JSON.parse(localStorage.getItem('cartItemsBackup')) || [];

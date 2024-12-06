@@ -25,7 +25,7 @@ const HistoryOrderDetail = () => {
   const [voucherPrice, setVoucherPrice] = useState("");
   const [cancelReason, setCancelReason] = useState("");
   const [images, setImages] = useState([]);
-
+  const [total, setTotal] = useState("");
   useEffect(() => {
     if (orderId) {
       const fetchOrderDetails = async () => {
@@ -59,7 +59,7 @@ const HistoryOrderDetail = () => {
             setVoucherPrice(data[0].voucher);
             setCancelReason(data[0].reason);
             setFullNameAdd(data[0].name);
-
+              setTotal(data[0].total);
             // Fetch additional image data for each product
             const imageRequests = data.map((product) =>
               axios
@@ -506,9 +506,7 @@ const HistoryOrderDetail = () => {
                               }}
                             >
                               <span style={{ marginLeft: "2px" }}>
-                                {new Intl.NumberFormat("vi-VN", { minimumFractionDigits: 3 })
-                                  .format(formattedFinalTotal)
-                                  .replace(/,/g, ".")}đ
+                              {new Intl.NumberFormat("vi-VN").format(total)}đ
                               </span>
                             </TableCell>
                           </TableRow>

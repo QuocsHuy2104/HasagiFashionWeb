@@ -270,7 +270,18 @@ const Backup = ({ show, onClose }) => {
         label: ward.WardName,
     }));
 
-
+    const resetForm = () => {
+        setFullName("");
+        setNumBerPhone("");
+        setAddress("");
+        setSelectedProvince("");
+        setSelectedDistrict("");
+        setSelectedWard("");
+        setErrors({});
+        setIsSubmitted(false);
+        setDistricts([]);
+        setWards([]);
+    };
 
     const handleModalClose = () => {
         resetForm(); // Reset form data

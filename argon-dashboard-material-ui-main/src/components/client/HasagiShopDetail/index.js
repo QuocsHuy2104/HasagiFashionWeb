@@ -1,11 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
-import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import "layouts/assets/css/style.css";
 import HasagiNav from "components/client/HasagiHeader";
-import { useLocation, Link, json } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import Footer from "components/client/HasagiFooter";
 import cartService from "../../../services/ProductDetail";
-import Cookies from "js-cookie";
 import { toast, ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -14,7 +12,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar as solidStar } from "@fortawesome/free-solid-svg-icons";
 import { faStar as regularStar } from "@fortawesome/free-regular-svg-icons";
 import ReviewList from "../HasagiReview/reviewList";
-import aboutImage from "layouts/assets/img/h1.jpg";
 
 function ShopDetail() {
   const [product, setProduct] = useState(null);
@@ -27,7 +24,7 @@ function ShopDetail() {
   const [sale, setSale] = useState(0);
   const query = new URLSearchParams(location.search);
   const productId = query.get("id");
-
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
   const [reviews, setReviews] = useState([]);
@@ -107,6 +104,12 @@ function ShopDetail() {
 
   const handleAddToCart = async () => {
     try {
+      // Kiểm tra nếu chưa chọn màu hoặc kích thước
+      if (!selectedColor || !selectedSize) {
+        toast.error("Vui lòng chọn màu và kích thước trước khi thêm vào giỏ hàng.");
+        return;
+      }
+
       // Gọi API để thêm sản phẩm vào giỏ hàng
       const response = await cartService.addToCart({
         colorId: selectedColor,
@@ -115,12 +118,12 @@ function ShopDetail() {
         productId,
       });
 
-      if (response.status >= 200 || response.status < 300) {
+      if (response.status >= 200 && response.status < 300) {
         toast.success("Sản phẩm đã được thêm vào giỏ hàng thành công!");
       }
     } catch (error) {
-      // console.error("Error adding to cart:", error);
-      toast.error(error.response.data);
+      // Log lỗi nếu có
+      setError(error.response?.data || "Đã có lỗi xảy ra. Vui lòng thử lại!");
     }
   };
 
@@ -178,6 +181,7 @@ function ShopDetail() {
     if (productId) {
       fetchProductDetail();
     }
+    setError("");
   }, [productId, selectedSize, selectedColor]);
 
   useEffect(() => {
@@ -213,6 +217,12 @@ function ShopDetail() {
 
   const handleByNow = async () => {
     try {
+      // Kiểm tra nếu chưa chọn màu hoặc kích thước
+      if (!selectedColor || !selectedSize) {
+        toast.error("Vui lòng chọn màu và kích thước trước khi thêm vào giỏ hàng.");
+        return;
+      }
+
       const response = await cartService.addToCart({
         colorId: selectedColor,
         sizeId: selectedSize,
@@ -221,7 +231,7 @@ function ShopDetail() {
       });
 
       // Kiểm tra phản hồi từ server để quyết định hiển thị thông báo
-      if (response.status >= 200 || response.status < 300) {
+      if (response.status >= 200 && response.status < 300) {
         const checkedItems = JSON.parse(localStorage.getItem("checkedItems")) || [];
         if (!checkedItems.includes(productId)) {
           checkedItems.push(productId);
@@ -234,10 +244,11 @@ function ShopDetail() {
 
       navigate("/Cart");
     } catch (error) {
-      toast.error(error.response.data);
+      setError(error.response?.data || "Đã có lỗi xảy ra. Vui lòng thử lại!");
     }
   };
-  
+
+
   const [activeTab, setActiveTab] = useState("tab-pane-1");
 
   const handleTabClick = (tabId) => {
@@ -432,8 +443,8 @@ function ShopDetail() {
     preloadNextAndPrev();
   }, [startIndex, uniqueColors, images]);
 
-  const thumbnailWidth = 92.3; 
-  const thumbnailGap = 10; 
+  const thumbnailWidth = 92.3;
+  const thumbnailGap = 10;
   const thumbnailOffset = -(startIndex * (thumbnailWidth + thumbnailGap));
 
   useEffect(() => {
@@ -563,7 +574,7 @@ function ShopDetail() {
                   ←
                 </div>
               )}
-{/* Thumbnail Gallery */}
+              {/* Thumbnail Gallery */}
               <div
                 style={{
                   position: "relative",
@@ -633,7 +644,7 @@ function ShopDetail() {
                         onMouseEnter={() => handleThumbnailHover(product.video, 0)} // Hover video thumbnail
                       />
                     )}
-{/* Thumbnail ảnh của product */}
+                    {/* Thumbnail ảnh của product */}
                     {product.image && (
                       <div
                         style={{
@@ -676,7 +687,7 @@ function ShopDetail() {
                           <div
                             style={{
                               width: "92.3px",
-                              height: "86px",
+                              height: "130px",
                               cursor: "pointer",
                               border:
                                 currentImage === matchingImages?.imageDTOResponse[0]?.url
@@ -697,7 +708,7 @@ function ShopDetail() {
                               src={matchingImages?.imageDTOResponse[0]?.url}
                               alt={`Thumbnail ${idx}`}
                               style={{
-width: "100%",
+                                width: "100%",
                                 height: "100%",
                               }}
                             />
@@ -759,20 +770,24 @@ width: "100%",
                 style={{ fontSize: "17px", color: "#555" }}
               >
                 {/* Phần hiển thị số sao và sao */}
-                <div className="d-flex align-items-center">
+                <div className="d-flex align-items-center" style={{ gap: "5px" }}>
                   <span
                     style={{
                       color: "#555",
-                      marginRight: "5px",
                       textDecoration: "underline",
                       textUnderlineOffset: "5px",
+                      fontSize: "14px", // Đảm bảo kích thước văn bản không quá lớn
+                      lineHeight: "1", // Giữ nội dung cân đối
                     }}
                   >
-                    {averageStars}
+                    {averageStars} {/* Hiển thị 1 số thập phân */}
                   </span>
 
-                  <div style={{ marginTop: "1px" }}>{renderStars(averageStars)}</div>
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    {renderStars(averageStars)}
+                  </div>
                 </div>
+
 
                 {/* Đường phân cách */}
                 <div
@@ -814,39 +829,44 @@ width: "100%",
                 {formattedPrice}đ  {/* Giá đã giảm */}
               </h6>
 
-              <h6
-                className="mb-3"
-                style={{
-                  fontFamily: "Arial, sans-serif",
-                  color: "#999",  // Màu xám cho giá gốc
-                  fontSize: "30px",
-                  fontWeight: "bold",
-                  textDecoration: "line-through",  // Gạch ngang giá gốc
-                  position: "relative",
-                  display: "inline-block",
-                  marginLeft: "15px",
-                }}
-              >
-                {formatOriginalPrice(totalPrice)}  {/* Giá chưa giảm */}
-              </h6>
+              {(sale > 0) && (
+                <>
+                  <h6
+                    className="mb-3"
+                    style={{
+                      fontFamily: "Arial, sans-serif",
+                      color: "#999", // Màu xám cho giá gốc
+                      fontSize: "20px", // Giảm kích thước font
+                      fontWeight: "bold",
+                      textDecoration: "line-through", // Gạch ngang giá gốc
+                      position: "relative",
+                      display: "inline-block",
+                      marginLeft: "10px", // Giảm khoảng cách
+                    }}
+                  >
+                    {formatOriginalPrice(totalPrice)} {/* Giá chưa giảm */}
+                  </h6>
 
-              <h6
-                className="mb-3"
-                style={{
-                  fontFamily: "Arial, sans-serif",
-                  color: "red",  // Màu đỏ cho tỷ lệ giảm giá
-                  fontSize: "20px",
-                  fontWeight: "bold",
-                  position: "relative",
-                  display: "inline-block",
-                  marginLeft: "15px",
-                  backgroundColor: "#f8d7da", // Nền màu hồng nhạt cho phần giảm giá
-                  padding: "5px 10px",
-                  borderRadius: "5px",
-                }}
-              >
-                -{sale}%  {/* Hiển thị tỷ lệ giảm giá */}
-              </h6>
+                  <h6
+                    className="mb-3"
+                    style={{
+                      fontFamily: "Arial, sans-serif",
+                      color: "red", // Màu đỏ cho tỷ lệ giảm giá
+                      fontSize: "16px", // Giảm kích thước font
+                      fontWeight: "bold",
+                      position: "relative",
+                      display: "inline-block",
+                      marginLeft: "10px", // Giảm khoảng cách
+                      backgroundColor: "#f8d7da", // Nền màu hồng nhạt cho phần giảm giá
+                      padding: "3px 8px", // Giảm kích thước padding
+                      borderRadius: "5px",
+                    }}
+                  >
+                    -{sale}% {/* Hiển thị tỷ lệ giảm giá */}
+                  </h6>
+                </>
+              )}
+
 
               <div className="mb-4 mt-2" id="color-input-list">
                 <div className="row">
@@ -869,9 +889,8 @@ width: "100%",
                           return (
                             <button
                               key={color.id}
-                              className={`variant-button ${
-                                selectedColor === color.id ? "selected" : ""
-                              } ${!color.check ? "disabled" : ""}`}
+                              className={`variant-button ${selectedColor === color.id ? "selected" : ""
+                                } ${!color.check ? "disabled" : ""}`}
                               onClick={() => {
                                 setSelectedColor((prevSelected) => {
                                   const newSelectedColor =
@@ -943,9 +962,8 @@ width: "100%",
                         {uniqueSizes?.map((size) => (
                           <button
                             key={size.id}
-                            className={`variant-button ${
-                              selectedSize === size.id ? "selected" : ""
-                            } ${!size.check ? "disabled" : ""}`}
+                            className={`variant-button ${selectedSize === size.id ? "selected" : ""
+                              } ${!size.check ? "disabled" : ""}`}
                             onClick={() => {
                               setSelectedSize((prevSelected) => {
                                 const newSelectedSize = prevSelected === size.id ? null : size.id;
@@ -1049,7 +1067,7 @@ width: "100%",
                   </div>
                 </div>
               </div>
-
+              {error && <p style={{ fontSize: "14px", color: "red" }}>{error}</p>}
               <div className="d-flex align-items-center py-1">
                 <button
                   id="cartBtn"
@@ -1062,7 +1080,7 @@ width: "100%",
                   Mua ngay
                 </button>
               </div>
-              
+
             </div>
           </div>
         </div>
@@ -1071,25 +1089,22 @@ width: "100%",
             <div className="bg-light" style={{ marginBottom: "-50px" }}>
               <div className="nav nav-tabs mb-4">
                 <a
-                  className={`nav-item nav-link text-dark ${
-                    activeTab === "tab-pane-1" ? "active" : ""
-                  }`}
+                  className={`nav-item nav-link text-dark ${activeTab === "tab-pane-1" ? "active" : ""
+                    }`}
                   onClick={() => handleTabClick("tab-pane-1")}
                 >
                   Chi tiết sản phẩm
                 </a>
                 <a
-                  className={`nav-item nav-link text-dark ${
-                    activeTab === "tab-pane-2" ? "active" : ""
-                  }`}
+                  className={`nav-item nav-link text-dark ${activeTab === "tab-pane-2" ? "active" : ""
+                    }`}
                   onClick={() => handleTabClick("tab-pane-2")}
                 >
                   Mô tả sản phẩm
                 </a>
                 <a
-                  className={`nav-item nav-link text-dark ${
-                    activeTab === "tab-pane-3" ? "active" : ""
-                  }`}
+                  className={`nav-item nav-link text-dark ${activeTab === "tab-pane-3" ? "active" : ""
+                    }`}
                   onClick={() => handleTabClick("tab-pane-3")}
                 >
                   Đánh giá ({reviews.length})

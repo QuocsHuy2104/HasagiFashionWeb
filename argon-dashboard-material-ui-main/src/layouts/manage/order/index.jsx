@@ -184,13 +184,22 @@ function Order() {
             </span>
             {currentStatus !== 'hoan-thanh' && currentStatus !== 'da-giao' && (
               <>
-                {currentStatus !== 'da-huy' && (
+                {currentStatus !== 'da-huy' && currentStatus !== 'tra-hang' && (
                   <ArgonButton
                     size="small"
                     color="primary"
                     onClick={() => handleNextStatus(order.id, currentStatus, getNextStatus)}
                   >
                     {statuses.find(status => status.slug === nextStatus)?.status || 'Unknown'}
+                  </ArgonButton>
+                )}
+                {currentStatus === 'tra-hang' && (
+                  <ArgonButton
+                    size="small"
+                    color="primary"
+                    onClick={() => handleStatusChange(order.id, 'da-huy')}
+                  >
+                    Xác nhận
                   </ArgonButton>
                 )}
                 {['dang-xu-ly'].includes(currentStatus) && (
@@ -209,10 +218,7 @@ function Order() {
         );
       },
     }
-
   ];
-
-
 
   const handleStatusChange = async (orderId, newStatusSlug) => {
     try {

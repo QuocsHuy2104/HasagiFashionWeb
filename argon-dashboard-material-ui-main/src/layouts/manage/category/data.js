@@ -6,7 +6,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
 import Box from '@mui/material/Box';
-import Swal from 'sweetalert2';
+import Swal from 'sweetalert2'; 
 
 const columns = [
     { field: 'name', headerName: 'Danh mục', width: 130 },
@@ -40,7 +40,7 @@ export default function DataTable({ categories, onEditClick, onDeleteClick }) {
             swalWithBootstrapButtons
                 .fire({
                     title: "Bạn có chắc chắn?",
-                    text: "Muốn xóa danh mục này không!",  // Đổi từ Size thành danh mục
+                    text: "Muốn xóa thương hiệu này không!",
                     icon: "warning",
                     showCancelButton: true,
                     confirmButtonText: "Vâng, tôi muốn!",
@@ -54,7 +54,7 @@ export default function DataTable({ categories, onEditClick, onDeleteClick }) {
                             await onDeleteClick(selectedRows);
                             Swal.fire({
                                 title: "Đã xóa!",
-                                text: "Danh mục đã được xóa thành công.",  // Đổi từ Size thành danh mục
+                                text: "Danh mục đã được xóa thành công.",
                                 icon: "success",
                                 backdrop: 'rgba(0, 0, 0, 0)',
                             });
@@ -62,7 +62,7 @@ export default function DataTable({ categories, onEditClick, onDeleteClick }) {
                             console.error("Có lỗi xảy ra khi xóa!", error);
                             Swal.fire({
                                 title: "Lỗi!",
-                                text: "Có lỗi xảy ra khi xóa danh mục.",  // Đổi từ Size thành danh mục
+                                text: "Có lỗi xảy ra khi xóa thương hiệu.",
                                 icon: "error",
                                 backdrop: 'rgba(0, 0, 0, 0)',
                             });
@@ -70,7 +70,7 @@ export default function DataTable({ categories, onEditClick, onDeleteClick }) {
                     } else if (result.dismiss === Swal.DismissReason.cancel) {
                         Swal.fire({
                             title: "Đã hủy",
-                            text: "Danh mục không bị xóa.",  // Đổi từ Size thành danh mục
+                            text: "Danh mục không bị xóa.",
                             icon: "error",
                             backdrop: 'rgba(0, 0, 0, 0)',
                         });
@@ -124,10 +124,10 @@ export default function DataTable({ categories, onEditClick, onDeleteClick }) {
             {selectedRows.length > 0 && (
                 <Box sx={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 1 }}>
                     <IconButton onClick={handleEdit} disabled={selectedRows.length !== 1}>
-                        <EditIcon color="dark" />
+                        <EditIcon category="dark" />
                     </IconButton>
                     <IconButton onClick={handleDelete}>
-                        <DeleteIcon color="dark" />
+                        <DeleteIcon category="dark" />
                     </IconButton>
                 </Box>
             )}
@@ -136,7 +136,7 @@ export default function DataTable({ categories, onEditClick, onDeleteClick }) {
 }
 
 DataTable.propTypes = {
-    categories: PropTypes.array.isRequired, // Đổi từ sizes thành categories
+    categories: PropTypes.array.isRequired,
     onEditClick: PropTypes.func.isRequired,
     onDeleteClick: PropTypes.func.isRequired,
 };

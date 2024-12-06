@@ -25,7 +25,7 @@ const Checkout = () => {
     const [cartItems, setCartItems] = useState([]);
     const [images, setImages] = useState([]);
     const paymentMethods = [
-        { name: "Cod", image: aboutImage5, nameView: "COD (Tiền mặt)" },
+        { name: "COD", image: aboutImage5, nameView: "COD (Tiền mặt)" },
         { name: "VNPay", image: aboutImage6, nameView: "VNPay" },
         { name: "PayOs", image: aboutImage7, nameView: "PayOs" },
     ];
@@ -323,12 +323,12 @@ const Checkout = () => {
         };
         try {
             let response;
-            if (selectedMethod === "Cod") {
+            if (selectedMethod === "COD") {
                 response = await CheckoutService.postCheckout(addressId, checkoutData);
                 if (response.status === 200) {
                     localStorage.setItem("address1", JSON.stringify(addressDTO));
                     localStorage.setItem("orderDetails1", JSON.stringify(cartDetailsDTO));
-                    Cookies.set("selectedPayment", "Cod");
+                    Cookies.set("selectedPayment", "COD");
 
                     const swal = Swal.fire({
                         title: "Đang xử lý...",

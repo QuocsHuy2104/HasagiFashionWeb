@@ -9,7 +9,6 @@ import "components/client/assets/js/plugins";
 import logo from "components/client/assets/images/logo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-regular-svg-icons";
-import { faHeart } from "@fortawesome/free-regular-svg-icons";
 import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import { faMicrophone } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
@@ -328,7 +327,7 @@ const Header = ({ onSearch }) => {
                 onMouseLeave={handleMouseLeave}
               >
                 <a
-                  href="/profile"
+                  href="/feature-section"
                   className="rounded-circle"
                   style={{
                     ...styles.userIcon,
