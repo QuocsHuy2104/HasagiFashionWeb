@@ -55,8 +55,6 @@ const ReviewList = () => {
     const fetchReviews = async (productId) => {
         try {
             const productReviews = await reviewsService.getReviewsByProduct(productId);
-            console.log('Fetched reviews for product:', productReviews);
-
             if (Array.isArray(productReviews)) {
                 const sortedReviews = productReviews.sort((a, b) => b.star - a.star);
                 setReviews(sortedReviews);

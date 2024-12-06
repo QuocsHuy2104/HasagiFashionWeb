@@ -42,8 +42,6 @@ function ShopDetail() {
   const fetchReviews = async (productId) => {
     try {
       const productReviews = await reviewsService.getReviewsByProduct(productId);
-      console.log("Fetched reviews for product:", productReviews);
-
       if (Array.isArray(productReviews)) {
         const sortedReviews = productReviews.sort((a, b) => b.star - a.star);
         setReviews(sortedReviews);
@@ -52,7 +50,6 @@ function ShopDetail() {
         setReviews([]);
       }
     } catch (error) {
-      console.error("Error fetching reviews for product:", error);
       setReviews([]);
     }
   };
@@ -288,8 +285,8 @@ function ShopDetail() {
     const [minPrice, maxPrice] = importPrice.split("-").map((price) => parseFloat(price));
 
     return minPrice === maxPrice
-      ? `${new Intl.NumberFormat("vi-VN").format(minPrice)}đ`
-      : `${new Intl.NumberFormat("vi-VN").format(minPrice)}đ - ${new Intl.NumberFormat("vi-VN").format(maxPrice)}đ`;
+      ? `${new Intl.NumberFormat("vi-VN").format(minPrice)}`
+      : `${new Intl.NumberFormat("vi-VN").format(minPrice)} - ${new Intl.NumberFormat("vi-VN").format(maxPrice)}`;
   };
 
   const formattedPrice = formatImportPrice(totalPrice);
@@ -844,7 +841,7 @@ function ShopDetail() {
                       marginLeft: "10px", // Giảm khoảng cách
                     }}
                   >
-                    {formatOriginalPrice(totalPrice)} {/* Giá chưa giảm */}
+                    {formatOriginalPrice(totalPrice)}đ
                   </h6>
 
                   <h6

@@ -105,9 +105,9 @@ function Shop() {
 
     const sortedProducts = filteredProducts.sort((a, b) => {
         if (sortOption === "price-asc") {
-            return (a.importPrice || 0) - (b.importPrice || 0);
+            return (a.maxPrice || 0) - (b.maxPrice || 0);
         } else if (sortOption === "price-desc") {
-            return (b.importPrice || 0) - (a.importPrice || 0);
+            return (b.maxPrice || 0) - (a.maxPrice || 0);
         } else if (sortOption === "popularity") {
             return (b.popularity || 0) - (a.popularity || 0);
         } else if (sortOption === "newest") {
@@ -131,19 +131,6 @@ function Shop() {
 
     const formatNumber = (num) => {
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    };
-
-    const formatImportPrice = (importPrice) => {
-        if (!importPrice) return "0đ";
-
-        const prices = importPrice.split('-').map(price => {
-            const trimmedPrice = price.trim();
-            const numericPrice = parseFloat(trimmedPrice);
-            const integerPrice = Math.floor(numericPrice);
-            return `${formatNumber(integerPrice)}đ`;
-        });
-
-        return prices.join(' - ');
     };
 
     const fetchReviews = async (productId) => {
@@ -223,8 +210,6 @@ function Shop() {
                                         <option value="default">-----Chọn Sắp Xếp-----</option>
                                         <option value="price-asc">Giá thấp nhất</option>
                                         <option value="price-desc">Giá cao nhất</option>
-                                        <option value="popularity">Phổ biến</option>
-                                        <option value="newest">Mới nhất</option>
                                     </Form.Control>
                                 </div>
                             </div>

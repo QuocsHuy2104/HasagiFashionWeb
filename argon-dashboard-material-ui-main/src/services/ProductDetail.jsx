@@ -14,9 +14,6 @@ const ShopDetailService = {
             sizeId ? `?selectedSizeId=${sizeId}` : '',
             colorId ? (sizeId ? `&selectedColorId=${colorId}` : `?selectedColorId=${colorId}`) : ''
         ].join('');
-
-        console.log("Requesting URL:", url); // In ra URL yêu cầu
-
         return apiClient.get(url);
     },
 
