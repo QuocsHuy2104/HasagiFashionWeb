@@ -15,7 +15,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ImageService from 'services/ImageServices';
 import AddIcon from '@mui/icons-material/Add';
 import ImageUploader from "./uploadImage";
-import { toast, ToastContainer } from 'react-toastify';
+import { toast} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";

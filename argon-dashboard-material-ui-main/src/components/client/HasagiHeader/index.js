@@ -9,15 +9,14 @@ import "components/client/assets/js/plugins";
 import logo from "components/client/assets/images/logo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-regular-svg-icons";
-import { faHeart } from "@fortawesome/free-regular-svg-icons";
 import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import { faMicrophone } from "@fortawesome/free-solid-svg-icons";
-import useFavoriteCount from "../HasagiFavoriteCount";
 import { useNavigate } from "react-router-dom";
 import CartService from "../../../services/CartService";
 import axios from "axios";
 import aboutImage5 from "layouts/assets/img/product-1.jpg";
 import ProfileServices from "services/ProfileServices";
+import AddressService from "../../../services/AddressServices";
 
 const Header = ({ onSearch }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -26,7 +25,6 @@ const Header = ({ onSearch }) => {
   const { totalQuantity, fetchTotalQuantity } = useCartQuantity();
   const [cartProducts, setCartProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const { favoriteCount } = useFavoriteCount();
   const [username, setUsername] = useState("");
   const navigate = useNavigate();
   const [hovered, setHovered] = useState(null);
@@ -94,14 +92,11 @@ const Header = ({ onSearch }) => {
   };
   useEffect(() => {
     const fetchCartItems = async () => {
-      const accountId = Cookies.get("accountId");
 
       try {
         const [cartResponse] = await Promise.all([
           CartService.getCart(),
-          axios.get(`http://localhost:3000/api/addresses/exists?accountId=${accountId}`, {
-            withCredentials: true,
-          }),
+          AddressService.getAddress(),
         ]);
         const reversedCartData = cartResponse.data.reverse();
         setCartProducts(reversedCartData);
@@ -332,7 +327,7 @@ const Header = ({ onSearch }) => {
                 onMouseLeave={handleMouseLeave}
               >
                 <a
-                  href="/profile"
+                  href="/feature-section"
                   className="rounded-circle"
                   style={{
                     ...styles.userIcon,
@@ -549,18 +544,6 @@ const Header = ({ onSearch }) => {
                                     </div>
                                     <span
                                       style={{
-                                        textDecoration: "underline",
-                                        fontSize: "10px",
-                                        fontWeight: "normal",
-                                        transform: "translateY(-1px)",
-                                        display: "inline-block",
-                                        color: "red",
-                                      }}
-                                    >
-                                      đ
-                                    </span>
-                                    <span
-                                      style={{
                                         marginLeft: "1px",
                                         color: "red",
                                         fontSize: "16px",
@@ -568,7 +551,7 @@ const Header = ({ onSearch }) => {
                                         marginRight: "5%",
                                       }}
                                     >
-                                      {new Intl.NumberFormat("vi-VN").format(product.price)}
+                                      {new Intl.NumberFormat("vi-VN").format(product.price)}đ
                                     </span>
                                   </li>
                                 );
@@ -632,23 +615,6 @@ const Header = ({ onSearch }) => {
                         )}
                       </div>
                     )}
-                  </li>
-                  <li style={{ marginTop: "2%", marginRight: "-30px", marginLeft: "10px" }}>
-                    <a
-                      href="/Favorite"
-                      style={{
-                        position: "relative",
-                        padding: "10px",
-                        textDecoration: "none",
-                      }}
-                    >
-                      <FontAwesomeIcon icon={faHeart} className="icon" style={styles.icon} />
-                      {favoriteCount > 0 && (
-                        <span className="badge" style={styles.badge}>
-                          {favoriteCount}
-                        </span>
-                      )}
-                    </a>
                   </li>
                 </>
               )}

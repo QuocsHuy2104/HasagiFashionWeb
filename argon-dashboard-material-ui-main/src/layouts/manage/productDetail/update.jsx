@@ -13,14 +13,14 @@ import { Button } from '@mui/material';
 import { InputAdornment } from "@mui/material";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ProductDetailService from 'services/ProductDetailService';
+import ProductDetailService from 'services/ProductDetailServices';
 
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function ProductFormDialog({ open, onClose, colors, sizes, initialData, productID, refreshData, updateQuantity }) {
+export default function ProductFormDialog({ open, onClose, colors, sizes, initialData, productID, refreshData, updateQuantity, updatePrice }) {
 
   const [formData, setFormData] = React.useState({
     id: '',
@@ -78,6 +78,7 @@ export default function ProductFormDialog({ open, onClose, colors, sizes, initia
         console.log('Update successful:', resp.data);
         refreshData();
         updateQuantity();
+        updatePrice()
         onClose();
       } else {
         console.error('Unexpected response:', resp);
@@ -285,4 +286,5 @@ ProductFormDialog.propTypes = {
   productID: PropTypes.number.isRequired,
   refreshData: PropTypes.func.isRequired,
   updateQuantity: PropTypes.func.isRequired,
+  updatePrice: PropTypes.func.isRequired,
 };

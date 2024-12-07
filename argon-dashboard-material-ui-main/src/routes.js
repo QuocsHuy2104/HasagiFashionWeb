@@ -2,11 +2,9 @@ import Dashboard from "layouts/dashboard";
 import Profile from "components/client/HasagiProfile";
 import Color from "layouts/manage/color";
 import Size from "layouts/manage/size";
-import Status from "layouts/manage/status";
 import Banner from "layouts/manage/banner";
 import Order from "layouts/manage/order";
 import Account from "layouts/manage/account";
-import Image from "layouts/manage/image";
 import ForgotPassword from "layouts/authentication/forgot-password";
 import ResetPassword from "layouts/authentication/reset-password";
 import Product from "layouts/manage/product";
@@ -16,7 +14,8 @@ import ArgonBox from "components/ArgonBox";
 import About from "components/client/HasagiAbout";
 import Category from "layouts/manage/category";
 import Brand from "layouts/manage/brand";
-import FeatureSection from "layouts/clientuser/home";
+// import FeatureSection from "layouts/clientuser";
+import FeatureSection from "layouts/clientuser/index";
 import OrderDetail from "layouts/manage/orderdetail";
 import Role from "layouts/manage/role";
 import ShopDetail from "components/client/HasagiShopDetail";
@@ -24,21 +23,22 @@ import Shop from "components/client/HasagiShop";
 import Cart from "components/client/HasagiCart";
 import Contact from "components/client/HasagiContact";
 import Checkout from "components/client/HasagiCheckout";
-import Favorite from "components/client/HasagiFavorite";
 import SignIn from "layouts/authentication/sign-in";
 import SignUp from "layouts/authentication/sign-up";
 import Complete from "components/client/HasagiComplete";
 import History from "components/client/HasagiHistory";
 import HistoryOrderDetail from "components/client/HasagiHistoryDetail";
+import ProductDetail from "layouts/manage/productDetail";
+import { isAuthenticated } from "utils/Authen";
+import { Navigate } from "react-router-dom";
+import NotFoundPage from "components/client/Hasagi404";
 import Voucher from "layouts/manage/voucher";
 import ChatBot from "components/client/HasagiChatBot";
 import QA from "components/client/HasagiQ&A";
-import ProductDetail from "layouts/manage/productDetail";
-// import Notfound from "components/client/Hasagi404"
 const routes = [
   {
     type: "route",
-    name: "Dashboard",
+    name: "Bảng điều khiển",
     key: "dashboard",
     route: "/dashboard",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-tv-2" />,
@@ -53,7 +53,7 @@ const routes = [
     icon: (
       <ArgonBox component="i" color="warning" fontSize="14px" className="ni ni-single-copy-04" />
     ),
-    component: <SignIn />,
+    component: isAuthenticated() ? <Navigate to="/" /> : <SignIn />,
   },
   {
     name: "Sign Up",
@@ -62,7 +62,7 @@ const routes = [
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
     component: <SignUp />,
   },
-  { type: "title", title: "Account Pages", key: "account-pages" },
+  { type: "title", title: "Trang tài khoản", key: "account-pages" },
   {
     type: "route",
     name: "Profile",
@@ -71,10 +71,10 @@ const routes = [
     icon: <ArgonBox component="i" color="dark" fontSize="14px" className="ni ni-single-02" />,
     component: <Profile />,
   },
-  { type: "title", title: "Management pages", key: "manage-pages" },
+  { type: "title", title: "Trang quản lý", key: "manage-pages" },
   {
     type: "route",
-    name: "Manage Account",
+    name: "Quản lý người dùng",
     key: "account",
     route: "/manage/account",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -83,7 +83,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Role",
+    name: "Quản lý vai trò",
     key: "role",
     route: "/manage/role",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -91,7 +91,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Product",
+    name: "Quản lý sản phẩm",
     key: "product",
     route: "/manage/product",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -106,7 +106,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Category",
+    name: "Quản lý danh mục",
     key: "category",
     route: "/manage/category",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -114,7 +114,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Brand",
+    name: "Quản lý thương hiệu",
     key: "brand",
     route: "/manage/brand",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -122,7 +122,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Color",
+    name: "Quản lý màu sắc",
     key: "Manage Color",
     route: "/manage/color",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -130,7 +130,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Size",
+    name: "Quản lý kích thước",
     key: "size",
     route: "/manage/size",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -138,7 +138,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Review",
+    name: "Quản lý đánh giá",
     key: "review",
     route: "/manage/review",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -151,15 +151,6 @@ const routes = [
     route: "/feature-section",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
     component: <FeatureSection />,
-    showInSidenav: true,
-  },
-  {
-    // type: "route",
-    name: "Favorite",
-    key: "Favorite",
-    route: "/Favorite",
-    icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
-    component: <Favorite />,
     showInSidenav: true,
   },
 
@@ -192,7 +183,7 @@ const routes = [
   
   {
     type: "route",
-    name: "Manage Order",
+    name: "Quản lý đơn hàng",
     key: "order",
     route: "/manage/order",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -200,15 +191,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Status",
-    key: "status",
-    route: "/manage/status",
-    icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
-    component: <Status />,
-  },
-  {
-    type: "route",
-    name: "Manage Banner",
+    name: "Quản lý Banner",
     key: "banner",
     route: "/manage/banners",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -216,15 +199,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Image",
-    key: "image",
-    route: "/manage/images",
-    icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
-    component: <Image />,
-  },
-  {
-    type: "route",
-    name: "Manage Voucher",
+    name: "Quản lý phiếu giảm giá",
     key: "voucher",
     route: "/manage/voucher",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -279,13 +254,11 @@ const routes = [
     showInSidenav: true,
   },
   {
-    // type: "route",
-    name: "Shop",
+    name: "shop",
     key: "shop",
-    route: "/Shop",
+    route: "/shop",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
     component: <Shop />,
-    showInSidenav: true,
   },
   {
     // type: "route",
@@ -297,7 +270,7 @@ const routes = [
     showInSidenav: true,
   },
   {
-    // type: "route",
+    // type: "route", 
     name: "Contact",
     key: "contact",
     route: "/Contact",
@@ -346,6 +319,13 @@ const routes = [
     route: "/history-order/:orderId",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
     component: <HistoryOrderDetail />,
+    showInSidenav: true,
+  },
+  {
+    name: "NotFound",
+    key: "not-found",
+    route: "/not-found",
+    component: <NotFoundPage />,
     showInSidenav: true,
   },
 ];

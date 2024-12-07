@@ -1,67 +1,161 @@
 import React from "react";
-import "layouts/assets/css/style.css";
-import "bootstrap";
-import { FaFacebookF, FaTwitter, FaYoutube, FaLinkedinIn, FaTiktok } from 'react-icons/fa';
+import ArgonBox from "components/ArgonBox";
+import ArgonTypography from "components/ArgonTypography";
+import MuiLink from "@mui/material/Link";
+import logo from "../../../assets/images/logo2.jpg";
 
 const Footer = () => {
     return (
-        <div className="container-fluid bg-black text-secondary mt-5">
-            <div className="row px-xl-5 pt-5" style={{fontSize: "16px", paddingTop: "20px"}}>
-                <div className="col-lg-4 col-md-12 mb-5 pr-3 pr-xl-5">
-                    <h5 className="text-secondary text-uppercase mb-4">Liên hệ</h5>
-                    <p className="mb-4">Chúng tôi luôn sẵn sàng hỗ trợ bạn! Nếu bạn có bất kỳ câu hỏi nào về sản phẩm, đơn hàng, hoặc cần hỗ trợ thêm, xin vui lòng liên hệ với chúng tôi qua các kênh sau</p>
-                    <p className="mb-2"><i className="fa fa-map-marker-alt text-warning mr-3"></i>123 Lê Bình, Quận Ninh Kiều, Thành phố Cần Thơ</p>
-                    <p className="mb-2"><i className="fa fa-envelope text-warning mr-3"></i>hasagifashion@gmail.com</p>
-                    <p className="mb-0"><i className="fa fa-phone-alt text-warning mr-3"></i>0942767262</p>
-                </div>
-                <div className="col-lg-8 col-md-12">
-                    <div className="row">
-                        <div className="col-md-4 mb-5">
-                            <h5 className="text-secondary text-uppercase mb-4">Về Hasagifashion</h5>
-                            <div className="d-flex flex-column justify-content-start">
-                                <a className="text-secondary mb-2" href="/feature-section"><i className="fa fa-angle-right mr-2"></i>Trang chủ</a>
-                                <a className="text-secondary mb-2" href="/Shop"><i className="fa fa-angle-right mr-2"></i>Sản phẩm</a>
-                                <a className="text-secondary mb-2" href="/Cart"><i className="fa fa-angle-right mr-2"></i>Giỏ hàng</a>
-                                <a className="text-secondary mb-2" href="/History"><i className="fa fa-angle-right mr-2"></i>Đơn hàng</a>
-                                <a className="text-secondary mb-2" href="#"><i className="fa fa-angle-right mr-2"></i>Giới thiệu</a>
-                                <a className="text-secondary" href="#"><i className="fa fa-angle-right mr-2"></i>Liên hệ</a>
-                            </div>
-                        </div>
-                        <div className="col-md-4 mb-5">
-                            <h5 className="text-secondary text-uppercase mb-4">Tài khoản</h5>
-                            <div className="d-flex flex-column justify-content-start">
-                                <a className="text-secondary mb-2" href="#"><i className="fa fa-angle-right mr-2"></i>Đăng nhập</a>
-                                <a className="text-secondary mb-2" href="#"><i className="fa fa-angle-right mr-2"></i>Đăng ký</a>
-                                <a className="text-secondary mb-2" href="#"><i className="fa fa-angle-right mr-2"></i>Đổi mật khẩu</a>
-                                <a className="text-secondary mb-2" href="#"><i className="fa fa-angle-right mr-2"></i>Quên mật khẩu</a>
-                                <a className="text-secondary mb-2" href="/History"><i className="fa fa-angle-right mr-2"></i>Đơn mua</a>
-                                <a className="text-secondary" href="#"><i className="fa fa-angle-right mr-2"></i>Thông tin tài khoản</a>
-                            </div>
-                        </div>
-                        <div className="col-md-4 mb-5">
-                            <h5 className="text-secondary text-uppercase mb-4">Newsletter</h5>
-                            <p>Duo stet tempor ipsum sit amet magna ipsum tempor est</p>
-                            <form action="">
-                                <div className="input-group">
-                                    <input type="email" className="form-control" placeholder="Your Email Address" aria-label="Your Email Address" required />
-                                    <div className="input-group-append">
-                                        <button className="btn btn-warning" type="submit">Sign Up</button>
-                                    </div>
-                                </div>
-                            </form>
-                            <h6 className="text-secondary text-uppercase mt-4 mb-3">Theo dõi chúng tôi trên</h6>
-                            <div className="d-flex">
-                                <a className="btn btn-warning btn-square mr-2" href="#" aria-label="Twitter"><FaTwitter /></a>
-                                <a className="btn btn-warning btn-square mr-2" href="#" aria-label="Facebook"><FaFacebookF /></a>
-                                <a className="btn btn-warning btn-square mr-2" href="#" aria-label="LinkedIn"><FaLinkedinIn /></a>
-                                <a className="btn btn-warning btn-square" href="#" aria-label="Instagram"><FaYoutube /></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>  
-        </div>
-    );
+        <ArgonBox
+            sx={{
+                backgroundImage: 'url("https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/footers2_background.jpg?1713464283843")',
+                backgroundSize: 'cover',
+                backgroundPosition: '100% 100%',
+            }}>
+            <ArgonBox mx={20}>
+                <ArgonBox pt='5rem'>
+                    <ArgonBox
+                        display='flex'
+                        flexWrap='wrap'
+                        justifyContent='flex-start'
+                        alignItems='flex-start'
+                        borderBottom='1px solid #ededed'
+                        pb='5rem'
+                        sx={{
+                            margin: {
+                                md: '0 -10px 0 -10px'
+                            }
+                        }}
+                    >
+                        <ArgonBox width='25%'
+                            sx={{
+                                padding: {
+                                    md: '0 10px'
+                                }
+                            }}>
+                            <MuiLink href='/' sx={{ marginBottom: '15px', maxWidth: '50%', display: 'block' }}>
+                                <ArgonBox
+                                    component='img'
+                                    src={logo}
+                                    alt='Logo'
+                                    width='100%' />
+                            </MuiLink>
+                            <ArgonTypography variant='button' color='secondary' sx={{ maxWidth: '85%', fontSize: '15px', lineHeight: '1.7rem', margin: '0' }}>HASAGIFASHION luôn cam kết, đảm bảo đưa sản phẩm trực tiếp từ nhà sản xuất đến tay người dùng và kiểm soát được chất lượng để đáp ứng được nhu cầu ngày càng cao của khách hàng. Tất cả các sản phẩm tại HASAGI FASHION đều có nguồn gốc xuất xứ rõ ràng, chất lượng.</ArgonTypography>
+                        </ArgonBox>
+                        <ArgonBox width='22.5%'
+                            sx={{
+                                padding: {
+                                    md: '0 10px'
+                                }
+                            }}>
+                            <ArgonTypography variant='h4' mb='17px' display='flex' justifyContent='space-between' alignItems='center'>Liên hệ</ArgonTypography>
+                            <ArgonBox>
+                                <ArgonTypography variant='button' color='secondary' sx={{ maxWidth: '85%', fontSize: '15px', lineHeight: '1.7rem', margin: '0' }}>
+                                    CSKH: <MuiLink>0398948675</MuiLink><br />
+                                    Email: hasagifashion@gmail.com<br />
+                                    Từ 7h00 – 22h00 các ngày từ thứ 2 đến Chủ nhật<br />
+                                </ArgonTypography>
+                            </ArgonBox>
+                        </ArgonBox>
+
+                        <ArgonBox width='15%'
+                            sx={{
+                                padding: {
+                                    md: '0 10px'
+                                }
+                            }}>
+                            <ArgonTypography variant='h4' mb='17px' display='flex' justifyContent='space-between' alignItems='center'>Về chúng tôi</ArgonTypography>
+                            <ArgonTypography variant='button' color='secondary' sx={{ maxWidth: '85%', fontSize: '15px', lineHeight: '1.7rem', margin: '0' }}>
+                                <MuiLink href='/Q&A'>Chính sách đổi trả</MuiLink><br />
+                                <MuiLink href='/Q&A'>Chính sách bảo mật</MuiLink><br />
+                                <MuiLink href='/Q&A'>Điều khoản dịch vụ</MuiLink><br />
+                            </ArgonTypography>
+                        </ArgonBox>
+
+                        <ArgonBox width='15%'
+                            sx={{
+                                padding: {
+                                    md: '0 10px'
+                                }
+                            }}>
+                            <ArgonTypography variant='h4' mb='17px' display='flex' justifyContent='space-between' alignItems='center'>Doanh Mục</ArgonTypography>
+                            <ArgonTypography variant='button' color='secondary' sx={{ maxWidth: '85%', fontSize: '15px', lineHeight: '1.7rem', margin: '0' }}>
+                                <MuiLink href='/Shop'>Sản Phẩm</MuiLink><br />
+                                <MuiLink href='/About'>Giới thiệu</MuiLink><br />
+                                <MuiLink href='/Contact'>Liên hệ</MuiLink><br />
+                                <MuiLink href='/Q&A'>Hỏi đáp</MuiLink><br />
+                            </ArgonTypography>
+                        </ArgonBox>
+
+                        <ArgonBox width='22.5%'
+                            sx={{
+                                padding: {
+                                    md: '0 10px'
+                                }
+                            }}>
+                            <ArgonTypography variant='h4' mb='17px' display='flex' justifyContent='space-between' alignItems='center'>Liên hệ với chúng tôi</ArgonTypography>
+                            <ArgonTypography variant='button' color='secondary' sx={{ maxWidth: '85%', fontSize: '15px', lineHeight: '1.7rem', margin: '0' }}>
+                                Luôn cập nhật tất cả các hành động mà chúng tôi đã lưu cho tất cả khách hàng của mình.
+                            </ArgonTypography>
+                            <ArgonBox display='flex' justifyContent='flex-start' alignItems='center'>
+                                <MuiLink href='/shop'>
+                                    <ArgonBox width={30} height={30} component='img' src='https://file.hstatic.net/200000588277/file/facebook__6__53aaa8d352524d3eb025af5203eaa437_icon.png' alt='Facebook' />
+                                </MuiLink>
+                                <MuiLink href='/shop'>
+                                    <ArgonBox width={30} height={30} mx={1} component='img' src='https://file.hstatic.net/200000588277/file/youtube__5__4f04522e10494557a651f53a33ad4d76_icon.png' alt='Facebook' />
+                                </MuiLink>
+                                <MuiLink href='/shop'>
+                                    <ArgonBox width={30} height={30} component='img' src='https://file.hstatic.net/200000588277/file/tik-tok_d85bb4e7468c43ac9ed5437649b7405c_icon.png' alt='Facebook' />
+                                </MuiLink>
+                                <MuiLink href='/shop'>
+                                    <ArgonBox width={30} height={30} mx={1} component='img' src='https://file.hstatic.net/200000588277/file/instagram__3__7de3ebbce1f24003b516ca6c1d7c24d5_icon.png' alt='Facebook' />
+                                </MuiLink>
+                            </ArgonBox>
+                        </ArgonBox>
+                    </ArgonBox>
+                </ArgonBox>
+
+                <ArgonBox display='flex' justifyContent='space-between' alignItems='center' py='2rem'>
+                    <ArgonBox>
+                        <ArgonTypography variant='button'>
+                            © 2024 - Bản quyền thuộc về
+                            <MuiLink href='/' mx={1}>HASAGI FASHION</MuiLink>
+                        </ArgonTypography>
+                    </ArgonBox>
+                    <ArgonBox display='flex' justifyContent='space-start' alignItems='center'>
+                        <ArgonBox>
+                            <MuiLink href='/'>
+                                <ArgonBox component='img' src='https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/shop_payment_item_image_1.png?1713464283843' alt='payment' />
+                            </MuiLink>
+                        </ArgonBox>
+                        <ArgonBox mx={1}>
+                            <MuiLink href='/'>
+                                <ArgonBox component='img' src='https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/shop_payment_item_image_2.png?1713464283843' alt='payment' />
+                            </MuiLink>
+                        </ArgonBox>
+
+                        <ArgonBox>
+                            <MuiLink href='/'>
+                                <ArgonBox component='img' src='https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/shop_payment_item_image_3.png?1713464283843' alt='payment' />
+                            </MuiLink>
+                        </ArgonBox>
+
+                        <ArgonBox mx={1}>
+                            <MuiLink href='/'>
+                                <ArgonBox component='img' src='https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/shop_payment_item_image_4.png?1713464283843' alt='payment' />
+                            </MuiLink>
+                        </ArgonBox>
+                        <ArgonBox>
+                            <MuiLink href='/'>
+                                <ArgonBox component='img' src='https://bizweb.dktcdn.net/100/493/370/themes/940719/assets/shop_payment_item_image_5.png?1713464283843' alt='payment' />
+                            </MuiLink>
+                        </ArgonBox>
+                    </ArgonBox>
+
+                </ArgonBox>
+            </ArgonBox>
+        </ArgonBox >
+    )
 }
 
 export default Footer;

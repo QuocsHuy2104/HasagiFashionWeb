@@ -13,7 +13,7 @@ import ArgonButton from "../../../components/ArgonButton";
 import { Grid, InputAdornment } from "@mui/material";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import DataGridDemo from './data';
-import ProductDetailService from "services/ProductDetailService";
+import ProductDetailService from "services/ProductDetailServices";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { toast, ToastContainer } from 'react-toastify';
@@ -152,7 +152,8 @@ function ProductDetail() {
             console.error(e)
         }
     }
-    const updatePriceProduct = async () => {
+
+    const updatePrice = async () => {
         try {
             const resp = await ProductService.updatePrice(product.id);
         } catch (e) {
@@ -192,7 +193,7 @@ function ProductDetail() {
             const responses = await Promise.all(savePromises);
             toast.success("Product detail create successfully!");
             updateQuantityProduct();
-            updatePriceProduct();
+            updatePrice()
             refreshData()
             setFormData({
                 id: '',
@@ -203,13 +204,9 @@ function ProductDetail() {
             });
             setSelectedSize([]);
             setSelectedColor([]);
-            
         } catch (e) {
             console.error("Error saving product details:", e);
-        
-            // Use e.response?.data or e.message if available, otherwise show a default error message
             const errorMessage = e.response?.data || "An unexpected error occurred.";
-            
             toast.error(errorMessage);
         }
     };
@@ -257,7 +254,7 @@ function ProductDetail() {
                                             </ArgonBox>
 
                                             <ArgonBox>
-                                                <ArgonTypography variant="caption">{product.categoryDTOResp.name}</ArgonTypography>
+                                                <ArgonTypography variant="caption">{product.categoryDTOResponse.name}</ArgonTypography>
                                             </ArgonBox>
                                         </ArgonBox>
 
@@ -265,20 +262,16 @@ function ProductDetail() {
                                             <ArgonBox width='75px'>
                                                 <ArgonTypography variant="button">Brand</ArgonTypography>
                                             </ArgonBox>
-
                                             <ArgonBox>
-                                                <ArgonTypography variant="caption">{product.trademarkDTOResp.name}</ArgonTypography>
+                                                <ArgonTypography variant="caption">{product.brandDTOResponse.name}</ArgonTypography>
                                             </ArgonBox>
                                         </ArgonBox>
-
                                     </ArgonBox>
                                 </Grid>
                             </Grid>
                         </ArgonBox>
-
                         <ArgonBox mx={7}>
                             <ArgonBox component="form" role="form" onSubmit={handleSubmit}>
-
                                 <ArgonBox
                                     display="flex"
                                     flexDirection="column"
@@ -483,7 +476,7 @@ function ProductDetail() {
                     </Card>
                 </ArgonBox>
             </ArgonBox>
-            <ProductFormDialog open={dialogOpen} onClose={handleCloseDialog} colors={colors} sizes={sizes} initialData={selectedRow} productID={product.id} refreshData={refreshData} updateQuantity={updateQuantityProduct} />
+            <ProductFormDialog open={dialogOpen} onClose={handleCloseDialog} colors={colors} sizes={sizes} initialData={selectedRow} productID={product.id} refreshData={refreshData} updateQuantity={updateQuantityProduct} updatePrice={updatePrice} />
             <ToastContainer />
         </DashboardLayout>
     );

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import 'layouts/assets/css/style.css';
 import { Link } from "react-router-dom";
-import aboutImage5 from "layouts/assets/img/product-1.jpg";
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
 import ProductService from "../../../services/ProductServices";
@@ -12,12 +11,11 @@ import { Card, Typography } from '@mui/material';
 import { Form } from 'react-bootstrap';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
-import ChatBot from "components/client/HasagiChatBot";
 
 function Shop() {
     const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [productsPerPage] = useState(20);
+    const [productsPerPage] = useState(12);
     const [isLoading, setIsLoading] = useState(true);
     const [sortOption, setSortOption] = useState("default");
     const [categories, setCategories] = useState([]);
@@ -26,8 +24,8 @@ function Shop() {
     const [selectedBrands, setSelectedBrands] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [reviews, setReviews] = useState([]);
-    const [value, setValue] = useState([0, 1000000]);
-
+    const [value, setValue] = useState([300000, 700000]);
+    const [showSaleOnly, setShowSaleOnly] = useState(false);
     const handleSliderChange = (newValue) => {
         setValue(newValue);
     };
@@ -68,9 +66,10 @@ function Shop() {
     useEffect(() => {
         const fetchProductsAndCategories = async () => {
             try {
-                const productResponse = await ProductService.getAllProducts();
-                const categoryResponse = await CategoryService.getAllCategories();
-                const brandResponse = await BrandService.getAllBrands();;
+                const productResponse = await ProductService.getAllProductsUs();
+                const categoryResponse = await CategoryService.getAllCategoriesUS();
+                const brandResponse = await BrandService.getAllBrandsUS();
+
                 if (
                     Array.isArray(productResponse.data) &&
                     Array.isArray(categoryResponse.data) &&
@@ -96,24 +95,23 @@ function Shop() {
     }, []);
 
     const filteredProducts = products.filter(product => {
-        const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.categoryDTOResp?.id);
-        const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(product.trademarkDTOResp?.id);
-const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-        const minPrice = parseFloat(product.minPrice) || 0;
-        const matchesPriceRange = minPrice >= value[0] && minPrice <= value[1];
-    
-        return matchesCategory && matchesBrand && matchesSearchTerm && matchesPriceRange;
+        const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.categoryDTOResponse?.id);
+        const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(product.brandDTOResponse?.id);
+        const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSale = !showSaleOnly || product.sale > 0;
+
+        return matchesCategory && matchesBrand && matchesSearchTerm && matchesSale;
     });
 
     const sortedProducts = filteredProducts.sort((a, b) => {
         if (sortOption === "price-asc") {
-            return (a.minPrice || 0) - (b.minPrice || 0);
+            return (a.maxPrice || 0) - (b.maxPrice || 0);
         } else if (sortOption === "price-desc") {
-            return (b.minPrice || 0) - (a.minPrice || 0);
+            return (b.maxPrice || 0) - (a.maxPrice || 0);
         } else if (sortOption === "popularity") {
-            return (b.sold || 0) - (a.sold || 0);
+            return (b.popularity || 0) - (a.popularity || 0);
         } else if (sortOption === "newest") {
-            return b.id - a.id; 
+            return new Date(b.date) - new Date(a.date);
         } else {
             return 0;
         }
@@ -133,19 +131,6 @@ const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLower
 
     const formatNumber = (num) => {
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    };
-
-    const formatImportPrice = (importPrice) => {
-        if (!importPrice) return "0đ";
-
-        const prices = importPrice.split(' - ').map(price => {
-            const trimmedPrice = price.trim();
-            const numericPrice = parseFloat(trimmedPrice);
-            const integerPrice = Math.floor(numericPrice);
-            return `${formatNumber(integerPrice)}đ`;
-        });
-
-        return prices.join(' - ');
     };
 
     const fetchReviews = async (productId) => {
@@ -185,24 +170,13 @@ const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLower
                     </div>
                 </div>
             )}
-            <div className="container-fluid">
-                <div className="row px-xl-5 py-5">
-                    <div className="col-12">
-                        <nav className="breadcrumb bg-light mb-30">
-                            <a className="breadcrumb-item text-dark" href="/feature-section">Trang chủ</a>
-                            <span className="breadcrumb-item active">Sản phẩm</span>
-                        </nav>
-                    </div>
-                </div>
-            </div>
             <HasagiNav onSearch={handleSearch} />
-            <div className="container-fluid">
-                <div className="row px-xl-5 pt-0">
+            <div className="container-fluid ">
+                <div className="row px-xl-5" style={{ marginTop: "120px" }}>
                     <div className="col-3">
                         <h5 className="section-title position-relative text-uppercase mb-3">
                             <span className="bg-white pr-3">Lọc theo:</span>
                         </h5>
-
                         <div className="filter-options card p-3 mb-4" style={{
                             border: '1px solid #ddd',
                             borderRadius: '8px',
@@ -236,13 +210,10 @@ const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLower
                                         <option value="default">-----Chọn Sắp Xếp-----</option>
                                         <option value="price-asc">Giá thấp nhất</option>
                                         <option value="price-desc">Giá cao nhất</option>
-                                        <option value="popularity">Phổ biến</option>
-                                        <option value="newest">Mới nhất</option>
                                     </Form.Control>
                                 </div>
                             </div>
                         </div>
-
                         <div className="filter-options card p-3 mb-4" style={{
                             border: '1px solid #ddd',
                             borderRadius: '8px',
@@ -266,23 +237,18 @@ const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLower
                                     range
                                 />
                                 <p>Từ: {value[0].toLocaleString('vi-VN')}đ - Đến: {value[1].toLocaleString('vi-VN')}đ</p>
-
-
                                 <style>
                                     {`
                                         .rc-slider-rail {
                                         background-color: #ccc; /* Màu của thanh chưa được kéo */
                                         }
-
                                         .rc-slider-track {
                                         background-color: #ffcc00; /* Màu của thanh khi kéo (vàng đậm) */
                                         }
-
                                         .rc-slider-handle {
                                         border-color: #ffcc00; /* Màu của nút kéo */
                                         background-color: #ffcc00; /* Màu nền của nút kéo */
                                         }
-
                                         .rc-slider-handle:focus {
                                         border-color: #ffcc00; /* Màu của nút kéo khi focus */
                                         }
@@ -290,7 +256,66 @@ const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLower
                                 </style>
                             </div>
                         </div>
+                        <div className="filter-options card p-3 mb-4" style={{
+                            border: '1px solid #ddd',
+                            borderRadius: '8px',
+                            backgroundColor: '#f9f9f9'
+                        }}>
+                        <div className="filter-section mt-0" style={{ padding: '8px 12px' }}>
+                            <h6 className="filter-title text-uppercase mb-2" style={{
+                                fontSize: '1.5rem',
+                                color: '#333',
+                                fontWeight: 600,
+                                borderBottom: '1px solid #ddd',
+                                paddingBottom: '5px',
+                                marginBottom: '3px'
+                            }}>SẢN PHẨM GIẢM GIÁ</h6>
+                            <div className="filter-checkboxes" style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                paddingLeft: '15px',
+                                maxHeight: '300px',
+                                overflowY: 'auto',
+                                scrollbarWidth: 'thin',
+                                scrollbarColor: '#C0C0C0 #f1f1f1',
+                            }}>
+                                {/* Checkbox "Tất cả" */}
+                                <Form.Check
+                                    type="checkbox"
+                                    id="filter-all"
+                                    label="Tất cả"
+                                    checked={selectedCategories.length === 0 && !showSaleOnly}
+                                    onChange={() => {
+                                        setSelectedCategories([]);
+                                        setShowSaleOnly(false);
+                                    }}
+                                    style={{
+                                        cursor: 'pointer',
+                                        fontWeight: 'bold',
+                                        color: '#333',
+                                        marginBottom: '10px',
+                                        fontSize: '19px',
+                                    }}
+                                />
 
+                                {/* Checkbox "Sale" */}
+                                <Form.Check
+                                    type="checkbox"
+                                    id="filter-sale"
+                                    label="Sản phẩm giảm giá"
+                                    checked={showSaleOnly}
+                                    onChange={() => setShowSaleOnly(!showSaleOnly)}
+                                    style={{
+                                        cursor: 'pointer',
+                                        color: '#555',
+                                        transition: 'color 0.3s',
+                                        marginBottom: '10px',
+                                        fontSize: '19px',
+                                    }}
+                                />
+                            </div>
+                        </div>
+                        </div>
                         <div className="filter-options card p-3 mb-4" style={{
                             border: '1px solid #ddd',
                             borderRadius: '8px',
@@ -362,12 +387,8 @@ const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLower
                                         />
                                     ))}
                                 </div>
-
-
                             </div>
                         </div>
-
-
                         <div className="filter-options card p-3 mb-4" style={{
                             border: '1px solid #ddd',
                             borderRadius: '8px',
@@ -443,90 +464,133 @@ const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLower
                             </div>
                         </div>
                     </div>
-                    <div className="col-9">
+                    <div className="col-9 bg-white">
                         <div className="row pt-2">
-                            {currentProducts.map((product, index) => (
-                                <div className="col-lg-3 col-md-6 col-sm-6 px-2"
-                                    key={index}>
-                                    <Link to={`/ShopDetail?id=${product.id}`}>
-                                        <Card
-                                            sx={{
-                                                boxShadow: 3,
-                                                borderRadius: '4px',
-                                                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                                                '&:hover': {
-                                                    transform: 'scale(1.05)',
-                                                    boxShadow: 6,
-                                                },
-                                            }}
-                                            className="product-item bg-light mb-3"
-                                        >
-                                            <div className="product-img position-relative overflow-hidden">
-                                                <img
-                                                    className="img-fluid w-100"
-                                                    src={product.image || aboutImage5}
-                                                    alt={product.name || 'Product Name'}
-                                                    style={{
-                                                        objectFit: 'cover',
-                                                        height: '200px',
-                                                    }}
-                                                />
-                                            </div>
-                                            <div className="py-3 px-2">
+                            <div
+                                className="product-list"
+                                style={{
+                                    display: "grid",
+                                    gridTemplateColumns: "repeat(4, 1fr)", // 4 cột
+                                    gap: "20px", // Khoảng cách giữa các sản phẩm
+                                }}
+                            >
+                                {currentProducts.map((product, index) => (
+                                    <div
+                                        key={index}
+                                        className="product-card"
+                                        style={{
+                                            position: "relative",
+                                            overflow: "hidden",
+                                            transition: "all 0.3s ease",
+                                            transform: "scale(1)",
+                                            boxShadow: "0px 0px 0px rgba(0, 0, 0, 0)",
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.transform = "scale(1.03)";
+                                            e.currentTarget.style.boxShadow = "0 10px 15px rgba(0, 0, 0, 0.2)";
+                                            const image = e.currentTarget.querySelector("img");
+                                            if (image) {
+                                                image.style.transform = "scale(1.1)";
+                                                image.style.opacity = "0.9";
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.transform = "scale(1)";
+                                            e.currentTarget.style.boxShadow = "0px 0px 0px rgba(0, 0, 0, 0)";
+                                            const image = e.currentTarget.querySelector("img");
+                                            if (image) {
+                                                image.style.transform = "scale(1)";
+                                                image.style.opacity = "1";
+                                            }
+                                        }}
+                                    >
+                                        <Link to={`/ShopDetail?id=${product.id}`} style={{ textDecoration: "none" }}>
+                                            <Card className="card-container" style={{ position: "relative" }}>
                                                 <div
-                                                    className="h6 text-decoration-none text-truncate"
+                                                    className="image-container"
                                                     style={{
-                                                        color: '#333',
-                                                        fontWeight: 'bold',
-                                                        display: 'block',
-                                                        marginBottom: '1px',
-                                                        fontSize: '1rem',
+                                                        position: "relative",
+                                                        overflow: "hidden",
+                                                        width: "110%",
+                                                        height: "auto",
                                                     }}
                                                 >
-                                                    {product.name || "Product Name Goes Here"}
+                                                    {/* Hiển thị hình ảnh sản phẩm */}
+                                                    <img
+                                                        src={product.image}
+                                                        alt={product.name}
+                                                        style={{
+                                                            width: "100%",
+                                                            height: "350px",
+                                                            transition: "transform 0.3s ease, opacity 0.3s ease",
+                                                        }}
+                                                    />
+
+                                                    {/* Hiển thị nhãn giảm giá */}
+                                                    {product.sale > 0 && (
+                                                        <div
+                                                            style={{
+                                                                position: "absolute",
+                                                                top: "10px",
+                                                                left: "10px",
+                                                                backgroundColor: "#f5365c",
+                                                                color: "white",
+                                                                padding: "5px 10px",
+                                                                borderRadius: "5px",
+                                                                fontSize: "14px",
+                                                            }}
+                                                        >
+                                                            -{product.sale}%
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                <Typography
-                                                    sx={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        color: 'red',
-                                                        fontWeight: 'bold',
-                                                        marginBottom: '10px',
-                                                        fontSize: '14px',
-                                                    }}
-                                                >
-                                                    {formatImportPrice(product.importPrice)}
+
+                                                <div className="card-content" style={{ padding: "10px" }}>
+                                                    {/* Tên sản phẩm */}
                                                     <div
                                                         style={{
-                                                            color: '#f0e62b',
-                                                            border: '1px solid #f0e62b',
-                                                            padding: '0 5px',
-                                                            marginLeft: '10px',
-
+                                                            fontSize: "15px",
+                                                            marginBottom: "5px",
+                                                            whiteSpace: "nowrap",
+                                                            overflow: "hidden",
+                                                            textOverflow: "ellipsis",
                                                         }}
                                                     >
-                                                        {product.sale}%
+                                                        {product.name || "Product Name Goes Here"}
                                                     </div>
-                                                </Typography>
 
-                                                <Typography
-                                                    sx={{
-                                                        fontWeight: 'bold',
-                                                        marginBottom: '10px',
-                                                        fontSize: '14px'
-                                                    }}
-                                                >
+                                                    {/* Giá gốc và giá sau giảm */}
+                                                    <div style={{ fontSize: "16px", marginBottom: "5px" }}>
+                                                        {product.sale > 0 ? (
+                                                            <>
+                                                                <span style={{ color: "#f5365c", fontWeight: "bold" }}>
+                                                                    {product.minPrice === product.maxPrice
+                                                                        ? `${(product.maxPrice * (1 - product.sale / 100)).toLocaleString()}đ`
+                                                                        : ` ${(product.maxPrice * (1 - product.sale / 100)).toLocaleString()}đ`}
+                                                                </span>
+                                                                <span style={{ textDecoration: "line-through", color: "gray", marginLeft: "5px" }}>
+                                                                    {new Intl.NumberFormat("vi-VN").format(product.maxPrice)}đ
+                                                                </span>
+                                                            </>
+                                                        ) : (
+                                                            <span style={{ color: "#f5365c", fontWeight: "bold" }}>
+                                                                {new Intl.NumberFormat("vi-VN").format(product.maxPrice)}đ
+                                                            </span>
+                                                        )}
+                                                    </div>
 
-                                                    <p> ⭐ {calculateAverageStars(product.id)} </p>
-                                                </Typography>
-                                            </div>
-                                        </Card>
-                                    </Link>
-                                </div>
-                            ))}
+                                                    {/* Đánh giá sản phẩm */}
+                                                    <Typography variant="body2" style={{ fontWeight: "bold", marginTop: "10px" }}>
+                                                        ⭐ {calculateAverageStars(product.id)}
+                                                    </Typography>
+                                                </div>
+                                            </Card>
+                                        </Link>
+                                    </div>
+                                ))}
+                            </div>
 
-
-                            <div className="col-12" style={{ marginTop: "-30px" }}>
+                            <div className="col-12" style={{}}>
                                 <nav>
                                     <ul className="pagination justify-content-center">
                                         <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
@@ -552,10 +616,9 @@ const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLower
                         </div>
 
                     </div>
-                </div>
-            </div>
+                </div >
+            </div >
             <Footer />
-            <ChatBot />
         </>
     );
 }

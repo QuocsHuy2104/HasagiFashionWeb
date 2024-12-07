@@ -11,10 +11,11 @@ import "react-toastify/dist/ReactToastify.css";
 import { Link } from "react-router-dom";
 import aboutImage from "layouts/assets/img/shopping.png";
 import CartService from "../../../services/CartService";
-import ProductService from "services/ProductServices";
-import aboutImage5 from "layouts/assets/img/product-1.jpg";
+import AddressService from "../../../services/AddressServices";
 import ProductVariant from "./ProductVariant";
 import logo from "components/client/assets/images/logo1.png";
+import Swal from 'sweetalert2';
+
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -24,7 +25,9 @@ const Cart = () => {
   const [selectAll, setSelectAll] = useState(false);
   const [showBackupModal, setShowBackupModal] = useState(false);
   const [images, setImages] = useState([]);
+  const [checkedItems, setCheckedItems] = useState([]);
   const navigate = useNavigate();
+
   const fetchCartItems = async () => {
     const accountId = Cookies.get("accountId");
 
@@ -35,9 +38,7 @@ const Cart = () => {
     try {
       const [cartResponse, addressResponse] = await Promise.all([
         CartService.getCart(),
-        axios.get(`http://localhost:3000/api/addresses/exists?accountId=${accountId}`, {
-          withCredentials: true,
-        }),
+        AddressService.getAddress(),
       ]);
 
       // Cập nhật cartItems và accountExists
@@ -53,20 +54,32 @@ const Cart = () => {
           .then((res) => ({ productId: item.productId, data: res.data }))
       );
 
-      // Chờ tất cả API hoàn thành
       const imagesData = await Promise.all(imageRequests);
 
-      // Chuyển đổi thành object để dễ truy cập
       const imagesMap = imagesData.reduce((acc, { productId, data }) => {
         acc[productId] = data;
         return acc;
       }, {});
 
-      // Cập nhật state với hình ảnh
       setImages(imagesMap);
 
-      // console.log("Cart Response:", cartResponse.data);
-      // console.log("Address Response:", addressResponse.data);
+      const updatedCartItems = reversedCartData.map((item) => {
+        const checkedItems =
+          JSON.parse(
+            localStorage.getItem("checkedItems" + item.productId + item.colorId + item.sizeId)
+          ) || [];
+        const isChecked = checkedItems.includes(item.productId);
+        const checked = isChecked
+          ? checkedItems.includes(item.colorId) && checkedItems.includes(item.sizeId)
+          : "";
+        return {
+          ...item,
+          selected: checked,
+        };
+      });
+
+      setCartItems(updatedCartItems);
+      //setCheckedItems(updatedCartItems);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -75,26 +88,79 @@ const Cart = () => {
   };
 
   useEffect(() => {
+    const handleBeforeUnload = () => {
+      localStorage.clear();
+    };
     fetchCartItems();
+    window.onbeforeunload = handleBeforeUnload;
+
+    return () => {
+      window.onbeforeunload = null;
+    };
   }, []);
 
   const calculateSubtotal = () => {
     return cartItems
       .filter((item) => item.selected)
-      .reduce((total, item) => total + item.price * item.quantity, 0);
+      .reduce(
+        (total, item) =>
+          item.quantity > 0 ? total + item.price * item.quantity : total + item.price,
+        0
+      );
   };
-
   const subtotal = calculateSubtotal();
   const total = subtotal;
 
   const handleQuantityChange = async (itemId, change, inputValue = null) => {
     const updatedCartItems = cartItems.map((item) => {
       if (item.cartdetailid === itemId) {
-        // If inputValue is provided and is empty, set quantity to 1
         const newQuantity =
-          inputValue === "" ? 1 : inputValue ? parseInt(inputValue, 10) : item.quantity + change;
-        const finalQuantity = Math.min(Math.max(1, newQuantity), item.quantityDetail); // Ensure quantity is between 1 and available stock
-        return { ...item, quantity: finalQuantity };
+          inputValue === ""
+            ? ""
+            : inputValue === "0"
+            ? item.quantity
+            : parseInt(inputValue, 10) || item.quantity + change;
+
+        if (newQuantity === 0) {
+          Swal.fire({
+            title: "Bạn chắc chắn xóa sản phẩm này?",
+            text: "Bạn sẽ không thể hoàn tác điều này!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Vâng, xóa nó!",
+          }).then(async (result) => {
+            if (result.isConfirmed) {
+              // Xóa sản phẩm khỏi giỏ hàng
+              const filteredCartItems = cartItems.filter((item) => item.cartdetailid !== itemId);
+              setCartItems(filteredCartItems);
+              try {
+                CartService.getRemove(itemId);
+                Swal.fire({
+                  title: "Xóa thành công!",
+                  text: "Sản phẩm đã được xóa.",
+                  icon: "success",
+                });
+              } catch (error) {
+                console.error("Error deleting item:", error);
+                Swal.fire({
+                  title: "Lỗi!",
+                  text: "Đã có sự cố khi xóa sản phẩm.",
+                  icon: "error",
+                });
+              }
+            }
+          });
+          return item;
+        }
+
+        // Đảm bảo số lượng nằm trong khoảng cho phép
+        if (newQuantity > 0) {
+          const finalQuantity = Math.min(Math.max(1, newQuantity), item.quantityDetail);
+          return { ...item, quantity: finalQuantity };
+        }
+        return { ...item, quantity: newQuantity };
       }
       return item;
     });
@@ -103,20 +169,31 @@ const Cart = () => {
 
     setCartItems(updatedCartItems);
 
-    try {
-      await axios.put(`http://localhost:3000/api/cart/update/${updatedItem.cartdetailid}`, null, {
-        params: { quantity: updatedItem.quantity },
-      });
-    } catch (error) {
-      console.error("Error updating quantity:", error);
+    if (updatedItem.quantity > 0) {
+      try {
+        await axios.put(`http://localhost:3000/api/cart/update/${updatedItem.cartdetailid}`, null, {
+          params: { quantity: updatedItem.quantity },
+        });
+      } catch (error) {
+        console.error("Error updating quantity:", error);
+      }
+    } else {
+      try {
+        await axios.put(`http://localhost:3000/api/cart/update/${updatedItem.cartdetailid}`, null, {
+          params: { quantity: 1 },
+        });
+      } catch (error) {
+        console.error("Error updating quantity:", error);
+      }
     }
   };
 
-  const handleRemoveItem = async (itemId) => {
-    const accountId = Cookies.get("accountId");
+
+  const handleRemoveItem = async (itemId, productId, colorId, sizeId) => {
     try {
-      await axios.delete(`http://localhost:3000/api/cart/remove/${itemId}?accountId=${accountId}`);
+      CartService.getRemove(itemId);
       setCartItems(cartItems.filter((item) => item.cartdetailid !== itemId));
+      localStorage.removeItem("checkedItems" + productId + colorId + sizeId);
       toast.success("Xóa sản phẩm thành công.");
     } catch (error) {
       console.error("Error removing item:", error);
@@ -127,15 +204,47 @@ const Cart = () => {
   const handleSelectAllChange = () => {
     const newSelectAll = !selectAll;
     setSelectAll(newSelectAll);
-    setCartItems(cartItems.map((item) => ({ ...item, selected: newSelectAll })));
+    const updatedCartItems = cartItems.map((item) => ({ ...item, selected: newSelectAll }));
+    setCartItems(updatedCartItems);
+    if (newSelectAll) {
+      const selectedKeys = updatedCartItems.map(
+        (item) => `checkedItems${item.productId}${item.colorId}${item.sizeId}`
+      );
+      selectedKeys.forEach((key, index) => {
+        const item = updatedCartItems[index]; // Tương ứng với từng sản phẩm
+        localStorage.setItem(key, JSON.stringify([item.productId, item.colorId, item.sizeId]));
+      });
+    } else {
+      localStorage.clear();
+    }
   };
 
-  const handleCheckboxChange = (itemId) => {
+  const handleCheckboxChange = (itemId, productId, colorId, sizeId) => {
+    const checkedItems =
+      JSON.parse(localStorage.getItem("checkedItems" + productId + colorId + sizeId)) || [];
+
+    if (checkedItems && checkedItems.length > 0) {
+      localStorage.removeItem("checkedItems" + productId + colorId + sizeId);
+    } else {
+      cartItems.map((item) =>
+        item.productId === productId
+          ? localStorage.setItem(
+            "checkedItems" + productId + colorId + sizeId,
+            JSON.stringify([Number(productId), item.colorId, item.sizeId])
+          )
+          : item
+      );
+    }
+    let updatedCheckedItems = [...checkedItems];
+    if (updatedCheckedItems.includes(productId)) {
+      updatedCheckedItems = updatedCheckedItems.filter((id) => id === productId); // Bỏ chọn
+    } else {
+      updatedCheckedItems.push(productId); // Chọn
+    }
     const updatedCartItems = cartItems.map((item) =>
       item.cartdetailid === itemId ? { ...item, selected: !item.selected } : item
     );
     setCartItems(updatedCartItems);
-
     const allSelected = updatedCartItems.every((item) => item.selected);
     setSelectAll(allSelected);
   };
@@ -146,7 +255,6 @@ const Cart = () => {
       toast.warn("Vui lòng chọn sản phẩm để thanh toán.");
       return;
     }
-    console.log("Selected Items:", selectedItems);
     localStorage.setItem("cartItemsBackup", JSON.stringify(selectedItems));
     if (!accountExists) {
       setShowBackupModal(true);
@@ -174,6 +282,7 @@ const Cart = () => {
       await axios.delete("http://localhost:8080/api/cart/delete", { data: selectedIds });
       setCartItems(cartItems.filter((item) => !selectedIds.includes(item.cartdetailid)));
       setSelectAll(false);
+      localStorage.clear();
       toast.success("Xóa sản phẩm thành công.");
     } catch (error) {
       console.error("Error deleting items:", error);
@@ -205,7 +314,22 @@ const Cart = () => {
         prevItems.map((item) => (item.id === id ? { ...item, isDropdownVisible: false } : item))
       );
       const response = await CartService.getCart();
-      setCartItems(response.data);
+
+      const updatedCartItems = response.data.reverse().map((item) => {
+        const checkedItemsKey = `checkedItems${item.productId}${item.colorId}${item.sizeId}`;
+        const checkedItems = JSON.parse(localStorage.getItem(checkedItemsKey)) || [];
+        const isChecked =
+          checkedItems.includes(item.productId) &&
+          checkedItems.includes(item.colorId) &&
+          checkedItems.includes(item.sizeId);
+
+        return {
+          ...item,
+          selected: isChecked ? true : false,
+        };
+      });
+
+      setCartItems(updatedCartItems);
     } catch (error) {
       console.error("Error fetching updated cart:", error);
     }
@@ -390,7 +514,7 @@ const Cart = () => {
                           <input
                             type="checkbox"
                             checked={item.selected}
-                            onChange={() => handleCheckboxChange(item.cartdetailid)}
+                            onChange={() => handleCheckboxChange(item.cartdetailid, item.productId)}
                             style={{ transform: "scale(1.5)" }}
                           />
                         </td>
@@ -401,7 +525,11 @@ const Cart = () => {
                           <Link
                             key={item.id}
                             to={`/ShopDetail?id=${item.productId}`}
-                            style={{ color: "black", textDecoration: "none" }}
+                            style={{
+                              color: "black",
+                              textDecoration: "none",
+                              whiteSpace: "nowrap", // Thêm thuộc tính này để ngăn dòng mới
+                            }}
                           >
                             {matchingImage && (
                               <img
@@ -416,6 +544,7 @@ const Cart = () => {
                             )}
                             {item.name}
                           </Link>
+
                         </td>
                         <td
                           className="align-middle"
@@ -459,7 +588,7 @@ const Cart = () => {
                                 textAlign: "left",
                               }}
                             >
-                              <span style={{ color: item.color || "black" }}>
+                              <span>
                                 {item.color || "Chưa chọn màu"}
                               </span>
                               , {item.size || "Chưa chọn kích thước"}
@@ -509,19 +638,8 @@ const Cart = () => {
                           )}
                         </td>
                         <td className="align-middle" style={{ border: "none" }}>
-                          <span
-                            style={{
-                              textDecoration: "underline",
-                              fontSize: "10px",
-                              fontWeight: "normal",
-                              transform: "translateY(-3px)", // Adjust the value as needed
-                              display: "inline-block",
-                            }}
-                          >
-                            đ
-                          </span>
                           <span style={{ marginLeft: "1px" }}>
-                            {new Intl.NumberFormat("vi-VN").format(item.price)}
+                            {new Intl.NumberFormat("vi-VN").format(item.price)}đ
                           </span>
                         </td>
 
@@ -529,7 +647,7 @@ const Cart = () => {
                           <div
                             className="input-group quantity mx-auto"
                             style={{
-                              width: "150px", // Adjust the container width to fit the new input size
+                              width: "150px",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "space-between",
@@ -548,7 +666,7 @@ const Cart = () => {
                                   justifyContent: "center",
                                   boxShadow: "none",
                                 }}
-                                disabled={item.quantity <= 1}
+                                disabled={item.quantity <= 0}
                               >
                                 <i className="fa fa-minus"></i>
                               </button>
@@ -558,17 +676,28 @@ const Cart = () => {
                               type="text"
                               className="form-control form-control-sm text-center"
                               value={item.quantity}
-                              onChange={(e) =>
-                                handleQuantityChange(item.cartdetailid, 0, e.target.value)
-                              } // Pass input value directly
+                              onChange={(e) => {
+                                // Chỉ cho phép nhập số và không cho phép nhập ký tự khác
+                                const value = e.target.value;
+                                if (/^\d*$/.test(value)) {
+                                  handleQuantityChange(item.cartdetailid, 0, value);
+                                }
+                              }}
+                              onBlur={(e) => {
+                                const inputValue = e.target.value.trim(); 
+                                if (inputValue === "") {
+                                  handleQuantityChange(item.cartdetailid, 0, "1"); 
+                                } else {
+                                  handleQuantityChange(item.cartdetailid, 0, inputValue); 
+                                }
+                              }}
                               style={{
-                                width: "60px", // Increase the width of the input field
+                                width: "60px", 
                                 height: "30px",
                                 margin: "0 5px",
                                 boxShadow: "none",
                                 border: "1px solid #888",
                               }}
-                              min="1" // Optional: You can add a minimum value for quantity
                             />
 
                             <div className="input-group-btn">
@@ -593,19 +722,10 @@ const Cart = () => {
                         </td>
 
                         <td className="align-middle" style={{ border: "none" }}>
-                          <span
-                            style={{
-                              textDecoration: "underline",
-                              fontSize: "10px",
-                              fontWeight: "normal",
-                              transform: "translateY(-3px)", // Adjust the value as needed
-                              display: "inline-block",
-                            }}
-                          >
-                            đ
-                          </span>
-                          <span style={{ marginLeft: "1px" }}>
-                            {new Intl.NumberFormat("vi-VN").format(item.price * item.quantity)}
+                        <span style={{ marginLeft: "1px" }}>
+                            {item.quantity !== ""
+                              ? new Intl.NumberFormat("vi-VN").format(item.price * item.quantity)
+                              : new Intl.NumberFormat("vi-VN").format(item.price)}
                           </span>
                         </td>
                         <td className="align-middle" style={{ border: "none" }}>
@@ -630,9 +750,9 @@ const Cart = () => {
                     type="checkbox"
                     checked={selectAll}
                     onChange={handleSelectAllChange}
-                    style={{ transform: "scale(1.5)", marginBottom: "0" }}
+                    style={{ transform: "scale(1.5)", marginBottom: "0", marginLeft: "-4px" }}
                   />
-                  <label style={{ marginLeft: "5px", marginBottom: "0" }}>
+                  <label style={{ marginLeft: "12px", marginTop: "2px" }}>
                     Chọn Tất Cả ({countSelectedItems()})
                   </label>
                   <button
@@ -645,6 +765,7 @@ const Cart = () => {
                       fontSize: "20px",
                       fontWeight: "normal",
                       marginLeft: "10px",
+                      marginTop: "2px",
                     }}
                   >
                     Xóa
@@ -653,19 +774,8 @@ const Cart = () => {
                 <div className="d-flex align-items-center">
                   <h5 className="font-weight-medium mb-0">
                     Tổng thanh toán ({countSelectedItems()} sản phẩm):{" "}
-                    <span
-                      style={{
-                        textDecoration: "underline",
-                        fontSize: "13px",
-                        fontWeight: "normal",
-                        transform: "translateY(-4px)", // Adjust the value as needed
-                        display: "inline-block",
-                      }}
-                    >
-                      đ
-                    </span>
                     <span style={{ marginLeft: "1px" }}>
-                      {new Intl.NumberFormat("vi-VN").format(total)}
+                      {new Intl.NumberFormat("vi-VN").format(total)}đ
                     </span>
                   </h5>
                   <button

@@ -108,7 +108,6 @@ export default function App() {
       }}
       onClick={handleConfiguratorOpen}
     >
-      <Icon sx={{ fontSize: "1.25rem" }}>settings</Icon>
     </ArgonBox>
   );
 

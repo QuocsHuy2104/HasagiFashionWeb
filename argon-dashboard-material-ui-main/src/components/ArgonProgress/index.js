@@ -28,7 +28,7 @@ const ArgonProgress = forwardRef(({ variant, color, value, label, ...rest }, ref
   <>
     {label && (
       <ArgonTypography variant="button" fontWeight="medium" color="text">
-        {value}%
+        {value} Sold
       </ArgonTypography>
     )}
     <ArgonProgressRoot
