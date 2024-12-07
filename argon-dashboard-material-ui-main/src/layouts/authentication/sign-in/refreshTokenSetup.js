@@ -4,7 +4,7 @@ export const refreshTokenSetup = (res) => {
   const refreshToken = async () => {
     const newAuthRes = await res.reloadAuthRespose();
 
-    refreshTiming = (newAuthRe.expires_in || 3600 - 50) * 1000;
+    refreshTiming = (newAuthRes.expires_in || 3600 - 50) * 1000;
 
     console.log("new AuthRes", newAuthRes);
 

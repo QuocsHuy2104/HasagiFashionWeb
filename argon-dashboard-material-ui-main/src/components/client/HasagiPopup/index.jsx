@@ -346,7 +346,7 @@ export default function ProductPopup({ open, handleClose, id }) {
                             </Button>
 
                             {/* Nút Xem chi tiết */}
-                            <MuiLink href={`ShopDetails/${id}`} target="_blank" rel="noreferrer">
+                            <MuiLink href={`/ShopDetail?id=${id}`} rel="noreferrer">
                                 <Button
                                     variant="contained"
 

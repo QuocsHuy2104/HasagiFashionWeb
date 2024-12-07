@@ -19,6 +19,7 @@ export default function SaleProduct() {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 8; // Define items per page
 
+
     const handleOpenPopup = (id) => {
         setSelectedProductId(id);
         setIsPopupOpen(true);

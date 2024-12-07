@@ -60,7 +60,7 @@ function HasagiCard2({ image, name, id, price }) {
             }}
         >
             {/* Image and Name */}
-            <MuiLink href={`ShopDetail?id=${id}`} rel="noreferrer">
+            <MuiLink href={`/ShopDetail?id=${id}`}>
                 <ArgonBox
                     mt={1}
                     mx={2}
@@ -90,23 +90,21 @@ function HasagiCard2({ image, name, id, price }) {
                     />
                 </ArgonBox>
 
-                <div style={{ padding: '8px' }}>
-                    <ArgonTypography
-                        variant="h5"
-                        color="text"
-                        mt={2}
-                        textAlign="center"
-                        style={{
-                            fontSize: '17px',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            width: '100%',
-                        }}
-                    >
-                        {name}
-                    </ArgonTypography>
-                </div>
+                <ArgonTypography
+                    variant="h5"
+                    color="text"
+                    mt={2}
+                    textAlign='center'
+                    style={{
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        width: '100%',
+                    }}
+                >
+                    {name}
+                </ArgonTypography>
+
 
                 {/* Price */}
                 <ArgonBox display="flex" alignItems="center" justifyContent='center' my={1} mb={3}>

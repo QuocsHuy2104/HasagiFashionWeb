@@ -30,7 +30,6 @@ const Header = ({ onSearch }) => {
   const navigate = useNavigate();
   const [hovered, setHovered] = useState(null);
   const [images, setImages] = useState([]);
-
   const handleMouseDropdownMenuEnter = (index) => setHovered(index);
   const handleMouseDropdownMenuLeave = () => setHovered(null);
 
@@ -93,7 +92,6 @@ const Header = ({ onSearch }) => {
   };
   useEffect(() => {
     const fetchCartItems = async () => {
-
       try {
         const [cartResponse] = await Promise.all([
           CartService.getCart(),
