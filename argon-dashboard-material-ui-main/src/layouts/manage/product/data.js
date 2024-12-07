@@ -91,6 +91,8 @@ const ProductTable = ({ onEditClick, setSelectedProduct, searchKeyword, selected
         }
     };
 
+
+
     const handleEditClick = (product) => {
         if (onEditClick) onEditClick(product);
     };
@@ -100,6 +102,21 @@ const ProductTable = ({ onEditClick, setSelectedProduct, searchKeyword, selected
             setSelectedProduct(product);
             navigate('/manage/product-detail', { state: { product } });
         }
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return "N/A";
+
+        const date = new Date(dateString);
+
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+
+        return `${day}-${month}-${year}\n${hours}:${minutes}`;
     };
 
     const formatNumber = (num) => {
@@ -200,7 +217,7 @@ const ProductTable = ({ onEditClick, setSelectedProduct, searchKeyword, selected
                         },
                     }}
                 >
-                    <i className="bi bi-pencil-square"></i> Edit
+                    <i className="bi bi-pencil-square"></i> Chỉnh sửa
                 </ArgonTypography>
                 <ArgonTypography
                     px={1}
@@ -216,7 +233,7 @@ const ProductTable = ({ onEditClick, setSelectedProduct, searchKeyword, selected
                         },
                     }}
                 >
-                    <i className="bi bi-info-circle"></i> Detail
+                    <i className="bi bi-info-circle"></i> Chi tiết
                 </ArgonTypography>
             </ArgonBox>
         ),

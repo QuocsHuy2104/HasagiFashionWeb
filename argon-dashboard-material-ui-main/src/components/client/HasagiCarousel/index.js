@@ -15,23 +15,23 @@ const ImageCarousel = () => {
                 ...doc.data(),
                 id: doc.id,
             }));
-            setBanners(bannersList); 
+            setBanners(bannersList);
         } catch (error) {
             console.error("Failed to fetch banners:", error);
         } finally {
-            setLoading(false); 
+            setLoading(false);
         }
     };
 
     useEffect(() => {
-        getBanners(); 
+        getBanners();
     }, []);
 
     if (loading) {
-        return <p>Loading banners...</p>; 
+        return <p>Loading banners...</p>;
     }
     const mainBanner = banners.length > 0 ? banners[0] : null;
-    const smallBanners = banners.slice(1, 3); 
+    const smallBanners = banners.slice(1, 3);
 
     return (
         <ArgonBox mt={5}>
@@ -63,10 +63,9 @@ const ImageCarousel = () => {
                         {smallBanners.map((banner, bannerIndex) => (
                             <div key={banner.id} style={styles[`smallBanner${bannerIndex + 1}`]}>
                                 <Carousel
-                                    prevIcon={<span style={styles.customPrevIcon}>&lt;</span>}
-                                    nextIcon={<span style={styles.customNextIcon}>&gt;</span>}
-                                    fade
                                     interval={3000}
+                                    controls={false}  // Tắt nút trái và phải
+                                    indicators={false} // Tắt các đường đánh dấu trang
                                 >
                                     {banner.imageUrls.map((imageUrl, imgIndex) => (
                                         <Carousel.Item key={`small-banner-${bannerIndex}-${imgIndex}`}>
@@ -81,6 +80,8 @@ const ImageCarousel = () => {
                                 </Carousel>
                             </div>
                         ))}
+
+
                     </div>
                 </div>
             </div>

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import 'layouts/assets/css/style.css';
 import { Link } from "react-router-dom";
@@ -7,11 +8,11 @@ import ProductService from "../../../services/ProductServices";
 import CategoryService from "../../../services/CategoryServices";
 import BrandService from "../../../services/BrandServices";
 import reviewsService from 'services/ReviewsServices';
-import { Card, Typography } from '@mui/material';
+import { Card, Box, Typography } from '@mui/material';
 import { Form } from 'react-bootstrap';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
-
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 function Shop() {
     const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -24,7 +25,7 @@ function Shop() {
     const [selectedBrands, setSelectedBrands] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [reviews, setReviews] = useState([]);
-    const [value, setValue] = useState([300000, 700000]);
+    const [value, setValue] = useState([0, 0]);
     const [showSaleOnly, setShowSaleOnly] = useState(false);
     const handleSliderChange = (newValue) => {
         setValue(newValue);
@@ -99,15 +100,18 @@ function Shop() {
         const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(product.brandDTOResponse?.id);
         const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesSale = !showSaleOnly || product.sale > 0;
+        const matchesPriceRange =
+            (!value[0] || product.minPrice >= value[0]) &&
+            (!value[1] || product.minPrice <= value[1]);
 
-        return matchesCategory && matchesBrand && matchesSearchTerm && matchesSale;
+        return matchesCategory && matchesBrand && matchesSearchTerm && matchesSale && matchesPriceRange;
     });
 
     const sortedProducts = filteredProducts.sort((a, b) => {
         if (sortOption === "price-asc") {
-            return (a.importPrice || 0) - (b.importPrice || 0);
+            return (a.minPrice || 0) - (b.minPrice || 0);
         } else if (sortOption === "price-desc") {
-            return (b.importPrice || 0) - (a.importPrice || 0);
+            return (b.minPrice || 0) - (a.minPrice || 0);
         } else if (sortOption === "popularity") {
             return (b.popularity || 0) - (a.popularity || 0);
         } else if (sortOption === "newest") {
@@ -131,19 +135,6 @@ function Shop() {
 
     const formatNumber = (num) => {
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    };
-
-    const formatImportPrice = (importPrice) => {
-        if (!importPrice) return "0đ";
-
-        const prices = importPrice.split('-').map(price => {
-            const trimmedPrice = price.trim();
-            const numericPrice = parseFloat(trimmedPrice);
-            const integerPrice = Math.floor(numericPrice);
-            return `${formatNumber(integerPrice)}đ`;
-        });
-
-        return prices.join(' - ');
     };
 
     const fetchReviews = async (productId) => {
@@ -171,6 +162,13 @@ function Shop() {
 
         const totalStars = productReviews.reduce((sum, review) => sum + review.star, 0);
         return (totalStars / productReviews.length).toFixed(1);
+    };
+
+
+    const paginate = (pageNumber) => {
+        if (pageNumber > 0 && pageNumber <= totalPages) {
+            setCurrentPage(pageNumber);
+        }
     };
 
 
@@ -223,8 +221,6 @@ function Shop() {
                                         <option value="default">-----Chọn Sắp Xếp-----</option>
                                         <option value="price-asc">Giá thấp nhất</option>
                                         <option value="price-desc">Giá cao nhất</option>
-                                        <option value="popularity">Phổ biến</option>
-                                        <option value="newest">Mới nhất</option>
                                     </Form.Control>
                                 </div>
                             </div>
@@ -489,144 +485,174 @@ function Shop() {
                                     gap: "20px", // Khoảng cách giữa các sản phẩm
                                 }}
                             >
-                                {currentProducts.map((product, index) => (
-                                    <div
-                                        key={index}
-                                        className="product-card"
-                                        style={{
-                                            position: "relative",
-                                            overflow: "hidden",
-                                            transition: "all 0.3s ease",
-                                            transform: "scale(1)",
-                                            boxShadow: "0px 0px 0px rgba(0, 0, 0, 0)",
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.transform = "scale(1.03)";
-                                            e.currentTarget.style.boxShadow = "0 10px 15px rgba(0, 0, 0, 0.2)";
-                                            const image = e.currentTarget.querySelector("img");
-                                            if (image) {
-                                                image.style.transform = "scale(1.1)";
-                                                image.style.opacity = "0.9";
-                                            }
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.transform = "scale(1)";
-                                            e.currentTarget.style.boxShadow = "0px 0px 0px rgba(0, 0, 0, 0)";
-                                            const image = e.currentTarget.querySelector("img");
-                                            if (image) {
-                                                image.style.transform = "scale(1)";
-                                                image.style.opacity = "1";
-                                            }
-                                        }}
-                                    >
-                                        <Link to={`/ShopDetail?id=${product.id}`} style={{ textDecoration: "none" }}>
-                                            <Card className="card-container" style={{ position: "relative" }}>
-                                                <div
-                                                    className="image-container"
-                                                    style={{
-                                                        position: "relative",
-                                                        overflow: "hidden",
-                                                        width: "110%",
-                                                        height: "auto",
-                                                    }}
-                                                >
-                                                    {/* Hiển thị hình ảnh sản phẩm */}
-                                                    <img
-                                                        src={product.image}
-                                                        alt={product.name}
-                                                        style={{
-                                                            width: "100%",
-                                                            height: "350px",
-                                                            transition: "transform 0.3s ease, opacity 0.3s ease",
-                                                        }}
-                                                    />
-
-                                                    {/* Hiển thị nhãn giảm giá */}
-                                                    {product.sale > 0 && (
-                                                        <div
-                                                            style={{
-                                                                position: "absolute",
-                                                                top: "10px",
-                                                                left: "10px",
-                                                                backgroundColor: "#f5365c",
-                                                                color: "white",
-                                                                padding: "5px 10px",
-                                                                borderRadius: "5px",
-                                                                fontSize: "14px",
-                                                            }}
-                                                        >
-                                                            -{product.sale}%
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                <div className="card-content" style={{ padding: "10px" }}>
-                                                    {/* Tên sản phẩm */}
+                                {currentProducts
+                                    .filter((product) => product.isActive)
+                                    .map((product, index) => (
+                                        <div
+                                            key={index}
+                                            className="product-card"
+                                            style={{
+                                                position: "relative",
+                                                overflow: "hidden",
+                                                transition: "all 0.3s ease",
+                                                transform: "scale(1)",
+                                                boxShadow: "0px 0px 0px rgba(0, 0, 0, 0)",
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.transform = "scale(1.03)";
+                                                e.currentTarget.style.boxShadow = "0 10px 15px rgba(0, 0, 0, 0.2)";
+                                                const image = e.currentTarget.querySelector("img");
+                                                if (image) {
+                                                    image.style.transform = "scale(1.1)";
+                                                    image.style.opacity = "0.9";
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.transform = "scale(1)";
+                                                e.currentTarget.style.boxShadow = "0px 0px 0px rgba(0, 0, 0, 0)";
+                                                const image = e.currentTarget.querySelector("img");
+                                                if (image) {
+                                                    image.style.transform = "scale(1)";
+                                                    image.style.opacity = "1";
+                                                }
+                                            }}
+                                        >
+                                            <Link to={`/ShopDetail?id=${product.id}`} style={{ textDecoration: "none" }}>
+                                                <Card className="card-container" style={{ position: "relative" }}>
                                                     <div
+                                                        className="image-container"
                                                         style={{
-                                                            fontSize: "15px",
-                                                            marginBottom: "5px",
-                                                            whiteSpace: "nowrap",
+                                                            position: "relative",
                                                             overflow: "hidden",
-                                                            textOverflow: "ellipsis",
+                                                            width: "110%",
+                                                            height: "auto",
                                                         }}
                                                     >
-                                                        {product.name || "Product Name Goes Here"}
-                                                    </div>
+                                                        {/* Hiển thị hình ảnh sản phẩm */}
+                                                        <img
+                                                            src={product.image}
+                                                            alt={product.name}
+                                                            style={{
+                                                                width: "100%",
+                                                                height: "350px",
+                                                                transition: "transform 0.3s ease, opacity 0.3s ease",
+                                                            }}
+                                                        />
 
-                                                    {/* Giá gốc và giá sau giảm */}
-                                                    <div style={{ fontSize: "16px", marginBottom: "5px" }}>
-                                                        {product.sale > 0 ? (
-                                                            <>
-                                                                <span style={{ color: "#f5365c", fontWeight: "bold" }}>
-                                                                    {product.minPrice === product.maxPrice
-                                                                        ? `${(product.minPrice * (1 - product.sale / 100)).toLocaleString()}đ`
-                                                                        : ` ${(product.minPrice * (1 - product.sale / 100)).toLocaleString()}đ`}
-                                                                </span>
-                                                                <span style={{ textDecoration: "line-through", color: "gray", marginLeft: "5px" }}>
-                                                                    {new Intl.NumberFormat("vi-VN").format(product.minPrice)}đ
-                                                                </span>
-                                                            </>
-                                                        ) : (
-                                                            <span style={{ color: "#f5365c", fontWeight: "bold" }}>
-                                                                {new Intl.NumberFormat("vi-VN").format(product.minPrice)}đ
-                                                            </span>
+                                                        {/* Hiển thị nhãn giảm giá */}
+                                                        {product.sale > 0 && (
+                                                            <div
+                                                                style={{
+                                                                    position: "absolute",
+                                                                    top: "10px",
+                                                                    left: "10px",
+                                                                    backgroundColor: "#f5365c",
+                                                                    color: "white",
+                                                                    padding: "5px 10px",
+                                                                    borderRadius: "5px",
+                                                                    fontSize: "14px",
+                                                                }}
+                                                            >
+                                                                -{product.sale}%
+                                                            </div>
                                                         )}
                                                     </div>
 
-                                                    {/* Đánh giá sản phẩm */}
-                                                    <Typography variant="body2" style={{ fontWeight: "bold", marginTop: "10px" }}>
-                                                        ⭐ {calculateAverageStars(product.id)}
-                                                    </Typography>
-                                                </div>
-                                            </Card>
-                                        </Link>
-                                    </div>
-                                ))}
+                                                    <div className="card-content" style={{ padding: "10px" }}>
+                                                        {/* Tên sản phẩm */}
+                                                        <div
+                                                            style={{
+                                                                fontSize: "15px",
+                                                                marginBottom: "5px",
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                            }}
+                                                        >
+                                                            {product.name || "Product Name Goes Here"}
+                                                        </div>
+
+                                                        {/* Giá gốc và giá sau giảm */}
+                                                        <div style={{ fontSize: "16px", marginBottom: "5px" }}>
+                                                            {product.sale > 0 ? (
+                                                                <>
+                                                                    <span style={{ color: "#f5365c", fontWeight: "bold" }}>
+                                                                        {product.minPrice === product.maxPrice
+                                                                            ? `${(product.minPrice * (1 - product.sale / 100)).toLocaleString()}đ`
+                                                                            : ` ${(product.minPrice * (1 - product.sale / 100)).toLocaleString()}đ`}
+                                                                    </span>
+                                                                    <span style={{ textDecoration: "line-through", color: "gray", marginLeft: "5px" }}>
+                                                                        {new Intl.NumberFormat("vi-VN").format(product.minPrice)}đ
+                                                                    </span>
+                                                                </>
+                                                            ) : (
+                                                                <span style={{ color: "#f5365c", fontWeight: "bold" }}>
+                                                                    {new Intl.NumberFormat("vi-VN").format(product.minPrice)}đ
+                                                                </span>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Đánh giá sản phẩm */}
+                                                        <Typography variant="body2" style={{ fontWeight: "bold", marginTop: "10px" }}>
+                                                            ⭐ {calculateAverageStars(product.id)}
+                                                        </Typography>
+                                                    </div>
+                                                </Card>
+                                            </Link>
+                                        </div>
+                                    ))}
                             </div>
 
                             <div className="col-12" style={{}}>
-                                <nav>
-                                    <ul className="pagination justify-content-center">
-                                        <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                                            <a className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
-                                                <i className="ni ni-bold-left" />
-                                            </a>
-                                        </li>
-                                        {[...Array(totalPages)].map((_, index) => (
-                                            <li className={`page-item ${currentPage === index + 1 ? "active" : ""}`} key={index}>
-                                                <a className="page-link" onClick={() => handlePageChange(index + 1)}>
-                                                    {index + 1}
-                                                </a>
-                                            </li>
-                                        ))}
-                                        <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                                            <a className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
-                                                <i className="ni ni-bold-right" />
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </nav>
+                                <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+                                    <button
+                                        disabled={currentPage === 1}
+                                        onClick={() => paginate(currentPage - 1)}
+                                        style={{
+                                            padding: "10px 15px",
+                                            backgroundColor: currentPage === 1 ? "#e0e0e0" : "#FFD333",
+                                            border: "none",
+                                            borderRadius: "50%",
+                                            color: "black",
+                                            fontSize: "18px",
+                                            cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                                        }}
+                                    >
+                                        <FiChevronLeft style={{ fontSize: "20px" }} />
+                                    </button>
+
+                                    <span
+                                        style={{
+                                            fontSize: "16px",
+                                            fontWeight: "600",
+                                            margin: "0 15px",
+                                            color: "#333",
+                                            textAlign: "center",
+                                            padding: "10px 10px",
+                                            backgroundColor: "#f7f7f7",
+                                            borderRadius: "25px",
+                                            boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+                                        }}
+                                    >
+                                        Trang {currentPage} / {totalPages}
+                                    </span>
+
+                                    <button
+                                        disabled={currentPage === totalPages}
+                                        onClick={() => paginate(currentPage + 1)}
+                                        style={{
+                                            padding: "10px 15px",
+                                            backgroundColor: currentPage === totalPages ? "#e0e0e0" : "#FFD333",
+                                            border: "none",
+                                            borderRadius: "50%",
+                                            color: "black",
+                                            fontSize: "18px",
+                                            cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+                                        }}
+                                    >
+                                        <FiChevronRight style={{ fontSize: "20px" }} />
+                                    </button>
+                                </Box>
                             </div>
                         </div>
 

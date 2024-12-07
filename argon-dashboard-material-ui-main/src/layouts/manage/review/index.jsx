@@ -26,7 +26,13 @@ function Review() {
     const [formData, setFormData] = useState({
         id: null,
         adminFeedBack: "",
+        feedbackDate: "",
     });
+    const [filterStar, setFilterStar] = useState('');
+    const [filterStatus, setFilterStatus] = useState('');
+    const [filterStartDate, setFilterStartDate] = useState('');
+    const [filterEndDate, setFilterEndDate] = useState('');
+
 
     useEffect(() => {
         const fetchReviewData = async () => {
@@ -50,6 +56,34 @@ function Review() {
         fetchReviewData();
         fetchReviewFileData();
     }, []);
+
+    const filterReviews = (reviews) => {
+        return reviews.filter(review => {
+            // Lọc theo số sao
+            if (filterStar && review.star !== parseInt(filterStar)) {
+                return false;
+            }
+
+            // Lọc theo trạng thái (đã phản hồi hay chưa)
+            if (filterStatus === 'Đã phản hồi' && !review.adminFeedback) {
+                return false;
+            }
+            if (filterStatus === 'Chưa phản hồi' && review.adminFeedback) {
+                return false;
+            }
+
+            // Lọc theo ngày
+            if (filterStartDate && new Date(review.createdAt) < new Date(filterStartDate)) {
+                return false;
+            }
+            if (filterEndDate && new Date(review.createdAt) > new Date(filterEndDate)) {
+                return false;
+            }
+
+            return true;
+        });
+    };
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -121,11 +155,34 @@ function Review() {
         }
     };
 
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+
+        let hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+
+        return `${day}-${month}-${year} | ${hours}:${minutes} ${ampm}`;
+    }
+
+    const renderStars = (starCount) => {
+        return Array.from({ length: starCount }, (_, index) => (
+            <span key={index} role="img" aria-label="star">
+                ⭐
+            </span>
+        ));
+    };
 
     const handleOpen = (url) => {
         setMediaUrl(url);
         setOpen(true);
     };
+
     const handleClose = () => {
         setOpen(false);
         setMediaUrl('');
@@ -134,9 +191,95 @@ function Review() {
         <DashboardLayout>
             <ToastContainer />
             <DashboardNavbar />
-            <ArgonBox py={-3}>
+            <ArgonBox py={3}>
+                <ArgonBox mb={5}>
+                    <Card>
+                        <ArgonBox
+                            p={2}
+                            display="flex"
+                            justifyContent="space-evenly"
+                            alignItems="center"
+                            borderRadius="8px"
+                            bgcolor="#f9f9f9"
+                        >
+                            {/* Lọc theo số sao */}
+                            <ArgonBox width="22%">
+                                <select
+                                    style={{
+                                        padding: "12px 16px",
+                                        borderRadius: "8px",
+                                        border: "1px solid #ddd",
+                                        boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+                                        width: "100%",
+                                        backgroundColor: "#fff",
+                                        fontSize: "14px",
+                                        color: "#555",
+                                    }}
+                                    value={filterStar}
+                                    onChange={(e) => setFilterStar(e.target.value)}
+                                >
+                                    <option value="">Chọn số sao</option>
+                                    <option value="">Tất cả</option>
+                                    {[1, 2, 3, 4, 5].map(star => (
+                                        <option key={star} value={star}>
+                                            {renderStars(star)} {/* Hiển thị các sao */}
+                                        </option>
+                                    ))}
+                                </select>
+                            </ArgonBox>
+
+                            {/* Lọc theo trạng thái */}
+                            <ArgonBox width="22%">
+                                <select
+                                    style={{
+                                        padding: "12px 16px",
+                                        borderRadius: "8px",
+                                        border: "1px solid #ddd",
+                                        boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+                                        width: "100%",
+                                        backgroundColor: "#fff",
+                                        fontSize: "14px",
+                                        color: "#555",
+                                    }}
+                                    value={filterStatus}
+                                    onChange={(e) => setFilterStatus(e.target.value)}
+                                >
+                                    <option value="">Trạng thái</option>
+                                    <option value="">Tất cả</option>
+                                    <option value="Đã phản hồi">Đã phản hồi</option>
+                                    <option value="Chưa phản hồi">Chưa phản hồi</option>
+                                </select>
+                            </ArgonBox>
+
+                            {/* Lọc theo ngày bắt đầu */}
+                            <ArgonBox width="22%">
+                                <ArgonInput
+                                    type="date"
+                                    placeholder="Ngày bắt đầu"
+                                    size="large"
+                                    sx={{ bgcolor: 'white', borderRadius: '8px', width: '100%' }}
+                                    value={filterStartDate}
+                                    onChange={(e) => setFilterStartDate(e.target.value)}
+                                />
+                            </ArgonBox>
+
+                            {/* Lọc theo ngày kết thúc */}
+                            <ArgonBox width="22%">
+                                <ArgonInput
+                                    type="date"
+                                    placeholder="Ngày kết thúc"
+                                    size="large"
+                                    sx={{ bgcolor: 'white', borderRadius: '8px', width: '100%' }}
+                                    value={filterEndDate}
+                                    onChange={(e) => setFilterEndDate(e.target.value)}
+                                />
+                            </ArgonBox>
+                        </ArgonBox>
+                    </Card>
+                </ArgonBox >
+
                 <ArgonBox mt={-1}>
-                    {reviews.map(review => {
+                    {filterReviews(reviews).map(review => {
                         return (
                             <Card key={review.id} style={{ marginBottom: '20px', padding: '20px', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.1)', borderRadius: '10px' }}>
                                 <ArgonTypography variant="h5" style={{ marginBottom: '15px', fontWeight: 'bold', color: '#333' }}>Đánh giá chi tiết</ArgonTypography>
@@ -146,8 +289,8 @@ function Review() {
                                         .map((videoUrl, index) => (
                                             <ArgonBox key={index} style={{ position: 'relative' }}>
                                                 <video
-                                                    width="150"
-                                                    height="150"
+                                                    width="120"
+                                                    height="120"
                                                     style={{
                                                         borderRadius: '3px',
                                                         cursor: 'pointer',
@@ -161,8 +304,8 @@ function Review() {
                                                     onClick={() => handleOpen(videoUrl)}
                                                     style={{
                                                         position: 'absolute',
-                                                        bottom: '70px',
-                                                        left: '60px',
+                                                        bottom: '55px',
+                                                        left: '45px',
                                                         backgroundColor: 'rgba(0, 0, 0, 0.5)',
                                                         borderRadius: '50%',
                                                         padding: '8px',
@@ -185,8 +328,8 @@ function Review() {
                                                     src={file.imageUrl}
                                                     alt="Review"
                                                     style={{
-                                                        width: '150px',
-                                                        height: '150px',
+                                                        width: '120px',
+                                                        height: '120px',
                                                         borderRadius: '3px',
                                                         cursor: 'pointer',
                                                         objectFit: 'cover',
@@ -215,16 +358,7 @@ function Review() {
                                                 display: 'flex',
                                                 alignItems: 'center',
                                             }}>
-                                            <strong style={{ marginRight: '5px' }}>Đánh giá: </strong> {review.star} ⭐
-                                        </ArgonTypography>
-                                        <ArgonTypography variant="body1"
-                                            style={{
-                                                fontSize: '16px',
-                                                color: '#555',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                            }}>
-                                            <strong style={{ marginRight: '5px' }}>Ngày đánh giá: </strong> {new Date(review.createdAt).toLocaleDateString()}
+                                            <strong style={{ marginRight: '5px' }}>Đánh giá: </strong> {renderStars(review.star)}
                                         </ArgonTypography>
                                         <ArgonTypography
                                             variant="body1"
@@ -235,7 +369,20 @@ function Review() {
                                                 alignItems: 'center',
                                             }}
                                         >
-                                            <strong>Phản hổi: </strong>&nbsp;
+                                            <strong style={{ marginRight: '5px' }}>Ngày đánh giá:</strong>{' '}
+                                            {formatDate(review.createdAt)}
+                                        </ArgonTypography>
+
+                                        <ArgonTypography
+                                            variant="body1"
+                                            style={{
+                                                fontSize: '16px',
+                                                color: '#555',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                            }}
+                                        >
+                                            <strong>Trạng thái: </strong>&nbsp;
                                             {review.adminFeedback ? (
                                                 <>
                                                     <CheckCircle style={{ color: '#4caf50', marginRight: '5px' }} />
@@ -245,6 +392,46 @@ function Review() {
                                                 <>
                                                     <Cancel style={{ color: '#f44336', marginRight: '5px' }} />
                                                     Chưa phản hồi
+                                                </>
+                                            )}
+                                        </ArgonTypography>
+                                        <ArgonTypography
+                                            variant="body1"
+                                            style={{
+                                                fontSize: '16px',
+                                                color: '#555',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                            }}
+                                        >
+                                            {review.adminFeedback ? (
+                                                <>
+                                                    <strong style={{ marginRight: '5px' }}>Phản hồi: </strong>  {review.adminFeedback}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <></>
+                                                </>
+                                            )}
+
+                                        </ArgonTypography>
+                                        <ArgonTypography
+                                            variant="body1"
+                                            style={{
+                                                fontSize: '16px',
+                                                color: '#555',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                            }}
+                                        >
+                                            {review.adminFeedback ? (
+                                                <>
+                                                    <strong style={{ marginRight: '5px' }}>Ngày phản hồi: </strong> {formatDate(review.feedbackDate)}
+
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <></>
                                                 </>
                                             )}
                                         </ArgonTypography>
@@ -305,8 +492,9 @@ function Review() {
                         top: '50%',
                         left: '50%',
                         transform: 'translate(-50%, -50%)',
-                        borderRadius: '5px',
                         boxShadow: 24,
+                        width: '60%',
+                        maxWidth: '500px',
                     }}>
                         {mediaUrl && mediaUrl.includes('firebasestorage.googleapis.com') ? (
                             mediaUrl.includes('.mp4') ? (
@@ -315,11 +503,12 @@ function Review() {
                                     Your browser does not support the video tag.
                                 </video>
                             ) : (
-                                <img src={mediaUrl} alt="Review" style={{ width: '100%', height: 'auto', borderRadius: '5px' }} />
+                                <img src={mediaUrl} alt="Review" style={{ width: '100%', height: 'auto' }} />
                             )
                         ) : null}
                     </Box>
                 </Modal>
+
             </ArgonBox>
             <Footer />
         </DashboardLayout>

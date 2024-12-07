@@ -25,7 +25,7 @@ const Checkout = () => {
     const [cartItems, setCartItems] = useState([]);
     const [images, setImages] = useState([]);
     const paymentMethods = [
-        { name: "Cod", image: aboutImage5, nameView: "COD (Tiền mặt)" },
+        { name: "COD", image: aboutImage5, nameView: "COD (Tiền mặt)" },
         { name: "VNPay", image: aboutImage6, nameView: "VNPay" },
         { name: "PayOs", image: aboutImage7, nameView: "PayOs" },
     ];
@@ -301,7 +301,7 @@ const Checkout = () => {
 
         const productDetailIdSelected = selectedItems.map((item) => item.id);
         const voucherId = selectedVoucher ? selectedVoucher.id : null;
-        const payStatus = selectedMethod === "Cod" ? "Chưa thanh toán" : "Đã thanh toán";
+        const payStatus = selectedMethod === "COD" ? "Chưa thanh toán" : "Đã thanh toán";
 
         const checkoutData = {
             addressDTO,
@@ -323,12 +323,12 @@ const Checkout = () => {
         };
         try {
             let response;
-            if (selectedMethod === "Cod") {
+            if (selectedMethod === "COD") {
                 response = await CheckoutService.postCheckout(addressId, checkoutData);
                 if (response.status === 200) {
                     localStorage.setItem("address1", JSON.stringify(addressDTO));
                     localStorage.setItem("orderDetails1", JSON.stringify(cartDetailsDTO));
-                    Cookies.set("selectedPayment", "Cod");
+                    Cookies.set("selectedPayment", "COD");
 
                     const swal = Swal.fire({
                         title: "Đang xử lý...",
@@ -373,6 +373,7 @@ const Checkout = () => {
             } else {
                 throw new Error("Invalid payment method");
             }
+            
         } catch (error) {
             console.error("Error placing order:", error.response ? error.response.data : error.message);
             Swal.fire({

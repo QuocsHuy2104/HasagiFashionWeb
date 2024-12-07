@@ -45,7 +45,6 @@ function Order() {
       try {
         const response = await axios.get("http://localhost:3000/api/order");
         if (response.data && response.data.orders) {
-          console.log(response.data);
           const orders = response.data.orders.map(order => ({
             ...order,
             orderDate: order.orderDate
@@ -66,6 +65,12 @@ function Order() {
     };
 
     fetchData();
+    const intervalId = setInterval(() => {
+      fetchData();
+    }, 3000);
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
 
 

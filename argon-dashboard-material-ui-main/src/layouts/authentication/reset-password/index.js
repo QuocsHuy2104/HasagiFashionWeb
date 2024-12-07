@@ -58,8 +58,8 @@ function ResetPassword() {
       setErrorPassword("Password cannot be blank!");
       setShowError(true);
       return;
-    } else if (password.length < 8) {
-      setErrorPassword("Mật khẩu phải có độ dài lớn hơn 8 ký tự");
+    } else if (password.length < 6 && password.length > 15) {
+      setErrorPassword("Mật khẩu phải có độ dài từ 6 đến 15 ký tự");
       setShowError(true);
       return;
     } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
@@ -90,7 +90,7 @@ function ResetPassword() {
         if (error.response) {
           setErrorPassword(error.response.data); // Thông báo lỗi từ server
         } else {
-          setErrorPassword("An error occurred"); // Thông báo lỗi không xác định
+          setErrorPassword("Lỗi không xác định.Vui lòng thử lại"); // Thông báo lỗi không xác định
         }
         setShowError(true);
       }
