@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
-import aboutImage5 from "layouts/assets/img/cod.png";
-import aboutImage6 from "layouts/assets/img/vnpay.png";
-import aboutImage7 from "layouts/assets/img/payos.png";
-import aboutImage8 from "layouts/assets/img/puches1.png";
+import aboutImage5 from "layouts/assets/img/cat-1.jpg";
+import aboutImage6 from "layouts/assets/img/cat-2.jpg";
+import aboutImage7 from "layouts/assets/img/cat-3.jpg";
+import aboutImage8 from "layouts/assets/img/cat-4.jpg";
 import axios from "axios";
 import AddressSelection from "components/client/HasagiBackup/index1";
 import Swal from "sweetalert2";
@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import VoucherService from "services/VoucherServices";
 import { ToastContainer, toast } from "react-toastify";
+import PaymentService from "services/PaymentServices";
 
 const Checkout = () => {
     const [selectedMethod, setSelectedMethod] = useState("");
@@ -367,7 +368,48 @@ const Checkout = () => {
                     throw new Error("Payment processing error with VNPAY");
                 }
             } else {
-                throw new Error("Invalid payment method");
+
+                try {
+                    const customPaymentData = {
+                        items: selectedItems.map((item) => ({
+                            name: item.name,
+                            quantity: item.quantity,
+                            price: item.price,
+                        })),
+                        description: "Thanh toán",
+                        shippingFee: shipFee.total,
+                    };
+
+                    try {
+                        const response = await PaymentService.PaymentMethods(customPaymentData);
+
+                        if (response) {
+                            console.log('Payment URL:', response);
+                            window.location.href = response; 
+                        } else {
+                            console.error('Payment URL is undefined');
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Lỗi',
+                                text: 'Không thể tạo liên kết thanh toán 1.',
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error during payment processing:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: error.message || 'Có lỗi xảy ra khi xử lý thanh toán.',
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error with custom payment service:", error);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Lỗi",
+                        text: error.message || "Có lỗi xảy ra khi xử lý thanh toán.",
+                    });
+                }
             }
         } catch (error) {
             console.error("Error placing order:", error.response ? error.response.data : error.message);
@@ -395,10 +437,7 @@ const Checkout = () => {
             try {
                 // Fetch all vouchers
                 const response = await VoucherService.getAllVouchers();
-
-                // Filter out only active vouchers
                 const activeVouchers = response.data.filter(voucher => voucher.isActive);
-
                 setVouchers(activeVouchers);
             } catch (error) {
                 console.error("Error fetching vouchers:", error);

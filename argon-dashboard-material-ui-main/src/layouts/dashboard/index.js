@@ -44,6 +44,8 @@ import categoriesListData from "layouts/dashboard/data/categoriesListData";
 
 function Default() {
   const { size } = typography;
+  const chartData = gradientLineChartData();
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -85,21 +87,21 @@ function Default() {
         <Grid container spacing={3} mb={3}>
           <Grid item xs={12} lg={7}>
             <GradientLineChart
-              title="Sales Overview"
+              title="Thống kê doanh thu"
               description={
                 <ArgonBox display="flex" alignItems="center">
-                  <ArgonBox fontSize={size.lg} color="success" mb={0.3} mr={0.5} lineHeight={0}>
+                  <ArgonBox fontSize={typography.size.lg} color="success" mb={0.3} mr={0.5} lineHeight={0}>
                     <Icon sx={{ fontWeight: "bold" }}>arrow_upward</Icon>
                   </ArgonBox>
                   <ArgonTypography variant="button" color="text" fontWeight="medium">
-                    4% more{" "}
+                    Doanh thu{" "}
                     <ArgonTypography variant="button" color="text" fontWeight="regular">
-                      in 2022
+                      năm {new Date().getFullYear()}
                     </ArgonTypography>
                   </ArgonTypography>
                 </ArgonBox>
               }
-              chart={gradientLineChartData}
+              chart={chartData} // Truyền đúng dữ liệu biểu đồ vào prop chart
             />
           </Grid>
           <Grid item xs={12} lg={5}>

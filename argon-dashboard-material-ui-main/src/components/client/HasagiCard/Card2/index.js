@@ -60,7 +60,7 @@ function HasagiCard2({ image, name, id, price }) {
             }}
         >
             {/* Image and Name */}
-            <MuiLink href={`ShopDetails?id=${id}`} rel="noreferrer">
+            <MuiLink href={`/ShopDetail?id=${id}`}>
                 <ArgonBox
                     mt={1}
                     mx={2}

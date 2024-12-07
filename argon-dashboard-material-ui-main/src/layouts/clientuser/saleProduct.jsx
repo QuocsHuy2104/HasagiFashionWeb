@@ -121,7 +121,7 @@ export default function SaleProduct() {
                                         <ArgonBox display="flex" alignItems="center" justifyContent="center" my={1}>
                                             {(() => {
                                                 const salePercent = parseFloat(product.sale);
-                                                const price = product.price ? parseFloat(product.price.toString().replace(/\s/g, "")) : 0;
+                                                const price = product.importPrice ? parseFloat(product.importPrice.toString().replace(/\s/g, "")) : 0;
 
                                                 if (!isNaN(salePercent) && salePercent > 0 && !isNaN(price)) {
                                                     const salePrice = price - (price * salePercent) / 100; // Tính giá sau giảm
