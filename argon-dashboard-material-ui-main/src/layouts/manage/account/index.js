@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 
 import { Card } from "@mui/material";
@@ -131,7 +132,7 @@ function Account() {
   const handleFileUpload = (downloadURL) => {
     setFormData((prevData) => ({
       ...prevData,
-      avatar: downloadURL, 
+      avatar: downloadURL, // Save the avatar URL
     }));
   };
 
@@ -182,7 +183,7 @@ function Account() {
         <ArgonBox mb={3}>
           <Card>
             <ArgonBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
-              <ArgonTypography variant="h6">Quản lý tài khoản</ArgonTypography>
+              <ArgonTypography variant="h6">Quản lý người dùng</ArgonTypography>
             </ArgonBox>
 
             <ArgonBox
@@ -213,7 +214,7 @@ function Account() {
                     <Grid item xs={12} md={6}>
                       <ArgonInput
                         type="text"
-                        placeholder="Tên người dùng"
+                        placeholder="Tên tài khoản"
                         name="username"
                         size="large"
                         value={formData.username}
@@ -224,7 +225,7 @@ function Account() {
                     <Grid item xs={12} md={6}>
                       <ArgonInput
                         type="text"
-                        placeholder="Họ và tên đầy đủ"
+                        placeholder="Họ tên đầy đủ"
                         name="fullName"
                         size="large"
                         value={formData.fullName}
@@ -252,7 +253,7 @@ function Account() {
                     <Grid item xs={12} md={6}>
                       <ArgonInput
                         type="text"
-                        placeholder="Địa chỉ thường chú"
+                        placeholder="Địa chỉ thường trú"
                         name="tabernacle"
                         size="large"
                         value={formData.tabernacle}
@@ -320,7 +321,7 @@ function Account() {
 
                 <ArgonBox mb={3} mx={3} sx={{ width: { sm: '50%', md: '20%' } }}>
                   <ArgonButton type="submit" size="large" color="info" fullWidth>
-                    {formData.id ? "Sửa" : "Thêm"}
+                    {formData.id ? "Update" : "Create"}
                   </ArgonButton>
                 </ArgonBox>
 
@@ -333,7 +334,7 @@ function Account() {
           <Card>
             <ArgonBox p={3} lineHeight={1}>
               <ArgonTypography variant="h6" fontWeight="medium">
-              Danh sách tài khoản
+                Danh sách người dùng
               </ArgonTypography>
             </ArgonBox>
             <ArgonBox>
@@ -356,7 +357,7 @@ function Account() {
                           value={searchTerm}
                           onChange={handleSearchChange}
                           fullWidth
-                          placeholder="Tìm kiếm ở đây..."
+                          placeholder="Search here..."
                         />
                       </ArgonBox>
                     </Grid>

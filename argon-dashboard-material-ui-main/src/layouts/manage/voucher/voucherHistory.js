@@ -35,7 +35,7 @@ VoucherQuantity.propTypes = {
 function VoucherMaxDiscount({ maxDiscount }) {
     return (
         <ArgonTypography variant="caption" color="secondary" fontWeight="bold">
-            {maxDiscount}
+            {`${maxDiscount.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}đ`}
         </ArgonTypography>
     );
 }
@@ -76,7 +76,7 @@ const formatDate = (dateString) => {
     return `${day}-${month}-${year}`;
 };
 
-const VoucherHistoryTable = ({ searchHistory, onEditClick, handleStatusToggle, deleteItem }) => {
+const VoucherHistoryTable = ({ searchHistory,  handleStatusToggle}) => {
     const [vouchers, setVouchers] = useState([]);
 
     const fetchData = async () => {
@@ -136,42 +136,6 @@ const VoucherHistoryTable = ({ searchHistory, onEditClick, handleStatusToggle, d
                 inputProps={{ "aria-label": "controlled" }}
             />
         ),
-        THAOTAC: (
-            <ArgonBox display="flex" justifyContent="space-between" alignItems="center">
-                <ArgonTypography
-                    px={1}
-                    component="span"
-                    variant="caption"
-                    color="info"
-                    fontWeight="medium"
-                    onClick={() => onEditClick(voucher)}
-                    sx={{
-                        cursor: "pointer",
-                        "&:hover": {
-                            textDecoration: "underline",
-                        },
-                    }}
-                >
-                    Edit
-                </ArgonTypography>
-                <ArgonTypography
-                    px={1}
-                    component="span"
-                    variant="caption"
-                    color="error"
-                    fontWeight="medium"
-                    onClick={() => deleteItem(voucher.id)}
-                    sx={{
-                        cursor: "pointer",
-                        "&:hover": {
-                            textDecoration: "underline",
-                        },
-                    }}
-                >
-                    <i className="bi bi-trash3"></i> Remove
-                </ArgonTypography>
-            </ArgonBox>
-        ),
     }));
 
     const voucherHistoryTableData = {
@@ -184,7 +148,6 @@ const VoucherHistoryTable = ({ searchHistory, onEditClick, handleStatusToggle, d
             { name: "NGAYBATDAU", align: "center" },
             { name: "NGAYHETHAN", align: "center" },
             { name: "TRANGTHAI", align: "center" },
-            { name: "THAOTAC", align: "center" },
         ],
         rowsHistory,
     };

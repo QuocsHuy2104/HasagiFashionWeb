@@ -301,7 +301,7 @@ const Checkout = () => {
 
         const productDetailIdSelected = selectedItems.map((item) => item.id);
         const voucherId = selectedVoucher ? selectedVoucher.id : null;
-        const payStatus = selectedMethod === "Cod" ? "Chưa thanh toán" : "Đã thanh toán";
+        const payStatus = selectedMethod === "COD" ? "Chưa thanh toán" : "Đã thanh toán";
 
         const checkoutData = {
             addressDTO,
@@ -373,6 +373,7 @@ const Checkout = () => {
             } else {
                 throw new Error("Invalid payment method");
             }
+            
         } catch (error) {
             console.error("Error placing order:", error.response ? error.response.data : error.message);
             Swal.fire({
@@ -765,16 +766,34 @@ const Checkout = () => {
 
                 {/* Order Summary */}
                 <div style={styles.orderSummary}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: "30px" }}>
                         <h2 style={{ margin: 0 }}>Chi tiết đơn hàng</h2>
                         <Button
                             variant="contained"
                             color="warning"
                             onClick={handleClickOpen}
-                            style={{ border: 'none', boxShadow: 'none', padding: '8px 16px', marginRight: "-20px", color: 'rgba(244, 79, 30, 0.99)' }}
+                            style={{
+                                border: 'none',
+                                boxShadow: 'none',
+                                padding: '8px 16px',
+                                marginRight: '-20px',
+                                color: 'rgba(244, 79, 30, 0.99)',
+                                textDecoration: 'none',
+                                transition: 'all 0.3s',
+                                fontSize: "1rem"
+                            }}
+                            onMouseEnter={(e) => {
+                                e.target.style.textDecoration = 'underline';
+                                e.target.style.color = 'blue';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.textDecoration = 'none';
+                                e.target.style.color = 'rgba(244, 79, 30, 0.99)';
+                            }}
                         >
                             Áp dụng mã giảm giá
                         </Button>
+
                     </div>
                     <Dialog open={open} onClose={handleClose}>
                         <DialogTitle style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '0' }}>
@@ -782,7 +801,7 @@ const Checkout = () => {
                                 Danh sách phiếu giảm giá
                             </div>
                             <div style={{ position: "relative", display: "inline-block" }}>
-                                <Dropdown>  
+                                <Dropdown>
                                     <Dropdown.Toggle
                                         variant="link"
                                         bsPrefix="icon-button"
@@ -794,6 +813,16 @@ const Checkout = () => {
                                             paddingBottom: "0",
                                             display: "flex",
                                             alignItems: "center",
+                                            transition: 'all 0.3s',
+                                        }}
+
+                                        onMouseEnter={(e) => {
+                                            e.target.style.textDecoration = 'underline';
+                                            e.target.style.color = 'blue';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.textDecoration = 'none';
+                                            e.target.style.color = 'black';
                                         }}
                                     >
                                         Hỗ Trợ{" "}
@@ -801,6 +830,7 @@ const Checkout = () => {
                                     </Dropdown.Toggle>
                                     <Dropdown.Menu
                                         style={{
+                                            color: "black",
                                             marginTop: "0",
                                             padding: "20px",
                                             width: "300px",
@@ -810,19 +840,19 @@ const Checkout = () => {
                                         }}
                                     >
                                         <div>
-                                            <h5 style={{ fontWeight: "bold", marginBottom: "10px" }}>Hỗ Trợ</h5>
+                                            <h5 style={{ marginBottom: "10px" }}>Hỗ Trợ</h5>
                                             <div>
-                                                <h6 style={{ fontWeight: "bold", marginBottom: "5px" }}>
-                                                    <strong>Cách Sử Dụng phiếu giảm giá</strong>
+                                                <h6 style={{ marginBottom: "5px" }}>
+                                                    Cách Sử Dụng phiếu giảm giá
                                                 </h6>
-                                                <p style={{ fontSize: "0.9rem", marginBottom: "10px" }}>
+                                                <p style={{ fontSize: "0.8rem", marginBottom: "10px" }}>
                                                     Để có thể áp dụng mã của phiếu giảm giá, bạn hãy chọn nút Sao chép mã để
                                                     áp dụng giảm giá vào đơn hàng của bạn.
                                                 </p>
-                                                <h6 style={{ fontWeight: "bold", marginBottom: "5px" }}>
-                                                    <strong>Cách Tìm phiếu giảm giá</strong>
+                                                <h6 style={{ marginBottom: "5px" }}>
+                                                    Cách Tìm phiếu giảm giá
                                                 </h6>
-                                                <p style={{ fontSize: "0.9rem" }}>
+                                                <p style={{ fontSize: "0.8rem" }}>
                                                     Bạn có thể tìm thấy phiếu giảm giá xuyên suốt trang Hasagi Fashion. Mẹo riêng cho bạn, hãy vào trang chủ của shop để có thể sao chép ưu đãi tốt nhất nhé!
                                                 </p>
                                             </div>

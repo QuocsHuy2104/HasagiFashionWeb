@@ -34,7 +34,7 @@ import Swal from "sweetalert2";
 import ReviewFilesService from '../../../services/ReviewFileServices';
 import { storage } from "../../../config/firebase-config";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 const indexHistory = () => {
   const [imageFiles, setImageFiles] = useState([]);
   const [videoFile, setVideoFile] = useState(null);
@@ -83,7 +83,7 @@ const indexHistory = () => {
     "Thời gian giao hàng quá lâu khiến tôi không còn nhu cầu",
     "Tôi không còn nhu cầu sử dụng sản phẩm này nữa",
   ]);
-  
+
 
   useEffect(() => {
     if (location.state?.activeTab) {
@@ -144,9 +144,7 @@ const indexHistory = () => {
     setOpenReturnModal(true);
   };
 
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
+
 
   const handleCancelOrder = async () => {
     try {
@@ -185,7 +183,7 @@ const indexHistory = () => {
     }
   };
 
-  
+
   const handleReturnOrder = async () => {
     try {
       await axios.put(
@@ -195,10 +193,11 @@ const indexHistory = () => {
           params: { reason: returnReason },
         }
       );
-
-      const response = await HistoryOrderService.getHistory();
-      setOrders(response.data);
       setOpenReturnModal(false);
+      const response = await HistoryOrderService.getHistory();
+
+      setOrders(response.data);
+
     } catch (error) {
       console.error("There was an error processing the return request!", error);
       alert("Không thể xử lý yêu cầu trả hàng. Vui lòng thử lại.");
@@ -206,10 +205,6 @@ const indexHistory = () => {
   };
 
 
-
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue);
-  };
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -375,6 +370,12 @@ const indexHistory = () => {
   };
 
 
+  const paginate = (pageNumber) => {
+    if (pageNumber > 0 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
+
   const handleVideoChange = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -448,12 +449,11 @@ const indexHistory = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleTabChangeWithScroll = (event, newValue) => {
-    handleTabChange(event, newValue);
-    setTabMarginTop(getMarginTop(newValue));
-    setTabMarginTop1(getMarginTop1(newValue));
-    window.scrollTo(0, 0);
+  const handleTabChangeWithScroll = (event, newTab) => {
+    setActiveTab(newTab);
+    setCurrentPage(1);
   };
+
 
   const getMarginTop = (tabValue) => {
     switch (tabValue) {
@@ -501,7 +501,7 @@ const indexHistory = () => {
   return (
     <>
       <div>
-        <ArgonBox style={{ marginLeft: "-1.22%", width: "102.44%", paddingBottom: "52px" }}>
+        <ArgonBox style={{ marginLeft: "-1.22%", width: "102.44%", paddingBottom: "40px" }}>
           <Paper
             ref={paperRef}
             elevation={3}
@@ -829,53 +829,58 @@ const indexHistory = () => {
                   </Grid>
                 ))}
                 <div className="col-12" style={{ marginTop: "-20px" }}>
-                  <nav>
-                    <ul className="pagination justify-content-center">
-                      <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                        <a className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
-                          <i className="ni ni-bold-left" />
-                        </a>
-                      </li>
+                  <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
+                    <button
+                      className="pageItem"
+                      disabled={currentPage === 1}
+                      onClick={() => paginate(currentPage - 1)}
+                      style={{
+                        padding: "10px 15px",
+                        backgroundColor: currentPage === 1 ? "#e0e0e0" : "#FFD333",
+                        border: "none",
+                        borderRadius: "50%",
+                        color: "black",
+                        fontSize: "18px",
+                        cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      <FiChevronLeft style={{ fontSize: "20px" }} />
+                    </button>
 
-                      {(() => {
-                        const pages = [];
-                        let startPage, endPage;
+                    <span
+                      style={{
+                        fontSize: "16px",
+                        fontWeight: "600",
+                        margin: "0 15px",
+                        color: "#333",
+                        textAlign: "center",
+                        padding: "10px 10px",
+                        backgroundColor: "#f7f7f7",
+                        borderRadius: "25px",
+                        boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+                      }}
+                    >
+                      Trang {currentPage} / {totalPages}
+                    </span>
 
-                        if (totalPages <= 3) {
-                          startPage = 1;
-                          endPage = totalPages;
-                        } else if (currentPage === 1) {
-                          startPage = 1;
-                          endPage = 3;
-                        } else if (currentPage === totalPages) {
-                          startPage = totalPages - 2;
-                          endPage = totalPages;
-                        } else {
-                          startPage = currentPage - 1;
-                          endPage = currentPage + 1;
-                        }
+                    <button
+                      className="pageItem"
+                      disabled={currentPage === totalPages}
+                      onClick={() => paginate(currentPage + 1)}
+                      style={{
+                        padding: "10px 15px",
+                        backgroundColor: currentPage === totalPages ? "#e0e0e0" : "#FFD333",
+                        border: "none",
+                        borderRadius: "50%",
+                        color: "black",
+                        fontSize: "18px",
+                        cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      <FiChevronRight style={{ fontSize: "20px" }} />
+                    </button>
+                  </Box>
 
-                        for (let i = startPage; i <= endPage; i++) {
-                          pages.push(
-                            <li
-                              className={`page-item ${currentPage === i ? "active" : ""}`}
-                              key={i}
-                            >
-                              <a className="page-link" onClick={() => handlePageChange(i)}>
-                                {i}
-                              </a>
-                            </li>
-                          );
-                        }
-                        return pages;
-                      })()}
-                      <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                        <a className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
-                          <i className="ni ni-bold-right" />
-                        </a>
-                      </li>
-                    </ul>
-                  </nav>
                 </div>
               </Grid>
             )}
@@ -965,18 +970,32 @@ const indexHistory = () => {
               {selectedProduct && (
                 <>
                   <div style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
-                    <img
-                      src={selectedProduct.productImage}
-                      alt={selectedProduct.productName}
-                      style={{
-                        width: "100px",
-                        height: "100px",
-                        borderRadius: "5px",
-                        objectFit: "cover",
-                        marginRight: "10px",
-                        border: "1px solid #ddd",
-                      }}
-                    />
+
+                    {(() => {
+                      // Tìm hình ảnh khớp với productId và colorId
+                      const matchingImage = images[selectedProduct.productId]?.find(
+                        (image) => image.colorsDTO?.id === selectedProduct.colorId
+                      ); 
+                      return (
+                        <img
+                        src={matchingImage.imageDTOResponse[0]?.url}
+                          alt={selectedProduct.productName || "Product Image"}
+                          style={{
+                            width: "100px",
+                            height: "100px",
+                            borderRadius: "5px",
+                            objectFit: "cover",
+                            marginRight: "10px",
+                            border: "1px solid #ddd",
+                          }}
+                          onError={(e) => {
+                            // Hiển thị ảnh mặc định nếu có lỗi khi tải ảnh
+                            e.target.src =
+                              "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930";
+                          }}
+                        />
+                      );
+                    })()}
                     <div>
                       <p style={{ fontSize: "20px", fontWeight: "bold", margin: "0" }}>
                         {selectedProduct.productName}

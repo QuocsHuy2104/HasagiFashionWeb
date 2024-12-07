@@ -56,7 +56,7 @@ function HasagiCard2({ image, name, id, price }) {
                 alignItems: 'center',
                 height: '100%',
                 position: 'relative',
-                overflow: 'hidden',
+                overflow: 'hidden'
             }}
         >
             {/* Image and Name */}

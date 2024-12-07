@@ -28,7 +28,7 @@ function Banner() {
                 <ArgonBox mb={5}>
                     <Card>
                         <ArgonBox display="flex" justifyContent="space-between" p={3}>
-                            <ArgonTypography variant="h6">Manage Banners</ArgonTypography>
+                            <ArgonTypography variant="h6">Quản lý Banner</ArgonTypography>
                         </ArgonBox>
                         <Container>
                             <Row>

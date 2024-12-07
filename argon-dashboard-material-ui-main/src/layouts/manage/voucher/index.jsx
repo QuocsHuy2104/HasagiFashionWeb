@@ -359,13 +359,14 @@ function Voucher() {
 
 
                 <ArgonBox sx={{ bgcolor: '#f5f5f5', borderRadius: '10px 10px 0 0' }}>
-                    <Tabs value={activeTab} onChange={handleTabChange} sx={{ mb: 1 }}>
-                        <Tab label="Còn hạn" sx={{ minWidth: '100px', padding: '0 20px' }} />
-                        <Tab label="Hết hạn" sx={{ minWidth: '100px', padding: '0 20px' }} />
-                    </Tabs>
 
                     {activeTab === 0 && (
                         <Card sx={{ mb: 3, borderRadius: '10px', boxShadow: 3 }}>
+                            <Tabs value={activeTab} onChange={handleTabChange} sx={{ mb: 1 }}>
+                                <Tab label="Còn hạn" sx={{ minWidth: '100px', padding: '0 20px' }} />
+                                <Tab label="Hết hạn" sx={{ minWidth: '100px', padding: '0 20px' }} />
+                            </Tabs>
+
                             <ArgonBox
                                 mb={3}
                                 p={2}
@@ -416,6 +417,10 @@ function Voucher() {
 
                     {activeTab === 1 && (
                         <Card sx={{ mb: 3, borderRadius: '10px', boxShadow: 3 }}>
+                            <Tabs value={activeTab} onChange={handleTabChange} sx={{ mb: 1 }}>
+                                <Tab label="Còn hạn" sx={{ minWidth: '100px', padding: '0 20px' }} />
+                                <Tab label="Hết hạn" sx={{ minWidth: '100px', padding: '0 20px' }} />
+                            </Tabs>
                             <ArgonBox
                                 mb={3}
                                 p={2}

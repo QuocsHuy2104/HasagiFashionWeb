@@ -129,13 +129,13 @@ const UploadPhoto = ({ onFileUpload }) => {
 
               <Overlay className="overlay">
                   <CloudUploadIcon style={{ fontSize: 50, marginBottom: 8 }} />
-                  <Typography variant="body1">Upload photo</Typography>
+                  <Typography variant="body1">Tải lên ảnh</Typography>
               </Overlay>
           </UploadContainer>
 
           {uploading && (
             <Typography variant="caption" sx={{ color: "blue", mt: 1, display: "block" }}>
-                Uploading...
+                Đang tải lên...
             </Typography>
           )}
 
@@ -149,8 +149,8 @@ const UploadPhoto = ({ onFileUpload }) => {
             variant="caption"
             sx={{ color: "#9E9E9E", mt: 1, display: "block" }}
           >
-              Allowed *.jpeg, *.jpg, *.png, *.gif <br />
-              max size of 3 Mb
+              chọn ảnh *.jpeg, *.jpg, *.png, *.gif <br />
+              tối đa of 3 Mb
           </Typography>
       </Box>
     );

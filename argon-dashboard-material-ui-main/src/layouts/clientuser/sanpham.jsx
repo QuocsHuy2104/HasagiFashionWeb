@@ -65,7 +65,10 @@ function FeaturedProducts() {
                                 gap: 2, // Khoảng cách giữa các sản phẩm
                             }}
                         >
-                            {currentProducts.map((product, index) => (
+                            {currentProducts
+                               .filter((product) => product.isActive)
+                            .map(
+                                (product, index) => (
                                 <Box
                                     key={product.id || index}
                                     sx={{

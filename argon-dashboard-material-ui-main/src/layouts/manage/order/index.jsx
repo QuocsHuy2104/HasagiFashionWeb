@@ -15,7 +15,6 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { DataGrid } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
-import Modal from "react-bootstrap/Modal";
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -46,7 +45,6 @@ function Order() {
       try {
         const response = await axios.get("http://localhost:3000/api/order");
         if (response.data && response.data.orders) {
-          console.log(response.data);
           const orders = response.data.orders.map(order => ({
             ...order,
             orderDate: order.orderDate
@@ -67,6 +65,12 @@ function Order() {
     };
 
     fetchData();
+    const intervalId = setInterval(() => {
+      fetchData();
+    }, 3000);
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
 
 
@@ -218,7 +222,10 @@ function Order() {
         );
       },
     }
+
   ];
+
+
 
   const handleStatusChange = async (orderId, newStatusSlug) => {
     try {
@@ -268,7 +275,7 @@ function Order() {
         <ArgonBox mb={3}>
           <Card>
             <ArgonBox component="form" role="form" p={3}>
-              <ArgonTypography variant="h6">Tìm kiếm order</ArgonTypography>
+              <ArgonTypography variant="h6">Tìm kiếm đơn hàng</ArgonTypography>
               <ArgonBox
                 display="flex"
                 flexDirection="row"
@@ -315,7 +322,7 @@ function Order() {
                   color="success"
                   style={{ marginTop: "-24px" }}
                 >
-                  Xuất
+                  Xuất Excel
                 </ArgonButton>
               </ArgonBox>
             </ArgonBox>
