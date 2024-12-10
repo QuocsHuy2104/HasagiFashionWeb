@@ -38,11 +38,14 @@ Author.propTypes = {
   email: PropTypes.string.isRequired,
 };
 
-function Function({ job }) {
+function Function({ job, org }) {
   return (
     <ArgonBox display="flex" flexDirection="column">
       <ArgonTypography variant="caption" fontWeight="medium" color="text">
         {job}
+      </ArgonTypography>
+      <ArgonTypography variant="caption" color="secondary">
+        {org}
       </ArgonTypography>
     </ArgonBox>
   );
@@ -55,6 +58,7 @@ Function.propTypes = {
 
 const AuthorsTableData = ({ onEditClick, searchTerm = "", selectedRoles = [] }) => {
   const [accounts, setAccounts] = useState([]);
+
   const [author, setAuthor] = useState("");
 
   const getAuthor = async () => {
@@ -147,7 +151,7 @@ const AuthorsTableData = ({ onEditClick, searchTerm = "", selectedRoles = [] }) 
   const filteredAccounts =
     selectedRoles.length > 0
       ? filteredBySearch.filter((account) =>
-          account.roleName.some((role) => selectedRoles.includes(role.name))
+          (account.roleName || []).some((role) => selectedRoles.includes(role.name))
         )
       : filteredBySearch;
 
@@ -155,7 +159,7 @@ const AuthorsTableData = ({ onEditClick, searchTerm = "", selectedRoles = [] }) 
     const accountRoles = (account.roleName || []).map((role) => role.name).join(", ") || "No Roles";
 
     return {
-      TaiKhoan: (
+      "Thông tin": (
         <Author
           image={account.avatar ? account.avatar : team2}
           name={account.fullName}
@@ -166,7 +170,7 @@ const AuthorsTableData = ({ onEditClick, searchTerm = "", selectedRoles = [] }) 
       "Trạng thái": (
         <ArgonBadge
           variant="gradient"
-          badgeContent={account.delete ? "Đã nghỉ" : "Còn làm"}
+          badgeContent={account.delete ? "inactive" : "active"}
           color={account.delete ? "secondary" : "success"}
           size="xs"
         />

@@ -3,6 +3,7 @@ import ArgonBox from 'components/ArgonBox';
 import ArgonTypography from 'components/ArgonTypography';
 import { Grid, Avatar, Typography, Box } from "@mui/material";
 import HomeService from 'services/HomeServices';
+import MuiLink from '@mui/material/Link'
 
 export default function ListCategories() {
 
@@ -30,7 +31,9 @@ export default function ListCategories() {
             <Box sx={{ p: (theme) => theme.spacing(4) }}>
                 <Grid container spacing={3} justifyContent="center">
                     {categories.map((category, index) => (
+
                         <Grid item xs={12 / 7} key={index}>
+                        <MuiLink href='/Shop'>
                             <Box
                                 sx={{
                                     textAlign: "center",
@@ -39,7 +42,7 @@ export default function ListCategories() {
                                     alignItems: "center",
                                     justifyContent: "center",
                                 }}
-                            >
+                                >
                                 <Avatar
                                     alt={category.name}
                                     src={category.image}
@@ -52,11 +55,12 @@ export default function ListCategories() {
                                         bgcolor: "#f5e5c8",
                                         mb: 1,
                                     }}
-                                />
+                                    />
                                 <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
                                     {category.name}
                                 </Typography>
                             </Box>
+                                    </MuiLink>
                         </Grid>
                     ))}
                 </Grid>

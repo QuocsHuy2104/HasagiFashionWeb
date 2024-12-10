@@ -194,7 +194,7 @@ export default function ProductPopup({ open, handleClose, id }) {
                                     component="span"
                                     sx={{ whiteSpace: "nowrap" }}
                                 >
-                                    {pd.trademarkDTOResp.name}
+                                    {pd.brandDTOResponse.name}
                                 </ArgonTypography>
                             </ArgonTypography>
 
@@ -209,7 +209,7 @@ export default function ProductPopup({ open, handleClose, id }) {
                                     component="span"
                                     sx={{ whiteSpace: "nowrap" }}
                                 >
-                                    {pd.categoryDTOResp.name}
+                                    {pd.categoryDTOResponse.name}
                                 </ArgonTypography>
                             </ArgonTypography>
                         </ArgonBox>
