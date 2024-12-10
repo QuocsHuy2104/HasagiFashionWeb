@@ -34,6 +34,7 @@ import Swal from "sweetalert2";
 import ReviewFilesService from '../../../services/ReviewFileServices';
 import { storage } from "../../../config/firebase-config";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
 const indexHistory = () => {
   const [imageFiles, setImageFiles] = useState([]);
@@ -83,7 +84,7 @@ const indexHistory = () => {
     "Thời gian giao hàng quá lâu khiến tôi không còn nhu cầu",
     "Tôi không còn nhu cầu sử dụng sản phẩm này nữa",
   ]);
-  
+
 
   useEffect(() => {
     if (location.state?.activeTab) {
@@ -144,9 +145,7 @@ const indexHistory = () => {
     setOpenReturnModal(true);
   };
 
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
+
 
   const handleCancelOrder = async () => {
     try {
@@ -185,7 +184,7 @@ const indexHistory = () => {
     }
   };
 
-  
+
   const handleReturnOrder = async () => {
     try {
       await axios.put(
@@ -195,10 +194,11 @@ const indexHistory = () => {
           params: { reason: returnReason },
         }
       );
-
-      const response = await HistoryOrderService.getHistory();
-      setOrders(response.data);
       setOpenReturnModal(false);
+      const response = await HistoryOrderService.getHistory();
+  
+      setOrders(response.data);
+  
     } catch (error) {
       console.error("There was an error processing the return request!", error);
       alert("Không thể xử lý yêu cầu trả hàng. Vui lòng thử lại.");
@@ -206,10 +206,6 @@ const indexHistory = () => {
   };
 
 
-
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue);
-  };
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -375,6 +371,12 @@ const indexHistory = () => {
   };
 
 
+  const paginate = (pageNumber) => {
+    if (pageNumber > 0 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
+
   const handleVideoChange = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -392,10 +394,6 @@ const indexHistory = () => {
     setVideoFile(null);
     const inputFile = document.getElementById('video-upload');
     inputFile.value = '';
-  };
-
-  const resetImageInput = () => {
-    setImageFiles([]);
   };
 
   useEffect(() => {
@@ -448,41 +446,9 @@ const indexHistory = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleTabChangeWithScroll = (event, newValue) => {
-    handleTabChange(event, newValue);
-    setTabMarginTop(getMarginTop(newValue));
-    setTabMarginTop1(getMarginTop1(newValue));
-    window.scrollTo(0, 0);
-  };
-
-  const getMarginTop = (tabValue) => {
-    switch (tabValue) {
-      case "all":
-        return "60px";
-      case "dang-xu-ly":
-      case "dang-giao":
-      case "da-giao":
-      case "hoan-thanh":
-      case "da-huy":
-        return "120px";
-      default:
-        return "60px";
-    }
-  };
-
-  const getMarginTop1 = (tabValue) => {
-    switch (tabValue) {
-      case "all":
-        return "30px";
-      case "dang-xu-ly":
-      case "dang-giao":
-      case "da-giao":
-      case "hoan-thanh":
-      case "da-huy":
-        return "75px";
-      default:
-        return "30px";
-    }
+  const handleTabChangeWithScroll = (event, newTab) => {
+    setActiveTab(newTab);
+    setCurrentPage(1);
   };
 
   const handleCloseSnackbar = () => {
@@ -501,7 +467,7 @@ const indexHistory = () => {
   return (
     <>
       <div>
-        <ArgonBox style={{ marginLeft: "-1.22%", width: "102.44%", paddingBottom: "52px" }}>
+        <ArgonBox style={{ marginLeft: "-1.22%", width: "102.44%", paddingBottom: "40px" }}>
           <Paper
             ref={paperRef}
             elevation={3}
@@ -652,7 +618,7 @@ const indexHistory = () => {
                                 display="flex"
                                 alignItems="center"
                                 key={index}
-                                style={{ marginBottom: "25px", marginTop: "-15px" }}
+                                style={{ marginBottom: "25px" }}
                               >
                                 {matchingImage && (
                                   <img
@@ -671,7 +637,15 @@ const indexHistory = () => {
                                         variant="body2"
                                         color="textSecondary"
                                         onClick={() => handleReviewClick(product)}
-                                        style={{ marginLeft: "600px", color: "black" }}
+                                        style={{ marginLeft: "400px" }}
+                                        onMouseEnter={(e) => {
+                                          e.target.style.textDecoration = 'underline';
+                                          e.target.style.color = 'blue';
+                                      }}
+                                      onMouseLeave={(e) => {
+                                          e.target.style.textDecoration = 'none';
+                                          e.target.style.color = 'black';
+                                      }}
                                       >
                                         Đánh giá
                                       </Typography>
@@ -695,12 +669,10 @@ const indexHistory = () => {
                                         fontSize: "16px",
                                         position: "relative",
                                         display: "inline-block",
-                                        marginLeft: "680px",
+                                        marginLeft: "690px",
                                       }}
                                     >
-
                                       {new Intl.NumberFormat("vi-VN").format(product.productPrice)}đ
-
                                     </Typography>
                                   </Box>
                                 </Box>
@@ -732,7 +704,7 @@ const indexHistory = () => {
                         <Typography
                           variant="body2"
                           style={{
-                            marginRight: "15px", // Space between "Tổng tiền:" and the price
+                            marginRight: "15px",
                           }}
                         >
                           Tổng tiền:
@@ -747,9 +719,7 @@ const indexHistory = () => {
                             alignItems: "center",
                           }}
                         >
-
                           {new Intl.NumberFormat("vi-VN").format(order.amount)}đ
-
                         </Typography>
                       </div>
                       <Box display="flex" justifyContent="flex-end" mt={2}>
@@ -829,53 +799,58 @@ const indexHistory = () => {
                   </Grid>
                 ))}
                 <div className="col-12" style={{ marginTop: "-20px" }}>
-                  <nav>
-                    <ul className="pagination justify-content-center">
-                      <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                        <a className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
-                          <i className="ni ni-bold-left" />
-                        </a>
-                      </li>
+                  <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
+                    <button
+                      className="pageItem"
+                      disabled={currentPage === 1}
+                      onClick={() => paginate(currentPage - 1)}
+                      style={{
+                        padding: "10px 15px",
+                        backgroundColor: currentPage === 1 ? "#e0e0e0" : "#FFD333",
+                        border: "none",
+                        borderRadius: "50%",
+                        color: "black",
+                        fontSize: "18px",
+                        cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      <FiChevronLeft style={{ fontSize: "20px" }} />
+                    </button>
 
-                      {(() => {
-                        const pages = [];
-                        let startPage, endPage;
+                    <span
+                      style={{
+                        fontSize: "16px",
+                        fontWeight: "600",
+                        margin: "0 15px",
+                        color: "#333",
+                        textAlign: "center",
+                        padding: "10px 10px",
+                        backgroundColor: "#f7f7f7",
+                        borderRadius: "25px",
+                        boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+                      }}
+                    >
+                      Trang {currentPage} / {totalPages}
+                    </span>
 
-                        if (totalPages <= 3) {
-                          startPage = 1;
-                          endPage = totalPages;
-                        } else if (currentPage === 1) {
-                          startPage = 1;
-                          endPage = 3;
-                        } else if (currentPage === totalPages) {
-                          startPage = totalPages - 2;
-                          endPage = totalPages;
-                        } else {
-                          startPage = currentPage - 1;
-                          endPage = currentPage + 1;
-                        }
+                    <button
+                      className="pageItem"
+                      disabled={currentPage === totalPages}
+                      onClick={() => paginate(currentPage + 1)}
+                      style={{
+                        padding: "10px 15px",
+                        backgroundColor: currentPage === totalPages ? "#e0e0e0" : "#FFD333",
+                        border: "none",
+                        borderRadius: "50%",
+                        color: "black",
+                        fontSize: "18px",
+                        cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      <FiChevronRight style={{ fontSize: "20px" }} />
+                    </button>
+                  </Box>
 
-                        for (let i = startPage; i <= endPage; i++) {
-                          pages.push(
-                            <li
-                              className={`page-item ${currentPage === i ? "active" : ""}`}
-                              key={i}
-                            >
-                              <a className="page-link" onClick={() => handlePageChange(i)}>
-                                {i}
-                              </a>
-                            </li>
-                          );
-                        }
-                        return pages;
-                      })()}
-                      <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                        <a className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
-                          <i className="ni ni-bold-right" />
-                        </a>
-                      </li>
-                    </ul>
-                  </nav>
                 </div>
               </Grid>
             )}
@@ -918,9 +893,10 @@ const indexHistory = () => {
             p={3}
             style={{
               backgroundColor: "white",
-              width: "300px",
+              width: "500px",
               margin: "50px auto",
               borderRadius: "8px",
+              marginTop: "90px",
             }}
           >
             <ArgonTypography variant="h6">Chọn lý do trả hàng</ArgonTypography>

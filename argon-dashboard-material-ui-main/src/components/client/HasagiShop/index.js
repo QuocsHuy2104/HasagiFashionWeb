@@ -7,11 +7,11 @@ import ProductService from "../../../services/ProductServices";
 import CategoryService from "../../../services/CategoryServices";
 import BrandService from "../../../services/BrandServices";
 import reviewsService from 'services/ReviewsServices';
-import { Card, Typography } from '@mui/material';
+import { Card,Box, Typography } from '@mui/material';
 import { Form } from 'react-bootstrap';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
-
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 function Shop() {
     const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -24,7 +24,7 @@ function Shop() {
     const [selectedBrands, setSelectedBrands] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [reviews, setReviews] = useState([]);
-    const [value, setValue] = useState([300000, 700000]);
+    const [value, setValue] = useState([0,0]);
     const [showSaleOnly, setShowSaleOnly] = useState(false);
     const handleSliderChange = (newValue) => {
         setValue(newValue);
@@ -99,8 +99,11 @@ function Shop() {
         const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(product.brandDTOResponse?.id);
         const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesSale = !showSaleOnly || product.sale > 0;
+        const matchesPriceRange =
+        (!value[0] || product.minPrice >= value[0]) &&
+        (!value[1] || product.minPrice <= value[1]);
 
-        return matchesCategory && matchesBrand && matchesSearchTerm && matchesSale;
+    return matchesCategory && matchesBrand && matchesSearchTerm && matchesSale && matchesPriceRange;
     });
 
     const sortedProducts = filteredProducts.sort((a, b) => {
@@ -158,6 +161,13 @@ function Shop() {
 
         const totalStars = productReviews.reduce((sum, review) => sum + review.star, 0);
         return (totalStars / productReviews.length).toFixed(1);
+    };
+ 
+ 
+    const paginate = (pageNumber) => {
+        if (pageNumber > 0 && pageNumber <= totalPages) {
+            setCurrentPage(pageNumber);
+        }
     };
 
 
@@ -261,60 +271,60 @@ function Shop() {
                             borderRadius: '8px',
                             backgroundColor: '#f9f9f9'
                         }}>
-                        <div className="filter-section mt-0" style={{ padding: '8px 12px' }}>
-                            <h6 className="filter-title text-uppercase mb-2" style={{
-                                fontSize: '1.5rem',
-                                color: '#333',
-                                fontWeight: 600,
-                                borderBottom: '1px solid #ddd',
-                                paddingBottom: '5px',
-                                marginBottom: '3px'
-                            }}>SẢN PHẨM GIẢM GIÁ</h6>
-                            <div className="filter-checkboxes" style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                paddingLeft: '15px',
-                                maxHeight: '300px',
-                                overflowY: 'auto',
-                                scrollbarWidth: 'thin',
-                                scrollbarColor: '#C0C0C0 #f1f1f1',
-                            }}>
-                                {/* Checkbox "Tất cả" */}
-                                <Form.Check
-                                    type="checkbox"
-                                    id="filter-all"
-                                    label="Tất cả"
-                                    checked={selectedCategories.length === 0 && !showSaleOnly}
-                                    onChange={() => {
-                                        setSelectedCategories([]);
-                                        setShowSaleOnly(false);
-                                    }}
-                                    style={{
-                                        cursor: 'pointer',
-                                        fontWeight: 'bold',
-                                        color: '#333',
-                                        marginBottom: '10px',
-                                        fontSize: '19px',
-                                    }}
-                                />
+                            <div className="filter-section mt-0" style={{ padding: '8px 12px' }}>
+                                <h6 className="filter-title text-uppercase mb-2" style={{
+                                    fontSize: '1.5rem',
+                                    color: '#333',
+                                    fontWeight: 600,
+                                    borderBottom: '1px solid #ddd',
+                                    paddingBottom: '5px',
+                                    marginBottom: '3px'
+                                }}>SẢN PHẨM GIẢM GIÁ</h6>
+                                <div className="filter-checkboxes" style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    paddingLeft: '15px',
+                                    maxHeight: '300px',
+                                    overflowY: 'auto',
+                                    scrollbarWidth: 'thin',
+                                    scrollbarColor: '#C0C0C0 #f1f1f1',
+                                }}>
+                                    {/* Checkbox "Tất cả" */}
+                                    <Form.Check
+                                        type="checkbox"
+                                        id="filter-all"
+                                        label="Tất cả"
+                                        checked={selectedCategories.length === 0 && !showSaleOnly}
+                                        onChange={() => {
+                                            setSelectedCategories([]);
+                                            setShowSaleOnly(false);
+                                        }}
+                                        style={{
+                                            cursor: 'pointer',
+                                            fontWeight: 'bold',
+                                            color: '#333',
+                                            marginBottom: '10px',
+                                            fontSize: '19px',
+                                        }}
+                                    />
 
-                                {/* Checkbox "Sale" */}
-                                <Form.Check
-                                    type="checkbox"
-                                    id="filter-sale"
-                                    label="Sản phẩm giảm giá"
-                                    checked={showSaleOnly}
-                                    onChange={() => setShowSaleOnly(!showSaleOnly)}
-                                    style={{
-                                        cursor: 'pointer',
-                                        color: '#555',
-                                        transition: 'color 0.3s',
-                                        marginBottom: '10px',
-                                        fontSize: '19px',
-                                    }}
-                                />
+                                    {/* Checkbox "Sale" */}
+                                    <Form.Check
+                                        type="checkbox"
+                                        id="filter-sale"
+                                        label="Sản phẩm giảm giá"
+                                        checked={showSaleOnly}
+                                        onChange={() => setShowSaleOnly(!showSaleOnly)}
+                                        style={{
+                                            cursor: 'pointer',
+                                            color: '#555',
+                                            transition: 'color 0.3s',
+                                            marginBottom: '10px',
+                                            fontSize: '19px',
+                                        }}
+                                    />
+                                </div>
                             </div>
-                        </div>
                         </div>
                         <div className="filter-options card p-3 mb-4" style={{
                             border: '1px solid #ddd',
@@ -591,27 +601,55 @@ function Shop() {
                             </div>
 
                             <div className="col-12" style={{}}>
-                                <nav>
-                                    <ul className="pagination justify-content-center">
-                                        <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                                            <a className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
-                                                <i className="ni ni-bold-left" />
-                                            </a>
-                                        </li>
-                                        {[...Array(totalPages)].map((_, index) => (
-                                            <li className={`page-item ${currentPage === index + 1 ? "active" : ""}`} key={index}>
-                                                <a className="page-link" onClick={() => handlePageChange(index + 1)}>
-                                                    {index + 1}
-                                                </a>
-                                            </li>
-                                        ))}
-                                        <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                                            <a className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
-                                                <i className="ni ni-bold-right" />
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </nav>
+                                <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+                                    <button
+                                        disabled={currentPage === 1}
+                                        onClick={() => paginate(currentPage - 1)}
+                                        style={{
+                                            padding: "10px 15px",
+                                            backgroundColor: currentPage === 1 ? "#e0e0e0" : "#FFD333",
+                                            border: "none",
+                                            borderRadius: "50%",
+                                            color: "black",
+                                            fontSize: "18px",
+                                            cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                                        }}
+                                    >
+                                        <FiChevronLeft style={{ fontSize: "20px" }} />
+                                    </button>
+
+                                    <span
+                                        style={{
+                                            fontSize: "16px",
+                                            fontWeight: "600",
+                                            margin: "0 15px",
+                                            color: "#333",
+                                            textAlign: "center",
+                                            padding: "10px 10px",
+                                            backgroundColor: "#f7f7f7",
+                                            borderRadius: "25px",
+                                            boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+                                        }}
+                                    >
+                                        Trang {currentPage} / {totalPages}
+                                    </span>
+
+                                    <button
+                                        disabled={currentPage === totalPages}
+                                        onClick={() => paginate(currentPage + 1)}
+                                        style={{
+                                            padding: "10px 15px",
+                                            backgroundColor: currentPage === totalPages ? "#e0e0e0" : "#FFD333",
+                                            border: "none",
+                                            borderRadius: "50%",
+                                            color: "black",
+                                            fontSize: "18px",
+                                            cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+                                        }}
+                                    >
+                                        <FiChevronRight style={{ fontSize: "20px" }} />
+                                    </button>
+                                </Box>
                             </div>
                         </div>
 

@@ -771,7 +771,24 @@ const Checkout = () => {
                             variant="contained"
                             color="warning"
                             onClick={handleClickOpen}
-                            style={{ border: 'none', boxShadow: 'none', padding: '8px 16px', marginRight: "-20px", color: 'rgba(244, 79, 30, 0.99)' }}
+                            style={{
+                                border: 'none',
+                                boxShadow: 'none',
+                                padding: '8px 16px',
+                                marginRight: '-20px',
+                                color: 'rgba(244, 79, 30, 0.99)',
+                                textDecoration: 'none',
+                                transition: 'all 0.3s',
+                                fontSize: "1rem"
+                            }}
+                            onMouseEnter={(e) => {
+                                e.target.style.textDecoration = 'underline';
+                                e.target.style.color = 'blue';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.textDecoration = 'none';
+                                e.target.style.color = 'rgba(244, 79, 30, 0.99)';
+                            }}
                         >
                             Áp dụng mã giảm giá
                         </Button>

@@ -38,7 +38,6 @@ export default function ProductPopup({ open, handleClose, id }) {
                     console.error('Error fetching product details:', error);
                 }
             } else {
-                console.warn(`Product ID is invalid: ${id}. Popup is closed: ${!open}`);
             }
         };
 
