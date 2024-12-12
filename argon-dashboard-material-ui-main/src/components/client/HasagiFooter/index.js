@@ -79,7 +79,7 @@ const Footer = () => {
                                     md: '0 10px'
                                 }
                             }}>
-                            <ArgonTypography variant='h4' mb='17px' display='flex' justifyContent='space-between' alignItems='center'>Doanh Mục</ArgonTypography>
+                            <ArgonTypography variant='h4' mb='17px' display='flex' justifyContent='space-between' alignItems='center'>Danh Mục</ArgonTypography>
                             <ArgonTypography variant='button' color='secondary' sx={{ maxWidth: '85%', fontSize: '15px', lineHeight: '1.7rem', margin: '0' }}>
                                 <MuiLink href='/Shop'>Sản Phẩm</MuiLink><br />
                                 <MuiLink href='/About'>Giới thiệu</MuiLink><br />

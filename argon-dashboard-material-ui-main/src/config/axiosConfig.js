@@ -3,7 +3,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8080/api',
+  baseURL: 'http://hasagi.site:8080/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

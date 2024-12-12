@@ -395,9 +395,6 @@ const indexHistory = () => {
     inputFile.value = '';
   };
 
-  const resetImageInput = () => {
-    setImageFiles([]);
-  };
 
   useEffect(() => {
     const handleScroll = () => {

@@ -43,8 +43,6 @@ const BannersList = ({ getBannerId }) => {
         }
     };
 
-
-
     const deleteBannerHandler = async (id) => {
         try {
             await BannerDataService.deleteBanner(id);
@@ -59,7 +57,6 @@ const BannersList = ({ getBannerId }) => {
     useEffect(() => {
         getBanners();
     }, []);
-
 
     const sliderSettings = {
         dots: true,
