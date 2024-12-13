@@ -85,7 +85,6 @@ export default function DataTable({ sizes, onEditClick, onDeleteClick }) {
                 columns={columns}
                 paginationModel={paginationModel}
                 onPaginationModelChange={setPaginationModel}
-                pageSizeOptions={[5, 10]}
                 checkboxSelection
                 onRowSelectionModelChange={handleSelectionModelChange}
                 sx={{

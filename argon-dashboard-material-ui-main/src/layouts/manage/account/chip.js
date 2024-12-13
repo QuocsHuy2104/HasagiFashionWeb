@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import PropTypes from 'prop-types'; 
 import { useTheme } from '@mui/material/styles';
@@ -43,7 +44,7 @@ function MultipleSelectChip({ roles, selectedRoles, onChange }) {
 
   return (
     <FormControl sx={{ width: "100%" }}>
-      <InputLabel id="demo-multiple-chip-label">Select roles</InputLabel>
+      <InputLabel id="demo-multiple-chip-label">Chọn vai trò</InputLabel>
       <Select
         labelId="demo-multiple-chip-label"
         id="demo-multiple-chip"

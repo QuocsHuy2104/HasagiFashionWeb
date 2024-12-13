@@ -23,6 +23,7 @@ import Shop from "components/client/HasagiShop";
 import Cart from "components/client/HasagiCart";
 import Contact from "components/client/HasagiContact";
 import Checkout from "components/client/HasagiCheckout";
+import Favorite from "components/client/HasagiFavorite";
 import SignIn from "layouts/authentication/sign-in";
 import SignUp from "layouts/authentication/sign-up";
 import Complete from "components/client/HasagiComplete";
@@ -38,7 +39,7 @@ import QA from "components/client/HasagiQ&A";
 const routes = [
   {
     type: "route",
-    name: "Bảng điều khiển",
+    name: "Thống kê",
     key: "dashboard",
     route: "/dashboard",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-tv-2" />,
@@ -153,6 +154,15 @@ const routes = [
     component: <FeatureSection />,
     showInSidenav: true,
   },
+  {
+    // type: "route",
+    name: "Favorite",
+    key: "Favorite",
+    route: "/Favorite",
+    icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
+    component: <Favorite />,
+    showInSidenav: true,
+  },
 
   {
     // type: "route",
@@ -180,7 +190,7 @@ const routes = [
     component: <ResetPassword />,
     showInSidenav: true,
   },
-  
+
   {
     type: "route",
     name: "Quản lý đơn hàng",
@@ -223,7 +233,7 @@ const routes = [
     component: <ChatBot />,
     showInSidenav: true,
   },
-  
+
   {
     // type: "route",
     name: "Q&A",

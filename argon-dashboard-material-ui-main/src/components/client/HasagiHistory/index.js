@@ -87,7 +87,7 @@ useEffect(() => {
             onEditProfileClick={handleEditProfileClick}
           />
         </div>
-        <div className="col-8 content-box">
+        <div className="col-8 content-box mb-3">
           {renderContent()}
         </div>
       </div>

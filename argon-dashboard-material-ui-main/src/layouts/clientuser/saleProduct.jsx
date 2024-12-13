@@ -5,7 +5,7 @@ import ArgonTypography from "components/ArgonTypography";
 import ArgonBox from "components/ArgonBox";
 import MuiLink from "@mui/material/Link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import { faArrowAltCircleRight } from "@fortawesome/free-solid-svg-icons";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import HomeService from "services/HomeServices";
@@ -58,7 +58,7 @@ export default function SaleProduct() {
     };
 
     return (
-        <ArgonBox>
+        <ArgonBox mt={3}>
             <ArgonBox mb={3} display="flex" justifyContent="space-between" alignItems="center">
                 <ArgonBox>
                     <ArgonTypography variant="h3">Sản phẩm giảm giá</ArgonTypography>
@@ -66,7 +66,7 @@ export default function SaleProduct() {
                 <ArgonBox>
                     <MuiLink href="/Shop">
                         <ArgonTypography variant="h4">
-                            Xem Thêm <FontAwesomeIcon icon={faArrowRight} />
+                            Xem Thêm <FontAwesomeIcon icon={faArrowAltCircleRight} />
                         </ArgonTypography>
                     </MuiLink>
                 </ArgonBox>

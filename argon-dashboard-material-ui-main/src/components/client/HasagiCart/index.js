@@ -118,8 +118,8 @@ const Cart = () => {
           inputValue === ""
             ? ""
             : inputValue === "0"
-            ? item.quantity
-            : parseInt(inputValue, 10) || item.quantity + change;
+              ? item.quantity
+              : parseInt(inputValue, 10) || item.quantity + change;
 
         if (newQuantity === 0) {
           Swal.fire({
@@ -130,6 +130,15 @@ const Cart = () => {
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
             confirmButtonText: "Vâng, xóa nó!",
+            scrollbarPadding: false,
+            didOpen: () => {
+              document.body.style.overflowY = "auto";
+              document.body.style.padding = "0";
+            },
+            willClose: () => {
+              document.body.style.overflowY = "auto";
+              document.body.style.padding = "0";
+            },
           }).then(async (result) => {
             if (result.isConfirmed) {
               // Xóa sản phẩm khỏi giỏ hàng
@@ -141,6 +150,15 @@ const Cart = () => {
                   title: "Xóa thành công!",
                   text: "Sản phẩm đã được xóa.",
                   icon: "success",
+                  scrollbarPadding: false,
+                  didOpen: () => {
+                    document.body.style.overflowY = "auto";
+                    document.body.style.padding = "0";
+                  },
+                  willClose: () => {
+                    document.body.style.overflowY = "auto";
+                    document.body.style.padding = "0";
+                  },
                 });
               } catch (error) {
                 console.error("Error deleting item:", error);
@@ -591,7 +609,12 @@ const Cart = () => {
                               <span>
                                 {item.color || "Chưa chọn màu"}
                               </span>
-                              , {item.size || "Chưa chọn kích thước"}
+                              {item.size !== "Không có" && (
+                                <>
+                                  , <span>{item.size || "Chưa chọn kích thước"}</span>
+                                </>
+                              )}
+
                             </div>
                           </button>
 
@@ -684,15 +707,15 @@ const Cart = () => {
                                 }
                               }}
                               onBlur={(e) => {
-                                const inputValue = e.target.value.trim(); 
+                                const inputValue = e.target.value.trim();
                                 if (inputValue === "") {
-                                  handleQuantityChange(item.cartdetailid, 0, "1"); 
+                                  handleQuantityChange(item.cartdetailid, 0, "1");
                                 } else {
-                                  handleQuantityChange(item.cartdetailid, 0, inputValue); 
+                                  handleQuantityChange(item.cartdetailid, 0, inputValue);
                                 }
                               }}
                               style={{
-                                width: "60px", 
+                                width: "60px",
                                 height: "30px",
                                 margin: "0 5px",
                                 boxShadow: "none",
@@ -722,7 +745,7 @@ const Cart = () => {
                         </td>
 
                         <td className="align-middle" style={{ border: "none" }}>
-                        <span style={{ marginLeft: "1px" }}>
+                          <span style={{ marginLeft: "1px" }}>
                             {item.quantity !== ""
                               ? new Intl.NumberFormat("vi-VN").format(item.price * item.quantity)
                               : new Intl.NumberFormat("vi-VN").format(item.price)}
@@ -750,7 +773,7 @@ const Cart = () => {
                     type="checkbox"
                     checked={selectAll}
                     onChange={handleSelectAllChange}
-                    style={{ transform: "scale(1.5)", marginBottom: "0", marginLeft: "-4px" }}
+                    style={{ transform: "scale(1.5)", marginBottom: "0" }}
                   />
                   <label style={{ marginLeft: "12px", marginTop: "2px" }}>
                     Chọn Tất Cả ({countSelectedItems()})

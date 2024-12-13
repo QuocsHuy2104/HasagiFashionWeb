@@ -103,13 +103,10 @@ function ShopDetail() {
 
   const handleAddToCart = async () => {
     try {
-      // Kiểm tra nếu chưa chọn màu hoặc kích thước
-      if (!selectedColor || !selectedSize) {
-        toast.error("Vui lòng chọn màu và kích thước trước khi thêm vào giỏ hàng.");
-        return;
+      if (product.sizes.length === 0 && !selectedColor) {
+        setError("Vui lòng chọn màu");
+        return; // Dừng thực thi nếu không có size
       }
-
-      // Gọi API để thêm sản phẩm vào giỏ hàng
       const response = await cartService.addToCart({
         colorId: selectedColor,
         sizeId: selectedSize,
@@ -126,7 +123,6 @@ function ShopDetail() {
     }
   };
 
-
   const fetchProductDetail = async () => {
     try {
       if (!productId) throw new Error("Product ID is missing");
@@ -138,7 +134,15 @@ function ShopDetail() {
       });
 
       const productData = response.data;
-      //console.log("Fetched Product Data:", productData);
+      console.log(productData);
+
+      // Kiểm tra nếu mảng sizes rỗng
+      if (productData.sizes.length === 0) {
+        if (selectedColor) {
+          fetchPricePK(productId, selectedColor);
+        }
+      }
+
       setSale(productData.sale);
       setProduct(productData);
       setMediaList(productData);
@@ -149,7 +153,6 @@ function ShopDetail() {
         setQuantityPDT(productData?.importQuantity);
       }
       //console.log("Total Price Set To:", productData.importPrice);
-
     } catch (error) {
       console.error("Error fetching product details:", error);
     }
@@ -202,6 +205,21 @@ function ShopDetail() {
       toast.error("Đã xảy ra lỗi khi lấy giá sản phẩm. Vui lòng thử lại sau.");
     }
   };
+  const fetchPricePK = async (productId, colorId) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/public/webShopDetail/pricePK`, {
+        params: { productId, colorId },
+      });
+      const { price, quantity } = response.data;
+      setTotalPrice(price);
+      setQuantityPDT(quantity);
+    } catch (error) {
+      console.error("Error fetching price:", error);
+      toast.error("Đã xảy ra lỗi khi lấy giá sản phẩm. Vui lòng thử lại sau.");
+    }
+  };
+
+
 
   useEffect(() => {
     if (selectedColor && selectedSize) {
@@ -212,13 +230,10 @@ function ShopDetail() {
     }
   }, [selectedColor, selectedSize, quantity]);
 
-
-
   const handleByNow = async () => {
     try {
-      // Kiểm tra nếu chưa chọn màu hoặc kích thước
-      if (!selectedColor || !selectedSize) {
-        toast.error("Vui lòng chọn màu và kích thước trước khi thêm vào giỏ hàng.");
+      if (product.sizes.length === 0 && !selectedColor) {
+        setError("Vui lòng chọn màu");
         return;
       }
 
@@ -237,7 +252,7 @@ function ShopDetail() {
         }
         localStorage.setItem(
           "checkedItems" + productId + selectedColor + selectedSize,
-          JSON.stringify([Number(checkedItems), selectedColor, selectedSize])
+          JSON.stringify([...checkedItems, { productId, selectedColor, selectedSize }])
         );
       }
 
@@ -246,7 +261,6 @@ function ShopDetail() {
       setError(error.response?.data || "Đã có lỗi xảy ra. Vui lòng thử lại!");
     }
   };
-
 
   const [activeTab, setActiveTab] = useState("tab-pane-1");
 
@@ -288,7 +302,9 @@ function ShopDetail() {
 
     return minPrice === maxPrice
       ? `${new Intl.NumberFormat("vi-VN").format(minPrice)}`
-      : `${new Intl.NumberFormat("vi-VN").format(minPrice)} - ${new Intl.NumberFormat("vi-VN").format(maxPrice)}`;
+      : `${new Intl.NumberFormat("vi-VN").format(minPrice)} - ${new Intl.NumberFormat(
+        "vi-VN"
+      ).format(maxPrice)}`;
   };
 
   const formattedPrice = formatImportPrice(totalPrice);
@@ -642,7 +658,6 @@ function ShopDetail() {
                       />
                     )}
                     {/* Thumbnail ảnh của product */}
-                    
                   </div>
 
                   {/* Phần hiển thị cho các ảnh của productDetail */}
@@ -761,7 +776,6 @@ function ShopDetail() {
                   </div>
                 </div>
 
-
                 {/* Đường phân cách */}
                 <div
                   style={{
@@ -791,7 +805,7 @@ function ShopDetail() {
                 className="mb-3"
                 style={{
                   fontFamily: "Arial, sans-serif",
-                  color: "red",  // Màu đỏ cho giá đã giảm
+                  color: "red", // Màu đỏ cho giá đã giảm
                   fontSize: "30px",
                   fontWeight: "bold",
                   position: "relative",
@@ -799,10 +813,10 @@ function ShopDetail() {
                   marginLeft: "15px",
                 }}
               >
-                {formattedPrice}đ  {/* Giá đã giảm */}
+                {formattedPrice}đ {/* Giá đã giảm */}
               </h6>
 
-              {(sale > 0) && (
+              {sale > 0 && (
                 <>
                   <h6
                     className="mb-3"
@@ -840,9 +854,8 @@ function ShopDetail() {
                 </>
               )}
 
-
               <div className="mb-4 mt-2" id="color-input-list">
-              <div className="row">
+                <div className="row">
                   <div className="col-2">
                     {product?.colors?.length > 0 && (
                       <span className="text-dark mr-3" style={{ fontSize: "17px" }}>
@@ -894,16 +907,15 @@ function ShopDetail() {
                               onMouseLeave={() => setTooltip(null)}
                             >
                               <button
-                                className={`variant-button ${
-                                  selectedColor === color.id ? "selected" : ""
-                                } ${!color.check ? "disabled" : ""}`}
+                                className={`variant-button ${selectedColor === color.id ? "selected" : ""
+                                  } ${!color.check ? "disabled" : ""}`}
                                 onClick={() => {
                                   setSelectedColor((prevSelected) => {
                                     const newSelectedColor =
                                       prevSelected === color.id ? null : color.id;
                                     prevSelected === color.id
                                       ? setColorName("")
-: setColorName(color.name);
+                                      : setColorName(color.name);
                                     setQuantity(1);
                                     if (matchingImage) {
                                       setCurrentImage(matchingImage?.imageDTOResponse[0]?.url);
@@ -953,7 +965,7 @@ function ShopDetail() {
                 </div>
               </div>
               <div className="mb-4" id="size-input-list">
-              <div className="row">
+                <div className="row">
                   <div className="col-3">
                     {product?.sizes?.length > 0 && (
                       <span className="text-dark mr-3" style={{ fontSize: "17px" }}>
@@ -1001,9 +1013,8 @@ function ShopDetail() {
                             onMouseLeave={() => setTooltip(null)}
                           >
                             <button
-                              className={`variant-button ${
-                                selectedSize === size.id ? "selected" : ""
-                              } ${!size.check ? "disabled" : ""}`}
+                              className={`variant-button ${selectedSize === size.id ? "selected" : ""
+                                } ${!size.check ? "disabled" : ""}`}
                               onClick={() => {
                                 if (size.check) {
                                   setSelectedSize((prevSelected) => {
@@ -1014,14 +1025,14 @@ function ShopDetail() {
                                       : setSizeName(size.name);
                                     setQuantity(1);
                                     return newSelectedSize;
-});
+                                  });
                                 }
                               }}
                               style={{
                                 cursor: !size.check ? "not-allowed" : "pointer",
                                 opacity: !size.check ? 0.5 : 1,
                               }}
-                              disabled={!size.check}
+
                             >
                               {size.name}
                             </button>
@@ -1070,7 +1081,10 @@ function ShopDetail() {
                             marginRight: "1px",
                             boxShadow: "none",
                           }}
-                          disabled={!selectedColor || !selectedSize}
+                          disabled={
+                            (product.sizes.length > 0 && (!selectedColor || !selectedSize)) ||
+                            (product.sizes.length === 0 && !selectedColor)
+                          }
                         >
                           <i className="fa fa-minus"></i>
                         </button>
@@ -1081,13 +1095,26 @@ function ShopDetail() {
                         className="form-control bg-white text-center"
                         value={quantity}
                         onBlur={(e) => {
-                          if (e.target.value === "" || !selectedColor || !selectedSize) {
+                          const inputValue = e.target.value.trim();
+                          if (
+                            inputValue === "" ||
+                            quantity === 0 ||
+                            !selectedColor ||
+                            !selectedSize
+                          ) {
                             setQuantity(1);
                           }
                         }}
-                        onInput={(e) => {
-                          e.target.value = e.target.value.replace(/[^0-9]/g, "");
-                          setQuantity(Math.min(Math.max(e.target.value, 1), quantityPDT));
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === "") {
+                            setQuantity("");
+                            return;
+                          }
+                          if (/^\d*$/.test(value)) {
+                            const numericValue = Math.min(Math.max(Number(value), 1), quantityPDT);
+                            setQuantity(numericValue);
+                          }
                         }}
                         style={{
                           boxShadow: "none",
@@ -1099,7 +1126,10 @@ function ShopDetail() {
                           maxWidth: "100px",
                           top: "0.699px",
                         }}
-                        disabled={!selectedColor || !selectedSize}
+                        disabled={
+                          (product.sizes.length > 0 && (!selectedColor || !selectedSize)) ||
+                          (product.sizes.length === 0 && !selectedColor)
+                        }
                       />
                       <div className="input-group-btn">
                         <button
@@ -1111,7 +1141,10 @@ function ShopDetail() {
                             marginLeft: "1px",
                             boxShadow: "none",
                           }}
-                          disabled={!selectedColor || !selectedSize}
+                          disabled={
+                            (product.sizes.length > 0 && (!selectedColor || !selectedSize)) ||
+                            (product.sizes.length === 0 && !selectedColor)
+                          }
                         >
                           <i className="fa fa-plus"></i>
                         </button>
@@ -1144,7 +1177,6 @@ function ShopDetail() {
                   Mua ngay
                 </button>
               </div>
-
             </div>
           </div>
         </div>

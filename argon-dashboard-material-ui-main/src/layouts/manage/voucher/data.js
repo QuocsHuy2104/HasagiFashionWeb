@@ -47,7 +47,7 @@ VoucherQuantity.propTypes = {
 function VoucherMaxDiscount({ maxDiscount }) {
     return (
         <ArgonTypography variant="caption" color="secondary" fontWeight="bold">
-            {`${maxDiscount}`}
+            {`${maxDiscount.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}đ`}
         </ArgonTypography>
     );
 }
@@ -119,17 +119,6 @@ const VoucherTable = ({ onEditClick, searchKeyword }) => {
         }
     };
 
-    const deleteItem = async (id) => {
-        try {
-            await VouchersService.deleteVoucher(id);
-            setVouchers(vouchers.filter(voucher => voucher.id !== id));
-            toast.success("Xóa voucher thành công");
-        } catch (error) {
-            console.error("There was an error deleting the item!", error);
-            toast.error("Xóa voucher thất bại!!!");
-        }
-    };
-
     const filteredVouchers = vouchers
         .filter((voucher) =>
             voucher.code.toLowerCase().includes(searchKeyword.toLowerCase())
@@ -175,23 +164,7 @@ const VoucherTable = ({ onEditClick, searchKeyword }) => {
                         },
                     }}
                 >
-                    Edit
-                </ArgonTypography>
-                <ArgonTypography
-                    px={1}
-                    component="span"
-                    variant="caption"
-                    color="error"
-                    fontWeight="medium"
-                    onClick={() => deleteItem(voucher.id)}
-                    sx={{
-                        cursor: "pointer",
-                        "&:hover": {
-                            textDecoration: "underline",
-                        },
-                    }}
-                >
-                    <i className="bi bi-trash3"></i> Remove
+                    Chỉnh sửa
                 </ArgonTypography>
             </ArgonBox>
         ),

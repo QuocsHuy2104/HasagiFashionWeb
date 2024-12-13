@@ -15,6 +15,16 @@ const CartService = {
         }
     },
 
+    getCartUpdatePK: async (cartDetailId, selectedColor, productId) => {
+        try {
+            const response = await apiClient.put(`/cart/updateOfOption/${cartDetailId}?colorId=${selectedColor}&productId=${productId}`);
+            return response.data;
+        } catch (error) {
+            console.error("Error during cart update:", error);
+            throw error;
+        }
+    },
+
     getRemove: async (cartDetailId) => {
         try {
             const response = await apiClient.delete(`/cart/remove/${cartDetailId}`);

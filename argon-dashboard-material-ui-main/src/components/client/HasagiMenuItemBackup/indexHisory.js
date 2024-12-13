@@ -35,6 +35,7 @@ import ReviewFilesService from '../../../services/ReviewFileServices';
 import { storage } from "../../../config/firebase-config";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+
 const indexHistory = () => {
   const [imageFiles, setImageFiles] = useState([]);
   const [videoFile, setVideoFile] = useState(null);
@@ -195,9 +196,9 @@ const indexHistory = () => {
       );
       setOpenReturnModal(false);
       const response = await HistoryOrderService.getHistory();
-  
+
       setOrders(response.data);
-  
+
     } catch (error) {
       console.error("There was an error processing the return request!", error);
       alert("Không thể xử lý yêu cầu trả hàng. Vui lòng thử lại.");
@@ -343,6 +344,14 @@ const indexHistory = () => {
           color: "black",
           showConfirmButton: true,
           background: "#fff",
+          didOpen: () => {
+            document.body.style.overflowY = "auto";
+            document.body.style.padding = "0";
+          },
+          willClose: () => {
+            document.body.style.overflowY = "auto";
+            document.body.style.padding = "0";
+          },
         });
       }, 0);
       setStar(5);
@@ -357,6 +366,7 @@ const indexHistory = () => {
         icon: "error",
         title: "Lỗi",
         text: errorMessage,
+        scrollbarPadding: false,
       });
     }
   };
@@ -393,10 +403,6 @@ const indexHistory = () => {
     setVideoFile(null);
     const inputFile = document.getElementById('video-upload');
     inputFile.value = '';
-  };
-
-  const resetImageInput = () => {
-    setImageFiles([]);
   };
 
   useEffect(() => {
@@ -452,37 +458,6 @@ const indexHistory = () => {
   const handleTabChangeWithScroll = (event, newTab) => {
     setActiveTab(newTab);
     setCurrentPage(1);
-  };
-
-
-  const getMarginTop = (tabValue) => {
-    switch (tabValue) {
-      case "all":
-        return "60px";
-      case "dang-xu-ly":
-      case "dang-giao":
-      case "da-giao":
-      case "hoan-thanh":
-      case "da-huy":
-        return "120px";
-      default:
-        return "60px";
-    }
-  };
-
-  const getMarginTop1 = (tabValue) => {
-    switch (tabValue) {
-      case "all":
-        return "30px";
-      case "dang-xu-ly":
-      case "dang-giao":
-      case "da-giao":
-      case "hoan-thanh":
-      case "da-huy":
-        return "75px";
-      default:
-        return "30px";
-    }
   };
 
   const handleCloseSnackbar = () => {
@@ -652,7 +627,7 @@ const indexHistory = () => {
                                 display="flex"
                                 alignItems="center"
                                 key={index}
-                                style={{ marginBottom: "25px", marginTop: "-15px" }}
+                                style={{ marginBottom: "25px", marginTop: "-20px" }}
                               >
                                 {matchingImage && (
                                   <img
@@ -671,7 +646,15 @@ const indexHistory = () => {
                                         variant="body2"
                                         color="textSecondary"
                                         onClick={() => handleReviewClick(product)}
-                                        style={{ marginLeft: "600px", color: "black" }}
+                                        style={{ marginLeft: "400px" }}
+                                        onMouseEnter={(e) => {
+                                          e.target.style.textDecoration = 'underline';
+                                          e.target.style.color = 'blue';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                          e.target.style.textDecoration = 'none';
+                                          e.target.style.color = 'black';
+                                        }}
                                       >
                                         Đánh giá
                                       </Typography>
@@ -682,7 +665,7 @@ const indexHistory = () => {
                                     color="textSecondary"
                                     style={{ color: "black" }}
                                   >
-                                    Phân loại hàng: {product.color}, {product.size}
+                                    Phân loại hàng: {product.color}    {product.size !== "Không có" && (<>, {product.size} </>)}
                                   </Typography>
                                   <Box display="flex" justifyContent="space-between">
                                     <Typography variant="body2" style={{ color: "black", fontSize: "14px" }}>
@@ -695,12 +678,10 @@ const indexHistory = () => {
                                         fontSize: "16px",
                                         position: "relative",
                                         display: "inline-block",
-                                        marginLeft: "680px",
+                                        marginLeft: "690px",
                                       }}
                                     >
-
                                       {new Intl.NumberFormat("vi-VN").format(product.productPrice)}đ
-
                                     </Typography>
                                   </Box>
                                 </Box>
@@ -732,7 +713,7 @@ const indexHistory = () => {
                         <Typography
                           variant="body2"
                           style={{
-                            marginRight: "15px", // Space between "Tổng tiền:" and the price
+                            marginRight: "15px",
                           }}
                         >
                           Tổng tiền:
@@ -747,9 +728,7 @@ const indexHistory = () => {
                             alignItems: "center",
                           }}
                         >
-
                           {new Intl.NumberFormat("vi-VN").format(order.amount)}đ
-
                         </Typography>
                       </div>
                       <Box display="flex" justifyContent="flex-end" mt={2}>
@@ -923,9 +902,10 @@ const indexHistory = () => {
             p={3}
             style={{
               backgroundColor: "white",
-              width: "300px",
+              width: "500px",
               margin: "50px auto",
               borderRadius: "8px",
+              marginTop: "90px",
             }}
           >
             <ArgonTypography variant="h6">Chọn lý do trả hàng</ArgonTypography>
@@ -970,18 +950,31 @@ const indexHistory = () => {
               {selectedProduct && (
                 <>
                   <div style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
-                    <img
-                      src={selectedProduct.productImage}
-                      alt={selectedProduct.productName}
-                      style={{
-                        width: "100px",
-                        height: "100px",
-                        borderRadius: "5px",
-                        objectFit: "cover",
-                        marginRight: "10px",
-                        border: "1px solid #ddd",
-                      }}
-                    />
+                    {(() => {
+                      // Tìm hình ảnh khớp với productId và colorId
+                      const matchingImage = images[selectedProduct.productId]?.find(
+                        (image) => image.colorsDTO?.id === selectedProduct.colorId
+                      );
+                      return (
+                        <img
+                          src={matchingImage.imageDTOResponse[0]?.url}
+                          alt={selectedProduct.productName || "Product Image"}
+                          style={{
+                            width: "100px",
+                            height: "100px",
+                            borderRadius: "5px",
+                            objectFit: "cover",
+                            marginRight: "10px",
+                            border: "1px solid #ddd",
+                          }}
+                          onError={(e) => {
+                            // Hiển thị ảnh mặc định nếu có lỗi khi tải ảnh
+                            e.target.src =
+                              "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930";
+                          }}
+                        />
+                      );
+                    })()}
                     <div>
                       <p style={{ fontSize: "20px", fontWeight: "bold", margin: "0" }}>
                         {selectedProduct.productName}

@@ -48,7 +48,7 @@ function FeaturedProducts() {
                 <ArgonTypography variant="h3">Sản phẩm nổi bật</ArgonTypography>
                 <MuiLink href="/Shop">
                     <ArgonTypography variant="h4">
-                        Xem thêm <FontAwesomeIcon icon={faArrowAltCircleRight} />
+                        Xem Thêm <FontAwesomeIcon icon={faArrowAltCircleRight} />
                     </ArgonTypography>
                 </MuiLink>
             </ArgonBox>
@@ -65,7 +65,10 @@ function FeaturedProducts() {
                                 gap: 2, // Khoảng cách giữa các sản phẩm
                             }}
                         >
-                            {currentProducts.map((product, index) => (
+                            {currentProducts
+                            .filter((product) => product.isActive)
+                            .map(
+                                (product, index) => (
                                 <Box
                                     key={product.id || index}
                                     sx={{
@@ -90,7 +93,8 @@ function FeaturedProducts() {
                                 display: "flex",
                                 justifyContent: "center",
                                 alignItems: "center",
-                                marginTop: "20px",
+                                marginTop: "40px",
+                                marginBottom: "-70px"
                             }}
                         >
                             <button

@@ -46,7 +46,7 @@ function Order() {
       try {
         const response = await axios.get("http://localhost:3000/api/order");
         if (response.data && response.data.orders) {
-          console.log(response.data);
+
           const orders = response.data.orders.map(order => ({
             ...order,
             orderDate: order.orderDate
@@ -67,6 +67,12 @@ function Order() {
     };
 
     fetchData();
+    const intervalId = setInterval(() => {
+      fetchData();
+    }, 3000);
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
 
 
@@ -93,7 +99,7 @@ function Order() {
     });
 
     setFilteredOrders(filteredOrders);
-  }, [searchCriteria, orders]); // Re-run filter whenever criteria or orders change
+  }, [searchCriteria, orders]);
 
   const handleRowClick = async (params, event) => {
     // Kiểm tra nếu cột được bấm không phải là "status"
@@ -466,10 +472,10 @@ function Order() {
                         <td style={{ padding: "10px" }}>{detail.productName}</td>
                         <td style={{ padding: "10px", textAlign: "center" }}>{detail.quantity}</td>
                         <td style={{ padding: "10px", textAlign: "right" }}>
-                          {new Intl.NumberFormat("vi-VN").format(detail.price + detail.priceSize)}đ
+                          {new Intl.NumberFormat("vi-VN").format(detail.price)}đ
                         </td>
                         <td style={{ padding: "10px", textAlign: "right" }}>
-                          {new Intl.NumberFormat("vi-VN").format((detail.price + detail.priceSize) * detail.quantity)}đ
+                          {new Intl.NumberFormat("vi-VN").format(detail.price * detail.quantity)}đ
                         </td>
                       </tr>
                     ))}
@@ -481,7 +487,7 @@ function Order() {
                       </td>
                       <td style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>
                         {new Intl.NumberFormat("vi-VN").format(
-                          selectedOrder.reduce((sum, detail) => sum + (detail.price + detail.priceSize) * detail.quantity, 0)
+                          selectedOrder.reduce((sum, detail) => sum + (detail.price) * detail.quantity, 0)
                         )}đ
                       </td>
                     </tr>
@@ -492,7 +498,7 @@ function Order() {
                         </td>
                         <td style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>
                           -{new Intl.NumberFormat("vi-VN").format(
-                            selectedOrder.reduce((sum, detail) => sum + (detail.price + detail.priceSize) * detail.quantity, 0) * voucherPrice / 100
+                            selectedOrder.reduce((sum, detail) => sum + (detail.price) * detail.quantity, 0) * voucherPrice / 100
                           )}đ
                         </td>
                       </tr>
@@ -512,7 +518,7 @@ function Order() {
               <div style={{ textAlign: "right", marginTop: "10px" }}>
                 <strong>Thành tiền: </strong>
                 {new Intl.NumberFormat("vi-VN").format(
-                  selectedOrder.reduce((sum, detail) => sum + (detail.price + detail.priceSize) * detail.quantity, 0) + shippingFee
+                  selectedOrder.reduce((sum, detail) => sum + (detail.price) * detail.quantity, 0) + shippingFee
                 )}đ
               </div>
               <div style={{ textAlign: "center", marginBottom: "10px" }}>

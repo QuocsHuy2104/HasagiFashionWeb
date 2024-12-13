@@ -21,28 +21,15 @@ const Complete = () => {
         const selectedPayment = Cookies.get('selectedPayment');
 
         if (selectedPayment !== 'COD' && (responseCode !== '00' || transactionStatus !== '00')) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Lỗi thanh toán',
-                text: 'Đã xảy ra lỗi trong quá trình thanh toán. Vui lòng thử lại sau.',
-                confirmButtonText: 'Quay lại trang chủ',
-                confirmButtonColor: '#d33',
-                showConfirmButton: true, // Hiển thị nút xác nhận
-                timer: 0, // Đặt timer thành 0 để không tự động đóng thông báo
-            }).then(() => {
-                // Sau khi người dùng nhấn xác nhận, chuyển hướng đến trang checkout
-                navigate(`/Checkout?id=${addressId}`);
-            });
-
             axios
-                .delete('http://localhost:3000/api/order/deleteMostRecentOrder')
-                .then((response) => {
-                    console.log(response.data);
-                    navigate(`/Checkout?id=${addressId}`);
-                })
-                .catch((error) => {
-                    console.error('Error deleting the most recent order:', error);
-                });
+            .delete('http://localhost:3000/api/order/deleteMostRecentOrder')
+            .then((response) => {
+              console.log(response.data); 
+              navigate(`/Checkout?id=${addressId}`);
+            })
+            .catch((error) => {
+              console.error('Error deleting the most recent order:', error);
+            });
         } else {
             const handleRemoveItems = async () => {
                 const cartItemsBackup = JSON.parse(localStorage.getItem('cartItemsBackup')) || [];

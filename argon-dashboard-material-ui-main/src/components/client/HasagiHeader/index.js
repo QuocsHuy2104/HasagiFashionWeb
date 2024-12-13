@@ -29,7 +29,7 @@ const Header = ({ onSearch }) => {
   const navigate = useNavigate();
   const [hovered, setHovered] = useState(null);
   const [images, setImages] = useState([]);
-
+  const [profileImage, setProfileImage] = useState(null);
   const handleMouseDropdownMenuEnter = (index) => setHovered(index);
   const handleMouseDropdownMenuLeave = () => setHovered(null);
 
@@ -100,30 +100,28 @@ const Header = ({ onSearch }) => {
         ]);
         const reversedCartData = cartResponse.data.reverse();
         setCartProducts(reversedCartData);
-        // Gọi API hình ảnh dựa trên dữ liệu từ cartResponse
         const imageRequests = reversedCartData.map((item) =>
           axios
             .get(`http://localhost:3000/api/public/webShopDetail/product-detail/${item.productId}`)
             .then((res) => ({ productId: item.productId, data: res.data }))
         );
-
-        // Chờ tất cả API hoàn thành
         const imagesData = await Promise.all(imageRequests);
-
-        // Chuyển đổi thành object để dễ truy cập
         const imagesMap = imagesData.reduce((acc, { productId, data }) => {
           acc[productId] = data;
           return acc;
         }, {});
-
-        // Cập nhật state với hình ảnh
         setImages(imagesMap);
       } catch (error) {
-        console.error("Error fetching data:", error);
       }
     };
 
     fetchCartItems();
+    const intervalId = setInterval(() => {
+      fetchCartItems();
+    }, 2000);
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
 
   const handleCartMouseEnter = () => {
@@ -219,7 +217,7 @@ const Header = ({ onSearch }) => {
   const fetchUserData = async () => {
     try {
       const profileData = await ProfileServices.getProfile();
-
+     setProfileImage(profileData.avatar);
       setUsername(profileData.username || "");
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -343,7 +341,7 @@ const Header = ({ onSearch }) => {
                   ) : (
                     <>
                       <img
-                        src={user.profileImageUrl || aboutImage5} // URL ảnh người dùng
+                        src={profileImage || aboutImage5} // URL ảnh người dùng
                         alt="User Avatar"
                         style={{
                           width: "24px", // Kích thước nhỏ gọn của ảnh

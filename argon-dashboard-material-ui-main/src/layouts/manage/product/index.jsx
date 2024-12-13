@@ -99,7 +99,7 @@ function Product() {
 
     const handleVideoChange = (event) => {
         const file = event.target.files[0];
-        const maxVideoSize = 100 * 1024 * 1024; 
+        const maxVideoSize = 40 * 1024 * 1024; 
 
         if (file) {
             if (file.size > maxVideoSize) {
@@ -118,6 +118,8 @@ function Product() {
             }
         }
     };
+
+
 
 
     const handleRemoveImage = () => {
@@ -364,7 +366,7 @@ function Product() {
                                                             }}
                                                             onClick={() => document.getElementById('image-upload').click()}
                                                         >
-                                                            <PhotoCamera style={{ color: 'black', width: '50px' }} />  {/* Tăng kích thước icon lên */}
+                                                            <PhotoCamera style={{ color: 'black', width: '50px' }} />
                                                         </ArgonButton>
 
                                                     </>
@@ -372,7 +374,7 @@ function Product() {
                                                     <div style={{ position: 'relative' }}>
                                                         {formData.image && (
                                                             <img
-                                                                src={formData.image instanceof File ? URL.createObjectURL(formData.image) : formData.image} // Check if it's a file or URL
+                                                                src={formData.image instanceof File ? URL.createObjectURL(formData.image) : formData.image}
                                                                 alt="Selected Image"
                                                                 style={{
                                                                     width: '200px',
