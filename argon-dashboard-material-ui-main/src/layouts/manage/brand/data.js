@@ -6,7 +6,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
 import Box from '@mui/material/Box';
-import Swal from 'sweetalert2'; 
+import Swal from 'sweetalert2';
 
 const columns = [
     { field: 'name', headerName: 'Thương hiệu', width: 130 },
@@ -93,7 +93,6 @@ export default function DataTable({ brands, onEditClick, onDeleteClick }) {
                 columns={columns}
                 paginationModel={paginationModel}
                 onPaginationModelChange={setPaginationModel}
-                pageSizeOptions={[5, 10]}
                 checkboxSelection
                 onRowSelectionModelChange={handleSelectionModelChange}
                 sx={{

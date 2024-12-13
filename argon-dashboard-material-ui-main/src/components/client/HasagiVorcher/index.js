@@ -13,7 +13,7 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import "react-toastify/dist/ReactToastify.css";
 import { Snackbar, SnackbarContent } from "@mui/material";
-
+import Swal from "sweetalert2";
 
 const Voucher = ({ voucher, onCopy }) => {
 
@@ -131,10 +131,30 @@ const Voucher = ({ voucher, onCopy }) => {
                             background: "linear-gradient(to right, #FF4500, #FF6347)",
                         },
                     }}
-                    onClick={() => onCopy(voucher.code)}
+                    onClick={() => {
+                        onCopy(voucher.code);
+                        Swal.fire({
+                            position: "top-center",
+                            icon: "success",
+                            title: "Đã sao chép mã!",
+                            showConfirmButton: false,
+                            timer: 1500,
+                            reverseButtons: true,
+                            scrollbarPadding: false,
+                            didOpen: () => {
+                                document.body.style.overflowY = "auto";
+                                document.body.style.padding = "0";
+                            },
+                            willClose: () => {
+                                document.body.style.overflowY = "auto";
+                                document.body.style.padding = "0";
+                            },
+                        });
+                    }}
                 >
                     Sao chép mã
                 </ArgonButton>
+
             </ArgonBox>
         </ArgonBox>
     );
@@ -240,19 +260,6 @@ const VoucherList = () => {
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     };
 
-    const formatImportPrice = (importPrice) => {
-        if (!importPrice) return "0đ";
-
-        const prices = importPrice.split('-').map(price => {
-            const trimmedPrice = price.trim();
-            const numericPrice = parseFloat(trimmedPrice);
-            const integerPrice = Math.floor(numericPrice);
-            return `${formatNumber(integerPrice)}đ`;
-        });
-
-        return prices.join(' - ');
-    };
-
     const sliderSettings = {
         infinite: false,
         speed: 500,
@@ -285,10 +292,6 @@ const VoucherList = () => {
     const copyToClipboard = (code) => {
         navigator.clipboard
             .writeText(code)
-            .then(() => {
-                setCopyMessage(`Đã sao chép mã: ${code}`);
-                setOpenSnackbar(true);
-            })
             .catch((err) => {
                 console.error("Lỗi sao chép:", err);
                 setCopyMessage("Không thể sao chép mã.");
@@ -299,10 +302,9 @@ const VoucherList = () => {
     if (loading) {
         return <CircularProgress />;
     }
-
     return (
         <>
-            
+
             <div style={{ position: "relative" }}>
                 <Slider {...sliderSettings} className="pb-3 pt-4">
                     {availableVouchers.length === 0 ? (

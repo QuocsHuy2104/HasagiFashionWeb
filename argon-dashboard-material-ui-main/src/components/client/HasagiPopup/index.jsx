@@ -38,6 +38,7 @@ export default function ProductPopup({ open, handleClose, id }) {
                     console.error('Error fetching product details:', error);
                 }
             } else {
+                console.warn(`Product ID is invalid: ${id}. Popup is closed: ${!open}`);
             }
         };
 
@@ -193,7 +194,7 @@ export default function ProductPopup({ open, handleClose, id }) {
                                     component="span"
                                     sx={{ whiteSpace: "nowrap" }}
                                 >
-                                    {pd.trademarkDTOResp.name}
+                                    {pd.brandDTOResponse.name}
                                 </ArgonTypography>
                             </ArgonTypography>
 
@@ -208,7 +209,7 @@ export default function ProductPopup({ open, handleClose, id }) {
                                     component="span"
                                     sx={{ whiteSpace: "nowrap" }}
                                 >
-                                    {pd.categoryDTOResp.name}
+                                    {pd.categoryDTOResponse.name}
                                 </ArgonTypography>
                             </ArgonTypography>
                         </ArgonBox>
@@ -345,7 +346,7 @@ export default function ProductPopup({ open, handleClose, id }) {
                             </Button>
 
                             {/* Nút Xem chi tiết */}
-                            <MuiLink href={`ShopDetails/${id}`} target="_blank" rel="noreferrer">
+                            <MuiLink href={`/ShopDetail?id=${id}`} rel="noreferrer">
                                 <Button
                                     variant="contained"
 

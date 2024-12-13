@@ -178,7 +178,7 @@ function ForgotPassword() {
                     value={email}
                     onChange={handleInputChange}
                     error={capValue ? !!errorEmail : ""}
-                    disabled={isLoading} // Disable input khi loading
+                    disabled={isLoading}
                     style={{ fontSize: "1.25rem", padding: "0.75rem", width: "100%" }}
                   />
                 )}
@@ -229,7 +229,7 @@ function ForgotPassword() {
                       fontSize: "1.05rem",
                       padding: "0.75rem",
                     }}
-                    disabled={isLoading} // Disable button khi loading
+                    disabled={isLoading}
                   >
                     {isLoading ? (
                       <>
@@ -237,7 +237,7 @@ function ForgotPassword() {
                         <span style={{ marginLeft: "0.5rem" }}>Loading...</span>
                       </>
                     ) : (
-                      "Reset Password"
+                      "Đặt lại mật khẩu"
                     )}
                   </ArgonButton>
                 )}

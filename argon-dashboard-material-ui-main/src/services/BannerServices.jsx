@@ -34,6 +34,5 @@ class BannerDataService {
 
 }
 
-// Gán thể hiện của BannerDataService vào biến trước khi export
 const bannerDataServiceInstance = new BannerDataService();
 export default bannerDataServiceInstance;

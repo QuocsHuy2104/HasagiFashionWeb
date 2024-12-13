@@ -130,6 +130,15 @@ const Cart = () => {
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
             confirmButtonText: "Vâng, xóa nó!",
+            scrollbarPadding: false,
+            didOpen: () => {
+              document.body.style.overflowY = "auto";
+              document.body.style.padding = "0";
+            },
+            willClose: () => {
+              document.body.style.overflowY = "auto";
+              document.body.style.padding = "0";
+            },
           }).then(async (result) => {
             if (result.isConfirmed) {
               // Xóa sản phẩm khỏi giỏ hàng
@@ -141,6 +150,15 @@ const Cart = () => {
                   title: "Xóa thành công!",
                   text: "Sản phẩm đã được xóa.",
                   icon: "success",
+                  scrollbarPadding: false,
+                  didOpen: () => {
+                    document.body.style.overflowY = "auto";
+                    document.body.style.padding = "0";
+                  },
+                  willClose: () => {
+                    document.body.style.overflowY = "auto";
+                    document.body.style.padding = "0";
+                  },
                 });
               } catch (error) {
                 console.error("Error deleting item:", error);
@@ -750,7 +768,7 @@ const Cart = () => {
                     type="checkbox"
                     checked={selectAll}
                     onChange={handleSelectAllChange}
-                    style={{ transform: "scale(1.5)", marginBottom: "0", marginLeft: "-4px" }}
+                    style={{ transform: "scale(1.5)", marginBottom: "0" }}
                   />
                   <label style={{ marginLeft: "12px", marginTop: "2px" }}>
                     Chọn Tất Cả ({countSelectedItems()})

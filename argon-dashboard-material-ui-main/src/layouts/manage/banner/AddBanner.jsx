@@ -99,19 +99,16 @@ const AddBanner = ({ id, setBannerId }) => {
 
     const handleRemoveImage = async (index) => {
         try {
-            // Nếu index nằm trong `previewUrls`, nghĩa là ảnh cũ
             if (index < previewUrls.length) {
                 const newPreviewUrls = previewUrls.filter((_, i) => i !== index);
                 setPreviewUrls(newPreviewUrls);
 
-                // Cập nhật lại cơ sở dữ liệu nếu đang trong chế độ chỉnh sửa
                 if (id) {
                     const currentBanner = await BannerDataService.getBanner(id);
                     if (currentBanner.exists()) {
                         const existingImageUrls = currentBanner.data().imageUrls || [];
                         const updatedImageUrls = existingImageUrls.filter((_, i) => i !== index);
 
-                        // Cập nhật banner với danh sách URL ảnh mới
                         await BannerDataService.updateBanner(id, {
                             ...currentBanner.data(),
                             imageUrls: updatedImageUrls,
@@ -119,7 +116,6 @@ const AddBanner = ({ id, setBannerId }) => {
                     }
                 }
             } else {
-                // Nếu index thuộc về ảnh mới trong `images`
                 const newImages = images.filter((_, i) => i !== (index - previewUrls.length));
                 setImages(newImages);
             }
@@ -146,9 +142,17 @@ const AddBanner = ({ id, setBannerId }) => {
                 </Alert>
             )}
 
-            <Form onSubmit={handleSubmit}>
-                <ArgonBox className="mb-3">
-                    <Form.Label style={{ fontWeight: "bold", color: "#495057" }}>
+            <Form
+                onSubmit={handleSubmit}
+                style={{
+                    backgroundColor: "#f8f9fa",
+                    borderRadius: "10px",
+                    padding: "20px",
+                    boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
+                }}
+            >
+                <ArgonBox className="mb-4">
+                    <Form.Label style={{ fontWeight: "bold", color: "#495057", fontSize: "1.2rem", width: "70px" }}>
                         Tiêu đề
                     </Form.Label>
                     <ArgonInput
@@ -159,32 +163,38 @@ const AddBanner = ({ id, setBannerId }) => {
                         style={{
                             borderRadius: "8px",
                             border: "1px solid #ced4da",
-                            padding: "0.8rem",
+                            padding: "1rem",
                             fontSize: "1rem",
+                            backgroundColor: "#fff",
+                            boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
                         }}
                     />
                 </ArgonBox>
 
-                <Form.Group className="mb-3">
-                    <Form.Label style={{ fontWeight: "bold", color: "#495057" }}>
+                <Form.Group className="mb-4">
+                    <Form.Label style={{ fontWeight: "bold", color: "#495057", fontSize: "1.2rem", width: "100px" }}>
                         Thêm ảnh
                     </Form.Label>
-
                     <div style={{ display: "flex", alignItems: "center" }}>
                         <Button
                             variant="outline-dark"
                             style={{
-                                width: "100px",
-                                height: "100px",
+                                width: "120px",
+                                height: "120px",
                                 borderRadius: "8px",
                                 display: "flex",
                                 justifyContent: "center",
                                 alignItems: "center",
                                 fontSize: "24px",
                                 padding: "0",
-                                marginRight: "0.5rem", // khoảng cách giữa nút và ảnh
+                                marginRight: "1rem",
+                                backgroundColor: "#fff",
+                                border: "2px dashed #6c757d",
+                                transition: "transform 0.2s",
                             }}
                             onClick={() => document.getElementById("fileInput").click()}
+                            onMouseEnter={(e) => (e.target.style.transform = "scale(1.1)")}
+                            onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
                         >
                             <FaCamera />
                             <input
@@ -201,9 +211,8 @@ const AddBanner = ({ id, setBannerId }) => {
                             style={{
                                 display: "flex",
                                 flexWrap: "wrap",
-                                gap: "0.5rem",
+                                gap: "1rem",
                                 marginTop: "1rem",
-                                marginBottom: "1rem",
                             }}
                         >
                             {previewUrls.length > 0 &&
@@ -228,27 +237,32 @@ const AddBanner = ({ id, setBannerId }) => {
                                                 height: "100%",
                                                 objectFit: "cover",
                                                 cursor: "pointer",
+                                                border: "2px solid #6c757d",
+                                                borderRadius: "10px",
                                             }}
                                         />
                                         <button
                                             type="button"
                                             style={{
-                                                background: "rgba(0, 0, 0, 0.5)",
+                                                background: "rgba(255, 255, 255, 0.7)",
                                                 border: "none",
-                                                color: "white",
-                                                fontSize: "1.5rem",
+                                                color: "#dc3545",
+                                                fontSize: "1.2rem",
                                                 position: "absolute",
                                                 top: "5px",
                                                 right: "5px",
                                                 cursor: "pointer",
                                                 borderRadius: "50%",
-                                                width: "20px",
-                                                height: "20px",
+                                                width: "24px",
+                                                height: "24px",
                                                 display: "flex",
                                                 justifyContent: "center",
                                                 alignItems: "center",
                                                 boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.3)",
+                                                transition: "transform 0.2s",
                                             }}
+                                            onMouseEnter={(e) => (e.target.style.transform = "scale(1.2)")}
+                                            onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
                                             onClick={() => handleRemoveImage(index)}
                                         >
                                             &times;
@@ -259,14 +273,25 @@ const AddBanner = ({ id, setBannerId }) => {
                     </div>
                 </Form.Group>
 
-
-
-                <ArgonBox mb={3} sx={{ width: { xs: '100%', sm: '50%', md: '20%' } }}>
-                    <ArgonButton type="submit" size="large" color="info" fullWidth>
+                <ArgonBox mb={3} sx={{ width: { xs: "100%", sm: "50%", md: "20%" } }}>
+                    <ArgonButton
+                        type="submit"
+                        size="large"
+                        color="info"
+                        fullWidth
+                        style={{
+                            padding: "10px 20px",
+                            fontSize: "1rem",
+                            borderRadius: "8px",
+                            fontWeight: "bold",
+                            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                        }}
+                    >
                         {id ? "Cập nhật" : "Thêm"}
                     </ArgonButton>
                 </ArgonBox>
             </Form>
+
         </div>
     );
 };

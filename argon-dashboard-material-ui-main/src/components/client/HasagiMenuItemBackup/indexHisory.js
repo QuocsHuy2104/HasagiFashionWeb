@@ -196,9 +196,9 @@ const indexHistory = () => {
       );
       setOpenReturnModal(false);
       const response = await HistoryOrderService.getHistory();
-  
+
       setOrders(response.data);
-  
+
     } catch (error) {
       console.error("There was an error processing the return request!", error);
       alert("Không thể xử lý yêu cầu trả hàng. Vui lòng thử lại.");
@@ -344,6 +344,14 @@ const indexHistory = () => {
           color: "black",
           showConfirmButton: true,
           background: "#fff",
+          didOpen: () => {
+            document.body.style.overflowY = "auto";
+            document.body.style.padding = "0";
+          },
+          willClose: () => {
+            document.body.style.overflowY = "auto";
+            document.body.style.padding = "0";
+          },
         });
       }, 0);
       setStar(5);
@@ -358,6 +366,7 @@ const indexHistory = () => {
         icon: "error",
         title: "Lỗi",
         text: errorMessage,
+        scrollbarPadding: false,
       });
     }
   };
@@ -492,26 +501,26 @@ const indexHistory = () => {
               className="d-flex justify-content-center"
               style={{ marginTop: searchStyle.position === "fixed" ? "80px" : "0px" }}
             >
-              <input
-                ref={searchInputRef}
-                type="search"
-                placeholder="Tìm kiếm"
-                className="form-control"
-                aria-label="Search"
-                style={{
-                  ...searchStyle,
-                  border: "none",
-                  fontSize: "14px",
-                  backgroundColor: "#f0f0f0",
-                  outline: "none",
-                  boxShadow: "none",
-                  height: "45px",
-                  marginBottom: "-1%",
-                  borderRadius: "0px",
-                }}
-                value={searchQuery}
-                onChange={handleSearchChange}
-              />
+              <div style={{ display: "flex", alignItems: "center", backgroundColor: "#f0f0f0", borderRadius: "4px", padding: "0 10px", height: "45px", width: "100%" }}>
+                <i className="fas fa-search" style={{ color: "#888", marginRight: "10px" }}></i> {/* Icon tìm kiếm */}
+                <input
+                  ref={searchInputRef}
+                  type="search"
+                  placeholder="Bạn có thể tìm kiếm theo ID đơn hàng"
+                  className="form-control"
+                  aria-label="Search"
+                  style={{
+                    flex: 1,
+                    border: "none",
+                    fontSize: "14px",
+                    backgroundColor: "transparent",
+                    outline: "none",
+                    boxShadow: "none",
+                  }}
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                />
+              </div>
             </div>
           )}
 
@@ -618,13 +627,13 @@ const indexHistory = () => {
                                 display="flex"
                                 alignItems="center"
                                 key={index}
-                                style={{ marginBottom: "25px" }}
+                                style={{ marginBottom: "25px", marginTop: "-20px" }}
                               >
                                 {matchingImage && (
                                   <img
                                     src={matchingImage.imageDTOResponse[0]?.url}
                                     alt={product.productName || "Product"}
-                                    style={{ width: "100px", marginRight: "16px", height: "100px" }}
+                                    style={{ width: "90px", marginRight: "16px", height: "100px" }}
                                   />
                                 )}
                                 <Box>
@@ -641,11 +650,11 @@ const indexHistory = () => {
                                         onMouseEnter={(e) => {
                                           e.target.style.textDecoration = 'underline';
                                           e.target.style.color = 'blue';
-                                      }}
-                                      onMouseLeave={(e) => {
+                                        }}
+                                        onMouseLeave={(e) => {
                                           e.target.style.textDecoration = 'none';
                                           e.target.style.color = 'black';
-                                      }}
+                                        }}
                                       >
                                         Đánh giá
                                       </Typography>
@@ -717,6 +726,7 @@ const indexHistory = () => {
                             position: "relative",
                             display: "inline-flex",
                             alignItems: "center",
+                            marginRight: "10px"
                           }}
                         >
                           {new Intl.NumberFormat("vi-VN").format(order.amount)}đ
@@ -941,18 +951,30 @@ const indexHistory = () => {
               {selectedProduct && (
                 <>
                   <div style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
-                    <img
-                      src={selectedProduct.productImage}
-                      alt={selectedProduct.productName}
-                      style={{
-                        width: "100px",
-                        height: "100px",
-                        borderRadius: "5px",
-                        objectFit: "cover",
-                        marginRight: "10px",
-                        border: "1px solid #ddd",
-                      }}
-                    />
+                  {(() => {
+                      // Tìm hình ảnh khớp với productId và colorId
+                      const matchingImage = images[selectedProduct.productId]?.find(
+                        (image) => image.colorsDTO?.id === selectedProduct.colorId
+                      ); 
+                      return (
+                        <img
+                        src={matchingImage.imageDTOResponse[0]?.url}
+                          alt={selectedProduct.productName || "Product Image"}
+                          style={{
+                            width: "80px",
+                            height: "100px",
+                            borderRadius: "5px",
+                            marginRight: "10px",
+                            border: "1px solid #ddd",
+                          }}
+                          onError={(e) => {
+                            // Hiển thị ảnh mặc định nếu có lỗi khi tải ảnh
+                            e.target.src =
+                              "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930";
+                          }}
+                        />
+                      );
+                    })()}
                     <div>
                       <p style={{ fontSize: "20px", fontWeight: "bold", margin: "0" }}>
                         {selectedProduct.productName}
