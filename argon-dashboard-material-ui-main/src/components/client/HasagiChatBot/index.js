@@ -71,7 +71,6 @@ function Gemini() {
         }
     };
 
-    const keywordCounts = {}; // Lưu số lần hỏi về từ khóa
 
     const generateAIResponse = async (question) => {
         setLoading(true);
