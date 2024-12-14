@@ -71,9 +71,9 @@ const Footer = () => {
                             <ArgonTypography variant='h4' mb='17px' display='flex' justifyContent='space-between' alignItems='center'>Về chúng tôi</ArgonTypography>
                             <ArgonTypography variant='button' color='secondary' sx={{ maxWidth: '85%', fontSize: '15px', lineHeight: '1.7rem', margin: '0' }}>
                                 <MuiLink href='/introduce'>Gioi Thieu</MuiLink><br />
-                                <MuiLink href='/policy'>Chinh sach doi tra</MuiLink><br />
-                                <MuiLink href='/security'>Chinh sach bao mat</MuiLink><br />
-                                <MuiLink href='/service'>Dieu khoan dich vu</MuiLink><br />
+                                <MuiLink href='/DoiTra'>Chinh sach doi tra</MuiLink><br />
+                                <MuiLink href='/BaoMat'>Chinh sach bao mat</MuiLink><br />
+                                <MuiLink href='/DieuKhoan'>Dieu khoan dich vu</MuiLink><br />
                             </ArgonTypography>
                         </ArgonBox>
 

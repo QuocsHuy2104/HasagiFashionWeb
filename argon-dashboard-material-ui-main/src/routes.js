@@ -63,6 +63,9 @@ import Contact from "components/client/HasagiContact";
 import About from "components/client/HasagiAbout";
 import Loi404 from "components/client/Hasagi404";
 import HoiDap from "components/client/HasagiQ&A";
+import BaoMat from "components/client/HasagiBaoMat";
+import DoiTra from "components/client/HasagiDoiTra";
+import DieuKhoan from "components/client/HasagiDieuKhoan";
 
 import Checkout from "components/client/HasagiCheckout";
 import Favorite from "components/client/HasagiFavorite";
@@ -288,6 +291,33 @@ const routes = [
     route: "/Loi404",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
     component: <Loi404 />,
+    showInSidenav: true,
+  },
+  {
+    // type: "route", 
+    name: "BaoMat",
+    key: "BaoMat",
+    route: "/BaoMat",
+    icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
+    component: <BaoMat />,
+    showInSidenav: true,
+  },
+  {
+    // type: "route", 
+    name: "DoiTra",
+    key: "DoiTra",
+    route: "/DoiTra",
+    icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
+    component: <DoiTra />,
+    showInSidenav: true,
+  },
+  {
+    // type: "route", 
+    name: "DieuKhoan",
+    key: "DieuKhoan",
+    route: "/DieuKhoan",
+    icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
+    component: <DieuKhoan />,
     showInSidenav: true,
   },
   {
