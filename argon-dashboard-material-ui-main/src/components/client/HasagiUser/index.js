@@ -176,8 +176,6 @@ function User() {
                 }}
               />
             </div>
-            <p className="hint-text">Tên Đăng nhập chỉ có thể thay đổi một lần.</p>
-
             <div className="form-row mt-3">
               <label className="form-label">Tên</label>
               <input

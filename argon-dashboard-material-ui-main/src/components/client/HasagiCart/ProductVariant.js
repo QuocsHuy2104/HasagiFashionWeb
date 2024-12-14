@@ -93,8 +93,7 @@ const ProductVariant = ({ onClose, cartDetailId, productId, colorId, sizeId }) =
         }
         onClose();
       } catch (error) {
-        setError(error.message || "Failed to update product option");
-        console.error("Error during cart update:", error);
+        setError(error.response.data);
       }
     } else {
       setError("Please select both color and size before submitting");
@@ -267,6 +266,7 @@ const ProductVariant = ({ onClose, cartDetailId, productId, colorId, sizeId }) =
         )}
       </div>
       )}
+      {Error && <p style={{ fontSize: "14px", color: "red" }}>{Error.message}</p>}
       <div className="variant-footer">
         <button className="back-button" onClick={onClose} style={{ marginRight: "10px" }}>
           Trở lại

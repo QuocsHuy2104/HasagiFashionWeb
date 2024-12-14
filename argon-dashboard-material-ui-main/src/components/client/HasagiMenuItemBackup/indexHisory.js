@@ -189,7 +189,7 @@ const indexHistory = () => {
     try {
       await axios.put(
         `http://localhost:3000/api/history-order/${selectedOrderId}/return`,
-        null,
+null,
         {
           params: { reason: returnReason },
         }
