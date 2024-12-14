@@ -41,7 +41,7 @@ export default function SaleProduct() {
 
     return (
         <ArgonBox>
-            <ArgonBox mb={3} display="flex" justifyContent="space-between" alignItems="center">
+            <ArgonBox my={3} display="flex" justifyContent="space-between" alignItems="center">
                 <ArgonBox>
                     <ArgonTypography variant="h3">Sản phẩm giảm giá</ArgonTypography>
                 </ArgonBox>
@@ -204,7 +204,6 @@ export default function SaleProduct() {
                                             />
                                         </>
                                     )}
-                                    <ProductPopup open={isPopupOpen} handleClose={handleClosePopup} id={selectedProductId} />
                                 </Card>
                             </Grid>
                         ))
@@ -215,6 +214,7 @@ export default function SaleProduct() {
                     )}
                 </Grid>
             </Box>
+            <ProductPopup open={isPopupOpen} handleClose={handleClosePopup} id={selectedProductId} />
         </ArgonBox>
     );
 }

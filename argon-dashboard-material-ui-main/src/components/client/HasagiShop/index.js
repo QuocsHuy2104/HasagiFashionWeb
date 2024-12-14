@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import 'layouts/assets/css/style.css';
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import aboutImage5 from "layouts/assets/img/product-1.jpg";
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
@@ -27,6 +27,11 @@ function Shop() {
     const [searchTerm, setSearchTerm] = useState("");
     const [reviews, setReviews] = useState([]);
     const [value, setValue] = useState([0, 1000000]);
+
+    const location = useLocation();
+    const message = location.state?.category;
+
+    alert(message)
 
     const handleSliderChange = (newValue) => {
         setValue(newValue);
@@ -137,7 +142,6 @@ const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLower
 
     const formatImportPrice = (importPrice) => {
         if (!importPrice) return "0đ";
-
         const prices = importPrice.split(' - ').map(price => {
             const trimmedPrice = price.trim();
             const numericPrice = parseFloat(trimmedPrice);
@@ -151,10 +155,8 @@ const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLower
     const fetchReviews = async (productId) => {
         try {
             const productReviews = await reviewsService.getReviewsByProduct(productId);
-            console.log('Fetched reviews for product:', productReviews);
             setReviews((prevReviews) => [...prevReviews, ...productReviews]);
         } catch (error) {
-            console.error('Error fetching reviews for product:', error);
             setReviews([]);
         }
     };
@@ -550,7 +552,6 @@ const matchesSearchTerm = product.name.toLowerCase().includes(searchTerm.toLower
                                 </nav>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>

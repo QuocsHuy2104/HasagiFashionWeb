@@ -49,7 +49,7 @@ Product.propTypes = {
     importprice: PropTypes.number,
 };
 
-const ProductTable = ({ onEditClick, setSelectedProduct }) => {
+const ProductTable = ({ onEditClick,    setSelectedProduct }) => {
     const [products, setProducts] = useState([]);
     const navigate = useNavigate();
 

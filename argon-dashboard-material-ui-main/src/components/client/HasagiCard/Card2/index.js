@@ -8,6 +8,7 @@ import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useState } from "react";
 import ProductPopup from "components/client/HasagiPopup";
+import HomeService from "services/HomeServices";
 function formatPrice(price) {
     if (!price || typeof price !== "string") {
         return "N/A"; // Handle missing or invalid price
@@ -39,6 +40,15 @@ function HasagiCard2({ image, name, id, price }) {
         setSelectedProductId(id);
         setIsPopupOpen(true);
     };
+
+    const handleAddCart = async () => {
+        try {
+           const resp = await HomeService.buyQuickly(id);
+            alert(resp.data)
+        } catch (err) {
+            console.error(err);
+        }
+    }
 
     const handleClosePopup = () => {
         setIsPopupOpen(false);
@@ -137,6 +147,7 @@ function HasagiCard2({ image, name, id, price }) {
                     />
 
                     <ShoppingCartIcon
+                        onClick={handleAddCart}
                         sx={{
                             width: '1.7em',
                             height: '1.7em',

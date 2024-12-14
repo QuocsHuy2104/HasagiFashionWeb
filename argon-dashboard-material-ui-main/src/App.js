@@ -114,29 +114,30 @@ export default function App() {
 
   const filteredRoutes = routes.filter(route => route.showInSidenav !== false);
 
-  const shouldShowSidenav = 
-    pathname !== "/feature-section" 
-    && pathname !== "/ShopDetail" 
-    && pathname !== "/Shop" 
-    && pathname !== "/Cart" 
-    && pathname !== "/Contact" 
-    && pathname !== "/Checkout" 
-    && pathname !== "/Backup" 
+  const shouldShowSidenav =
+    pathname !== "/feature-section"
+    && pathname !== "/ShopDetail"
+    && pathname !== "/Shop"
+    && pathname !== "/Cart"
+    && pathname !== "/Contact"
+    && pathname !== "/Checkout"
+    && pathname !== "/Backup"
     && pathname !== "/Favorite"
     && pathname !== "/Complete"
     && pathname !== "/History"
-    && pathname !== "/profile" 
-    && pathname !== "/chatBot" 
-    && pathname !== "/Q&A" 
-    && pathname !== "/About" 
-    // && pathname !== "/not-Found"
+    && pathname !== "/profile"
+    && pathname !== "/chatBot"
+    && pathname !== "/Q&A"
+    && pathname !== "/OrderSummary"
+    && pathname !== "/About"
+    && pathname !== "/not-Found"
     && !pathname.startsWith("/history-order/");
 
   return direction === "rtl" ? (
     <CacheProvider value={rtlCache}>
       <ThemeProvider theme={darkMode ? themeDarkRTL : themeRTL}>
         <CssBaseline />
-        {!loading && layout === "dashboard" && shouldShowSidenav && ( // Conditionally render Sidenav after loading
+        {!loading && layout === "dashboard" && shouldShowSidenav && (
           <>
             <Sidenav
               color={sidenavColor}

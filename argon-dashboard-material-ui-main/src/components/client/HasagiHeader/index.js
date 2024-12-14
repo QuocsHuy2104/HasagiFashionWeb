@@ -190,7 +190,7 @@ export default function Header(props) {
                       </MuiLink>
                     ) : (
                       <ArgonBox display='flex' justifyContent='space-evenly' alignItems='center'>
-                        <ArgonAvatar src={author.avatar !== '' ? author.avatar : "https://bit.ly/3I3pbe6"} alt="Avatar" size="md" sx={{ marginRight: 1 }} bgColor='light' />
+                        <ArgonAvatar src={author.avatar !== '' ? author.avatar : "	https://assets.minimals.cc/public/assets/images/mock/avatar/avatar-9.webp"} alt="Avatar" size="md" sx={{ marginRight: 1 }} bgColor='light' />
                         <ArgonTypography variant="inherit">xin chào {author.username}</ArgonTypography>
                       </ArgonBox>
                     )}

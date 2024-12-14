@@ -3,10 +3,11 @@ import ArgonBox from 'components/ArgonBox';
 import ArgonTypography from 'components/ArgonTypography';
 import { Grid, Avatar, Typography, Box } from "@mui/material";
 import HomeService from 'services/HomeServices';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function ListCategories() {
-
     const [categories, setCategories] = React.useState([])
+    const navigate = useNavigate();
 
     React.useEffect(() => {
         const fetchData = async () => {
@@ -15,7 +16,7 @@ export default function ListCategories() {
                 setCategories(res.data);
             } catch (e) {
                 console.log(e)
-            } 
+            }
         }
 
         fetchData();
@@ -40,6 +41,7 @@ export default function ListCategories() {
                                     justifyContent: "center",
                                 }}
                             >
+
                                 <Avatar
                                     alt={category.name}
                                     src={category.image}
@@ -52,7 +54,12 @@ export default function ListCategories() {
                                         bgcolor: "#f5e5c8",
                                         mb: 1,
                                     }}
+
+                                    onClick={(category) => {
+                                        navigate('/Shop', { state: { category } })
+                                    }}
                                 />
+
                                 <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
                                     {category.name}
                                 </Typography>

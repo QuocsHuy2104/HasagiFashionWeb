@@ -38,6 +38,8 @@ import NotFoundPage from "components/client/Hasagi404";
 import Voucher from "layouts/manage/voucher";
 import ChatBot from "components/client/HasagiChatBot";
 import QA from "components/client/HasagiQ&A";
+import UserInfo from "layouts/manage/user/index"
+import OrderSummary from "layouts/billed";
 const routes = [
   {
     type: "route",
@@ -82,7 +84,7 @@ const routes = [
     route: "/manage/account",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
     component: <Account />,
-    // protected: true,
+    protected: true,
   },
   {
     type: "route",
@@ -192,7 +194,7 @@ const routes = [
     component: <ResetPassword />,
     showInSidenav: true,
   },
-  
+
   {
     type: "route",
     name: "Manage Order",
@@ -251,7 +253,7 @@ const routes = [
     component: <ChatBot />,
     showInSidenav: true,
   },
-  
+
   {
     // type: "route",
     name: "Q&A",
@@ -355,6 +357,21 @@ const routes = [
     route: "/not-found",
     component: <NotFoundPage />,
     showInSidenav: true,
+  },
+  {
+    type: "route",
+    name: "user-info",
+    key: "user-info",
+    route: "/see-user-info",
+    icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
+    component: <UserInfo />,
+    protected: true,
+  },
+  {
+    name: "OrderSummary",
+    key: "OrderSummary",
+    route: "/OrderSummary",
+    component: <OrderSummary />,
   },
 ];
 
