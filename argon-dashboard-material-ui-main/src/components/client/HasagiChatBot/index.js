@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import CategoryService from '../../../services/CategoryServices';
 import BrandService from '../../../services/BrandServices';
@@ -16,6 +16,7 @@ function Gemini() {
     const [isListening, setIsListening] = useState(false);
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [hasGreeted, setHasGreeted] = useState(false);
+    const chatContainerRef = useRef(null);
 
     useEffect(() => {
         if (isChatOpen && !hasGreeted) {
@@ -70,6 +71,8 @@ function Gemini() {
         }
     };
 
+    const keywordCounts = {}; // Lưu số lần hỏi về từ khóa
+
     const generateAIResponse = async (question) => {
         setLoading(true);
         try {
@@ -79,9 +82,28 @@ function Gemini() {
             const productDetails = await getProductDetailData();
             const vouchers = await getVoucherData();
 
+            // Lưu và đếm số lần hỏi về từ khóa
+            const keywords = ['sản phẩm', 'voucher', 'chính sách', 'thương hiệu', 'đặt hàng']; // Các từ khóa cần theo dõi
+            let shouldSuggest = false;
+
+            keywords.forEach(keyword => {
+                if (question.toLowerCase().includes(keyword)) {
+                    keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
+                    if (keywordCounts[keyword] > 3) {  // Nếu số lần hỏi về từ khóa này vượt quá 3
+                        shouldSuggest = true;
+                    }
+                }
+            });
+
+            // Tạo prompt với lời chào hỏi thân thiện và trả lời theo cách tự nhiên
+            let greeting = "Chào bạn! Tôi có thể giúp gì cho bạn hôm nay?";
+            if (question.toLowerCase().includes("xin chào") || question.toLowerCase().includes("chào")) {
+                greeting = "Chào bạn! Có câu hỏi nào tôi có thể giúp bạn không?";
+            }
+
             const prompt = `
             Bạn là trợ lý ảo của shop Hasagi. Dưới đây là dữ liệu nội bộ của shop, bạn chỉ được sử dụng các thông tin này để trả lời câu hỏi.
-    
+        
             Dữ liệu nội bộ:
             - **Danh mục sản phẩm**: ${JSON.stringify(categories)}.
             - **Thương hiệu**: ${JSON.stringify(brands)}.
@@ -95,15 +117,18 @@ function Gemini() {
                 - Chính sách đổi trả: ${termsAndConditions.returnPolicy}.
                 - Chính sách bảo mật: ${termsAndConditions.privacyPolicy}.
                 - Liên hệ: Email: ${termsAndConditions.contact.email}, SĐT: ${termsAndConditions.contact.phone}, Địa chỉ: ${termsAndConditions.contact.address}.
-            
+        
             Câu hỏi: "${question}"
-            
+        
             Hướng dẫn trả lời:
             1. Chỉ sử dụng dữ liệu nội bộ để trả lời.
             2. Nếu câu hỏi không thuộc phạm vi dữ liệu, hãy xin lỗi khách hàng và yêu cầu họ đặt câu hỏi cụ thể hơn.
             3. Nếu câu hỏi liên quan đến chính sách, danh mục, thương hiệu, sản phẩm hoặc voucher, hãy cung cấp thông tin chính xác từ dữ liệu.
             4. Đối với các câu hỏi không rõ ràng, hãy gợi ý cách khách hàng có thể tìm kiếm thông tin từ shop.
             5. Trả lời bằng ngôn ngữ tiếng Việt.
+            6. Hãy giữ phong cách giao tiếp thân thiện và tự nhiên, giống như một trợ lý ảo thân thiện.
+        
+            Chào hỏi: ${greeting}
             `;
 
             // Gửi prompt đến mô hình AI
@@ -118,6 +143,12 @@ function Gemini() {
                 response.data.candidates?.[0]?.content?.parts?.[0]?.text ||
                 "Xin lỗi, tôi không thể xử lý câu hỏi của bạn ngay bây giờ. Vui lòng thử lại sau.";
 
+            // Nếu số lần hỏi vượt quá giới hạn, đưa ra lời khuyên truy cập trang web
+            let finalAnswer = aiAnswer;
+            if (shouldSuggest) {
+                finalAnswer += "\n\nCó vẻ như bạn đang tìm kiếm thông tin về một số sản phẩm hoặc chính sách. Bạn có thể truy cập trang web của chúng tôi để tìm kiếm thêm chi tiết.";
+            }
+
             // Thêm tin nhắn "AI is typing..." vào lịch sử
             setChatHistory((prevHistory) => [
                 ...prevHistory,
@@ -128,14 +159,13 @@ function Gemini() {
             let currentIndex = 0;
             const interval = setInterval(() => {
                 setChatHistory((prevHistory) => {
-                    // Cập nhật chỉ tin nhắn cuối cùng
                     const updatedHistory = [...prevHistory];
-                    updatedHistory[updatedHistory.length - 1].text = aiAnswer.slice(0, currentIndex + 1);
+                    updatedHistory[updatedHistory.length - 1].text = finalAnswer.slice(0, currentIndex + 1);
                     return updatedHistory;
                 });
                 currentIndex++;
 
-                if (currentIndex >= aiAnswer.length) {
+                if (currentIndex >= finalAnswer.length) {
                     clearInterval(interval); // Dừng hiệu ứng khi đã hoàn thành
                 }
             }, 10); // Điều chỉnh 50ms cho tốc độ gõ chữ
@@ -162,6 +192,18 @@ function Gemini() {
         ]);
         setQuestion('');
         await generateAIResponse(question);
+    };
+
+    useEffect(() => {
+        // Tự động cuộn xuống khi chatHistory thay đổi
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [chatHistory]);
+
+    const convertTextToLinks = (text) => {
+        const urlPattern = /https?:\/\/[^\s]+/g;
+        return text.replace(urlPattern, (url) => `<a href="${url}" target="_blank" style="color: #1e90ff; text-decoration: none;">${url}</a>`);
     };
 
     const startVoiceRecognition = () => {
@@ -209,14 +251,6 @@ function Gemini() {
                     transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                 }}
                 onClick={() => setIsChatOpen(!isChatOpen)}
-                onMouseEnter={(e) => {
-                    e.target.style.transform = 'scale(1.1)';
-                    e.target.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.3)';
-                }}
-                onMouseLeave={(e) => {
-                    e.target.style.transform = 'scale(1)';
-                    e.target.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
-                }}
             >
                 <Avatar
                     alt="Logo"
@@ -224,7 +258,6 @@ function Gemini() {
                     sx={{ width: 40, height: 40 }}
                 />
             </div>
-
 
             {isChatOpen && (
                 <div style={{
@@ -317,13 +350,11 @@ function Gemini() {
                                     wordBreak: 'break-word',
                                     textAlign: 'left',
                                     display: 'inline-block',
-                                }}>
-                                    {msg.text}
-                                </div>
+                                }} dangerouslySetInnerHTML={{ __html: convertTextToLinks(msg.text) }} />
                             </div>
                         ))}
+                        <div ref={chatContainerRef} /> {/* Thêm ref để cuộn tự động */}
                     </Box>
-
 
                     <form onSubmit={handleSubmit} style={{ display: 'flex', alignItems: 'center' }}>
                         <input
@@ -342,7 +373,6 @@ function Gemini() {
                                 boxSizing: 'border-box',
                             }}
                         />
-
                         <IconButton onClick={startVoiceRecognition} color={isListening ? "secondary" : "primary"}>
                             <MicIcon />
                         </IconButton>
