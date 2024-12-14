@@ -73,7 +73,7 @@ export default function SaleProduct() {
                                         overflow: "hidden",
                                     }}
                                 >
-                                    <MuiLink href={`ShopDetails?id=${product.id}`} rel="noreferrer">
+                                    <MuiLink href={`ShopDetail?id=${product.id}`} rel="noreferrer">
                                         <ArgonBox
                                             mt={1}
                                             mx={2}

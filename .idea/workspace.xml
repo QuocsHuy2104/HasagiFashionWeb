@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="520305bf-d51c-4706-b3aa-c2e03f733a27" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/App.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiBackup/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiBackup/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiBackup1/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiBackup2/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiBackup3/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiCarousel/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiCarousel/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiCart/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiCart/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiCheckout/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiCheckout/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiFavorite/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiFavorite/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiFooter/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiFooter/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiHeader/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiHeader/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiHistory/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiHistory/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiHistoryDetail/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiHistoryDetail/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiNavbar/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiNavbar/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiPhanLoai/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiPhanLoai/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiShop/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiShop/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiShopDetail/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiShopDetail/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiVorcher/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/HasagiVorcher/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/assets/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/components/client/assets/css/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/layouts/clientuser/home.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/layouts/clientuser/home.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/layouts/manage/order/index.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/layouts/manage/order/index.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/layouts/manage/size/data.js" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/layouts/manage/size/data.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/layouts/manage/size/index.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/layouts/manage/size/index.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/routes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/services/CartService.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/services/CartService.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/services/ProductDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/argon-dashboard-material-ui-main/src/services/ProductDetail.jsx" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="2nWJq4Va0NcM9Ujx1vE4CirHail" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;khanh&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/minhk/Downloads/HasagiFashionWeb&quot;
+  }
+}</component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="520305bf-d51c-4706-b3aa-c2e03f733a27" name="Changes" comment="" />
+      <created>1729083085973</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1729083085973</updated>
+    </task>
+    <servers />
+  </component>
+</project>
