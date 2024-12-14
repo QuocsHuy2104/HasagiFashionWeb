@@ -10,9 +10,7 @@ const LoginHooks = () => {
       console.log("Google Login Response:", response);
 
       const token = response?.credential;
-
       console.log("Received token:", token);
-
       const backendResponse = await axios.post("http://localhost:8080/oauth2/verify", {
         token,
       });

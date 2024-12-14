@@ -153,8 +153,6 @@ function Brand() {
     }
   };
 
-
-
   const resetForm = () => {
     setFormData({
       name: "",
@@ -168,14 +166,17 @@ function Brand() {
     setErrors({});
   };
 
-  const handleDeleteClick = async (id) => {
-    try {
-      await BrandsService.deleteBrand(id);
-      setBrands(brands.filter((brand) => brand.id !== id));
-      fetchData();
-    } catch (error) {
-      console.error("Error deleting brand", error);
+  const handleDeleteClick = async (selectedRows) => {
+    if (selectedRows.length === 0) return;
+
+    for (const id of selectedRows) {
+      try {
+        await BrandsService.deleteBrand(id);
+      } catch (error) {
+        console.error(`${id}`, error);
+      }
     }
+    fetchData();
   };
 
 
@@ -273,11 +274,25 @@ function Brand() {
                   )}
                 </ArgonBox>
 
-                <ArgonBox mb={3} sx={{ width: { xs: '100%', sm: '50%', md: '20%' } }}>
-                  <ArgonButton type="submit" size="large" color="info" fullWidth={true}>
+                <ArgonBox mb={3} width={720} display="flex" gap={1} justifyContent="flex-start">
+                  <ArgonButton
+                    type="submit"
+                    size="large"
+                    color="info"
+                    sx={{ minWidth: 100, padding: '8px 16px' }}
+                  >
                     {formData.id ? "Cập nhật" : "Thêm"}
                   </ArgonButton>
+                  <ArgonButton
+                    size="large"
+                    color="primary"
+                    sx={{ minWidth: 100, padding: '8px 16px' }}
+                    onClick={resetForm}
+                  >
+                    Làm mới
+                  </ArgonButton>
                 </ArgonBox>
+
               </ArgonBox>
             </ArgonBox>
           </Card>

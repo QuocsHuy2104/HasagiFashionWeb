@@ -64,7 +64,7 @@ function Role() {
     e.preventDefault();
 
     if (!validateForm()) {
-      return; 
+      return;
     }
 
     const data = new FormData();
@@ -112,53 +112,12 @@ function Role() {
   return (
     <DashboardLayout>
       <DashboardNavbar />
-
-      <ArgonBox py={3}>
-        <ArgonBox mb={3}>
-          <Card>
-            <ArgonBox display="flex" justifyContent="space-between" p={3}>
-              <ArgonTypography variant="h6">Quản lý vai trò</ArgonTypography>
-            </ArgonBox>
-
-            <ArgonBox p={3} component="form" role="form" onSubmit={handleSubmit}>
-              <ArgonBox mx={3}>
-                <ArgonBox mb={3} position="relative">
-                  <ArgonInput
-                    type="text"
-                    placeholder="Tên vai trò"
-                    size="large"
-                    name="name"
-                    fullWidth
-                    value={formData.name}
-                    onChange={handleChange}
-                    error={!!errors.name} // Show error state
-                  />
-                  {errors.name && (
-                    <ArgonTypography variant="caption" color="error">
-                      {errors.name}
-                    </ArgonTypography>
-                  )}
-                </ArgonBox>
-
-                <ArgonBox mb={3} sx={{ width: { xs: '100%', sm: '50%', md: '20%' } }}>
-                  <ArgonButton
-                    type="submit"
-                    size="large"
-                    color="info"
-                    fullWidth={true}
-                  >
-                    {editingRole ? "Sửa" : "Lưu"}
-                  </ArgonButton>
-                </ArgonBox>
-              </ArgonBox>
-            </ArgonBox>
-          </Card>
-        </ArgonBox>
-      </ArgonBox>
-
       <ArgonBox>
         <ArgonBox mb={3}>
           <Card>
+            <ArgonBox display="flex" justifyContent="space-between" p={3}>
+              <ArgonTypography variant="h6">Danh sách vai trò</ArgonTypography>
+            </ArgonBox>
             <ArgonBox
               sx={{
                 "& .MuiTableRow-root:not(:last-child)": {

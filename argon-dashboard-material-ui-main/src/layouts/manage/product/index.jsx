@@ -99,7 +99,7 @@ function Product() {
 
     const handleVideoChange = (event) => {
         const file = event.target.files[0];
-        const maxVideoSize = 40 * 1024 * 1024; 
+        const maxVideoSize = 40 * 1024 * 1024;
 
         if (file) {
             if (file.size > maxVideoSize) {
@@ -278,6 +278,7 @@ function Product() {
 
     const resetForm = () => {
         setFormData({
+            id: '',
             name: '',
             image: null,
             categoryId: '',
@@ -600,7 +601,7 @@ function Product() {
                                                 }}
                                                 startAdornment={
                                                     <InputAdornment position="start">
-                                                        <b style={{ fontSize: '25px' }}> $</b>
+                                                        <b style={{ fontSize: '25px' }}> %</b>
                                                     </InputAdornment>
                                                 }
                                             />
@@ -608,11 +609,27 @@ function Product() {
 
                                     </ArgonBox>
 
-                                    <ArgonBox mx={{ xs: 1, sm: 2, md: 3 }} mb={3} width={720}>
-                                        <ArgonButton type="submit" size="large" color="info">
-                                            {formData.id ? "Cập nhật" : "Lưu"}
+                                    <ArgonBox mx={{ xs: 1, sm: 2, md: 3 }} mb={3} width={720} display="flex" gap={1} justifyContent="flex-start">
+                                        <ArgonButton
+                                            type="submit"
+                                            size="large"
+                                            color="info"
+                                            sx={{ minWidth: 100, padding: '8px 16px' }} 
+                                        >
+                                            {formData.id ? "Cập nhật" : "Thêm"}
+                                        </ArgonButton>
+                                        <ArgonButton
+                                            size="large"
+                                            color="primary"
+                                            sx={{ minWidth: 100, padding: '8px 16px' }} 
+                                            onClick={resetForm}
+                                        >
+                                            Làm mới
                                         </ArgonButton>
                                     </ArgonBox>
+
+
+
                                 </ArgonBox>
                             </ArgonBox>
                         </ArgonBox>

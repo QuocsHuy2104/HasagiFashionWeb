@@ -93,19 +93,16 @@ function Size() {
     const resetForm = () => {
         setFormData({
             id: "",
-            name: "",  // Thay đổi 'size' thành 'name'
+            name: "",
         });
-        setErrors({ name: false });  // Thay đổi 'size' thành 'name'
+        setErrors({ name: false });
     };
 
     const handleEditClick = (size) => {
-        setFormData({
-            id: size.id,
-            name: size.name,  // Thay đổi 'size' thành 'name'
-        });
+        setFormData(size);
+        setErrors({});
     };
 
-    // Handle deletion of selected rows
     const handleDeleteClick = async (selectedRows) => {
         if (selectedRows.length === 0) return;
 
@@ -118,7 +115,7 @@ function Size() {
                 toast.error(`Error deleting size with ID ${id}`);
             }
         }
-        fetchData(); // Refresh data after deletion
+        fetchData();
     };
 
     return (

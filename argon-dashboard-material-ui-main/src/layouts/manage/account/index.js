@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 
 import { Card } from "@mui/material";
@@ -25,6 +24,9 @@ import UploadPhoto from "./uploadPhoto";
 import RoleService from "../../../services/RoleServices";
 import AccountService from "../../../services/AccountServices";
 import PermissionService from "../../../services/PermissionServices";
+
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function Account() {
   const generateRandomPassword = (length) => {
@@ -102,20 +104,19 @@ function Account() {
     }));
   };
 
-  const handlePermissionChange = (permissionName) => {
-    setFormData((prevFormData) => {
-      const newPermissions = prevFormData.permissionNames.includes(permissionName)
-        ? prevFormData.permissionNames.filter((name) => name !== permissionName)
-        : [...prevFormData.permissionNames, permissionName];
-      return {
-        ...prevFormData,
-        permissionNames: newPermissions,
-      };
-    });
-  };
+  // const handlePermissionChange = (permissionName) => {
+  //   setFormData((prevFormData) => {
+  //     const newPermissions = prevFormData.permissionNames.includes(permissionName)
+  //       ? prevFormData.permissionNames.filter((name) => name !== permissionName)
+  //       : [...prevFormData.permissionNames, permissionName];
+  //     return {
+  //       ...prevFormData,
+  //       permissionNames: newPermissions,
+  //     };
+  //   });
+  // };
 
   const handleEditClick = (account) => {
-    console.log("Account to edit:", account);
     setFormData({
       id: account.id,
       username: account.username,
@@ -124,7 +125,7 @@ function Account() {
       avatar: account.avatar,
       fullName: account.fullName,
       email: account.email,
-      roleId: account.roleName ? account.roleName.map(role => role.name) : [],
+      roleId: account.roleName ? account.roleName.map((role) => role.name) : [],
       permissionNames: account.permissionNames || [],
     });
   };
@@ -132,17 +133,14 @@ function Account() {
   const handleFileUpload = (downloadURL) => {
     setFormData((prevData) => ({
       ...prevData,
-      avatar: downloadURL, // Save the avatar URL
+      avatar: downloadURL,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
-
     try {
       await AccountService.saveAccount(formData);
-      await fetchAccounts();
       setFormData({
         id: "",
         username: "",
@@ -183,7 +181,7 @@ function Account() {
         <ArgonBox mb={3}>
           <Card>
             <ArgonBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
-              <ArgonTypography variant="h6">Quản lý người dùng</ArgonTypography>
+              <ArgonTypography variant="h6">Quản lý nhân viên</ArgonTypography>
             </ArgonBox>
 
             <ArgonBox
@@ -196,7 +194,6 @@ function Account() {
               role="form"
               onSubmit={handleSubmit}
             >
-
               <ArgonBox
                 maxWidth={{ xs: "100%", md: 270 }}
                 mx={4}
@@ -214,7 +211,7 @@ function Account() {
                     <Grid item xs={12} md={6}>
                       <ArgonInput
                         type="text"
-                        placeholder="Tên tài khoản"
+                        placeholder="Tên đăng nhập"
                         name="username"
                         size="large"
                         value={formData.username}
@@ -225,7 +222,7 @@ function Account() {
                     <Grid item xs={12} md={6}>
                       <ArgonInput
                         type="text"
-                        placeholder="Họ tên đầy đủ"
+                        placeholder="Họ và Tên"
                         name="fullName"
                         size="large"
                         value={formData.fullName}
@@ -253,7 +250,7 @@ function Account() {
                     <Grid item xs={12} md={6}>
                       <ArgonInput
                         type="text"
-                        placeholder="Địa chỉ thường trú"
+                        placeholder="Thường Trú"
                         name="tabernacle"
                         size="large"
                         value={formData.tabernacle}
@@ -285,7 +282,7 @@ function Account() {
                   />
                 </ArgonBox>
 
-                <ArgonBox mb={3} mx={3}>
+                {/* <ArgonBox mb={3} mx={3}>
                   <Box sx={{ flexGrow: 1 }}>
                     <Grid container spacing={2}>
                       {permissions.length > 0 ? (
@@ -317,14 +314,13 @@ function Account() {
                       )}
                     </Grid>
                   </Box>
-                </ArgonBox>
+                </ArgonBox> */}
 
-                <ArgonBox mb={3} mx={3} sx={{ width: { sm: '50%', md: '20%' } }}>
+                <ArgonBox mb={3} mx={3} sx={{ width: { sm: "50%", md: "20%" } }}>
                   <ArgonButton type="submit" size="large" color="info" fullWidth>
-                    {formData.id ? "Update" : "Create"}
+                    {formData.id ? "Cập Nhật" : "Thêm"}
                   </ArgonButton>
                 </ArgonBox>
-
               </ArgonBox>
             </ArgonBox>
           </Card>
@@ -334,7 +330,7 @@ function Account() {
           <Card>
             <ArgonBox p={3} lineHeight={1}>
               <ArgonTypography variant="h6" fontWeight="medium">
-                Danh sách người dùng
+                Danh sách nhân viên
               </ArgonTypography>
             </ArgonBox>
             <ArgonBox>
@@ -363,7 +359,6 @@ function Account() {
                     </Grid>
                   </Grid>
                 </Box>
-
               </ArgonBox>
               {rows.length > 0 ? (
                 <Table columns={columns} rows={rows} />
@@ -395,8 +390,8 @@ function Account() {
         </ArgonBox>
       </ArgonBox>
       <Footer />
+      <ToastContainer />
     </DashboardLayout>
-
   );
 }
 

@@ -59,20 +59,15 @@ function Review() {
 
     const filterReviews = (reviews) => {
         return reviews.filter(review => {
-            // Lọc theo số sao
             if (filterStar && review.star !== parseInt(filterStar)) {
                 return false;
             }
-
-            // Lọc theo trạng thái (đã phản hồi hay chưa)
             if (filterStatus === 'Đã phản hồi' && !review.adminFeedback) {
                 return false;
             }
             if (filterStatus === 'Chưa phản hồi' && review.adminFeedback) {
                 return false;
             }
-
-            // Lọc theo ngày
             if (filterStartDate && new Date(review.createdAt) < new Date(filterStartDate)) {
                 return false;
             }
@@ -99,7 +94,6 @@ function Review() {
             });
         }
     };
-
 
     const validateForm = () => {
         const newErrors = { adminFeedBack: false };
@@ -349,7 +343,15 @@ function Review() {
                                                 display: 'flex',
                                                 alignItems: 'center',
                                             }}>
-                                            <strong style={{ marginRight: '5px' }}>Bình luận: </strong> {review.comment}
+                                            {review.comment ? (
+                                                <>
+                                                    <strong style={{ marginRight: '5px' }}>Bình luận: </strong> {review.comment}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <></>
+                                                </>
+                                            )}
                                         </ArgonTypography>
                                         <ArgonTypography variant="body1"
                                             style={{

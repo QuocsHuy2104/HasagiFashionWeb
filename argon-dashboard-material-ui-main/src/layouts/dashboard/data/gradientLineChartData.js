@@ -13,15 +13,48 @@ Coded by www.creative-tim.com
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
 
-const gradientLineChartData = {
-  labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-  datasets: [
-    {
-      label: "Mobile apps",
-      color: "info",
-      data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
-    },
-  ],
+import React, { useEffect, useState } from "react";
+import RevenueService from "services/RevenueServices";
+
+const gradientLineChartData = () => {
+  const [chartData, setChartData] = useState({
+    labels: [],
+    datasets: [
+      {
+        label: "Doanh Thu",
+        color: "info",
+        data: [],
+      },
+    ],
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await RevenueService.getLast12Months();
+        const apiData = response.data;
+        const labels = apiData.map((item) => item.month).reverse();
+        const data = apiData.map((item) => item.revenue).reverse();
+
+        setChartData({
+          labels,
+          datasets: [
+            {
+              label: "Doanh Thu",
+              color: "info",
+              data,
+            },
+          ],
+        });
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu từ API:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  return chartData;
 };
 
 export default gradientLineChartData;

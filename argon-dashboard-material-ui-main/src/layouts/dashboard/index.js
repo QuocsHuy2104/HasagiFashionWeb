@@ -41,9 +41,35 @@ import Slider from "layouts/dashboard/components/Slider";
 import gradientLineChartData from "layouts/dashboard/data/gradientLineChartData";
 import salesTableData from "layouts/dashboard/data/salesTableData";
 import categoriesListData from "layouts/dashboard/data/categoriesListData";
+import { useEffect, useState } from "react";
+import RevenueService from "services/RevenueServices";
 
 function Default() {
   const { size } = typography;
+  const chartData = gradientLineChartData();
+  const [today, setToday] = useState(0);
+  const [thisMonth, setThisMonth] = useState(0);
+  const [yesterday, setYesterday] = useState(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [res, res2, res3] = await Promise.all([
+          RevenueService.getToday(),
+          RevenueService.getThisMonth(),
+          RevenueService.getYesterday(),
+        ]);
+        setToday(res.data);
+        setThisMonth(res2.data);
+        setYesterday(res3.data);
+      } catch (err) {
+        console.error("Error fetching revenue data:", err);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -51,18 +77,18 @@ function Default() {
         <Grid container spacing={3} mb={3}>
           <Grid item xs={12} md={6} lg={3}>
             <DetailedStatisticsCard
-              title="Tiền hôm nay"
-              count="53,000đ"
+              title="Doanh thu hôm nay"
+              count={`${today.toLocaleString()} đ`}
               icon={{ color: "info", component: <i className="ni ni-money-coins" /> }}
               percentage={{ color: "success", count: "+55%", text: "kể từ hôm qua" }}
             />
           </Grid>
           <Grid item xs={12} md={6} lg={3}>
             <DetailedStatisticsCard
-              title="today's users"
-              count="2,300"
-              icon={{ color: "error", component: <i className="ni ni-world" /> }}
-              percentage={{ color: "success", count: "+3%", text: "since last week" }}
+              title="Doanh thu tháng"
+              count={`${thisMonth.toLocaleString()} đ`}
+              icon={{ color: "info", component: <i className="ni ni-money-coins" /> }}
+              percentage={{ color: "success", count: "+55%", text: "kể từ hôm qua" }}
             />
           </Grid>
           <Grid item xs={12} md={6} lg={3}>
@@ -85,21 +111,27 @@ function Default() {
         <Grid container spacing={3} mb={3}>
           <Grid item xs={12} lg={7}>
             <GradientLineChart
-              title="Sales Overview"
+              title="Thống kê doanh thu"
               description={
                 <ArgonBox display="flex" alignItems="center">
-                  <ArgonBox fontSize={size.lg} color="success" mb={0.3} mr={0.5} lineHeight={0}>
+                  <ArgonBox
+                    fontSize={typography.size.lg}
+                    color="success"
+                    mb={0.3}
+                    mr={0.5}
+                    lineHeight={0}
+                  >
                     <Icon sx={{ fontWeight: "bold" }}>arrow_upward</Icon>
                   </ArgonBox>
                   <ArgonTypography variant="button" color="text" fontWeight="medium">
-                    4% more{" "}
+                    Doanh thu{" "}
                     <ArgonTypography variant="button" color="text" fontWeight="regular">
-                      in 2022
+                      năm {new Date().getFullYear()}
                     </ArgonTypography>
                   </ArgonTypography>
                 </ArgonBox>
               }
-              chart={gradientLineChartData}
+              chart={chartData} // Truyền đúng dữ liệu biểu đồ vào prop chart
             />
           </Grid>
           <Grid item xs={12} lg={5}>

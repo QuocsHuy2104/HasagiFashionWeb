@@ -24,8 +24,8 @@ function ProtectedRoute({ children }) {
       return <Navigate to="/feature-section" />;
     }
   } catch (error) {
-    return <Navigate to="/authentication/sign-in" />;
-  }
+    return <Navigate to="/not-found" />;
+  } 
 
   return children;
 }

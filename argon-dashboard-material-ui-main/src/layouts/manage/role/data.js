@@ -51,32 +51,11 @@ const RoleTable = ({ onEditClick }) => {
                 name={role.name}
             />
         ),
-        ThaoTac: (
-            <ArgonBox display="flex" justifyContent="space-between" alignItems="center">
-                <ArgonTypography
-                    px={1}
-                    component="span"
-                    variant="caption"
-                    color="info"
-                    fontWeight="medium"
-                    onClick={() => handleEditClick(role)}
-                    sx={{
-                        cursor: "pointer",
-                        "&:hover": {
-                            textDecoration: "underline",
-                        },
-                    }}
-                >
-                    <i className="bi bi-pencil-square"></i> Sửa
-                </ArgonTypography>
-            </ArgonBox>
-        ),
     }));
 
     const roleTableData = {
         columns: [
             { name: "VaiTro", align: "left" },
-            { name: "ThaoTac", align: "center" },
         ],
         rows,
     };

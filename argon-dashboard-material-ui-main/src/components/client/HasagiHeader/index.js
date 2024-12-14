@@ -9,7 +9,6 @@ import "components/client/assets/js/plugins";
 import logo from "components/client/assets/images/logo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-regular-svg-icons";
-import { faHeart } from "@fortawesome/free-regular-svg-icons";
 import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import { faMicrophone } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
@@ -101,30 +100,28 @@ const Header = ({ onSearch }) => {
         ]);
         const reversedCartData = cartResponse.data.reverse();
         setCartProducts(reversedCartData);
-        // Gọi API hình ảnh dựa trên dữ liệu từ cartResponse
         const imageRequests = reversedCartData.map((item) =>
           axios
             .get(`http://localhost:3000/api/public/webShopDetail/product-detail/${item.productId}`)
             .then((res) => ({ productId: item.productId, data: res.data }))
         );
-
-        // Chờ tất cả API hoàn thành
         const imagesData = await Promise.all(imageRequests);
-
-        // Chuyển đổi thành object để dễ truy cập
         const imagesMap = imagesData.reduce((acc, { productId, data }) => {
           acc[productId] = data;
           return acc;
         }, {});
-
-        // Cập nhật state với hình ảnh
         setImages(imagesMap);
       } catch (error) {
-        console.error("Error fetching data:", error);
       }
     };
 
     fetchCartItems();
+    const intervalId = setInterval(() => {
+      fetchCartItems();
+    }, 2000);
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
 
   const handleCartMouseEnter = () => {
@@ -328,7 +325,7 @@ const Header = ({ onSearch }) => {
                 onMouseLeave={handleMouseLeave}
               >
                 <a
-                  href="/profile"
+                  href="/feature-section"
                   className="rounded-circle"
                   style={{
                     ...styles.userIcon,

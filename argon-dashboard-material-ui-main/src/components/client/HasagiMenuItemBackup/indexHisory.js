@@ -35,6 +35,7 @@ import ReviewFilesService from '../../../services/ReviewFileServices';
 import { storage } from "../../../config/firebase-config";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+
 const indexHistory = () => {
   const [imageFiles, setImageFiles] = useState([]);
   const [videoFile, setVideoFile] = useState(null);
@@ -343,6 +344,14 @@ const indexHistory = () => {
           color: "black",
           showConfirmButton: true,
           background: "#fff",
+          didOpen: () => {
+            document.body.style.overflowY = "auto";
+            document.body.style.padding = "0";
+          },
+          willClose: () => {
+            document.body.style.overflowY = "auto";
+            document.body.style.padding = "0";
+          },
         });
       }, 0);
       setStar(5);
@@ -357,6 +366,7 @@ const indexHistory = () => {
         icon: "error",
         title: "Lỗi",
         text: errorMessage,
+        scrollbarPadding: false,
       });
     }
   };
@@ -393,10 +403,6 @@ const indexHistory = () => {
     setVideoFile(null);
     const inputFile = document.getElementById('video-upload');
     inputFile.value = '';
-  };
-
-  const resetImageInput = () => {
-    setImageFiles([]);
   };
 
   useEffect(() => {
@@ -454,37 +460,6 @@ const indexHistory = () => {
     setCurrentPage(1);
   };
 
-
-  const getMarginTop = (tabValue) => {
-    switch (tabValue) {
-      case "all":
-        return "60px";
-      case "dang-xu-ly":
-      case "dang-giao":
-      case "da-giao":
-      case "hoan-thanh":
-      case "da-huy":
-        return "120px";
-      default:
-        return "60px";
-    }
-  };
-
-  const getMarginTop1 = (tabValue) => {
-    switch (tabValue) {
-      case "all":
-        return "30px";
-      case "dang-xu-ly":
-      case "dang-giao":
-      case "da-giao":
-      case "hoan-thanh":
-      case "da-huy":
-        return "75px";
-      default:
-        return "30px";
-    }
-  };
-
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
   };
@@ -526,26 +501,26 @@ const indexHistory = () => {
               className="d-flex justify-content-center"
               style={{ marginTop: searchStyle.position === "fixed" ? "80px" : "0px" }}
             >
-              <input
-                ref={searchInputRef}
-                type="search"
-                placeholder="Tìm kiếm"
-                className="form-control"
-                aria-label="Search"
-                style={{
-                  ...searchStyle,
-                  border: "none",
-                  fontSize: "14px",
-                  backgroundColor: "#f0f0f0",
-                  outline: "none",
-                  boxShadow: "none",
-                  height: "45px",
-                  marginBottom: "-1%",
-                  borderRadius: "0px",
-                }}
-                value={searchQuery}
-                onChange={handleSearchChange}
-              />
+              <div style={{ display: "flex", alignItems: "center", backgroundColor: "#f0f0f0", borderRadius: "4px", padding: "0 10px", height: "45px", width: "100%" }}>
+                <i className="fas fa-search" style={{ color: "#888", marginRight: "10px" }}></i> {/* Icon tìm kiếm */}
+                <input
+                  ref={searchInputRef}
+                  type="search"
+                  placeholder="Bạn có thể tìm kiếm theo ID đơn hàng"
+                  className="form-control"
+                  aria-label="Search"
+                  style={{
+                    flex: 1,
+                    border: "none",
+                    fontSize: "14px",
+                    backgroundColor: "transparent",
+                    outline: "none",
+                    boxShadow: "none",
+                  }}
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                />
+              </div>
             </div>
           )}
 
@@ -652,13 +627,13 @@ const indexHistory = () => {
                                 display="flex"
                                 alignItems="center"
                                 key={index}
-                                style={{ marginBottom: "25px", marginTop: "-15px" }}
+                                style={{ marginBottom: "25px", marginTop: "-20px" }}
                               >
                                 {matchingImage && (
                                   <img
                                     src={matchingImage.imageDTOResponse[0]?.url}
                                     alt={product.productName || "Product"}
-                                    style={{ width: "100px", marginRight: "16px", height: "100px" }}
+                                    style={{ width: "90px", marginRight: "16px", height: "100px" }}
                                   />
                                 )}
                                 <Box>
@@ -671,7 +646,15 @@ const indexHistory = () => {
                                         variant="body2"
                                         color="textSecondary"
                                         onClick={() => handleReviewClick(product)}
-                                        style={{ marginLeft: "600px", color: "black" }}
+                                        style={{ marginLeft: "400px" }}
+                                        onMouseEnter={(e) => {
+                                          e.target.style.textDecoration = 'underline';
+                                          e.target.style.color = 'blue';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                          e.target.style.textDecoration = 'none';
+                                          e.target.style.color = 'black';
+                                        }}
                                       >
                                         Đánh giá
                                       </Typography>
@@ -695,12 +678,10 @@ const indexHistory = () => {
                                         fontSize: "16px",
                                         position: "relative",
                                         display: "inline-block",
-                                        marginLeft: "680px",
+                                        marginLeft: "690px",
                                       }}
                                     >
-
                                       {new Intl.NumberFormat("vi-VN").format(product.productPrice)}đ
-
                                     </Typography>
                                   </Box>
                                 </Box>
@@ -732,7 +713,7 @@ const indexHistory = () => {
                         <Typography
                           variant="body2"
                           style={{
-                            marginRight: "15px", // Space between "Tổng tiền:" and the price
+                            marginRight: "15px",
                           }}
                         >
                           Tổng tiền:
@@ -745,11 +726,10 @@ const indexHistory = () => {
                             position: "relative",
                             display: "inline-flex",
                             alignItems: "center",
+                            marginRight: "10px"
                           }}
                         >
-
                           {new Intl.NumberFormat("vi-VN").format(order.amount)}đ
-
                         </Typography>
                       </div>
                       <Box display="flex" justifyContent="flex-end" mt={2}>
@@ -923,9 +903,10 @@ const indexHistory = () => {
             p={3}
             style={{
               backgroundColor: "white",
-              width: "300px",
+              width: "500px",
               margin: "50px auto",
               borderRadius: "8px",
+              marginTop: "90px",
             }}
           >
             <ArgonTypography variant="h6">Chọn lý do trả hàng</ArgonTypography>
@@ -970,8 +951,7 @@ const indexHistory = () => {
               {selectedProduct && (
                 <>
                   <div style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
-
-                    {(() => {
+                  {(() => {
                       // Tìm hình ảnh khớp với productId và colorId
                       const matchingImage = images[selectedProduct.productId]?.find(
                         (image) => image.colorsDTO?.id === selectedProduct.colorId
@@ -981,10 +961,9 @@ const indexHistory = () => {
                         src={matchingImage.imageDTOResponse[0]?.url}
                           alt={selectedProduct.productName || "Product Image"}
                           style={{
-                            width: "100px",
+                            width: "80px",
                             height: "100px",
                             borderRadius: "5px",
-                            objectFit: "cover",
                             marginRight: "10px",
                             border: "1px solid #ddd",
                           }}

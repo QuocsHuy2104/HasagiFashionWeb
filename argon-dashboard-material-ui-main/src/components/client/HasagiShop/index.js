@@ -603,59 +603,64 @@ function Shop() {
                                     ))}
                             </div>
 
-                            <div className="col-12" style={{}}>
-                                <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
-                                    <button
-                                        disabled={currentPage === 1}
-                                        onClick={() => paginate(currentPage - 1)}
-                                        style={{
-                                            padding: "10px 15px",
-                                            backgroundColor: currentPage === 1 ? "#e0e0e0" : "#FFD333",
-                                            border: "none",
-                                            borderRadius: "50%",
-                                            color: "black",
-                                            fontSize: "18px",
-                                            cursor: currentPage === 1 ? "not-allowed" : "pointer",
-                                        }}
-                                    >
-                                        <FiChevronLeft style={{ fontSize: "20px" }} />
-                                    </button>
+                            {currentProducts.length > 1 ? (
+                                <div className="col-12" style={{marginBottom: "20px"}}>
+                                    <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+                                        <button
+                                            disabled={currentPage === 1}
+                                            onClick={() => paginate(currentPage - 1)}
+                                            style={{
+                                                padding: "10px 15px",
+                                                backgroundColor: currentPage === 1 ? "#e0e0e0" : "#FFD333",
+                                                border: "none",
+                                                borderRadius: "50%",
+                                                color: "black",
+                                                fontSize: "18px",
+                                                cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                                            }}
+                                        >
+                                            <FiChevronLeft style={{ fontSize: "20px" }} />
+                                        </button>
 
-                                    <span
-                                        style={{
-                                            fontSize: "16px",
-                                            fontWeight: "600",
-                                            margin: "0 15px",
-                                            color: "#333",
-                                            textAlign: "center",
-                                            padding: "10px 10px",
-                                            backgroundColor: "#f7f7f7",
-                                            borderRadius: "25px",
-                                            boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
-                                        }}
-                                    >
-                                        Trang {currentPage} / {totalPages}
-                                    </span>
+                                        <span
+                                            style={{
+                                                fontSize: "16px",
+                                                fontWeight: "600",
+                                                margin: "0 15px",
+                                                color: "#333",
+                                                textAlign: "center",
+                                                padding: "10px 10px",
+                                                backgroundColor: "#f7f7f7",
+                                                borderRadius: "25px",
+                                                boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+                                            }}
+                                        >
+                                            Trang {currentPage} / {totalPages}
+                                        </span>
 
-                                    <button
-                                        disabled={currentPage === totalPages}
-                                        onClick={() => paginate(currentPage + 1)}
-                                        style={{
-                                            padding: "10px 15px",
-                                            backgroundColor: currentPage === totalPages ? "#e0e0e0" : "#FFD333",
-                                            border: "none",
-                                            borderRadius: "50%",
-                                            color: "black",
-                                            fontSize: "18px",
-                                            cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-                                        }}
-                                    >
-                                        <FiChevronRight style={{ fontSize: "20px" }} />
-                                    </button>
-                                </Box>
-                            </div>
+                                        <button
+                                            disabled={currentPage === totalPages}
+                                            onClick={() => paginate(currentPage + 1)}
+                                            style={{
+                                                padding: "10px 15px",
+                                                backgroundColor: currentPage === totalPages ? "#e0e0e0" : "#FFD333",
+                                                border: "none",
+                                                borderRadius: "50%",
+                                                color: "black",
+                                                fontSize: "18px",
+                                                cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+                                            }}
+                                        >
+                                            <FiChevronRight style={{ fontSize: "20px" }} />
+                                        </button>
+                                    </Box>
+                                </div>
+                            ) : (
+                                <div style={{ textAlign: "center", marginTop: "20px", fontSize: "18px", color: "#666" }}>
+                                    Không có sản phẩm
+                                </div>
+                            )}
                         </div>
-
                     </div>
                 </div >
             </div >
