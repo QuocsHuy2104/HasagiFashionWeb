@@ -82,20 +82,30 @@ function Gemini() {
             const productDetails = await getProductDetailData();
             const vouchers = await getVoucherData();
 
-            // Lưu và đếm số lần hỏi về từ khóa
-            const keywords = ['sản phẩm', 'voucher', 'chính sách', 'thương hiệu', 'đặt hàng']; // Các từ khóa cần theo dõi
+            // Kiểm tra trùng lặp câu hỏi
+            const lastQuestion = chatHistory[chatHistory.length - 1]?.text;
+            if (lastQuestion && lastQuestion === question) {
+                setChatHistory((prevHistory) => [
+                    ...prevHistory,
+                    { type: "ai", text: "Bạn vừa hỏi câu này rồi. Cần hỗ trợ gì thêm không?" }
+                ]);
+                setLoading(false);
+                return;
+            }
+
+            const keywords = ['sản phẩm', 'phiếu giảm giá', 'danh mục', 'thương hiệu', 'chi tiết sản phẩm'];
             let shouldSuggest = false;
+            let keywordCounts = {};  // Đảm bảo khai báo và sử dụng keywordCounts
 
             keywords.forEach(keyword => {
                 if (question.toLowerCase().includes(keyword)) {
                     keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
-                    if (keywordCounts[keyword] > 3) {  // Nếu số lần hỏi về từ khóa này vượt quá 3
+                    if (keywordCounts[keyword] > 3) {
                         shouldSuggest = true;
                     }
                 }
             });
 
-            // Tạo prompt với lời chào hỏi thân thiện và trả lời theo cách tự nhiên
             let greeting = "Chào bạn! Tôi có thể giúp gì cho bạn hôm nay?";
             if (question.toLowerCase().includes("xin chào") || question.toLowerCase().includes("chào")) {
                 greeting = "Chào bạn! Có câu hỏi nào tôi có thể giúp bạn không?";
@@ -103,7 +113,7 @@ function Gemini() {
 
             const prompt = `
             Bạn là trợ lý ảo của shop Hasagi. Dưới đây là dữ liệu nội bộ của shop, bạn chỉ được sử dụng các thông tin này để trả lời câu hỏi.
-        
+    
             Dữ liệu nội bộ:
             - **Danh mục sản phẩm**: ${JSON.stringify(categories)}.
             - **Thương hiệu**: ${JSON.stringify(brands)}.
@@ -117,9 +127,9 @@ function Gemini() {
                 - Chính sách đổi trả: ${termsAndConditions.returnPolicy}.
                 - Chính sách bảo mật: ${termsAndConditions.privacyPolicy}.
                 - Liên hệ: Email: ${termsAndConditions.contact.email}, SĐT: ${termsAndConditions.contact.phone}, Địa chỉ: ${termsAndConditions.contact.address}.
-        
+    
             Câu hỏi: "${question}"
-        
+    
             Hướng dẫn trả lời:
             1. Chỉ sử dụng dữ liệu nội bộ để trả lời.
             2. Nếu câu hỏi không thuộc phạm vi dữ liệu, hãy xin lỗi khách hàng và yêu cầu họ đặt câu hỏi cụ thể hơn.
@@ -127,35 +137,33 @@ function Gemini() {
             4. Đối với các câu hỏi không rõ ràng, hãy gợi ý cách khách hàng có thể tìm kiếm thông tin từ shop.
             5. Trả lời bằng ngôn ngữ tiếng Việt.
             6. Hãy giữ phong cách giao tiếp thân thiện và tự nhiên, giống như một trợ lý ảo thân thiện.
-        
+    
             Chào hỏi: ${greeting}
             `;
 
-            // Gửi prompt đến mô hình AI
             const API_KEY = process.env.REACT_APP_API_KEY;
             const response = await axios.post(
                 `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`,
                 { contents: [{ parts: [{ text: prompt }] }] }
             );
 
-            // Lấy phản hồi từ API
             const aiAnswer =
                 response.data.candidates?.[0]?.content?.parts?.[0]?.text ||
                 "Xin lỗi, tôi không thể xử lý câu hỏi của bạn ngay bây giờ. Vui lòng thử lại sau.";
 
-            // Nếu số lần hỏi vượt quá giới hạn, đưa ra lời khuyên truy cập trang web
             let finalAnswer = aiAnswer;
             if (shouldSuggest) {
-                finalAnswer += "\n\nCó vẻ như bạn đang tìm kiếm thông tin về một số sản phẩm hoặc chính sách. Bạn có thể truy cập trang web của chúng tôi để tìm kiếm thêm chi tiết.";
+                finalAnswer += "\n\nCó vẻ như bạn đang tìm kiếm thông tin về một số sản phẩm hoặc chính sách. Bạn có thể truy cập <a href='/shop'>trang sản phẩm</a> của chúng tôi để tìm kiếm thêm chi tiết.";
             }
 
-            // Thêm tin nhắn "AI is typing..." vào lịch sử
+            // Chuyển đổi URL trong câu trả lời thành thẻ <a> HTML
+            finalAnswer = convertTextToLinks(finalAnswer);
+
             setChatHistory((prevHistory) => [
                 ...prevHistory,
-                { type: "ai", text: "AI is typing..." }
+                { type: "ai", text: finalAnswer }
             ]);
 
-            // Hiển thị hiệu ứng gõ chữ trong box tin nhắn cuối cùng
             let currentIndex = 0;
             const interval = setInterval(() => {
                 setChatHistory((prevHistory) => {
@@ -166,9 +174,9 @@ function Gemini() {
                 currentIndex++;
 
                 if (currentIndex >= finalAnswer.length) {
-                    clearInterval(interval); // Dừng hiệu ứng khi đã hoàn thành
+                    clearInterval(interval);
                 }
-            }, 10); // Điều chỉnh 50ms cho tốc độ gõ chữ
+            }, 10);
 
         } catch (error) {
             console.error("Lỗi:", error);

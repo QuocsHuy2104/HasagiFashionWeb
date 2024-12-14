@@ -25,6 +25,9 @@ const Voucher = ({ voucher, onCopy }) => {
         return `${day}-${month}-${year}`;
     };
 
+    const formatNumber = (num) => {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    };
     return (
         <ArgonBox
             sx={{
@@ -88,7 +91,7 @@ const Voucher = ({ voucher, onCopy }) => {
                             textOverflow: "ellipsis",
                         }}
                     >
-                        Giảm <strong>{voucher.discountPercentage}%</strong> khi hóa đơn từ {voucher.minimumOrderValue}đ, giảm tối đa {voucher.maxDiscount}
+                        Giảm <strong>{voucher.discountPercentage}%</strong> khi hóa đơn từ {formatNumber(voucher.minimumOrderValue)}đ, giảm tối đa {formatNumber(voucher.maxDiscount)}
                     </ArgonBox>
                     <ArgonBox
                         sx={{
@@ -256,9 +259,7 @@ const VoucherList = () => {
         voucher => !usedVouchers.some(usedVoucher => usedVoucher.id === voucher.id)
     );
 
-    const formatNumber = (num) => {
-        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    };
+
 
     const sliderSettings = {
         infinite: false,
