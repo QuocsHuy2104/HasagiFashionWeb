@@ -265,8 +265,6 @@ const VoucherList = () => {
         speed: 500,
         slidesToShow: Math.min(4, availableVouchers.length),
         slidesToScroll: 1,
-        // nextArrow: <CustomNextArrow />,
-        // prevArrow: <CustomPrevArrow />,
         responsive: [
             {
                 breakpoint: 1024,

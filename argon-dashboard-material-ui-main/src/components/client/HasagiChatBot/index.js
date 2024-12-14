@@ -32,42 +32,30 @@ function Gemini() {
     }, [isChatOpen, hasGreeted]);
 
     const getCategoryData = async () => {
-        const response = await CategoryService.getAllCategories();
+        const response = await CategoryService.getAllCategoriesUS();
         return response?.data || [];
     };
 
     const getBrandData = async () => {
-        const response = await BrandService.getAllBrands();
+        const response = await BrandService.getAllBrandsUS();
         return response?.data || [];
     };
 
     const getProductData = async () => {
-        const response = await ProductService.getAllProducts();
+        const response = await ProductService.getAllProductsUS();
         return response?.data || [];
     };
 
     const getProductDetailData = async () => {
-        const response = await ProductDetailService.getAllProductDetails();
+        const response = await ProductDetailService.getAllProductDetailsUS();
         return response?.data || [];
     };
 
     const getVoucherData = async () => {
-        const response = await VoucherService.getAllVouchers();
+        const response = await VoucherService.getAllVouchersUS();
         return response?.data || [];
     };
 
-    const detectLanguage = (text) => {
-        return /[\u00C0-\u024F]/.test(text) ? 'vi' : 'en';
-    };
-
-    const isGreeting = (text) => {
-        const greetings = [
-            { en: ["hi", "hello", "hey"], vi: ["chào bạn", "xin chào", "alo"] },
-        ];
-        const lang = detectLanguage(text);
-        const keywords = greetings.find((g) => g[lang]);
-        return keywords && keywords[lang].some((word) => text.toLowerCase().includes(word));
-    };
 
     const termsAndConditions = {
         introduction: "Các điều khoản áp dụng khi mua sắm tại shop Hasagi.",
@@ -82,78 +70,87 @@ function Gemini() {
         }
     };
 
-
     const generateAIResponse = async (question) => {
         setLoading(true);
         try {
-            const language = detectLanguage(question);
-
-            const keywords = ["điều khoản", "chính sách", "đổi trả", "bảo mật", "liên hệ"];
-            const matchedKeyword = keywords.find((keyword) => question.toLowerCase().includes(keyword));
-            if (matchedKeyword) {
-                let response = "";
-                switch (matchedKeyword) {
-                    case "điều khoản":
-                        response = termsAndConditions.introduction;
-                        break;
-                    case "chính sách":
-                        response = `Chính sách của shop: ${termsAndConditions.orderPolicy}. ${termsAndConditions.paymentPolicy}`;
-                        break;
-                    case "đổi trả":
-                        response = termsAndConditions.returnPolicy;
-                        break;
-                    case "bảo mật":
-                        response = termsAndConditions.privacyPolicy;
-                        break;
-                    case "liên hệ":
-                        response = `Thông tin liên hệ: Email - ${termsAndConditions.contact.email}, SĐT - ${termsAndConditions.contact.phone}, Địa chỉ - ${termsAndConditions.contact.address}`;
-                        break;
-                    default:
-                        response = "Xin lỗi, tôi không hiểu câu hỏi của bạn.";
-                }
-                setChatHistory((prevHistory) => [
-                    ...prevHistory,
-                    { type: 'ai', text: response },
-                ]);
-                setLoading(false);
-                return;
-            }
-
             const categories = await getCategoryData();
             const brands = await getBrandData();
             const products = await getProductData();
             const productDetails = await getProductDetailData();
             const vouchers = await getVoucherData();
 
-            const prompt = `\nCurrent Question: ${question}
-            \nData (when available):
-            \nCategories: ${JSON.stringify(categories.slice(0, 5))}
-            \nBrands: ${JSON.stringify(brands.slice(0, 5))}
-            \nProducts: ${JSON.stringify(products.slice(0, 5))}
-            \nProductDetails: ${JSON.stringify(productDetails.slice(0, 5))} 
-            \nVouchers: ${JSON.stringify(vouchers.slice(0, 5))}
-            \nTerms and Conditions: ${JSON.stringify(termsAndConditions)}
-            \nAnswer in ${language === 'vi' ? 'Vietnamese' : 'English'}.`;
+            const prompt = `
+            Bạn là trợ lý ảo của shop Hasagi. Dưới đây là dữ liệu nội bộ của shop, bạn chỉ được sử dụng các thông tin này để trả lời câu hỏi.
+    
+            Dữ liệu nội bộ:
+            - **Danh mục sản phẩm**: ${JSON.stringify(categories)}.
+            - **Thương hiệu**: ${JSON.stringify(brands)}.
+            - **Sản phẩm**: ${JSON.stringify(products)}.
+            - **Chi tiết sản phẩm**: ${JSON.stringify(productDetails)}.
+            - **Voucher**: ${JSON.stringify(vouchers)}.
+            - **Điều khoản & chính sách**: 
+                - Giới thiệu: ${termsAndConditions.introduction}.
+                - Chính sách đặt hàng: ${termsAndConditions.orderPolicy}.
+                - Chính sách thanh toán: ${termsAndConditions.paymentPolicy}.
+                - Chính sách đổi trả: ${termsAndConditions.returnPolicy}.
+                - Chính sách bảo mật: ${termsAndConditions.privacyPolicy}.
+                - Liên hệ: Email: ${termsAndConditions.contact.email}, SĐT: ${termsAndConditions.contact.phone}, Địa chỉ: ${termsAndConditions.contact.address}.
+            
+            Câu hỏi: "${question}"
+            
+            Hướng dẫn trả lời:
+            1. Chỉ sử dụng dữ liệu nội bộ để trả lời.
+            2. Nếu câu hỏi không thuộc phạm vi dữ liệu, hãy xin lỗi khách hàng và yêu cầu họ đặt câu hỏi cụ thể hơn.
+            3. Nếu câu hỏi liên quan đến chính sách, danh mục, thương hiệu, sản phẩm hoặc voucher, hãy cung cấp thông tin chính xác từ dữ liệu.
+            4. Đối với các câu hỏi không rõ ràng, hãy gợi ý cách khách hàng có thể tìm kiếm thông tin từ shop.
+            5. Trả lời bằng ngôn ngữ tiếng Việt.
+            `;
 
+            // Gửi prompt đến mô hình AI
             const API_KEY = process.env.REACT_APP_API_KEY;
             const response = await axios.post(
                 `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`,
-                {
-                    contents: [{ parts: [{ text: prompt }] }]
-                }
+                { contents: [{ parts: [{ text: prompt }] }] }
             );
 
-            const aiAnswer = response.data.candidates?.[0]?.content?.parts?.[0]?.text || "Không có phản hồi từ AI.";
+            // Lấy phản hồi từ API
+            const aiAnswer =
+                response.data.candidates?.[0]?.content?.parts?.[0]?.text ||
+                "Xin lỗi, tôi không thể xử lý câu hỏi của bạn ngay bây giờ. Vui lòng thử lại sau.";
+
+            // Thêm tin nhắn "AI is typing..." vào lịch sử
             setChatHistory((prevHistory) => [
                 ...prevHistory,
-                { type: 'ai', text: aiAnswer },
+                { type: "ai", text: "AI is typing..." }
             ]);
+
+            // Hiển thị hiệu ứng gõ chữ trong box tin nhắn cuối cùng
+            let currentIndex = 0;
+            const interval = setInterval(() => {
+                setChatHistory((prevHistory) => {
+                    // Cập nhật chỉ tin nhắn cuối cùng
+                    const updatedHistory = [...prevHistory];
+                    updatedHistory[updatedHistory.length - 1].text = aiAnswer.slice(0, currentIndex + 1);
+                    return updatedHistory;
+                });
+                currentIndex++;
+
+                if (currentIndex >= aiAnswer.length) {
+                    clearInterval(interval); // Dừng hiệu ứng khi đã hoàn thành
+                }
+            }, 10); // Điều chỉnh 50ms cho tốc độ gõ chữ
+
         } catch (error) {
-            console.error('Lỗi:', error);
+            console.error("Lỗi:", error);
+            setChatHistory((prevHistory) => [
+                ...prevHistory,
+                { type: "ai", text: "Xin lỗi, tôi gặp lỗi khi xử lý yêu cầu của bạn. Vui lòng thử lại sau." },
+            ]);
         } finally {
             setLoading(false);
         }
     };
+
 
 
     const handleSubmit = async (e) => {
@@ -165,9 +162,7 @@ function Gemini() {
         ]);
         setQuestion('');
         await generateAIResponse(question);
-
     };
-
 
     const startVoiceRecognition = () => {
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
@@ -180,6 +175,7 @@ function Gemini() {
         recognition.onresult = (event) => {
             const spokenText = event.results[0][0].transcript;
             setQuestion(spokenText);
+            handleSubmit(new Event('submit'));
         };
 
         recognition.onerror = (event) => {
@@ -189,6 +185,7 @@ function Gemini() {
 
         recognition.start();
     };
+
 
     return (
         <div style={{
@@ -326,6 +323,7 @@ function Gemini() {
                             </div>
                         ))}
                     </Box>
+
 
                     <form onSubmit={handleSubmit} style={{ display: 'flex', alignItems: 'center' }}>
                         <input
