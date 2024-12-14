@@ -18,7 +18,6 @@ export default function ProductPopup({ open, handleClose, id }) {
     const [quantity, setQuantity] = useState(1);
     const allSizes = new Map();
     const allColors = new Map();
-    const allImages = [];
 
     useEffect(() => {
         const fetchData = async () => {
@@ -82,16 +81,6 @@ export default function ProductPopup({ open, handleClose, id }) {
         } else if (productDetail.colorsDTO) {
             allColors.set(productDetail.colorsDTO.id, productDetail.colorsDTO);
         }
-
-        if (Array.isArray(productDetail.imageDTOResponse)) {
-            productDetail.imageDTOResponse.forEach(image => {
-                if (image.url) {
-                    allImages.push({ url: image.url });
-                }
-            });
-        } else if (productDetail.imageDTOResponse && productDetail.imageDTOResponse.url) {
-            allImages.push({ url: productDetail.imageDTOResponse.url });
-        }
     });
 
     const handleAddToCart = async () => {
@@ -142,40 +131,29 @@ export default function ProductPopup({ open, handleClose, id }) {
         }
     };
 
-    console.log(allImages)
-
 
     return (
         <Dialog open={open} onClose={handleClose} maxWidth="xl" fullWidth>
             <DialogContent>
                 <Grid container spacing={3}>
-                    <Grid item xs={12} md={6} display='flex' alignItems='center'>
-                        <div className="carousel-container" style={styles.carouselContainer}>
-                            <Carousel
-                                prevIcon={<span style={styles.customPrevIcon}>&lt;</span>}
-                                nextIcon={<span style={styles.customNextIcon}>&gt;</span>}
-                                fade
-                                interval={3000}
+                    <Grid item xs={12} md={6} display="flex" alignItems="center" justifyContent='center'>
+                        {pd.image !== '' ? (
+                            <img
+                                src={pd.image}
+                                alt="Product Image"
+                                style={{ maxWidth: '380px', height: 'auto', borderRadius: '8px' }}
+                            />
+                        ) : (
+                            <video
+                                controls
+                                src="https://example.com/path/to/your/video.mp4"
+                                style={{ maxWidth: '100%', borderRadius: '8px' }}
                             >
-
-                                {
-                                    allImages.size > 0 ? (
-                                        Array.from(allImages.values()).map(image => (
-                                            <Carousel.Item key={`${image.id}-${imgIndex}`}>
-                                                <img
-                                                    className="d-block w-100"
-                                                    style={styles.carouselImage}
-                                                    src={image.url && image.url.trim() !== '' ? image.url : 'https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930'}
-                                                    alt={pd.name}
-                                                />
-                                            </Carousel.Item>
-                                        ))
-                                    )
-                                        : <ArgonBox component="img" src='https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930' alt="Product" sx={{ width: '100%' }} />
-                                }
-                            </Carousel>
-                        </div>
+                                Your browser does not support the video tag.
+                            </video>
+                        )}
                     </Grid>
+
 
                     <Grid item xs={12} md={6}>
                         <ArgonTypography variant="h3" fontWeight="bold">
@@ -194,7 +172,7 @@ export default function ProductPopup({ open, handleClose, id }) {
                                     component="span"
                                     sx={{ whiteSpace: "nowrap" }}
                                 >
-                                    {pd.brandDTOResponse.name}
+                                    {pd.trademarkDTOResp.name}
                                 </ArgonTypography>
                             </ArgonTypography>
 
@@ -209,7 +187,7 @@ export default function ProductPopup({ open, handleClose, id }) {
                                     component="span"
                                     sx={{ whiteSpace: "nowrap" }}
                                 >
-                                    {pd.categoryDTOResponse.name}
+                                    {pd.categoryDTOResp.name}
                                 </ArgonTypography>
                             </ArgonTypography>
                         </ArgonBox>
@@ -391,28 +369,6 @@ export default function ProductPopup({ open, handleClose, id }) {
 
     );
 }
-
-const styles = {
-    carouselContainer: {
-        borderRadius: '10px',
-        boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
-    },
-    carouselImage: {
-        height: 'auto',
-        objectFit: 'cover',
-        borderRadius: '10px',
-    },
-    customPrevIcon: {
-        fontSize: '2rem',
-        color: 'white',
-        background: 'rgba(0, 0, 0, 0.3)',
-    },
-    customNextIcon: {
-        fontSize: '2rem',
-        color: 'white',
-        background: 'rgba(0, 0, 0, 0.3)',
-    },
-};
 
 ProductPopup.propTypes = {
     open: PropTypes.bool.isRequired,

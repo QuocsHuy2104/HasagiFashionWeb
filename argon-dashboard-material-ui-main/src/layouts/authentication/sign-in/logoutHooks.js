@@ -1,26 +1,30 @@
 import React from "react";
-import { useGoogleLogout } from "react-google-login";
+import Cookies from "js-cookie";
+import axios from "axios";
+import { GoogleOAuthProvider, googleLogout } from "@react-oauth/google";
 
-const clientId =
-  "576683154565-adkki79r5dvm6v4j8alacmbg73cagt72.apps.googleusercontent.com";
+const LogoutHooks = () => {
+  const handleLogout = () => {
+    try {
+      Cookies.remove("user");
+      
+      delete axios.defaults.headers.common["Authorization"];
+      googleLogout();
 
-function LogoutHooks() {
-  const onLogoutSuccess = () => {
-    alert("Logout is successful");
+      alert("Logout successful");
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
   };
-
-  const onFailure = () => {
-    console.log("Handle failure case");
-  };
-
-  const { signOut } = useGoogleLogout({ clientId, onLogoutSuccess, onFailure });
 
   return (
-    <button onClick={signOut} className="button">
-      <img src="icons/google.svg" alt="google icon" className="icon" />
-      <span className="buttonText"> Sign out</span>
-    </button>
+    <GoogleOAuthProvider clientId="576683154565-adkki79r5dvm6v4j8alacmbg73cagt72.apps.googleusercontent.com">
+      <button onClick={handleLogout} className="button">
+        <img src="icons/google.svg" alt="google icon" className="icon" />
+        <span className="buttonText"> Sign out</span>
+      </button>
+    </GoogleOAuthProvider>
   );
-}
+};
 
 export default LogoutHooks;

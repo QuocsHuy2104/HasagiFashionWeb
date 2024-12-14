@@ -1,24 +1,30 @@
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Cookies from 'js-cookie';
 
 const LoginHooks = () => {
   const navigate = useNavigate();
 
   const handleLogin = async (response) => {
     try {
-      console.log("Google Login Response:", response);
-
       const token = response?.credential;
       console.log("Received token:", token);
       const backendResponse = await axios.post("http://localhost:8080/oauth2/verify", {
-        token,
+        token
       });
 
       console.log("Backend response:", backendResponse.data);
 
-      localStorage.setItem("Account", token);
-      navigate("/feature-section");
+      if (backendResponse.status === 200) {
+        const expirationTime = new Date(new Date().getTime() + 60 * 60 * 1000);
+
+        const token = backendResponse.data;
+
+        Cookies.set('user', token, { expires: expirationTime });
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        navigate("/");
+      }
 
     } catch (error) {
       console.error("Error during login:", error);

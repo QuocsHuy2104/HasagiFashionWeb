@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
+import Icon from "@mui/material/Icon";
 import ArgonBox from "components/ArgonBox";
 import Sidenav from "examples/Sidenav";
 import Configurator from "examples/Configurator";
@@ -107,34 +108,36 @@ export default function App() {
       }}
       onClick={handleConfiguratorOpen}
     >
+      <Icon sx={{ fontSize: "1.25rem" }}>settings</Icon>
     </ArgonBox>
   );
 
   const filteredRoutes = routes.filter(route => route.showInSidenav !== false);
 
-  const shouldShowSidenav = 
-    pathname !== "/feature-section" 
-    && pathname !== "/ShopDetail" 
-    && pathname !== "/Shop" 
-    && pathname !== "/Cart" 
-    && pathname !== "/Contact" 
-    && pathname !== "/Checkout" 
-    && pathname !== "/Backup" 
+  const shouldShowSidenav =
+    pathname !== "/feature-section"
+    && pathname !== "/ShopDetail"
+    && pathname !== "/Shop"
+    && pathname !== "/Cart"
+    && pathname !== "/Contact"
+    && pathname !== "/Checkout"
+    && pathname !== "/Backup"
     && pathname !== "/Favorite"
     && pathname !== "/Complete"
     && pathname !== "/History"
-    && pathname !== "/profile" 
-    && pathname !== "/chatBot" 
-    && pathname !== "/Q&A" 
-    && pathname !== "/About" 
-    // && pathname !== "/not-Found"
+    && pathname !== "/profile"
+    && pathname !== "/chatBot"
+    && pathname !== "/Q&A"
+    && pathname !== "/OrderSummary"
+    && pathname !== "/About"
+    && pathname !== "/not-Found"
     && !pathname.startsWith("/history-order/");
 
   return direction === "rtl" ? (
     <CacheProvider value={rtlCache}>
       <ThemeProvider theme={darkMode ? themeDarkRTL : themeRTL}>
         <CssBaseline />
-        {!loading && layout === "dashboard" && shouldShowSidenav && ( // Conditionally render Sidenav after loading
+        {!loading && layout === "dashboard" && shouldShowSidenav && (
           <>
             <Sidenav
               color={sidenavColor}

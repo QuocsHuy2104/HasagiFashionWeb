@@ -35,7 +35,13 @@ export default function MultipleSelectCheckmarks({ roles, selectedRoles, onRoleC
 
     return (
         <FormControl sx={{ width: { xs: '100%', sm: '100%' } }}>  {/* Full width on small screens, fixed on larger */}
-            <InputLabel id="demo-multiple-checkbox-label">Vai trò</InputLabel>
+            <InputLabel
+                id="demo-multiple-checkbox-label"
+                sx={{ color: '#dadada' }}
+            >
+                Chọn vai trò
+            </InputLabel>
+
             <Select
                 labelId="demo-multiple-checkbox-label"
                 id="demo-multiple-checkbox"
