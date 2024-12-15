@@ -107,21 +107,21 @@ export default function ProductFormDialog({ open, onClose, colors, sizes, initia
       maxWidth="md"
       fullWidth
     >
-      <DialogTitle id="product-form-dialog-title">Product Details</DialogTitle>
+      <DialogTitle id="product-form-dialog-title">Sản phẩm chi tiết</DialogTitle>
       <DialogContent>
         <ArgonBox component="form" role="form" onSubmit={handleSubmit}>
 
           {/* Quantity & Pricing */}
           <ArgonBox display="flex" flexDirection="column" mt={3} p={2} mb={3} border="1px solid #ccc" borderRadius="8px">
             <Typography variant="h6" component="h2" fontWeight="bold" mb={3}>
-              Quantity & Pricing
+              Số lượng và giá
             </Typography>
 
             {/* Quantity Input */}
             <ArgonBox mb={3}>
               <ArgonInput
                 type="number"
-                placeholder="Quantity"
+                placeholder="Số lượng"
                 name="quantity"
                 size="large"
                 fullWidth
@@ -142,7 +142,7 @@ export default function ProductFormDialog({ open, onClose, colors, sizes, initia
             <ArgonBox display="flex" flexDirection="column" gap={3} mb={3}>
               <ArgonInput
                 type="number"
-                placeholder="Update price"
+                placeholder="Cập nhật giá"
                 name="price"
                 size="large"
                 fullWidth
@@ -154,7 +154,7 @@ export default function ProductFormDialog({ open, onClose, colors, sizes, initia
                   borderWidth: '0.5px',
                   borderStyle: 'solid',
                 }}
-                startAdornment={<InputAdornment position="start">$</InputAdornment>}
+                startAdornment={<InputAdornment position="start">đ</InputAdornment>}
                 error={Boolean(errors.price)}
                 helperText={errors.price}
               />
@@ -164,7 +164,7 @@ export default function ProductFormDialog({ open, onClose, colors, sizes, initia
             <ArgonBox display="flex" flexDirection="column" gap={3} mb={3}>
               <ArgonInput
                 type="number"
-                placeholder="Update price size"
+                placeholder="Cập nhật giá kích cỡ"
                 name="priceSize"
                 size="large"
                 fullWidth
@@ -176,7 +176,7 @@ export default function ProductFormDialog({ open, onClose, colors, sizes, initia
                   borderWidth: '0.5px',
                   borderStyle: 'solid',
                 }}
-                startAdornment={<InputAdornment position="start">$</InputAdornment>}
+                startAdornment={<InputAdornment position="start">đ</InputAdornment>}
                 error={Boolean(errors.priceSize)}
                 helperText={errors.priceSize}
               />
@@ -216,7 +216,7 @@ export default function ProductFormDialog({ open, onClose, colors, sizes, initia
                 onChange={handleChange}
                 value={formData.colorId}
                 options={[
-                  { value: "", label: errors.colorId ? errors.colorId : "Color" },
+                  { value: "", label: errors.colorId ? errors.colorId : "Màu sắc" },
                   ...colors.map(color => ({ value: color.id, label: color.name }))
                 ]}
                 style={{
@@ -240,7 +240,7 @@ export default function ProductFormDialog({ open, onClose, colors, sizes, initia
                 onChange={handleChange}
                 value={formData.sizeId}
                 options={[
-                  { value: "", label: errors.sizeId ? errors.sizeId : "Size" },
+                  { value: "", label: errors.sizeId ? errors.sizeId : "Kích cỡ" },
                   ...sizes.map(size => ({ value: size.id, label: size.name }))
                 ]}
                 style={{
@@ -261,8 +261,8 @@ export default function ProductFormDialog({ open, onClose, colors, sizes, initia
         </ArgonBox>
       </DialogContent>
       <DialogActions>
-        <Button type="button" onClick={onClose}>Cancel</Button>
-        <Button type="submit" onClick={handleSubmit}>Submit</Button>
+        <Button type="button" onClick={onClose}>Đóng</Button>
+        <Button type="submit" onClick={handleSubmit}>Lưu</Button>
       </DialogActions>
     </Dialog>
   );

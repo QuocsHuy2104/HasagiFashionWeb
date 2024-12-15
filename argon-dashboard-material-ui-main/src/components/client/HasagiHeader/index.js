@@ -14,7 +14,7 @@ import { faMicrophone } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import CartService from "../../../services/CartService";
 import axios from "axios";
-import aboutImage5 from "layouts/assets/img/product-1.jpg";
+import aboutImage5 from "layouts/assets/img/user.jpg";
 import ProfileServices from "services/ProfileServices";
 import AddressService from "../../../services/AddressServices";
 
@@ -29,7 +29,7 @@ const Header = ({ onSearch }) => {
   const navigate = useNavigate();
   const [hovered, setHovered] = useState(null);
   const [images, setImages] = useState([]);
-
+  const [profileImage, setProfileImage] = useState(null);
   const handleMouseDropdownMenuEnter = (index) => setHovered(index);
   const handleMouseDropdownMenuLeave = () => setHovered(null);
 
@@ -217,7 +217,7 @@ const Header = ({ onSearch }) => {
   const fetchUserData = async () => {
     try {
       const profileData = await ProfileServices.getProfile();
-
+      setProfileImage(profileData.avatar);
       setUsername(profileData.username || "");
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -225,7 +225,12 @@ const Header = ({ onSearch }) => {
   };
 
   useEffect(() => {
-    fetchUserData();
+    const intervalId = setInterval(() => {
+      fetchUserData();
+    }, 1000);
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
 
   const menuItems = user
@@ -341,7 +346,7 @@ const Header = ({ onSearch }) => {
                   ) : (
                     <>
                       <img
-                        src={user.profileImageUrl || aboutImage5} // URL ảnh người dùng
+                        src={profileImage || aboutImage5} // URL ảnh người dùng
                         alt="User Avatar"
                         style={{
                           width: "24px", // Kích thước nhỏ gọn của ảnh

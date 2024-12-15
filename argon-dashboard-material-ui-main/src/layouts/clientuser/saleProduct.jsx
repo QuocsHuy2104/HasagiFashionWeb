@@ -85,7 +85,6 @@ export default function SaleProduct() {
                                         display: "flex",
                                         flexDirection: "column",
                                         justifyContent: "start",
-                                        alignItems: "center",
                                         height: "100%",
                                         position: "relative",
                                         overflow: "hidden",
@@ -120,19 +119,19 @@ export default function SaleProduct() {
                                             />
                                         </ArgonBox>
                                         <ArgonTypography
-                                            variant="h5"
-                                            color="text"
-                                            mt={2}
-                                            textAlign="center"
-                                            style={{
-                                                whiteSpace: "nowrap",
-                                                overflow: "hidden",
-                                                textOverflow: "ellipsis",
-                                                width: "100%",
-                                            }}
-                                        >
-                                            {product.name}
-                                        </ArgonTypography>
+    variant="h5"
+    color="text"
+    mt={2}
+    textAlign="left" // Căn trái tên sản phẩm
+    style={{    
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+    }}
+>
+    {product.name}
+</ArgonTypography>
+
                                         <ArgonBox display="flex" alignItems="center" justifyContent="center" my={1}>
                                             {(() => {
                                                 const salePercent = parseFloat(product.sale);
@@ -192,7 +191,7 @@ export default function SaleProduct() {
                                     </ArgonBox>
                                     {hoveredProductId === product.id && (
                                         <>
-                                            <SearchOutlinedIcon
+                                            {/* <SearchOutlinedIcon
                                                 onClick={() => handleOpenPopup(product.id)}
                                                 sx={{
                                                     width: "1.7em",
@@ -205,8 +204,8 @@ export default function SaleProduct() {
                                                     borderRadius: "12px",
                                                     cursor: "pointer",
                                                 }}
-                                            />
-                                            <ShoppingCartIcon
+                                            /> */}
+                                            {/* <ShoppingCartIcon
                                                 sx={{
                                                     width: "1.7em",
                                                     height: "1.7em",
@@ -218,7 +217,7 @@ export default function SaleProduct() {
                                                     borderRadius: "12px",
                                                     cursor: "pointer",
                                                 }}
-                                            />
+                                            /> */}
                                         </>
                                     )}
                                     <ProductPopup open={isPopupOpen} handleClose={handleClosePopup} id={selectedProductId} />

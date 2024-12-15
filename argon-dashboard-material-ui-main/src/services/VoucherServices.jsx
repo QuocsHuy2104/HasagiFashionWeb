@@ -16,7 +16,9 @@ const VoucherService = {
 
     deleteVoucher: (id) => apiClient.delete(`/admin/coupon/${id}`),
 
-    getUsedVouchersByAccount: (accountId) => apiClient.get(`/admin/coupon/${accountId}/used-vouchers`)
+    getUsedVouchersByAccount: (accountId) => apiClient.get(`/admin/coupon/${accountId}/used-vouchers`),
+
+    getAllVouchersUS: () => apiClient.get("/user/coupon"),
 };
 
 export default VoucherService;

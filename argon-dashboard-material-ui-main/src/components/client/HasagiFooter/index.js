@@ -108,12 +108,9 @@ const Footer = () => {
               >
                 <MuiLink href="/introduce">Hỏi đáp</MuiLink>
                 <br />
-                <MuiLink href="/Q&A">Chính sách đổi trả</MuiLink>
-                <br />
-                <MuiLink href="/Q&A">Chính sách bảo mật</MuiLink>
-                <br />
-                <MuiLink href="/Q&A">Điều khoản dịch vụ</MuiLink>
-                <br />
+                <MuiLink href='/DoiTra'>Chinh sách đổi trả</MuiLink><br />
+                                <MuiLink href='/BaoMat'>Chính sách bảo mật</MuiLink><br />
+                                <MuiLink href='/DieuKhoan'>Điều khoản dịch vụ</MuiLink><br />
               </ArgonTypography>
             </ArgonBox>
 
@@ -132,7 +129,7 @@ const Footer = () => {
                 justifyContent="space-between"
                 alignItems="center"
               >
-                Doanh Mục
+                Danh Mục
               </ArgonTypography>
               <ArgonTypography
                 variant="button"
@@ -175,7 +172,7 @@ const Footer = () => {
                 Luôn cập nhật tất cả các hành động mà chúng tôi đã lưu cho tất cả khách hàng của
                 mình.
               </ArgonTypography>
-              <ArgonBox display="flex" justifyContent="flex-start" alignItems="center">
+              {/* <ArgonBox display="flex" justifyContent="flex-start" alignItems="center">
                 <MuiLink href="/shop">
                   <ArgonBox
                     width={30}
@@ -214,7 +211,7 @@ const Footer = () => {
                     alt="Facebook"
                   />
                 </MuiLink>
-              </ArgonBox>
+              </ArgonBox> */}
             </ArgonBox>
           </ArgonBox>
         </ArgonBox>
@@ -228,7 +225,7 @@ const Footer = () => {
               </MuiLink>
             </ArgonTypography>
           </ArgonBox>
-          <ArgonBox display="flex" justifyContent="space-start" alignItems="center">
+          {/* <ArgonBox display="flex" justifyContent="space-start" alignItems="center">
             <ArgonBox>
               <MuiLink href="/">
                 <ArgonBox
@@ -276,7 +273,7 @@ const Footer = () => {
                 />
               </MuiLink>
             </ArgonBox>
-          </ArgonBox>
+          </ArgonBox> */}
         </ArgonBox>
       </ArgonBox>
     </ArgonBox>

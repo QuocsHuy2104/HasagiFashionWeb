@@ -175,15 +175,15 @@ const ProductTable = ({ onEditClick, setSelectedProduct, searchKeyword, selected
                 }}
             />
         ),
-        // TrangThai: (
-        //     <Switch
-        //         checked={product.isActive}
-        //         onChange={() => handleStatusToggle(product)}
-        //         color="primary"
-        //         inputProps={{ "aria-label": "controlled" }}
-        //     />
+        TrangThai: (
+            <Switch
+                checked={product.isActive}
+                onChange={() => handleStatusToggle(product)}
+                color="primary"
+                inputProps={{ "aria-label": "controlled" }}
+            />
 
-        // ),
+        ),
         ThaoTac: (
             <ArgonBox display="flex" justifyContent="space-between" alignItems="center">
                 <ArgonTypography
@@ -200,7 +200,7 @@ const ProductTable = ({ onEditClick, setSelectedProduct, searchKeyword, selected
                         },
                     }}
                 >
-                    <i className="bi bi-pencil-square"></i> Edit
+                    <i className="bi bi-pencil-square"></i> Chỉnh sửa
                 </ArgonTypography>
                 <ArgonTypography
                     px={1}
@@ -216,7 +216,7 @@ const ProductTable = ({ onEditClick, setSelectedProduct, searchKeyword, selected
                         },
                     }}
                 >
-                    <i className="bi bi-info-circle"></i> Detail
+                    <i className="bi bi-info-circle"></i> Chi tiết
                 </ArgonTypography>
             </ArgonBox>
         ),
@@ -228,7 +228,7 @@ const ProductTable = ({ onEditClick, setSelectedProduct, searchKeyword, selected
             { name: "SoLuong", align: "center" },
             { name: "DanhMuc", align: "center" },
             { name: "ThuongHieu", align: "center" },
-            // { name: "TrangThai", align: "center" },
+            { name: "TrangThai", align: "center" },
             { name: "ThaoTac", align: "center" },
         ],
         rows,

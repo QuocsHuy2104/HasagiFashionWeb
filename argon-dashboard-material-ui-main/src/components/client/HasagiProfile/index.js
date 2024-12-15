@@ -7,6 +7,7 @@ import AddressPage from "../HasagiAddress";
 import ChangePassword from "../HasagiChangePassword";
 import Voucher from "components/client/HasagiVorcher/vorcher";
 import User from "../HasagiUser";
+import aboutImage5 from "layouts/assets/img/user.jpg";
 import ProfileServices from "../../../services/ProfileServices";
 const Profile = () => {
   const [activeItem, setActiveItem] = useState("Hồ Sơ");
@@ -118,10 +119,9 @@ const Profile = () => {
                 {profileImage ? (
                   <img src={profileImage} alt="Profile" style={{ width: "100%", height: "auto" }} />
                 ) : (
-                  <img src="default-avatar.png" alt="Profile" style={{ width: "100%", height: "auto" }} />
+                  <img src={aboutImage5} alt="Profile" style={{ width: "100%", height: "auto" }} />
                 )}
               </div>
-
               <span className="username">{name}</span>
               <button className="edit-profile" onClick={handleEditProfileClick}>
                 Sửa Hồ Sơ

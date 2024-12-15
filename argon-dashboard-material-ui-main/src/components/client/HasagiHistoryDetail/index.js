@@ -367,7 +367,11 @@ const HistoryOrderDetail = () => {
                           {item.productName}
                         </Typography>
                         <Typography variant="body2" color="textSecondary" style={{ color: "black" }}>
-                          Phân loại hàng: {item.size}, {item.color}
+                          Phân loại hàng: {item.size !== "Không có" && (
+                            <>
+                              {item.size || "Chưa chọn kích thước"},
+                            </>
+                          )} {item.color}
                         </Typography>
                         <Box display="flex" justifyContent="space-between">
                           <Typography variant="body2" color="textSecondary" style={{ color: "black" }}>

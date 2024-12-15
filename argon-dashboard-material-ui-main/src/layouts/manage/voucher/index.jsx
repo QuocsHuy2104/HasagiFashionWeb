@@ -347,11 +347,25 @@ function Voucher() {
                                     </Grid>
                                 </Grid>
 
-                                <ArgonBox mb={3} sx={{ width: { xs: '50%', sm: '10%', md: '10%' } }}>
-                                    <ArgonButton type="submit" size="large" color="info" fullWidth>
-                                        {formData.id ? "Cập nhật" : "Tạo"}
+                                <ArgonBox  mb={3} width={720} display="flex" gap={1} justifyContent="flex-start">
+                                    <ArgonButton
+                                        type="submit"
+                                        size="large"
+                                        color="info"
+                                        sx={{ minWidth: 100, padding: '8px 16px' }}
+                                    >
+                                        {formData.id ? "Cập nhật" : "Thêm"}
+                                    </ArgonButton>
+                                    <ArgonButton
+                                        size="large"
+                                        color="primary"
+                                        sx={{ minWidth: 100, padding: '8px 16px' }}
+                                        onClick={resetForm}
+                                    >
+                                        Làm mới
                                     </ArgonButton>
                                 </ArgonBox>
+
                             </ArgonBox>
                         </ArgonBox>
                     </Card>

@@ -6,7 +6,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
 import Box from '@mui/material/Box';
-import Swal from 'sweetalert2'; 
+import Swal from 'sweetalert2';
 
 const columns = [
     { field: 'name', headerName: 'Danh mục', width: 130 },
@@ -37,16 +37,17 @@ export default function DataTable({ categories, onEditClick, onDeleteClick }) {
                 },
                 buttonsStyling: false,
             });
+
             swalWithBootstrapButtons
                 .fire({
                     title: "Bạn có chắc chắn?",
-                    text: "Muốn xóa thương hiệu này không!",
+                    text: "Muốn xóa các danh mục này không!",
                     icon: "warning",
                     showCancelButton: true,
                     confirmButtonText: "Vâng, tôi muốn!",
                     cancelButtonText: "Không!",
                     reverseButtons: true,
-                    backdrop: 'rgba(0, 0, 0, 0) left top no-repeat',
+                    backdrop: 'rgba(0, 0, 0, 0)',
                 })
                 .then(async (result) => {
                     if (result.isConfirmed) {
@@ -54,15 +55,16 @@ export default function DataTable({ categories, onEditClick, onDeleteClick }) {
                             await onDeleteClick(selectedRows);
                             Swal.fire({
                                 title: "Đã xóa!",
-                                text: "Danh mục đã được xóa thành công.",
+                                text: "Các danh mục đã được xóa thành công.",
                                 icon: "success",
                                 backdrop: 'rgba(0, 0, 0, 0)',
                             });
+                            setSelectedRows([]); // Clear selection after deletion
                         } catch (error) {
                             console.error("Có lỗi xảy ra khi xóa!", error);
                             Swal.fire({
                                 title: "Lỗi!",
-                                text: "Có lỗi xảy ra khi xóa thương hiệu.",
+                                text: "Có lỗi xảy ra khi xóa các danh mục.",
                                 icon: "error",
                                 backdrop: 'rgba(0, 0, 0, 0)',
                             });
@@ -70,7 +72,7 @@ export default function DataTable({ categories, onEditClick, onDeleteClick }) {
                     } else if (result.dismiss === Swal.DismissReason.cancel) {
                         Swal.fire({
                             title: "Đã hủy",
-                            text: "Danh mục không bị xóa.",
+                            text: "Các danh mục không bị xóa.",
                             icon: "error",
                             backdrop: 'rgba(0, 0, 0, 0)',
                         });

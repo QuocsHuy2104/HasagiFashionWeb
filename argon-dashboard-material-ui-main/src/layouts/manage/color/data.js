@@ -115,10 +115,10 @@ export default function DataTable({ colors, onEditClick, onDeleteClick }) {
             {selectedRows.length > 0 && (
                 <Box sx={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 1 }}>
                     <IconButton onClick={handleEdit} disabled={selectedRows.length !== 1}>
-                        <EditIcon color="dark" />
+                        <EditIcon category="dark" />
                     </IconButton>
                     <IconButton onClick={handleDelete}>
-                        <DeleteIcon color="dark" />
+                        <DeleteIcon category="dark" />
                     </IconButton>
                 </Box>
             )}

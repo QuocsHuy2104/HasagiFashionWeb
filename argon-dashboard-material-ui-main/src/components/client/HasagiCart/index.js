@@ -25,16 +25,10 @@ const Cart = () => {
   const [selectAll, setSelectAll] = useState(false);
   const [showBackupModal, setShowBackupModal] = useState(false);
   const [images, setImages] = useState([]);
-  const [checkedItems, setCheckedItems] = useState([]);
   const navigate = useNavigate();
 
   const fetchCartItems = async () => {
-    const accountId = Cookies.get("accountId");
 
-    if (!accountId) {
-      navigate(`/authentication/sign-in`);
-      return;
-    }
     try {
       const [cartResponse, addressResponse] = await Promise.all([
         CartService.getCart(),
@@ -278,7 +272,6 @@ const Cart = () => {
       setShowBackupModal(true);
     } else {
       navigate(`/Checkout?id=${address}`);
-      toast.success("Chuyển đến trang thanh toán.");
     }
   };
 
@@ -286,7 +279,6 @@ const Cart = () => {
     setShowBackupModal(false);
     if (accountExists) {
       navigate(`/Checkout?id=${address}`);
-      toast.success("Chuyển đến trang thanh toán.");
     }
   };
 
@@ -448,13 +440,6 @@ const Cart = () => {
                       scope="col"
                       style={{ width: "5%", textAlign: "center", padding: "10px", border: "none" }}
                     >
-                      <input
-                        type="checkbox"
-                        checked={selectAll}
-                        onChange={handleSelectAllChange}
-                        aria-label="Select All"
-                        style={{ transform: "scale(1.5)" }}
-                      />
                     </th>
                     <th
                       scope="col"
@@ -538,7 +523,7 @@ const Cart = () => {
                         </td>
                         <td
                           className="align-middle"
-                          style={{ textAlign: "left", paddingLeft: "20px", border: "none" }}
+                          style={{ textAlign: "left", paddingLeft: "10px", border: "none" }}
                         >
                           <Link
                             key={item.id}
@@ -609,7 +594,11 @@ const Cart = () => {
                               <span>
                                 {item.color || "Chưa chọn màu"}
                               </span>
-                              , {item.size || "Chưa chọn kích thước"}
+                              {item.size !== "Không có" && (
+                                <>
+                                  , <span>{item.size || "Chưa chọn kích thước"}</span>
+                                </>
+                              )}
                             </div>
                           </button>
 
@@ -743,7 +732,7 @@ const Cart = () => {
                         <span style={{ marginLeft: "1px" }}>
                             {item.quantity !== ""
                               ? new Intl.NumberFormat("vi-VN").format(item.price * item.quantity)
-                              : new Intl.NumberFormat("vi-VN").format(item.price)}
+                              : new Intl.NumberFormat("vi-VN").format(item.price)}đ
                           </span>
                         </td>
                         <td className="align-middle" style={{ border: "none" }}>
@@ -768,22 +757,39 @@ const Cart = () => {
                     type="checkbox"
                     checked={selectAll}
                     onChange={handleSelectAllChange}
-                    style={{ transform: "scale(1.5)", marginBottom: "0" }}
+                    style={{ transform: "scale(1.5)", marginBottom: "0", marginLeft: "-4px" }}
                   />
-                  <label style={{ marginLeft: "12px", marginTop: "2px" }}>
+                  <label
+                    style={{
+                      marginLeft: "12px",
+                      marginTop: "3px",
+                      fontSize: "17px", // Sửa từ 'frontSize' thành 'fontSize'
+                    }}
+                  >
                     Chọn Tất Cả ({countSelectedItems()})
                   </label>
                   <button
                     onClick={handleDeleteSelected}
                     className="btn"
                     style={{
-                      backgroundColor: "transparent",
-                      border: "none",
+                      border: "0.1px solid gray",
                       color: "black",
-                      fontSize: "20px",
+                      fontSize: "16px",
                       fontWeight: "normal",
                       marginLeft: "10px",
-                      marginTop: "2px",
+                      marginTop: "3px",
+                      padding: "5px 10px",
+                      backgroundColor: "white",
+                      cursor: "pointer",
+                      transition: "all 0.3s ease", // Hiệu ứng mượt
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = "lightgray";
+                      e.target.style.borderColor = "black";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = "white";
+                      e.target.style.borderColor = "gray";
                     }}
                   >
                     Xóa

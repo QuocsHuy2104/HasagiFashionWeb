@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 
-import AccountService from "services/AccountServices";
+import AccountService from 'services/AccountServices';
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
 import ArgonAvatar from "components/ArgonAvatar";
 import ArgonBadge from "components/ArgonBadge";
 import team2 from "assets/images/team-2.jpg";
-import Switch from "@mui/material/Switch";
+import Switch from '@mui/material/Switch';
 
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 
@@ -56,10 +56,11 @@ Function.propTypes = {
   org: PropTypes.string.isRequired,
 };
 
+
 const AuthorsTableData = ({ onEditClick, searchTerm = "", selectedRoles = [] }) => {
   const [accounts, setAccounts] = useState([]);
 
-  const [author, setAuthor] = useState("");
+  const [author, setAuthor] = useState('');
 
   const getAuthor = async () => {
     try {
@@ -100,15 +101,15 @@ const AuthorsTableData = ({ onEditClick, searchTerm = "", selectedRoles = [] }) 
     fetchAccounts();
   }, [author]);
 
-  const deleteItem = async (id) => {
+  const deleteItem = async id => {
     try {
       const res = await AccountService.deleteAccount(id);
       fetchAccounts();
-      toast.success(res.data);
+      toast.success(res.data)
     } catch (error) {
       console.error(error);
     }
-  };
+  }
 
   const filteredBySearch = accounts.filter(
     (account) =>
@@ -139,7 +140,7 @@ const AuthorsTableData = ({ onEditClick, searchTerm = "", selectedRoles = [] }) 
 
         const revertedAccounts = accounts.map((acc) => {
           if (acc.id === account.id) {
-            return { ...acc, delete: !acc.delete }; // Revert the change
+            return { ...acc, delete: !acc.delete };  // Revert the change
           }
           return acc;
         });
@@ -148,15 +149,18 @@ const AuthorsTableData = ({ onEditClick, searchTerm = "", selectedRoles = [] }) 
       });
   };
 
-  const filteredAccounts =
-    selectedRoles.length > 0
-      ? filteredBySearch.filter((account) =>
-          (account.roleName || []).some((role) => selectedRoles.includes(role.name))
-        )
-      : filteredBySearch;
+  const filteredAccounts = selectedRoles.length > 0
+    ? filteredBySearch.filter(
+      (account) =>
+        (account.roleName || []).some((role) => selectedRoles.includes(role.name))
+    )
+    : filteredBySearch;
+
 
   const rows = filteredAccounts.map((account) => {
-    const accountRoles = (account.roleName || []).map((role) => role.name).join(", ") || "No Roles";
+    const accountRoles = (account.roleName || [])
+      .map((role) => role.name)
+      .join(", ") || "No Roles";
 
     return {
       "Thông tin": (
@@ -176,7 +180,10 @@ const AuthorsTableData = ({ onEditClick, searchTerm = "", selectedRoles = [] }) 
         />
       ),
       "Nghỉ việc": (
-        <Switch checked={!account.delete} onChange={() => handleSwitchChange(account)} />
+        <Switch
+          checked={!account.delete}
+          onChange={() => handleSwitchChange(account)}
+        />
       ),
       "Thao tác": (
         <ArgonBox display="flex" justifyContent="space-between" alignItems="center">
@@ -218,6 +225,7 @@ const AuthorsTableData = ({ onEditClick, searchTerm = "", selectedRoles = [] }) 
 
   return authorsTableData;
 };
+
 
 AuthorsTableData.propTypes = {
   onEditClick: PropTypes.func.isRequired,

@@ -75,7 +75,7 @@ function FeaturedProducts() {
                                         width: {
                                             xs: "100%", // Full width trên màn hình nhỏ
                                             sm: "48%", // Chiếm khoảng 50% trên màn hình trung bình
-                                            md: "23%", // Chiếm khoảng 1/4 trên màn hình lớn
+                                            md: "24%", // Chiếm khoảng 1/4 trên màn hình lớn
                                         },
                                     }}
                                 >

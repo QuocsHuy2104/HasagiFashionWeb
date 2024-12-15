@@ -665,7 +665,7 @@ const indexHistory = () => {
                                     color="textSecondary"
                                     style={{ color: "black" }}
                                   >
-                                    Phân loại hàng: {product.color}, {product.size}
+                                    Phân loại hàng: {product.color} {product.size !== "Không có" && (<>, {product.size} </>)}
                                   </Typography>
                                   <Box display="flex" justifyContent="space-between">
                                     <Typography variant="body2" style={{ color: "black", fontSize: "14px" }}>
