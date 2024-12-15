@@ -118,8 +118,8 @@ const Cart = () => {
           inputValue === ""
             ? ""
             : inputValue === "0"
-            ? item.quantity
-            : parseInt(inputValue, 10) || item.quantity + change;
+              ? item.quantity
+              : parseInt(inputValue, 10) || item.quantity + change;
 
         if (newQuantity === 0) {
           Swal.fire({
@@ -448,13 +448,7 @@ const Cart = () => {
                       scope="col"
                       style={{ width: "5%", textAlign: "center", padding: "10px", border: "none" }}
                     >
-                      <input
-                        type="checkbox"
-                        checked={selectAll}
-                        onChange={handleSelectAllChange}
-                        aria-label="Select All"
-                        style={{ transform: "scale(1.5)" }}
-                      />
+
                     </th>
                     <th
                       scope="col"
@@ -538,7 +532,7 @@ const Cart = () => {
                         </td>
                         <td
                           className="align-middle"
-                          style={{ textAlign: "left", paddingLeft: "20px", border: "none" }}
+                          style={{ textAlign: "left", paddingLeft: "10px", border: "none" }}
                         >
                           <Link
                             key={item.id}
@@ -702,15 +696,15 @@ const Cart = () => {
                                 }
                               }}
                               onBlur={(e) => {
-                                const inputValue = e.target.value.trim(); 
+                                const inputValue = e.target.value.trim();
                                 if (inputValue === "") {
-                                  handleQuantityChange(item.cartdetailid, 0, "1"); 
+                                  handleQuantityChange(item.cartdetailid, 0, "1");
                                 } else {
-                                  handleQuantityChange(item.cartdetailid, 0, inputValue); 
+                                  handleQuantityChange(item.cartdetailid, 0, inputValue);
                                 }
                               }}
                               style={{
-                                width: "60px", 
+                                width: "60px",
                                 height: "30px",
                                 margin: "0 5px",
                                 boxShadow: "none",
@@ -740,7 +734,7 @@ const Cart = () => {
                         </td>
 
                         <td className="align-middle" style={{ border: "none" }}>
-                        <span style={{ marginLeft: "1px" }}>
+                          <span style={{ marginLeft: "1px" }}>
                             {item.quantity !== ""
                               ? new Intl.NumberFormat("vi-VN").format(item.price * item.quantity)
                               : new Intl.NumberFormat("vi-VN").format(item.price)}
@@ -763,27 +757,44 @@ const Cart = () => {
             )}
             {cartItems.length > 0 && (
               <div className="d-flex align-items-center justify-content-between w-100 py-2">
-                <div className="d-flex align-items-center" style={{ marginLeft: "30px" }}>
+                <div className="d-flex align-items-center" style={{ marginLeft: "15px" }}>
                   <input
                     type="checkbox"
                     checked={selectAll}
                     onChange={handleSelectAllChange}
                     style={{ transform: "scale(1.5)", marginBottom: "0" }}
                   />
-                  <label style={{ marginLeft: "12px", marginTop: "2px" }}>
+                  <label
+                    style={{
+                      marginLeft: "12px",
+                      marginTop: "2px",
+                      fontSize: "16px", // Sửa từ 'frontSize' thành 'fontSize'
+                    }}
+                  >
                     Chọn Tất Cả ({countSelectedItems()})
                   </label>
                   <button
                     onClick={handleDeleteSelected}
                     className="btn"
                     style={{
-                      backgroundColor: "transparent",
-                      border: "none",
+                      border: "0.1px solid gray",
                       color: "black",
-                      fontSize: "20px",
+                      fontSize: "16px",
                       fontWeight: "normal",
                       marginLeft: "10px",
                       marginTop: "2px",
+                      padding: "5px 10px",
+                      backgroundColor: "white",
+                      cursor: "pointer",
+                      transition: "all 0.3s ease", // Hiệu ứng mượt
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = "lightgray";
+                      e.target.style.borderColor = "black";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = "white";
+                      e.target.style.borderColor = "gray";
                     }}
                   >
                     Xóa
@@ -805,6 +816,7 @@ const Cart = () => {
                   </button>
                 </div>
               </div>
+
             )}
           </div>
         </div>

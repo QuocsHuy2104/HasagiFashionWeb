@@ -22,13 +22,10 @@ const reviewsService = {
     },
 
 
-
     async getReviewsByProduct(productId) {
         const response = await apiClient.get(`/user/review/product/${productId}`);
         return response.data;
     },
-
-
 
     getAllReviewsAD: () => apiClient.get("/admin/review"),
 

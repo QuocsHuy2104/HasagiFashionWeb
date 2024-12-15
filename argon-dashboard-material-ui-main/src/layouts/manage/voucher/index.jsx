@@ -73,56 +73,78 @@ function Voucher() {
 
     const validateForm = () => {
         let isValid = true;
+        const newErrors = {};
 
         if (!formData.code || formData.code.trim() === "") {
-            toast.error("Trường mã voucher không được để trống.");
+            toast.warn("Trường mã voucher không được để trống.");
+            newErrors.code = true;
+            isValid = false;
+        } else if (
+            vouchers.some(
+                (voucher) =>
+                    voucher.code.trim().toLowerCase() === formData.code.trim().toLowerCase() &&
+                    voucher.id !== formData.id
+            )
+        ) {
+            toast.warn("Mã voucher đã tồn tại. Vui lòng nhập mã khác.");
+            newErrors.code = true;
             isValid = false;
         }
 
         if (!formData.discountPercentage) {
-            toast.error("Trường giảm giá không được để trống.");
+            toast.warn("Trường giảm giá không được để trống.");
+            newErrors.discountPercentage = true;
             isValid = false;
         } else if (
             isNaN(formData.discountPercentage) ||
             parseFloat(formData.discountPercentage) <= 0 ||
             parseFloat(formData.discountPercentage) > 100
         ) {
-            toast.error("Giảm giá phải là số lớn hơn 0 và nhỏ hơn hoặc bằng 100.");
+            toast.warn("Giảm giá phải là số lớn hơn 0 và nhỏ hơn hoặc bằng 100.");
+            newErrors.discountPercentage = true;
             isValid = false;
         }
 
         if (!formData.minimumOrderValue || isNaN(formData.minimumOrderValue)) {
-            toast.error("Trường giá trị đơn hàng tối thiểu phải là số hợp lệ.");
+            toast.warn("Trường giá trị đơn hàng tối thiểu phải là số hợp lệ.");
+            newErrors.minimumOrderValue = true;
             isValid = false;
         }
 
         if (!formData.maxDiscount || isNaN(formData.maxDiscount)) {
-            toast.error("Trường giảm giá tối đa phải là số hợp lệ.");
+            toast.warn("Trường giảm giá tối đa phải là số hợp lệ.");
+            newErrors.maxDiscount = true;
             isValid = false;
         }
 
         if (!formData.quantity || isNaN(formData.quantity)) {
-            toast.error("Trường số lượng phải là số hợp lệ.");
+            toast.warn("Trường số lượng phải là số hợp lệ.");
+            newErrors.quantity = true;
             isValid = false;
         }
 
         const currentDate = new Date().toISOString().split("T")[0];
         if (!formData.startDate) {
-            toast.error("Ngày bắt đầu không được để trống.");
+            toast.warn("Ngày bắt đầu không được để trống.");
+            newErrors.startDate = true;
             isValid = false;
         } else if (!formData.id && formData.startDate < currentDate) {
-            toast.error("Ngày bắt đầu không được trước ngày hiện tại khi tạo mới.");
+            toast.warn("Ngày bắt đầu không được trước ngày hiện tại.");
+            newErrors.startDate = true;
             isValid = false;
         }
 
         if (!formData.endDate) {
-            toast.error("Ngày kết thúc không được để trống.");
+            toast.warn("Ngày hết hạn không được để trống.");
+            newErrors.endDate = true;
             isValid = false;
         } else if (formData.endDate < formData.startDate) {
-            toast.error("Ngày kết thúc không được trước ngày bắt đầu.");
+            toast.warn("Ngày hết hạn không được trước ngày bắt đầu.");
+            newErrors.endDate = true;
             isValid = false;
         }
 
+        setErrors(newErrors);
         return isValid;
     };
 
@@ -240,24 +262,25 @@ function Voucher() {
                         <ArgonBox p={3} component="form" role="form" onSubmit={handleSubmit} sx={{ borderRadius: '0 0 15px 15px' }}>
                             <ArgonBox mx={3}>
                                 <ArgonBox mb={3} position="relative">
+                                    <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Mã giảm giá</p>
                                     <ArgonInput
                                         type="text"
-                                        placeholder="Mã giảm giá"
+                                        placeholder="Nhập mã giảm giá"
                                         size="large"
                                         name="code"
                                         value={formData.code}
                                         onChange={handleChange}
                                         error={!!errors.code}
-                                        sx={{ bgcolor: 'white', borderRadius: '8px' }}
                                     />
                                 </ArgonBox>
 
                                 <Grid container spacing={3}>
                                     <Grid item xs={12} sm={6}>
                                         <ArgonBox mb={3} position="relative">
+                                            <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Giảm %</p>
                                             <ArgonInput
                                                 type="number"
-                                                placeholder="Phầm trăm giảm giá"
+                                                placeholder="Nhập phầm trăm giảm giá"
                                                 size="large"
                                                 name="discountPercentage"
                                                 value={formData.discountPercentage}
@@ -269,9 +292,10 @@ function Voucher() {
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
                                         <ArgonBox mb={3} position="relative">
+                                            <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Số lượng</p>
                                             <ArgonInput
                                                 type="number"
-                                                placeholder="Số lượng"
+                                                placeholder="Nhập số lượng"
                                                 size="large"
                                                 name="quantity"
                                                 value={formData.quantity}
@@ -287,9 +311,10 @@ function Voucher() {
                                 <Grid container spacing={3}>
                                     <Grid item xs={12} sm={6}>
                                         <ArgonBox mb={3} position="relative">
+                                            <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Điều kiện giá tối thiểu</p>
                                             <ArgonInput
                                                 type="number"
-                                                placeholder="Giá trị tối thiểu hóa đơn"
+                                                placeholder="Nhập giá trị tối thiểu hóa đơn"
                                                 size="large"
                                                 name="minimumOrderValue"
                                                 value={formData.minimumOrderValue}
@@ -301,9 +326,10 @@ function Voucher() {
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
                                         <ArgonBox mb={3} position="relative">
+                                            <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Giảm tối đa</p>
                                             <ArgonInput
                                                 type="number"
-                                                placeholder="Giảm tối đa"
+                                                placeholder="Nhập giá giảm tối đa"
                                                 size="large"
                                                 name="maxDiscount"
                                                 value={formData.maxDiscount}
@@ -318,6 +344,9 @@ function Voucher() {
                                 <Grid container spacing={3}>
                                     <Grid item xs={12} sm={6}>
                                         <ArgonBox mb={3} position="relative">
+                                            <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>
+                                                Ngày bắt đầu
+                                            </p>
                                             <ArgonInput
                                                 type="date"
                                                 placeholder="Ngày bắt đầu"
@@ -325,14 +354,29 @@ function Voucher() {
                                                 name="startDate"
                                                 value={formData.startDate}
                                                 onChange={handleChange}
-                                                error={!!errors.startDate}
-                                                sx={{ bgcolor: 'white', borderRadius: '8px', width: '100%' }}
+                                                sx={{
+                                                    borderColor: errors.startDate ? 'red' : 'Gainsboro',
+                                                    borderWidth: '1px',
+                                                    borderStyle: 'solid',
+                                                    borderRadius: '8px',
+                                                    '& .MuiOutlinedInput-root': {
+                                                        '& fieldset': {
+                                                            borderColor: errors.startDate ? 'red' : 'Gainsboro',
+                                                        },
+                                                        '&:hover fieldset': {
+                                                            borderColor: errors.startDate ? 'red' : 'black',
+                                                        },
+                                                    },
+                                                }}
                                             />
                                         </ArgonBox>
                                     </Grid>
 
                                     <Grid item xs={12} sm={6}>
                                         <ArgonBox mb={3} position="relative">
+                                            <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>
+                                                Ngày hết hạn
+                                            </p>
                                             <ArgonInput
                                                 type="date"
                                                 placeholder="Ngày hết hạn"
@@ -340,14 +384,25 @@ function Voucher() {
                                                 name="endDate"
                                                 value={formData.endDate}
                                                 onChange={handleChange}
-                                                error={!!errors.endDate}
-                                                sx={{ bgcolor: 'white', borderRadius: '8px', width: '100%' }}
+                                                sx={{
+                                                    borderColor: errors.endDate ? 'red' : 'Gainsboro',
+                                                    borderWidth: '1px',
+                                                    borderStyle: 'solid',
+                                                    borderRadius: '8px',
+                                                    '& .MuiOutlinedInput-root': {
+                                                        '& fieldset': {
+                                                            borderColor: errors.endDate ? 'red' : 'Gainsboro',
+                                                        },
+                                                        '&:hover fieldset': {
+                                                            borderColor: errors.endDate ? 'red' : 'black',
+                                                        },
+                                                    },
+                                                }}
                                             />
                                         </ArgonBox>
                                     </Grid>
                                 </Grid>
-
-                                <ArgonBox  mb={3} width={720} display="flex" gap={1} justifyContent="flex-start">
+                                <ArgonBox mb={3} width={720} display="flex" gap={1} justifyContent="flex-start">
                                     <ArgonButton
                                         type="submit"
                                         size="large"

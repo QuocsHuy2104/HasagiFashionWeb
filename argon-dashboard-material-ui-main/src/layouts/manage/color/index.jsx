@@ -143,6 +143,7 @@ function Color() {
                         >
                             <ArgonBox mx={3}>
                                 <ArgonBox mb={3} position="relative">
+                                <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Tên màu</p>
                                     <ArgonInput
                                         type="text"
                                         placeholder="Nhập tên màu sắc"

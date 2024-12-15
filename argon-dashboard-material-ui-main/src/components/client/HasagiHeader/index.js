@@ -71,9 +71,9 @@ const Header = ({ onSearch }) => {
         setSearchTerm(transcript);
         onSearch(transcript);
 
-        const utterance = new SpeechSynthesisUtterance(transcript);
-        utterance.lang = "vi-VN";
-        window.speechSynthesis.speak(utterance);
+        // const utterance = new SpeechSynthesisUtterance(transcript);
+        // utterance.lang = "vi-VN";
+        // window.speechSynthesis.speak(utterance);
       };
 
       recognition.onerror = (event) => {

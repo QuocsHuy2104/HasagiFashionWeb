@@ -190,16 +190,19 @@ function Gemini() {
 
 
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!question.trim()) return;
+    const handleSubmit = async (e, directQuestion = null) => {
+        if (e) e.preventDefault(); // Chỉ gọi preventDefault khi e tồn tại.
+        const userQuestion = directQuestion || question;
+        if (!userQuestion.trim()) return;
+
         setChatHistory(prevHistory => [
             ...prevHistory,
-            { type: 'user', text: question }
+            { type: 'user', text: userQuestion }
         ]);
         setQuestion('');
-        await generateAIResponse(question);
+        await generateAIResponse(userQuestion);
     };
+
 
     useEffect(() => {
         // Tự động cuộn xuống khi chatHistory thay đổi
@@ -224,7 +227,9 @@ function Gemini() {
         recognition.onresult = (event) => {
             const spokenText = event.results[0][0].transcript;
             setQuestion(spokenText);
-            handleSubmit(new Event('submit'));
+
+            // Gọi handleSubmit với câu hỏi trực tiếp
+            handleSubmit(null, spokenText);
         };
 
         recognition.onerror = (event) => {

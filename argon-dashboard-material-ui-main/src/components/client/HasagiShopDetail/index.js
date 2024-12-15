@@ -332,7 +332,7 @@ function ShopDetail() {
                   fontSize: "20px",
                   width: "100%",
                   height: "100%",
-                  marginBottom: "8px",
+                  marginBottom: "15px",
                 }}
               />
             </div>

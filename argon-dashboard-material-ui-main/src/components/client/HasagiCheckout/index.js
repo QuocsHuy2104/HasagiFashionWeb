@@ -62,7 +62,7 @@ const Checkout = () => {
     setTimeout(() => {
       setIsLoading(false);
     }, 700);
-    
+
     const fetchAddress = async () => {
       try {
         const addressesId = new URLSearchParams(window.location.search).get("id");
@@ -151,6 +151,7 @@ const Checkout = () => {
     }
   };
 
+
   const fetchShipFee = async () => {
     const XuanKhanhDistrictID = 1572;
     try {
@@ -176,7 +177,7 @@ const Checkout = () => {
         }
       );
       setShipFee(response.data.data);
-    } catch (error) {}
+    } catch (error) { }
   };
 
   useEffect(() => {
@@ -689,7 +690,7 @@ const Checkout = () => {
     },
   };
 
-  
+
   return (
     <>
       <ToastContainer />
@@ -1021,14 +1022,14 @@ const Checkout = () => {
                             appliedVoucherId === voucher.id
                               ? "#d3d3d3" // Màu xám khi voucher đã áp dụng
                               : voucher.isValid
-                              ? "#fef5e3" // Màu nền vàng cho voucher hợp lệ
-                              : "#ffffff", // Màu trắng cho voucher không hợp lệ
+                                ? "#fef5e3" // Màu nền vàng cho voucher hợp lệ
+                                : "#ffffff", // Màu trắng cho voucher không hợp lệ
                           color:
                             appliedVoucherId === voucher.id
                               ? "#808080" // Màu chữ xám khi voucher đã áp dụng
                               : voucher.isValid
-                              ? "#000"
-                              : "#000",
+                                ? "#000"
+                                : "#000",
                           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
                           transition: "transform 0.2s, box-shadow 0.2s",
                           flexWrap: "nowrap",
@@ -1079,8 +1080,8 @@ const Checkout = () => {
                                   appliedVoucherId === voucher.id
                                     ? "#808080"
                                     : voucher.isValid
-                                    ? "#FF4500"
-                                    : "#000",
+                                      ? "#FF4500"
+                                      : "#000",
                                 margin: "0",
                               }}
                             >
@@ -1101,8 +1102,8 @@ const Checkout = () => {
                                   appliedVoucherId === voucher.id
                                     ? "#808080"
                                     : voucher.isValid
-                                    ? "#FF4500"
-                                    : "#000",
+                                      ? "#FF4500"
+                                      : "#000",
                                 margin: "0",
                                 fontWeight: 600,
                               }}
@@ -1205,7 +1206,7 @@ const Checkout = () => {
                   Math.min(
                     (cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) *
                       selectedVoucher.discountPercentage) /
-                      100,
+                    100,
                     selectedVoucher.maxDiscount
                   )
                 )}{" "}
@@ -1219,15 +1220,15 @@ const Checkout = () => {
               {" "}
               {new Intl.NumberFormat("vi-VN").format(
                 cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) -
-                  (selectedVoucher
-                    ? Math.min(
-                        (cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) *
-                          selectedVoucher.discountPercentage) /
-                          100,
-                        selectedVoucher.maxDiscount
-                      )
-                    : 0) +
-                  (shipFee?.total || 0)
+                (selectedVoucher
+                  ? Math.min(
+                    (cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) *
+                      selectedVoucher.discountPercentage) /
+                    100,
+                    selectedVoucher.maxDiscount
+                  )
+                  : 0) +
+                (shipFee?.total || 0)
               )}
               đ
             </h3>

@@ -59,15 +59,24 @@ function Brand() {
 
     if (!formData.name.trim()) {
       newErrors.name = true;
-      toast.warn("Vui lòng nhập tên thương hiệu!!!");
+      toast.warn("Vui lòng nhập tên Danh mục!!!");
+    } else if (
+      brands.some(
+        (brand) =>
+          brand.name.trim().toLowerCase() === formData.name.trim().toLowerCase() &&
+          brand.id !== formData.id
+      )
+    ) {
+      newErrors.name = true;
+      toast.error("Tên tDanh mục đã tồn tại. Vui lòng nhập tên khác!");
     }
+
     if (!formData.image) {
       newErrors.image = true;
-      toast.warn("Vui lòng chọn ảnh thương hiệu!!!");
+      toast.warn("Vui lòng chọn ảnh Danh mục!!!");
     }
 
     setErrors(newErrors);
-    console.log("Form errors: ", newErrors);
 
     return !newErrors.name && !newErrors.image;
   };
@@ -219,6 +228,10 @@ function Brand() {
                   boxShadow="0 0 15px rgba(0,0,0,0.1)"
                   overflow="hidden"
                   mb={2}
+                  sx={{
+                    border: errors.image ? "0.5px solid red" : "2px solid transparent",
+                    transition: "border 0.3s",
+                  }}
                 >
                   <Image
                     src={
@@ -257,14 +270,20 @@ function Brand() {
               >
                 <ArgonBox mb={3}>
                   <ArgonBox>
+                    <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Tên thương hiệu</p>
                     <ArgonInput
                       type="text"
-                      placeholder="Tên thương hiệu"
+                      placeholder="Nhập tên thương hiệu"
                       size="large"
                       fullWidth
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
+                      sx={{
+                        border: errors.name ? "0.5px solid red" : "0.5px solid #ccc",
+                        borderRadius: "8px",
+                        transition: "border 0.3s",
+                      }}
                     />
                   </ArgonBox>
                   {errors.name && (

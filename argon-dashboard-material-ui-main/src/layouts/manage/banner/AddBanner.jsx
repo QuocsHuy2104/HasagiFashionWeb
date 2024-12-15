@@ -152,7 +152,9 @@ const AddBanner = ({ id, setBannerId }) => {
                 }}
             >
                 <ArgonBox className="mb-4">
-                    <Form.Label style={{ fontWeight: "bold", color: "#495057", fontSize: "1.2rem", width: "70px" }}>
+                    <Form.Label
+                        style={{ fontWeight: "bold", color: "#495057", fontSize: "1.2rem", width: "70px" }}
+                    >
                         Tiêu đề
                     </Form.Label>
                     <ArgonInput
@@ -162,7 +164,7 @@ const AddBanner = ({ id, setBannerId }) => {
                         onChange={(e) => setTitle(e.target.value)}
                         style={{
                             borderRadius: "8px",
-                            border: "1px solid #ced4da",
+                            border: title === "" ? "1px solid red" : "1px solid #ced4da", // Viền đỏ nếu tiêu đề trống
                             padding: "1rem",
                             fontSize: "1rem",
                             backgroundColor: "#fff",
@@ -172,7 +174,9 @@ const AddBanner = ({ id, setBannerId }) => {
                 </ArgonBox>
 
                 <Form.Group className="mb-4">
-                    <Form.Label style={{ fontWeight: "bold", color: "#495057", fontSize: "1.2rem", width: "100px" }}>
+                    <Form.Label
+                        style={{ fontWeight: "bold", color: "#495057", fontSize: "1.2rem", width: "100px" }}
+                    >
                         Thêm ảnh
                     </Form.Label>
                     <div style={{ display: "flex", alignItems: "center" }}>
@@ -189,7 +193,7 @@ const AddBanner = ({ id, setBannerId }) => {
                                 padding: "0",
                                 marginRight: "1rem",
                                 backgroundColor: "#fff",
-                                border: "2px dashed #6c757d",
+                                border: previewUrls.length === 0 ? "2px dashed red" : "2px dashed #6c757d", // Viền đỏ nếu không có ảnh
                                 transition: "transform 0.2s",
                             }}
                             onClick={() => document.getElementById("fileInput").click()}

@@ -9,7 +9,8 @@ import ArgonTypography from "../../../components/ArgonTypography";
 import DataTable from "./data";
 import Footer from "../../../examples/Footer";
 import SizesService from "../../../services/SizeServices";
-import { toast } from "react-toastify";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Size() {
     const [formData, setFormData] = useState({
@@ -46,14 +47,15 @@ function Size() {
     const validateForm = () => {
         let isValid = true;
         const newErrors = { name: false };
-
-        if (!formData.name.trim()) {
-            newErrors.name = "Size name is required.";
-            isValid = false;
-        } else if (isSizeNameDuplicate(formData.name)) {
-            newErrors.name = true;
-            toast.warn("Tên size đã tồn tại!!!");
-        }
+               if (!formData.name.trim()) {
+                   newErrors.name = true;
+                   toast.warn("Vui lòng nhập tên kích cỡ!!!");
+                   isValid = false;
+               } else if (isSizeNameDuplicate(formData.name)) {
+                   newErrors.name = true;
+                   toast.warn("Tên kích cỡ đã tồn tại!!!");
+                 }
+       
 
         setErrors(newErrors);
         return isValid;
@@ -120,6 +122,7 @@ function Size() {
 
     return (
         <DashboardLayout>
+            <ToastContainer />
             <DashboardNavbar />
             <ArgonBox py={3}>
                 <ArgonBox mb={3}>
@@ -135,9 +138,10 @@ function Size() {
                         >
                             <ArgonBox mx={3}>
                                 <ArgonBox mb={3} position="relative">
+                                    <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Tên kích cỡ</p>
                                     <ArgonInput
                                         type="text"
-                                        placeholder="Nhập size"
+                                        placeholder="Nhập tên kích cỡ"
                                         size="large"
                                         name="name"
                                         fullWidth
@@ -145,11 +149,6 @@ function Size() {
                                         onChange={handleChange}
                                         error={!!errors.name}
                                     />
-                                    {errors.name && (
-                                        <ArgonTypography variant="caption" color="error">
-                                            {errors.name}
-                                        </ArgonTypography>
-                                    )}
                                 </ArgonBox>
 
                                 <ArgonBox mb={3}>
