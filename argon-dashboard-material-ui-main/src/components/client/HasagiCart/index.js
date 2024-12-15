@@ -26,12 +26,7 @@ const Cart = () => {
     const navigate = useNavigate();
     const [products, setProducts] = useState([]);
     const fetchCartItems = async () => {
-        const accountId = Cookies.get("accountId");
 
-        if (!accountId) {
-            navigate(`/authentication/sign-in`);
-            return;
-        }
         try {
             const [cartResponse, addressResponse] = await Promise.all([
                 CartService.getCart(),

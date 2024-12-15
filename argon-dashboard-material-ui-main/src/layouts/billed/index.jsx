@@ -3,13 +3,42 @@ import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
 import Grid from "@mui/material/Unstable_Grid2";
 import ArgonButton from "components/ArgonButton";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPrint } from "@fortawesome/free-solid-svg-icons";
 import { List, ListItem } from "@mui/material";
 import { Box, Typography, Card } from "@mui/material";
+import PaymentService from "services/PaymentServices";
 const OrderSummary = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    React.useEffect(() => {
+        const code = searchParams.get("code");
+        const id = searchParams.get("id");
+        const cancel = searchParams.get("cancel");
+        const status = searchParams.get("status");
+        const orderCode = searchParams.get("orderCode");
+
+        // Gọi hàm PaySuccess từ PaymentService
+        const fetchPaymentResult = async () => {
+            try {
+                const response = await PaymentService.PaySuccess({
+                    code,
+                    id,
+                    cancel,
+                    status,
+                    orderCode,
+                });
+                console.log("Payment Success Response:", response);
+                // Xử lý kết quả (ví dụ: hiển thị thông báo)
+            } catch (error) {
+                console.error("Error in fetchPaymentResult:", error);
+                // Xử lý lỗi nếu cần
+            }
+        };
+
+        fetchPaymentResult();
+    }, [searchParams]);
 
     return (
         <ArgonBox px={20} py={5}>

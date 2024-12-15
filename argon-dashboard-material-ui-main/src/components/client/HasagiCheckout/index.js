@@ -368,7 +368,6 @@ const Checkout = () => {
                     throw new Error("Payment processing error with VNPAY");
                 }
             } else {
-
                 try {
                     const customPaymentData = {
                         items: selectedItems.map((item) => ({
@@ -382,9 +381,8 @@ const Checkout = () => {
 
                     try {
                         const response = await PaymentService.PaymentMethods(customPaymentData);
-
                         if (response) {
-                            console.log('Payment URL:', response);
+                            localStorage.setItem("payment", customPaymentData.items)
                             window.location.href = response; 
                         } else {
                             console.error('Payment URL is undefined');
