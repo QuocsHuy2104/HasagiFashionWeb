@@ -28,6 +28,7 @@ import PermissionService from "../../../services/PermissionServices";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+
 function Account() {
   const generateRandomPassword = (length) => {
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
@@ -126,7 +127,7 @@ function Account() {
       avatar: account.avatar,
       fullName: account.fullName,
       email: account.email,
-      roleId: account.roleName ? account.roleName.map(role => role.name) : [],
+      roleId: account.roleName ? account.roleName.map((role) => role.name) : [],
       permissionNames: account.permissionNames || [],
     });
   };
@@ -154,6 +155,8 @@ function Account() {
         roleId: [],
         permissionNames: [],
       });
+
+      toast.success('Thêm nhân viên thành công')
     } catch (error) {
       console.error("Error saving account:", error);
     }
@@ -198,7 +201,6 @@ function Account() {
               role="form"
               onSubmit={handleSubmit}
             >
-
               <ArgonBox
                 maxWidth={{ xs: "100%", md: 270 }}
                 mx={4}
@@ -321,12 +323,11 @@ function Account() {
                   </Box>
                 </ArgonBox> */}
 
-                <ArgonBox mb={3} mx={3} sx={{ width: { sm: '50%', md: '20%' } }}>
+                <ArgonBox mb={3} mx={3} sx={{ width: { sm: "50%", md: "20%" } }}>
                   <ArgonButton type="submit" size="large" color="info" fullWidth>
                     {formData.id ? "Cập Nhật" : "Thêm"}
                   </ArgonButton>
                 </ArgonBox>
-
               </ArgonBox>
             </ArgonBox>
           </Card>
@@ -359,13 +360,12 @@ function Account() {
                           value={searchTerm}
                           onChange={handleSearchChange}
                           fullWidth
-                          placeholder="Search here..."
+                          placeholder="Tìm kiếm"
                         />
                       </ArgonBox>
                     </Grid>
                   </Grid>
                 </Box>
-
               </ArgonBox>
               {rows.length > 0 ? (
                 <Table columns={columns} rows={rows} />
@@ -399,7 +399,6 @@ function Account() {
       <Footer />
       <ToastContainer />
     </DashboardLayout>
-
   );
 }
 

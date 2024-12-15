@@ -31,29 +31,57 @@ function Product() {
         id: '',
         name: '',
         description: '',
-        trademarkId: '',
+        brandId: '',
         categoryId: '',
         image: null,
         video: null,
         sale: 0,
+        isActive: true,
     });
+
 
     const [categories, setCategories] = useState([]);
     const [brands, setBrands] = useState([]);
     const [errors, setErrors] = useState({});
+    const [searchKeyword, setSearchKeyword] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("");
+    const [selectedBrand, setSelectedBrand] = useState("");
+
+
+    const fetchData = async () => {
+        try {
+            const brandResponse = await BrandService.getAllBrands();
+            setBrands(brandResponse.data);
+
+            const categoryResponse = await CategoriesService.getAllCategories();
+            setCategories(categoryResponse.data);
+        } catch (error) {
+            console.error('Error fetching data', error);
+        }
+    };
+
+    const fetchCategories = async () => {
+        try {
+            const response = await CategoryService.getAllCategories();
+            setCategories(response.data || []);
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+        }
+    };
+
+    const fetchBrands = async () => {
+        try {
+            const response = await BrandService.getAllBrands();
+            setBrands(response.data || []);
+            console.error("Error fetching brands:", error);
+        } catch (error) {
+            console.error("Error fetching brand:", error);
+        }
+    };
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const trademarkResponse = await BrandService.getAllBrands();
-                setBrands(trademarkResponse.data);
-
-                const categoryResponse = await CategoriesService.getAllCategories();
-                setCategories(categoryResponse.data);
-            } catch (error) {
-                console.error('Error fetching data', error);
-            }
-        };
+        fetchCategories();
+        fetchBrands();
         fetchData();
     }, []);
 
@@ -71,15 +99,27 @@ function Product() {
 
     const handleVideoChange = (event) => {
         const file = event.target.files[0];
-        if (file && file instanceof Blob) {
-            setFormData((prevData) => ({
-                ...prevData,
-                video: file,
-            }));
-        } else {
-            console.error("Invalid video file");
+        const maxVideoSize = 40 * 1024 * 1024;
+
+        if (file) {
+            if (file.size > maxVideoSize) {
+                toast.error("Video không được vượt quá 100MB!");
+                event.target.value = "";
+                return;
+            }
+
+            if (file instanceof Blob) {
+                setFormData((prevData) => ({
+                    ...prevData,
+                    video: file,
+                }));
+            } else {
+                console.error("Invalid video file");
+            }
         }
     };
+
+
 
 
     const handleRemoveImage = () => {
@@ -102,7 +142,6 @@ function Product() {
     const validateFields = () => {
         const newErrors = {};
 
-        // Kiểm tra tên sản phẩm
         if (!formData.name.trim()) {
             newErrors.name = true;
             toast.warn("Vui lòng nhập tên sản phẩm!!!");
@@ -111,25 +150,21 @@ function Product() {
             toast.warn("Tên sản phẩm không được nhập số!!!");
         }
 
-        // Kiểm tra mô tả
         if (!formData.description.trim()) {
             newErrors.description = true;
             toast.warn("Vui lòng nhập mô tả sản phẩm!!!");
         }
 
-        // Kiểm tra danh mục
         if (!formData.categoryId) {
             newErrors.categoryId = true;
             toast.warn("Vui lòng chọn danh mục!!!");
         }
 
-        // Kiểm tra thương hiệu
-        if (!formData.trademarkId) {
-            newErrors.trademarkId = true;
+        if (!formData.brandId) {
+            newErrors.brandId = true;
             toast.warn("Vui lòng chọn thương hiệu!!!");
         }
 
-        // Kiểm tra hình ảnh
         if (!formData.image) {
             newErrors.image = true;
             toast.warn("Vui lòng chọn hình ảnh sản phẩm!!!");
@@ -204,28 +239,27 @@ function Product() {
             const productData = {
                 name: formData.name,
                 categoryId: formData.categoryId,
-                trademarkId: formData.trademarkId,
+                brandId: formData.brandId,
                 description: formData.description,
                 sale: formData.sale,
                 image: imageUrl,
                 video: videoUrl,
+                isActive: formData.isActive,
             };
 
-            // Kiểm tra nếu có formData.id, là cập nhật sản phẩm
             const response = formData.id
                 ? await ProductService.updateProduct(formData.id, productData)
                 : await ProductService.createProduct(productData);
 
-            // Thông báo thành công
             if (formData.id) {
                 toast.success('Cập nhật sản phẩm thành công');
             } else {
                 toast.success('Thêm sản phẩm thành công');
             }
 
+            fetchData();
             resetForm();
         } catch (error) {
-            // Thông báo thất bại khi thêm hoặc cập nhật sản phẩm
             if (formData.id) {
                 toast.error('Cập nhật sản phẩm thất bại, vui lòng thử lại');
             } else {
@@ -237,9 +271,6 @@ function Product() {
     };
 
 
-
-
-
     const handleApiError = (error) => {
         const errorMsg = error.response?.data?.message || error.message || 'An error occurred.';
         toast.error(`Error: ${errorMsg}`);
@@ -247,12 +278,14 @@ function Product() {
 
     const resetForm = () => {
         setFormData({
+            id: '',
             name: '',
             image: null,
             categoryId: '',
-            trademarkId: '',
+            brandId: '',
             description: '',
             sale: '',
+            isActive: true,
         });
         setErrors({});
     };
@@ -260,12 +293,13 @@ function Product() {
     const handleEditClick = (product) => {
         setFormData({
             ...product,
-            trademarkId: product.trademarkDTOResp?.id || '',
-            categoryId: product.categoryDTOResp?.id || '',
+            brandId: product.brandDTOResponse?.id || '',
+            categoryId: product.categoryDTOResponse?.id || '',
             image: product.image || null,
             video: product.video || null,
             imageUrl: product.image || '',
             videoUrl: product.video || '',
+            isActive: product.isActive,
         });
     };
 
@@ -281,7 +315,13 @@ function Product() {
         console.log("Set selected product for detail view:", product);
     };
 
-    const { columns, rows } = ProductTable({ onEditClick: handleEditClick, setSelectedProduct: setSelectedProduct });
+    const { columns, rows, refreshProducts } = ProductTable({
+        onEditClick: handleEditClick,
+        setSelectedProduct: setSelectedProduct,
+        searchKeyword: searchKeyword,
+        selectedCategory,
+        selectedBrand,
+    });
 
     return (
         <DashboardLayout>
@@ -327,7 +367,7 @@ function Product() {
                                                             }}
                                                             onClick={() => document.getElementById('image-upload').click()}
                                                         >
-                                                            <PhotoCamera style={{  color: 'black', width: '50px' }} />  {/* Tăng kích thước icon lên */}
+                                                            <PhotoCamera style={{ color: 'black', width: '50px' }} />
                                                         </ArgonButton>
 
                                                     </>
@@ -335,7 +375,7 @@ function Product() {
                                                     <div style={{ position: 'relative' }}>
                                                         {formData.image && (
                                                             <img
-                                                                src={formData.image instanceof File ? URL.createObjectURL(formData.image) : formData.image} // Check if it's a file or URL
+                                                                src={formData.image instanceof File ? URL.createObjectURL(formData.image) : formData.image}
                                                                 alt="Selected Image"
                                                                 style={{
                                                                     width: '200px',
@@ -484,17 +524,17 @@ function Product() {
                                         >
                                             <ArgonSelect
                                                 aria-label="Brand"
-                                                name="trademarkId"
+                                                name="brandId"
                                                 onChange={handleChange}
-                                                value={formData.trademarkId} // Hiển thị thương hiệu đã chọn
+                                                value={formData.brandId}
                                                 options={[
-                                                    { value: "", label: errors.trademarkId ? errors.trademarkId : "Thương hiệu" },
+                                                    { value: "", label: errors.brandId ? errors.brandId : "Thương hiệu" },
                                                     ...brands.map(brand => ({ value: brand.id, label: brand.name }))
                                                 ]}
                                                 style={{
                                                     height: "60px",
                                                     borderRadius: "10px",
-                                                    borderColor: errors.trademarkId ? 'red' : 'Gainsboro',
+                                                    borderColor: errors.brandId ? 'red' : 'Gainsboro',
                                                     borderWidth: '0.5px',
                                                     borderStyle: 'solid',
                                                     padding: '10px',
@@ -507,7 +547,7 @@ function Product() {
                                                 aria-label="Category"
                                                 name="categoryId"
                                                 onChange={handleChange}
-                                                value={formData.categoryId} // Hiển thị danh mục đã chọn
+                                                value={formData.categoryId}
                                                 options={[
                                                     { value: "", label: errors.categoryId ? errors.categoryId : "Danh mục" },
                                                     ...categories.map(category => ({ value: category.id, label: category.name }))
@@ -543,7 +583,6 @@ function Product() {
                                             </Typography>
                                         </ArgonBox>
 
-                                        {/* Sale Price Input */}
                                         <ArgonBox display="flex" flexDirection="column" gap={3}>
                                             <ArgonInput
                                                 type="number"
@@ -562,7 +601,7 @@ function Product() {
                                                 }}
                                                 startAdornment={
                                                     <InputAdornment position="start">
-                                                        <b style={{ fontSize: '25px' }}> $</b>
+                                                        <b style={{ fontSize: '25px' }}> %</b>
                                                     </InputAdornment>
                                                 }
                                             />
@@ -570,11 +609,27 @@ function Product() {
 
                                     </ArgonBox>
 
-                                    <ArgonBox mx={{ xs: 1, sm: 2, md: 3 }} mb={3} width={720}>
-                                        <ArgonButton type="submit" size="large" color="info">
-                                            {formData.id ? "Cập nhật" : "Lưu"}
+                                    <ArgonBox mx={{ xs: 1, sm: 2, md: 3 }} mb={3} width={720} display="flex" gap={1} justifyContent="flex-start">
+                                        <ArgonButton
+                                            type="submit"
+                                            size="large"
+                                            color="info"
+                                            sx={{ minWidth: 100, padding: '8px 16px' }} 
+                                        >
+                                            {formData.id ? "Cập nhật" : "Thêm"}
+                                        </ArgonButton>
+                                        <ArgonButton
+                                            size="large"
+                                            color="primary"
+                                            sx={{ minWidth: 100, padding: '8px 16px' }} 
+                                            onClick={resetForm}
+                                        >
+                                            Làm mới
                                         </ArgonButton>
                                     </ArgonBox>
+
+
+
                                 </ArgonBox>
                             </ArgonBox>
                         </ArgonBox>
@@ -584,23 +639,115 @@ function Product() {
                 <ArgonBox>
                     <ArgonBox mb={3}>
                         <Card>
-                            <ArgonBox
-                                sx={{
-                                    "& .MuiTableRow-root:not(:last-child)": {
-                                        "& td": {
-                                            borderBottom: ({ borders: { borderWidth, borderColor } }) =>
-                                                `${borderWidth[1]} solid ${borderColor}`,
+                            <ArgonBox>
+                                <ArgonBox
+                                    mb={3}
+                                    p={2}
+                                    display="flex"
+                                    justifyContent="space-evenly"
+                                    alignItems="center"
+                                    border="1px solid #e0e0e0"
+                                    borderRadius="8px"
+                                    bgcolor="#f9f9f9"
+                                >
+                                    <ArgonBox width="22%">
+                                        <ArgonInput
+                                            type="text"
+                                            placeholder="🔍 Tìm kiếm..."
+                                            style={{
+                                                padding: "12px 16px",
+                                                borderRadius: "8px",
+                                                border: "1px solid #ddd",
+                                                boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+                                                width: "100%",
+                                                backgroundColor: "#fff",
+                                                fontSize: "14px",
+                                            }}
+                                            onChange={(e) => setSearchKeyword(e.target.value)}
+                                        />
+                                    </ArgonBox>
+
+                                    <ArgonBox width="22%">
+                                        <select
+                                            style={{
+                                                padding: "12px 16px",
+                                                borderRadius: "8px",
+                                                border: "1px solid #ddd",
+                                                boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+                                                width: "100%",
+                                                backgroundColor: "#fff",
+                                                fontSize: "14px",
+                                                color: "#555",
+                                            }}
+                                            onChange={(e) => setSelectedCategory(e.target.value)}
+                                        >
+                                            <option value="">🗂 Tất cả danh mục</option>
+                                            {categories.map((category) => (
+                                                <option key={category.id} value={category.id}>
+                                                    {category.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </ArgonBox>
+
+                                    <ArgonBox width="22%">
+                                        <select
+                                            style={{
+                                                padding: "12px 16px",
+                                                borderRadius: "8px",
+                                                border: "1px solid #ddd",
+                                                boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+                                                width: "100%",
+                                                backgroundColor: "#fff",
+                                                fontSize: "14px",
+                                                color: "#555",
+                                            }}
+                                            onChange={(e) => setSelectedBrand(e.target.value)}
+                                        >
+                                            <option value="">🏷 Tất cả thương hiệu</option>
+                                            {brands.map((brand) => (
+                                                <option key={brand.id} value={brand.id}>
+                                                    {brand.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </ArgonBox>
+
+                                    <ArgonBox width="22%">
+                                        <ArgonButton
+                                            variant="contained"
+                                            color="primary"
+                                            style={{
+                                                padding: "12px 24px",
+                                                borderRadius: "8px",
+                                                fontSize: "14px",
+                                                fontWeight: "bold",
+                                            }}
+                                            onClick={refreshProducts}
+                                        >
+                                            🔄 Làm mới danh sách
+                                        </ArgonButton>
+                                    </ArgonBox>
+                                </ArgonBox>
+
+
+                                <ArgonBox
+                                    sx={{
+                                        "& .MuiTableRow-root:not(:last-child)": {
+                                            "& td": {
+                                                borderBottom: ({ borders: { borderWidth, borderColor } }) =>
+                                                    `${borderWidth[1]} solid ${borderColor}`,
+                                            },
                                         },
-                                    },
-                                }}
-                            >
-                                <Table columns={columns} rows={rows} />
+                                    }}
+                                >
+                                    <Table columns={columns} rows={rows} />
+                                </ArgonBox>
                             </ArgonBox>
                         </Card>
                     </ArgonBox>
                 </ArgonBox>
             </ArgonBox >
-
             <Footer />
         </DashboardLayout >
     );

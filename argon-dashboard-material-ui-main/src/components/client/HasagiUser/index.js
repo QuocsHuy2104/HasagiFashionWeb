@@ -2,13 +2,18 @@ import React, { useEffect, useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import "./User.css"; // Importing CSS file for styling
 import axios from "axios"; // Thêm thư viện axios để thực hiện gọi API
-
+import ProfileServices from "../../../services/ProfileServices";
+import { storage } from "../../../config/firebase-config";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import Swal from "sweetalert2";
+import aboutImage5 from "layouts/assets/img/user.jpg";
 function User() {
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("cdcdcdc@gmail.com");
   const [phone, setPhone] = useState("");
-  const [profileImage, setProfileImage] = useState(null);
+  const [profileImage, setProfileImage] = useState(null); // Dùng để lưu URL tạm thời của ảnh đã chọn
+  const [profileImageFile, setProfileImageFile] = useState(null);
 
   // State for handling modals
   const [showEmailModal, setShowEmailModal] = useState(false);
@@ -25,13 +30,20 @@ function User() {
   // Hàm lấy thông tin người dùng từ API
   const fetchUserData = async () => {
     try {
-      const response = await axios.get("/api/user"); // Thay đổi URL này cho phù hợp với API của bạn
-      const { username, name, email, phone, profileImage } = response.data;
-      setUsername(username);
-      setName(name);
+      // Gọi API qua ProfileServices
+      const response = await ProfileServices.getProfile();
+
+      // Lấy dữ liệu từ response
+      const { email, username, fullName, avatar, numberPhone } = response;
+
+      setName(fullName); // Full name thay cho name
       setEmail(email);
-      setPhone(phone);
-      setProfileImage(profileImage); // Giả sử API trả về URL của ảnh đại diện
+      setPhone(numberPhone); // Number phone thay cho phone
+      setProfileImage(null); // Avatar thay cho profileImage
+      setUsername(username); // Thêm cập nhật username nếu cần thiết
+
+      // Debug dữ liệu
+      console.log("User data:", response);
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
@@ -47,7 +59,7 @@ function User() {
     if (file) {
       const maxFileSize = 1 * 1024 * 1024; // 1 MB
       if (file.size > maxFileSize) {
-        alert("Vui lòng chọn tệp có dung lượng tối đa 1 MB."); // Thông báo lỗi nếu tệp quá lớn
+        alert("Vui lòng chọn tệp có dung lượng tối đa 1 MB.");
         return;
       }
 
@@ -57,29 +69,98 @@ function User() {
         .toLowerCase();
 
       if (validFormats.includes(`.${fileExtension}`)) {
-        setProfileImage(URL.createObjectURL(file)); // Tạo URL cho ảnh được chọn
+        setProfileImage(URL.createObjectURL(file));
+        setProfileImageFile(file);
+
+        // Reset the input field after successful update
+        event.target.value = '';
       } else {
-        alert("Vui lòng chọn tệp có định dạng .JPEG hoặc .PNG."); // Thông báo lỗi nếu định dạng không hợp lệ
+        alert("Vui lòng chọn tệp có định dạng .JPEG hoặc .PNG.");
       }
     }
   };
 
+
   const handleSave = async () => {
     try {
+      let profileImageUrl = null;
+
+      // Upload ảnh nếu có
+      if (profileImage) {
+        const storageRef = ref(storage, `profile_images/${profileImage.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, profileImageFile);
+
+        // Chờ tải lên hoàn tất
+        await new Promise((resolve, reject) => {
+          uploadTask.on(
+            "state_changed",
+            null, // Không cần xử lý quá trình thay đổi trạng thái
+            (error) => reject(error), // Xử lý lỗi
+            async () => {
+              try {
+                // Get the download URL correctly from the uploadTask snapshot
+                profileImageUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                resolve();
+              } catch (error) {
+                reject(error);
+              }
+            }
+          );
+        });
+      }
+
+      // Gửi dữ liệu lên backend (bao gồm URL ảnh nếu có)
       const userData = {
         username,
         name,
         email,
         phone,
-        // Thêm profileImage nếu cần thiết
+        avatar: profileImageUrl,
       };
-      // Gửi dữ liệu người dùng đến API
-      await axios.put("/api/user", userData); // Thay đổi URL này cho phù hợp với API của bạn
-      console.log("Profile saved");
+
+      await ProfileServices.changeProfile(userData);
+      console.log("Profile saved:", userData);
+
+      // Thay thế alert bằng Swal
+      Swal.fire({
+        position: "center",
+        icon: "success",
+        title: "Cập nhật thành công.",
+        showConfirmButton: false,
+        timer: 1500,
+        didOpen: () => {
+          document.body.style.overflowY = "auto";
+          document.body.style.padding = "0";
+        },
+        willClose: () => {
+          document.body.style.overflowY = "auto";
+          document.body.style.padding = "0";
+        },
+      });
+      setProfileImage(null);
     } catch (error) {
       console.error("Error saving user data:", error);
+
+      // Thay thế alert bằng Swal
+      Swal.fire({
+        position: "center",
+        icon: "error",
+        title: "Cập nhật thất bại.",
+        showConfirmButton: false,
+        timer: 1500,
+        didOpen: () => {
+          document.body.style.overflowY = "auto";
+          document.body.style.padding = "0";
+        },
+        willClose: () => {
+          document.body.style.overflowY = "auto";
+          document.body.style.padding = "0";
+        },
+      });
     }
   };
+
+
 
   const isValidEmail = (email) => {
     const regex = /^[^\s@]+@gmail\.com$/;
@@ -128,6 +209,7 @@ function User() {
             <div className="form-row mt-3">
               <label className="form-label">Tên đăng nhập</label>
               <input
+                readOnly
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -236,29 +318,40 @@ function User() {
         </div>
 
         <div className="col-4 profile-picture-section">
-          <div className="profile-picture mb-3">
+          <div className="profile-picture mb-3" style={{ width: '150px', height: '150px', borderRadius: '50%', overflow: 'hidden' }}>
             {profileImage ? (
-              <img src={profileImage} alt="Profile" style={{ width: "100%", height: "auto" }} />
+              <img
+                src={profileImage}
+                alt="Profile"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
             ) : (
-              <img alt="Profile" style={{ width: "100%", height: "auto" }} />
+              <img
+                src={aboutImage5}
+                alt="Profile"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+              />
             )}
           </div>
+
           <input
             type="file"
-            accept=".jpeg,.jpg,.png" // Chỉ cho phép định dạng .JPEG và .PNG
-            style={{ display: "none" }} // Ẩn input file
+            accept=".jpeg,.jpg,.png"
+            style={{ display: "none" }}
             onChange={handleImageChange}
             id="file-input"
           />
           <label htmlFor="file-input" className="select-image-btn" style={{ cursor: "pointer" }}>
             Chọn Ảnh
           </label>
+
           <p className="file-hint">
             Dung lượng file tối đa 1 MB
             <br />
             Định dạng: JPEG, PNG
           </p>
         </div>
+
       </div>
 
       {/* Email Modal */}

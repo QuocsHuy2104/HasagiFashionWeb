@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Carousel } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css'; // Đảm bảo rằng Bootstrap CSS được import
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const ExampleCarouselImage = ({ images }) => {
     return (

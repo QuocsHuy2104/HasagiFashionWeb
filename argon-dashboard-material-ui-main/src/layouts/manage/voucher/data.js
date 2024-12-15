@@ -32,6 +32,30 @@ VoucherDiscount.propTypes = {
     discount: PropTypes.number.isRequired,
 };
 
+function VoucherQuantity({ quantity }) {
+    return (
+        <ArgonTypography variant="caption" color="secondary" fontWeight="bold">
+            {`${quantity}`}
+        </ArgonTypography>
+    );
+}
+
+VoucherQuantity.propTypes = {
+    quantity: PropTypes.number.isRequired,
+};
+
+function VoucherMaxDiscount({ maxDiscount }) {
+    return (
+        <ArgonTypography variant="caption" color="secondary" fontWeight="bold">
+            {`${maxDiscount.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}đ`}
+        </ArgonTypography>
+    );
+}
+
+VoucherMaxDiscount.propTypes = {
+    maxDiscount: PropTypes.number.isRequired,
+};
+
 function VoucherMinOrder({ minOrder }) {
     return (
         <ArgonTypography variant="caption" color="secondary" fontWeight="bold">
@@ -52,25 +76,34 @@ const formatDate = (dateString) => {
     return `${day}-${month}-${year}`;
 };
 
-const VoucherTable = ({ onEditClick }) => {
+const VoucherTable = ({ onEditClick, searchKeyword }) => {
     const [vouchers, setVouchers] = useState([]);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await VouchersService.getAllVouchers();
-                const currentDate = new Date();
-
-                // Filter out expired vouchers
-                const activeVouchers = response.data.filter(voucher => new Date(voucher.endDate) >= currentDate);
-                setVouchers(activeVouchers || []);
-            } catch (err) {
-                console.log(err);
-            }
-        };
-
         fetchData();
     }, []);
+
+    const fetchData = async () => {
+        try {
+            const response = await VouchersService.getAllVouchers();
+            const currentDate = new Date();
+            const activeVouchers = response.data.filter(voucher => new Date(voucher.endDate) >= currentDate);
+            setVouchers(activeVouchers || []);
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
+    const refreshVouchers = async () => {
+        try {
+            await fetchData();
+            toast.success("Làm mới danh sách phiếu giảm giá thành công!");
+        } catch (error) {
+            console.error("Error refreshing products:", error);
+            toast.error("Làm mới danh sách phiếu giảm giá thất bại!");
+        }
+    };
+
 
     const handleStatusToggle = async (voucher) => {
         try {
@@ -79,39 +112,35 @@ const VoucherTable = ({ onEditClick }) => {
             setVouchers((prevVouchers) =>
                 prevVouchers.map((v) => (v.id === voucher.id ? updatedVoucher : v))
             );
-            toast.success("Voucher status updated successfully");
+            toast.success("Cập nhật trạng thái thành công!");
         } catch (error) {
             console.error("Error updating voucher status", error);
-            toast.error("Failed to update voucher status");
+            toast.error("Cập nhật trạng thái thất bại!!!");
         }
     };
 
-    const deleteItem = async (id) => {
-        try {
-            await VouchersService.deleteVoucher(id);
-            setVouchers(vouchers.filter(voucher => voucher.id !== id));
-            toast.success("Delete voucher successful");
-        } catch (error) {
-            console.error("There was an error deleting the item!", error);
-            toast.error("Error deleting voucher");
-        }
-    };
+    const filteredVouchers = vouchers
+        .filter((voucher) =>
+            voucher.code.toLowerCase().includes(searchKeyword.toLowerCase())
+        )
 
-    const rows = vouchers.map(voucher => ({
-        code: <VoucherCode code={voucher.code} />,
-        discount: <VoucherDiscount discount={voucher.discountPercentage} />,
-        minOrder: <VoucherMinOrder minOrder={voucher.minimumOrderValue} />,
-        startDate: (
+    const rows = filteredVouchers.map(voucher => ({
+        MAGIAMGIA: <VoucherCode code={voucher.code} />,
+        GIAM: <VoucherDiscount discount={voucher.discountPercentage} />,
+        GIATOITHIEU: <VoucherMinOrder minOrder={voucher.minimumOrderValue} />,
+        GIAMTOIDA: <VoucherMaxDiscount maxDiscount={voucher.maxDiscount} />,
+        SOLUONG: <VoucherQuantity quantity={voucher.quantity} />,
+        NGAYBATDAU: (
             <ArgonTypography variant="caption" color="textPrimary">
                 {formatDate(voucher.startDate)}
             </ArgonTypography>
         ),
-        endDate: (
+        NGAYHETHAN: (
             <ArgonTypography variant="caption" color="textPrimary">
                 {formatDate(voucher.endDate)}
             </ArgonTypography>
         ),
-        isActive: (
+        TRANGTHAI: (
             <Switch
                 checked={voucher.isActive}
                 onChange={() => handleStatusToggle(voucher)}
@@ -119,7 +148,7 @@ const VoucherTable = ({ onEditClick }) => {
                 inputProps={{ "aria-label": "controlled" }}
             />
         ),
-        action: (
+        THAOTAC: (
             <ArgonBox display="flex" justifyContent="space-between" alignItems="center">
                 <ArgonTypography
                     px={1}
@@ -135,23 +164,7 @@ const VoucherTable = ({ onEditClick }) => {
                         },
                     }}
                 >
-                    Edit
-                </ArgonTypography>
-                <ArgonTypography
-                    px={1}
-                    component="span"
-                    variant="caption"
-                    color="error"
-                    fontWeight="medium"
-                    onClick={() => deleteItem(voucher.id)}
-                    sx={{
-                        cursor: "pointer",
-                        "&:hover": {
-                            textDecoration: "underline",
-                        },
-                    }}
-                >
-                    <i className="bi bi-trash3"></i> Remove
+                    Chỉnh sửa
                 </ArgonTypography>
             </ArgonBox>
         ),
@@ -159,22 +172,25 @@ const VoucherTable = ({ onEditClick }) => {
 
     const voucherTableData = {
         columns: [
-            { name: "code", align: "left" },
-            { name: "discount", align: "center" },
-            { name: "minOrder", align: "center" },
-            { name: "startDate", align: "center" },
-            { name: "endDate", align: "center" },
-            { name: "isActive", align: "center" },
-            { name: "action", align: "center" },
+            { name: "MAGIAMGIA", align: "left" },
+            { name: "SOLUONG", align: "left" },
+            { name: "GIAM", align: "center" },
+            { name: "GIATOITHIEU", align: "center" },
+            { name: "GIAMTOIDA", align: "center" },
+            { name: "NGAYBATDAU", align: "center" },
+            { name: "NGAYHETHAN", align: "center" },
+            { name: "TRANGTHAI", align: "center" },
+            { name: "THAOTAC", align: "center" },
         ],
         rows,
     };
 
-    return voucherTableData;
+    return { ...voucherTableData, refreshVouchers };
 };
 
 VoucherTable.propTypes = {
     onEditClick: PropTypes.func.isRequired,
+    searchKeyword: PropTypes.string.isRequired,
 };
 
 export default VoucherTable;

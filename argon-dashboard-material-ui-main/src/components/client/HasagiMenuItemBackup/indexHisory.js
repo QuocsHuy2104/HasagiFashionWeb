@@ -34,6 +34,7 @@ import Swal from "sweetalert2";
 import ReviewFilesService from '../../../services/ReviewFileServices';
 import { storage } from "../../../config/firebase-config";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
 const indexHistory = () => {
   const [imageFiles, setImageFiles] = useState([]);
@@ -71,6 +72,19 @@ const indexHistory = () => {
   const threshold = 18;
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
+  const [images, setImages] = useState([]);
+  const [openReturnModal, setOpenReturnModal] = useState(false);
+  const [returnReason, setReturnReason] = useState("");
+  const [returnOptions] = useState([
+    "Màu sắc không giống với hình ảnh hoặc mô tả",
+    "Chất liệu sản phẩm không như mong đợi",
+    "Sản phẩm bị lỗi: rách, hỏng hoặc có vết bẩn",
+    "Nhận nhầm sản phẩm hoặc thiếu phụ kiện đi kèm",
+    "Sản phẩm không phù hợp sau khi thử",
+    "Thời gian giao hàng quá lâu khiến tôi không còn nhu cầu",
+    "Tôi không còn nhu cầu sử dụng sản phẩm này nữa",
+  ]);
+
 
   useEffect(() => {
     if (location.state?.activeTab) {
@@ -80,7 +94,23 @@ const indexHistory = () => {
     const fetchOrderHistory = async () => {
       try {
         const response = await HistoryOrderService.getHistory();
-        setOrders(response.data);
+        const ordersData = response.data;
+        setOrders(ordersData);
+        const allProducts = ordersData.flatMap(order => order.products || []);
+
+        const imageRequests = allProducts.map((product) =>
+          axios
+            .get(
+              `http://localhost:3000/api/public/webShopDetail/product-detail/${product.productId}`
+            )
+            .then((res) => ({ productId: product.productId, data: res.data }))
+        );
+        const imagesData = await Promise.all(imageRequests);
+        const imagesMap = imagesData.reduce((acc, { productId, data }) => {
+          acc[productId] = data;
+          return acc;
+        }, {});
+        setImages(imagesMap);
       } catch (error) {
         setError("Failed to fetch order history.");
       } finally {
@@ -109,9 +139,13 @@ const indexHistory = () => {
     setOpenCancelModal(true);
   };
 
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
+
+  const handleOpenReturnModal = (orderId) => {
+    setSelectedOrderId(orderId);
+    setOpenReturnModal(true);
   };
+
+
 
   const handleCancelOrder = async () => {
     try {
@@ -150,9 +184,28 @@ const indexHistory = () => {
     }
   };
 
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue);
+
+  const handleReturnOrder = async () => {
+    try {
+      await axios.put(
+        `http://localhost:3000/api/history-order/${selectedOrderId}/return`,
+        null,
+        {
+          params: { reason: returnReason },
+        }
+      );
+      setOpenReturnModal(false);
+      const response = await HistoryOrderService.getHistory();
+
+      setOrders(response.data);
+
+    } catch (error) {
+      console.error("There was an error processing the return request!", error);
+      alert("Không thể xử lý yêu cầu trả hàng. Vui lòng thử lại.");
+    }
   };
+
+
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -291,14 +344,21 @@ const indexHistory = () => {
           color: "black",
           showConfirmButton: true,
           background: "#fff",
+          didOpen: () => {
+            document.body.style.overflowY = "auto";
+            document.body.style.padding = "0";
+          },
+          willClose: () => {
+            document.body.style.overflowY = "auto";
+            document.body.style.padding = "0";
+          },
         });
       }, 0);
-
-      // Reset trạng thái
       setStar(5);
       setComment("");
       setImageFiles([]);
       setVideoFile(null);
+      handleClose();
     } catch (error) {
       console.error("Lỗi xử lý:", error);
       const errorMessage = error.response?.data?.message || "Có lỗi xảy ra trong quá trình xử lý.";
@@ -306,6 +366,7 @@ const indexHistory = () => {
         icon: "error",
         title: "Lỗi",
         text: errorMessage,
+        scrollbarPadding: false,
       });
     }
   };
@@ -318,6 +379,12 @@ const indexHistory = () => {
     setImageFiles([...imageFiles, ...limitedFiles]);
   };
 
+
+  const paginate = (pageNumber) => {
+    if (pageNumber > 0 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
 
   const handleVideoChange = (event) => {
     const file = event.target.files[0];
@@ -336,10 +403,6 @@ const indexHistory = () => {
     setVideoFile(null);
     const inputFile = document.getElementById('video-upload');
     inputFile.value = '';
-  };
-
-  const resetImageInput = () => {
-    setImageFiles([]);
   };
 
   useEffect(() => {
@@ -392,41 +455,9 @@ const indexHistory = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleTabChangeWithScroll = (event, newValue) => {
-    handleTabChange(event, newValue);
-    setTabMarginTop(getMarginTop(newValue));
-    setTabMarginTop1(getMarginTop1(newValue));
-    window.scrollTo(0, 0);
-  };
-
-  const getMarginTop = (tabValue) => {
-    switch (tabValue) {
-      case "all":
-        return "60px";
-      case "dang-xu-ly":
-      case "dang-giao":
-      case "da-giao":
-      case "hoan-thanh":
-      case "da-huy":
-        return "120px";
-      default:
-        return "60px";
-    }
-  };
-
-  const getMarginTop1 = (tabValue) => {
-    switch (tabValue) {
-      case "all":
-        return "30px";
-      case "dang-xu-ly":
-      case "dang-giao":
-      case "da-giao":
-      case "hoan-thanh":
-      case "da-huy":
-        return "75px";
-      default:
-        return "30px";
-    }
+  const handleTabChangeWithScroll = (event, newTab) => {
+    setActiveTab(newTab);
+    setCurrentPage(1);
   };
 
   const handleCloseSnackbar = () => {
@@ -445,7 +476,7 @@ const indexHistory = () => {
   return (
     <>
       <div>
-        <ArgonBox style={{ marginLeft: "-1.22%", width: "102.44%", paddingBottom: "52px" }}>
+        <ArgonBox style={{ marginLeft: "-1.22%", width: "102.44%", paddingBottom: "40px" }}>
           <Paper
             ref={paperRef}
             elevation={3}
@@ -462,6 +493,7 @@ const indexHistory = () => {
               <Tab label={`Đã giao (${getOrderCount("da-giao")})`} value="da-giao" />
               <Tab label={`Hoàn thành (${getOrderCount("hoan-thanh")})`} value="hoan-thanh" />
               <Tab label={`Đã hủy (${getOrderCount("da-huy")})`} value="da-huy" />
+              <Tab label={`Trả hàng (${getOrderCount("tra-hang")})`} value="tra-hang" />
             </Tabs>
           </Paper>
           {activeTab === "all" && (
@@ -469,26 +501,26 @@ const indexHistory = () => {
               className="d-flex justify-content-center"
               style={{ marginTop: searchStyle.position === "fixed" ? "80px" : "0px" }}
             >
-              <input
-                ref={searchInputRef}
-                type="search"
-                placeholder="Tìm kiếm"
-                className="form-control"
-                aria-label="Search"
-                style={{
-                  ...searchStyle,
-                  border: "none",
-                  fontSize: "14px",
-                  backgroundColor: "#f0f0f0",
-                  outline: "none",
-                  boxShadow: "none",
-                  height: "45px",
-                  marginBottom: "-1%",
-                  borderRadius: "0px",
-                }}
-                value={searchQuery}
-                onChange={handleSearchChange}
-              />
+              <div style={{ display: "flex", alignItems: "center", backgroundColor: "#f0f0f0", borderRadius: "4px", padding: "0 10px", height: "45px", width: "100%" }}>
+                <i className="fas fa-search" style={{ color: "#888", marginRight: "10px" }}></i> {/* Icon tìm kiếm */}
+                <input
+                  ref={searchInputRef}
+                  type="search"
+                  placeholder="Bạn có thể tìm kiếm theo ID đơn hàng"
+                  className="form-control"
+                  aria-label="Search"
+                  style={{
+                    flex: 1,
+                    border: "none",
+                    fontSize: "14px",
+                    backgroundColor: "transparent",
+                    outline: "none",
+                    boxShadow: "none",
+                  }}
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                />
+              </div>
             </div>
           )}
 
@@ -585,73 +617,77 @@ const indexHistory = () => {
                       />
                       {order.products && order.products.length > 0 ? (
                         <Box display="flex" flexDirection="column">
-                          {order.products.map((product, index) => (
-                            <Box
-                              display="flex"
-                              alignItems="center"
-                              key={index}
-                              style={{ marginBottom: "25px", marginTop: "-15px" }}
-                            >
-                              <img
-                                src={product.productImage}
-                                alt="Product"
-                                style={{ width: "100px", marginRight: "16px" }}
-                              />
-                              <Box>
-                                <Box display="flex" justifyContent="space-between">
-                                  <Typography variant="body2" gutterBottom>
-                                    {product.productName}
-                                  </Typography>
-                                  {order.statusSlug === "hoan-thanh" && product.canReview && (
-                                    <Typography
-                                      variant="body2"
-                                      color="textSecondary"
-                                      onClick={() => handleReviewClick(product)}
-                                      style={{ marginLeft: "600px", color: "black" }}
-                                    >
-                                      Đánh giá
+                          {order.products.map((product, index) => {
+                            const matchingImage = images[product.productId]?.find(
+                              (image) => image.colorsDTO?.id === product.colorId
+                            );
+
+                            return (
+                              <Box
+                                display="flex"
+                                alignItems="center"
+                                key={index}
+                                style={{ marginBottom: "25px", marginTop: "-20px" }}
+                              >
+                                {matchingImage && (
+                                  <img
+                                    src={matchingImage.imageDTOResponse[0]?.url}
+                                    alt={product.productName || "Product"}
+                                    style={{ width: "90px", marginRight: "16px", height: "100px" }}
+                                  />
+                                )}
+                                <Box>
+                                  <Box display="flex" justifyContent="space-between">
+                                    <Typography variant="body2" gutterBottom>
+                                      {product.productName}
                                     </Typography>
-                                  )}
-                                </Box>
-                                <Typography
-                                  variant="body2"
-                                  color="textSecondary"
-                                  style={{ color: "black" }}
-                                >
-                                  Phân loại hàng: {product.color}, {product.size}
-                                </Typography>
-                                <Box display="flex" justifyContent="space-between">
-                                  <Typography variant="body2" style={{ color: "black" }}>
-                                    Số lượng: {product.productQuantity}
-                                  </Typography>
+                                    {order.statusSlug === "hoan-thanh" && product.canReview && (
+                                      <Typography
+                                        variant="body2"
+                                        color="textSecondary"
+                                        onClick={() => handleReviewClick(product)}
+                                        style={{ marginLeft: "400px" }}
+                                        onMouseEnter={(e) => {
+                                          e.target.style.textDecoration = 'underline';
+                                          e.target.style.color = 'blue';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                          e.target.style.textDecoration = 'none';
+                                          e.target.style.color = 'black';
+                                        }}
+                                      >
+                                        Đánh giá
+                                      </Typography>
+                                    )}
+                                  </Box>
                                   <Typography
                                     variant="body2"
-                                    style={{
-                                      color: "#ee4d2d",
-                                      fontSize: "16px",
-                                      position: "relative",
-                                      display: "inline-block",
-                                      marginLeft: "680px",
-                                    }}
+                                    color="textSecondary"
+                                    style={{ color: "black" }}
                                   >
-                                    <span
+                                    Phân loại hàng: {product.color} {product.size !== "Không có" && (<>, {product.size} </>)}
+                                  </Typography>
+                                  <Box display="flex" justifyContent="space-between">
+                                    <Typography variant="body2" style={{ color: "black", fontSize: "14px" }}>
+                                      Số lượng: {product.productQuantity}
+                                    </Typography>
+                                    <Typography
+                                      variant="body2"
                                       style={{
-                                        textDecoration: "underline",
-                                        fontSize: "13px",
-                                        fontWeight: "normal",
-                                        position: "absolute",
-                                        top: 0,
-                                        left: "-10px",
+                                        color: "#ee4d2d",
+                                        fontSize: "16px",
+                                        position: "relative",
+                                        display: "inline-block",
+                                        marginLeft: "690px",
                                       }}
                                     >
-                                      đ
-                                    </span>
-                                    {new Intl.NumberFormat("vi-VN").format(product.productPrice)}
-                                  </Typography>
+                                      {new Intl.NumberFormat("vi-VN").format(product.productPrice)}đ
+                                    </Typography>
+                                  </Box>
                                 </Box>
                               </Box>
-                            </Box>
-                          ))}
+                            );
+                          })}
                         </Box>
                       ) : (
                         <Typography variant="body2" color="textSecondary">
@@ -677,7 +713,7 @@ const indexHistory = () => {
                         <Typography
                           variant="body2"
                           style={{
-                            marginRight: "15px", // Space between "Tổng tiền:" and the price
+                            marginRight: "15px",
                           }}
                         >
                           Tổng tiền:
@@ -690,21 +726,10 @@ const indexHistory = () => {
                             position: "relative",
                             display: "inline-flex",
                             alignItems: "center",
+                            marginRight: "10px"
                           }}
                         >
-                          <span
-                            style={{
-                              textDecoration: "underline",
-                              fontSize: "15px",
-                              fontWeight: "normal",
-                              position: "absolute",
-                              top: 0,
-                              left: "-10px",
-                            }}
-                          >
-                            đ
-                          </span>
-                          {new Intl.NumberFormat("vi-VN").format(order.amount)}
+                          {new Intl.NumberFormat("vi-VN").format(order.amount)}đ
                         </Typography>
                       </div>
                       <Box display="flex" justifyContent="flex-end" mt={2}>
@@ -717,17 +742,30 @@ const indexHistory = () => {
                             Hủy đơn
                           </MuiButton>
                         ) : order.statusSlug === "da-giao" ? (
-                          <MuiButton
-                            variant="contained"
-                            onClick={() => handleStatusComplete(order.id)}
-                            style={{
-                              marginRight: "10px",
-                              backgroundColor: "green",
-                              color: "white",
-                            }}
-                          >
-                            Hoàn thành
-                          </MuiButton>
+                          <>
+                            <MuiButton
+                              variant="contained"
+                              onClick={() => handleStatusComplete(order.id)}
+                              style={{
+                                marginRight: "10px",
+                                backgroundColor: "green",
+                                color: "white",
+                              }}
+                            >
+                              Đã nhận được hàng
+                            </MuiButton>
+                            <MuiButton
+                              variant="contained"
+                              onClick={() => handleOpenReturnModal(order.id)}
+                              style={{
+                                backgroundColor: "orange",
+                                color: "white",
+                                marginRight: "10px",
+                              }}
+                            >
+                              Yêu cầu trả hàng
+                            </MuiButton>
+                          </>
                         ) : order.statusSlug === "da-huy" || order.statusSlug === "hoan-thanh" ? (
                           <MuiButton
                             variant="contained"
@@ -741,7 +779,6 @@ const indexHistory = () => {
                             Mua lại
                           </MuiButton>
                         ) : null}
-
                         {order.statusSlug === "da-huy" ? (
                           <MuiButton
                             variant="contained"
@@ -772,53 +809,58 @@ const indexHistory = () => {
                   </Grid>
                 ))}
                 <div className="col-12" style={{ marginTop: "-20px" }}>
-                  <nav>
-                    <ul className="pagination justify-content-center">
-                      <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                        <a className="page-link" onClick={() => handlePageChange(currentPage - 1)}>
-                          <i className="ni ni-bold-left" />
-                        </a>
-                      </li>
+                  <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
+                    <button
+                      className="pageItem"
+                      disabled={currentPage === 1}
+                      onClick={() => paginate(currentPage - 1)}
+                      style={{
+                        padding: "10px 15px",
+                        backgroundColor: currentPage === 1 ? "#e0e0e0" : "#FFD333",
+                        border: "none",
+                        borderRadius: "50%",
+                        color: "black",
+                        fontSize: "18px",
+                        cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      <FiChevronLeft style={{ fontSize: "20px" }} />
+                    </button>
 
-                      {(() => {
-                        const pages = [];
-                        let startPage, endPage;
+                    <span
+                      style={{
+                        fontSize: "16px",
+                        fontWeight: "600",
+                        margin: "0 15px",
+                        color: "#333",
+                        textAlign: "center",
+                        padding: "10px 10px",
+                        backgroundColor: "#f7f7f7",
+                        borderRadius: "25px",
+                        boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+                      }}
+                    >
+                      Trang {currentPage} / {totalPages}
+                    </span>
 
-                        if (totalPages <= 3) {
-                          startPage = 1;
-                          endPage = totalPages;
-                        } else if (currentPage === 1) {
-                          startPage = 1;
-                          endPage = 3;
-                        } else if (currentPage === totalPages) {
-                          startPage = totalPages - 2;
-                          endPage = totalPages;
-                        } else {
-                          startPage = currentPage - 1;
-                          endPage = currentPage + 1;
-                        }
+                    <button
+                      className="pageItem"
+                      disabled={currentPage === totalPages}
+                      onClick={() => paginate(currentPage + 1)}
+                      style={{
+                        padding: "10px 15px",
+                        backgroundColor: currentPage === totalPages ? "#e0e0e0" : "#FFD333",
+                        border: "none",
+                        borderRadius: "50%",
+                        color: "black",
+                        fontSize: "18px",
+                        cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      <FiChevronRight style={{ fontSize: "20px" }} />
+                    </button>
+                  </Box>
 
-                        for (let i = startPage; i <= endPage; i++) {
-                          pages.push(
-                            <li
-                              className={`page-item ${currentPage === i ? "active" : ""}`}
-                              key={i}
-                            >
-                              <a className="page-link" onClick={() => handlePageChange(i)}>
-                                {i}
-                              </a>
-                            </li>
-                          );
-                        }
-                        return pages;
-                      })()}
-                      <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                        <a className="page-link" onClick={() => handlePageChange(currentPage + 1)}>
-                          <i className="ni ni-bold-right" />
-                        </a>
-                      </li>
-                    </ul>
-                  </nav>
                 </div>
               </Grid>
             )}
@@ -855,6 +897,41 @@ const indexHistory = () => {
             </ArgonButton>
           </Box>
         </MuiModal>
+
+        <MuiModal open={openReturnModal} onClose={() => setOpenReturnModal(false)}>
+          <Box
+            p={3}
+            style={{
+              backgroundColor: "white",
+              width: "500px",
+              margin: "50px auto",
+              borderRadius: "8px",
+              marginTop: "90px",
+            }}
+          >
+            <ArgonTypography variant="h6">Chọn lý do trả hàng</ArgonTypography>
+            <RadioGroup
+              aria-label="cancel-reason"
+              value={returnReason}
+              onChange={(e) => setReturnReason(e.target.value)}  // Ensure this sets the value correctly
+              style={{ marginTop: "15px" }}
+            >
+              {returnOptions.map((option, index) => (
+                <FormControlLabel key={index} value={option} control={<Radio />} label={option} />
+              ))}
+            </RadioGroup>
+
+            <ArgonButton
+              variant="contained"
+              style={{ marginTop: "15px", backgroundColor: "red", color: "white" }}
+              onClick={handleReturnOrder}
+              disabled={!returnReason}
+            >
+              Xác nhận trả hàng
+            </ArgonButton>
+          </Box>
+        </MuiModal>
+
         {selectedProduct && (
           <BootstrapModal show={showReviewModal} size="lg" centered >
             <BootstrapModal.Body>
@@ -874,18 +951,30 @@ const indexHistory = () => {
               {selectedProduct && (
                 <>
                   <div style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
-                    <img
-                      src={selectedProduct.productImage}
-                      alt={selectedProduct.productName}
-                      style={{
-                        width: "100px",
-                        height: "100px",
-                        borderRadius: "5px",
-                        objectFit: "cover",
-                        marginRight: "10px",
-                        border: "1px solid #ddd",
-                      }}
-                    />
+                  {(() => {
+                      // Tìm hình ảnh khớp với productId và colorId
+                      const matchingImage = images[selectedProduct.productId]?.find(
+                        (image) => image.colorsDTO?.id === selectedProduct.colorId
+                      ); 
+                      return (
+                        <img
+                        src={matchingImage.imageDTOResponse[0]?.url}
+                          alt={selectedProduct.productName || "Product Image"}
+                          style={{
+                            width: "80px",
+                            height: "100px",
+                            borderRadius: "5px",
+                            marginRight: "10px",
+                            border: "1px solid #ddd",
+                          }}
+                          onError={(e) => {
+                            // Hiển thị ảnh mặc định nếu có lỗi khi tải ảnh
+                            e.target.src =
+                              "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930";
+                          }}
+                        />
+                      );
+                    })()}
                     <div>
                       <p style={{ fontSize: "20px", fontWeight: "bold", margin: "0" }}>
                         {selectedProduct.productName}

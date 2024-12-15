@@ -6,8 +6,7 @@ import ArgonInput from "../../../components/ArgonInput";
 import ArgonButton from "../../../components/ArgonButton";
 import ArgonBox from "../../../components/ArgonBox";
 import ArgonTypography from "../../../components/ArgonTypography";
-import Table from "../../../examples/Tables/Table";
-import BrandTable from "./data";
+import DataTable from "./data";
 import Footer from "../../../examples/Footer";
 import BrandsService from "../../../services/BrandServices";
 import { Image } from "react-bootstrap";
@@ -15,6 +14,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { storage } from "../../../config/firebase-config";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+
 
 function Brand() {
   const [formData, setFormData] = useState({
@@ -25,16 +25,16 @@ function Brand() {
   const [brands, setBrands] = useState([]);
   const [errors, setErrors] = useState({});
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await BrandsService.getAllBrands();
-        setBrands(response.data || []);
-      } catch (err) {
-        console.log(err);
-      }
-    };
+  const fetchData = async () => {
+    try {
+      const response = await BrandsService.getAllBrands();
+      setBrands(response.data || []);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -57,16 +57,10 @@ function Brand() {
   const validateForm = () => {
     const newErrors = { name: false, image: false };
 
-    // Kiểm tra tên danh mục
     if (!formData.name.trim()) {
       newErrors.name = true;
       toast.warn("Vui lòng nhập tên thương hiệu!!!");
-    } else if (/\d/.test(formData.name)) {
-      newErrors.name = true;
-      toast.warn("Tên thương hiệu không được nhập số!!!");
     }
-
-    // Kiểm tra ảnh
     if (!formData.image) {
       newErrors.image = true;
       toast.warn("Vui lòng chọn ảnh thương hiệu!!!");
@@ -77,6 +71,7 @@ function Brand() {
 
     return !newErrors.name && !newErrors.image;
   };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -91,7 +86,7 @@ function Brand() {
       let imageUrl;
       if (formData.image instanceof File) {
         const imageFile = formData.image;
-        const storageRef = ref(storage, `brands/${imageFile.name}`);  // Thay đổi từ "categories" thành "brands"
+        const storageRef = ref(storage, `brands/${imageFile.name}`);
         const uploadTask = uploadBytesResumable(storageRef, imageFile);
 
         await new Promise((resolve, reject) => {
@@ -134,31 +129,29 @@ function Brand() {
 
       let result;
       if (formData.id) {
-        result = await BrandsService.updateBrand(formData.id, formDataObj, {  // Thay đổi từ CategoriesService sang BrandsService
+        result = await BrandsService.updateBrand(formData.id, formDataObj, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
-        setBrands(brands.map((brand) => (brand.id === result.data.id ? result.data : brand)));  // Thay đổi từ setCategories sang setBrands
+        setBrands(brands.map((brand) => (brand.id === result.data.id ? result.data : brand)));
         toast.success("Cập nhật thương hiệu thành công");
       } else {
-        result = await BrandsService.createBrand(formDataObj, {  // Thay đổi từ CategoriesService sang BrandsService
+        result = await BrandsService.createBrand(formDataObj, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
-        setBrands([...brands, result.data]);  // Thay đổi từ setCategories sang setBrands
+        setBrands([...brands, result.data]);
         toast.success("Thêm thương hiệu thành công");
       }
-
+      fetchData();
       resetForm();
     } catch (error) {
       console.error("Unexpected error:", error);
       toast.error("Có lỗi xảy ra. Vui lòng thử lại!");
     }
   };
-
-
 
   const resetForm = () => {
     setFormData({
@@ -173,16 +166,19 @@ function Brand() {
     setErrors({});
   };
 
-  const handleDeleteClick = async (id) => {
-    try {
-      await BrandsService.deleteBrand(id);
-      setBrands(brands.filter((brand) => brand.id !== id));
-    } catch (error) {
-      console.error("Error deleting brand", error);
+  const handleDeleteClick = async (selectedRows) => {
+    if (selectedRows.length === 0) return;
+
+    for (const id of selectedRows) {
+      try {
+        await BrandsService.deleteBrand(id);
+      } catch (error) {
+        console.error(`${id}`, error);
+      }
     }
+    fetchData();
   };
 
-  const { columns, rows } = BrandTable({ onEditClick: handleEditClick, onDeleteClick: handleDeleteClick });
 
   return (
     <DashboardLayout>
@@ -208,7 +204,7 @@ function Brand() {
               <ArgonBox
                 mb={3}
                 mx={3}
-                width={{ xs: "100%", md: 400 }} 
+                width={{ xs: "100%", md: 400 }}
                 display="flex"
                 flexDirection="column"
                 alignItems="center"
@@ -278,11 +274,25 @@ function Brand() {
                   )}
                 </ArgonBox>
 
-                <ArgonBox mb={3} sx={{ width: { xs: '100%', sm: '50%', md: '20%' } }}>
-                  <ArgonButton type="submit" size="large" color="info" fullWidth={true}>
+                <ArgonBox mb={3} width={720} display="flex" gap={1} justifyContent="flex-start">
+                  <ArgonButton
+                    type="submit"
+                    size="large"
+                    color="info"
+                    sx={{ minWidth: 100, padding: '8px 16px' }}
+                  >
                     {formData.id ? "Cập nhật" : "Thêm"}
                   </ArgonButton>
+                  <ArgonButton
+                    size="large"
+                    color="primary"
+                    sx={{ minWidth: 100, padding: '8px 16px' }}
+                    onClick={resetForm}
+                  >
+                    Làm mới
+                  </ArgonButton>
                 </ArgonBox>
+
               </ArgonBox>
             </ArgonBox>
           </Card>
@@ -292,18 +302,11 @@ function Brand() {
       <ArgonBox>
         <ArgonBox mb={3}>
           <Card>
-            <ArgonBox
-              sx={{
-                "& .MuiTableRow-root:not(:last-child)": {
-                  "& td": {
-                    borderBottom: ({ borders: { borderWidth, borderColor } }) =>
-                      `${borderWidth[1]} solid ${borderColor}`,
-                  },
-                },
-              }}
-            >
-              <Table columns={columns} rows={rows} />
-            </ArgonBox>
+            <DataTable
+              brands={brands}
+              onEditClick={handleEditClick}
+              onDeleteClick={handleDeleteClick}
+            />
           </Card>
         </ArgonBox>
       </ArgonBox>

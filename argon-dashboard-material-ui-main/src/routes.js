@@ -2,11 +2,9 @@ import Dashboard from "layouts/dashboard";
 import Profile from "components/client/HasagiProfile";
 import Color from "layouts/manage/color";
 import Size from "layouts/manage/size";
-import Status from "layouts/manage/status";
 import Banner from "layouts/manage/banner";
 import Order from "layouts/manage/order";
 import Account from "layouts/manage/account";
-import Image from "layouts/manage/image";
 import ForgotPassword from "layouts/authentication/forgot-password";
 import ResetPassword from "layouts/authentication/reset-password";
 import Product from "layouts/manage/product";
@@ -38,12 +36,14 @@ import NotFoundPage from "components/client/Hasagi404";
 import Voucher from "layouts/manage/voucher";
 import ChatBot from "components/client/HasagiChatBot";
 import QA from "components/client/HasagiQ&A";
-import UserInfo from "layouts/manage/user/index"
-import OrderSummary from "layouts/billed";
+import BaoMat from "components/client/HasagiBaoMat";
+import DoiTra from "components/client/HasagiDoiTra";
+import DieuKhoan from "components/client/HasagiDieuKhoan";
+import OrderSummary from "layouts/billed"
 const routes = [
   {
     type: "route",
-    name: "Dashboard",
+    name: "Thống kê",
     key: "dashboard",
     route: "/dashboard",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-tv-2" />,
@@ -67,28 +67,28 @@ const routes = [
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
     component: <SignUp />,
   },
-  { type: "title", title: "Account Pages", key: "account-pages" },
+  //{ type: "title", title: "Trang tài khoản", key: "account-pages" },
   {
-    type: "route",
+    //type: "route",
     name: "Profile",
     key: "profile",
     route: "/profile",
     icon: <ArgonBox component="i" color="dark" fontSize="14px" className="ni ni-single-02" />,
     component: <Profile />,
   },
-  { type: "title", title: "Management pages", key: "manage-pages" },
+  { type: "title", title: "Trang quản lý", key: "manage-pages" },
   {
     type: "route",
-    name: "Manage Account",
+    name: "Quản lý người dùng",
     key: "account",
     route: "/manage/account",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
     component: <Account />,
-    protected: true,
+    // protected: true,
   },
   {
     type: "route",
-    name: "Manage Role",
+    name: "Quản lý vai trò",
     key: "role",
     route: "/manage/role",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -96,7 +96,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Product",
+    name: "Quản lý sản phẩm",
     key: "product",
     route: "/manage/product",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -111,7 +111,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Category",
+    name: "Quản lý danh mục",
     key: "category",
     route: "/manage/category",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -119,7 +119,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Brand",
+    name: "Quản lý thương hiệu",
     key: "brand",
     route: "/manage/brand",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -127,7 +127,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Color",
+    name: "Quản lý màu sắc",
     key: "Manage Color",
     route: "/manage/color",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -135,7 +135,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Size",
+    name: "Quản lý kích thước",
     key: "size",
     route: "/manage/size",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -143,7 +143,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Review",
+    name: "Quản lý đánh giá",
     key: "review",
     route: "/manage/review",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -197,7 +197,7 @@ const routes = [
 
   {
     type: "route",
-    name: "Manage Order",
+    name: "Quản lý đơn hàng",
     key: "order",
     route: "/manage/order",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -205,15 +205,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Status",
-    key: "status",
-    route: "/manage/status",
-    icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
-    component: <Status />,
-  },
-  {
-    type: "route",
-    name: "Manage Banner",
+    name: "Quản lý Banner",
     key: "banner",
     route: "/manage/banners",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -221,15 +213,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Manage Image",
-    key: "image",
-    route: "/manage/images",
-    icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
-    component: <Image />,
-  },
-  {
-    type: "route",
-    name: "Manage Voucher",
+    name: "Quản lý phiếu giảm giá",
     key: "voucher",
     route: "/manage/voucher",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -357,15 +341,32 @@ const routes = [
     route: "/not-found",
     component: <NotFoundPage />,
     showInSidenav: true,
+  }, {
+    // type: "route", 
+    name: "BaoMat",
+    key: "BaoMat",
+    route: "/BaoMat",
+    icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
+    component: <BaoMat />,
+    showInSidenav: true,
   },
   {
-    type: "route",
-    name: "user-info",
-    key: "user-info",
-    route: "/see-user-info",
-    icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
-    component: <UserInfo />,
-    protected: true,
+    // type: "route", 
+    name: "DoiTra",
+    key: "DoiTra",
+    route: "/DoiTra",
+    icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
+    component: <DoiTra />,
+    showInSidenav: true,
+  },
+  {
+    // type: "route", 
+    name: "DieuKhoan",
+    key: "DieuKhoan",
+    route: "/DieuKhoan",
+    icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
+    component: <DieuKhoan />,
+    showInSidenav: true,
   },
   {
     name: "OrderSummary",

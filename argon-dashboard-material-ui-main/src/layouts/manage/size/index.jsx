@@ -9,8 +9,7 @@ import ArgonTypography from "../../../components/ArgonTypography";
 import DataTable from "./data";
 import Footer from "../../../examples/Footer";
 import SizesService from "../../../services/SizeServices";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from "react-toastify";
 
 function Size() {
     const [formData, setFormData] = useState({
@@ -19,7 +18,7 @@ function Size() {
     });
 
     const [errors, setErrors] = useState({
-        name: false,  
+        name: false,
     });
 
     const [sizes, setSizes] = useState([]);
@@ -46,35 +45,45 @@ function Size() {
 
     const validateForm = () => {
         let isValid = true;
-        const newErrors = { name: false };  
+        const newErrors = { name: false };
 
-        if (!formData.name.trim()) { 
-            newErrors.name = "Size không được bỏ trống";
+        if (!formData.name.trim()) {
+            newErrors.name = "Size name is required.";
             isValid = false;
+        } else if (isSizeNameDuplicate(formData.name)) {
+            newErrors.name = true;
+            toast.warn("Tên size đã tồn tại!!!");
         }
 
         setErrors(newErrors);
         return isValid;
     };
 
+    const isSizeNameDuplicate = (sizeName) => {
+        const existingSizeNames = sizes.map((size) => size.name.trim().toLowerCase());
+        return existingSizeNames.includes(sizeName.trim().toLowerCase());
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         if (!validateForm()) {
             return;
         }
-
-        const data = { name: formData.name }; 
-
+        if (isSizeNameDuplicate(formData.name)) {
+            return;
+        }
+        const data = { name: formData.name };
         try {
             let result;
             if (formData.id) {
                 result = await SizesService.updateSize(formData.id, data);
-                toast.success("Sửa thành công");
+                toast.success("Size updated successfully");
             } else {
                 result = await SizesService.createSize(data);
-                toast.success("Thêm thành công");
+                toast.success("Size created successfully");
             }
-            fetchData(); 
+            fetchData();
             resetForm();
         } catch (error) {
             toast.error(`Error: ${error.response ? error.response.data : error.message}`);
@@ -84,41 +93,42 @@ function Size() {
     const resetForm = () => {
         setFormData({
             id: "",
-            name: "",  
+            name: "",  // Thay đổi 'size' thành 'name'
         });
-        setErrors({ name: false }); 
+        setErrors({ name: false });  // Thay đổi 'size' thành 'name'
     };
 
     const handleEditClick = (size) => {
         setFormData({
             id: size.id,
-            name: size.name,  
+            name: size.name,  // Thay đổi 'size' thành 'name'
         });
     };
 
+    // Handle deletion of selected rows
     const handleDeleteClick = async (selectedRows) => {
         if (selectedRows.length === 0) return;
 
         for (const id of selectedRows) {
             try {
                 await SizesService.deleteSize(id);
-                toast.success(`Xóa thành công`);
+                toast.success(`Size with ID ${id} deleted successfully`);
             } catch (error) {
-                toast.error(`Lỗi khi xóa`);
+                console.error(`Error deleting size with ID ${id}`, error);
+                toast.error(`Error deleting size with ID ${id}`);
             }
         }
-        fetchData(); 
+        fetchData(); // Refresh data after deletion
     };
 
     return (
         <DashboardLayout>
-            <ToastContainer />
             <DashboardNavbar />
             <ArgonBox py={3}>
                 <ArgonBox mb={3}>
                     <Card>
                         <ArgonBox display="flex" justifyContent="space-between" p={3}>
-                            <ArgonTypography variant="h6">Manage Size</ArgonTypography>
+                            <ArgonTypography variant="h6">Quản lý Size</ArgonTypography>
                         </ArgonBox>
                         <ArgonBox
                             p={3}
@@ -130,7 +140,7 @@ function Size() {
                                 <ArgonBox mb={3} position="relative">
                                     <ArgonInput
                                         type="text"
-                                        placeholder="Nhập Size"
+                                        placeholder="Nhập size"
                                         size="large"
                                         name="name"
                                         fullWidth
@@ -145,10 +155,9 @@ function Size() {
                                     )}
                                 </ArgonBox>
 
-                                {/* Submit Button */}
                                 <ArgonBox mb={3}>
                                     <ArgonButton type="submit" size="large" color="info" fullWidth={true}>
-                                        {formData.id ? "Update" : "Save"}
+                                        {formData.id ? "Cập nhật" : "Thêm"}
                                     </ArgonButton>
                                 </ArgonBox>
                             </ArgonBox>

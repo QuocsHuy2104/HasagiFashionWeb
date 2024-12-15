@@ -188,13 +188,12 @@ export default function DataGridDemo({ items, onEdit, onDelete }) {
         { field: 'quantity', headerName: 'Số lượng', width: 150, editable: true },
         { field: 'price', headerName: 'Giá sản phẩm', width: 150, editable: true },
         { field: 'priceSize', headerName: 'Giá size', width: 150, editable: true },
-        { field: 'colorsDTO', headerName: 'Color', sortable: false },
-        { field: 'sizesDTOResponse', headerName: 'Size', sortable: false },
-        { field: 'createBy', headerName: 'Người thêm', sortable: false, width: 260 },
+        { field: 'colorsDTO', headerName: 'Màu sắc', sortable: false },
+        { field: 'sizesDTOResponse', headerName: 'Kích cỡ', sortable: false },
         {
             field: 'actions',
             type: 'actions',
-            headerName: 'Actions',
+            headerName: 'Thao tác',
             width: 100,
             getActions: (params) => {
                 const isOpen = Boolean(anchorEl[params.id]);

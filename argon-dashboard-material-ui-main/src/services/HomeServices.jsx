@@ -34,6 +34,7 @@ const HomeService = {
     getProductSale: () => apiClient.get('/public/home/top-discounts'),
     buyQuickly: id => apiClient.post(`/web/small-cart/buy-quickly/${id}`)
 
+
 }
 
 export default HomeService;

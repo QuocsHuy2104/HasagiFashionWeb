@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer} from "react-toastify";
 import AddressService from "../../../services/AddressServices";
 import Backup3 from "../HasagiBackup/index3";
 import Backup2 from "../HasagiBackup/index2";
 import Backup from "../HasagiBackup/index";
-import Cookies from "js-cookie";
 import Swal from "sweetalert2";
 const AddressPage = () => {
   const [address, setAddress] = useState([]);
@@ -20,12 +19,8 @@ const AddressPage = () => {
   const [showBackupModal, setShowBackupModal] = useState(false);
   const fetchAddress = async () => {
     try {
-      const accountId = Cookies.get("accountId");
       const response = await AddressService.getAllAddress();
-      const addressReponse = await axios.get(
-        `http://localhost:3000/api/addresses/exists?accountId=${accountId}`,
-        { withCredentials: true }
-      );
+      const addressReponse = await AddressService.getAddress();
       setAccountExists(addressReponse.data.exists);
       let addresses = response.data;
 

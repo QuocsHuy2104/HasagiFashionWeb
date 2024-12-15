@@ -7,7 +7,8 @@ import AddressPage from "../HasagiAddress";
 import ChangePassword from "../HasagiChangePassword";
 import Voucher from "components/client/HasagiVorcher/vorcher";
 import User from "../HasagiUser";
-
+import aboutImage5 from "layouts/assets/img/user.jpg";
+import ProfileServices from "../../../services/ProfileServices";
 const Profile = () => {
   const [activeItem, setActiveItem] = useState("Hồ Sơ");
   const [expandedItem, setExpandedItem] = useState("Tài Khoản Của Tôi");
@@ -15,36 +16,62 @@ const Profile = () => {
   const menuItems = [
     { name: "Tài Khoản Của Tôi", hasSubItems: true },
     { name: "Đơn Mua" },
-    { name: "Kho Voucher", isNew: true },
   ];
 
   const subMenuItems = [
     { name: "Hồ Sơ", parent: "Tài Khoản Của Tôi" },
     { name: "Địa Chỉ", parent: "Tài Khoản Của Tôi" },
     { name: "Đổi Mật Khẩu", parent: "Tài Khoản Của Tôi" },
-    { name: "Kho Voucher", parent: "Tài Khoản Của Tôi" },
   ];
 
   const urlMapping = {
     "Tài Khoản Của Tôi": "my-account",
     "Đơn Mua": "purchase",
-    "Kho Voucher": "voucher-store",
     "Hồ Sơ": "profile",
     "Địa Chỉ": "address",
     "Đổi Mật Khẩu": "change-password",
-}; 
+  };
 
-const updateURL = (item) => {
-  const englishURL = urlMapping[item] || item.toLowerCase().replace(/\s/g, '-');
-  const newURL = `/user/${englishURL}`;
-  window.history.pushState(null, '', newURL);
-};
 
-useEffect(() => {
-    if (activeItem) {
-        updateURL(activeItem);
+
+  const [profileImage, setProfileImage] = useState(null);
+  const [name, setName] = useState("");
+  const fetchUserData = async () => {
+    try {
+      const response = await ProfileServices.getProfile();
+      const { avatar, fullName } = response;
+
+
+      setProfileImage(avatar);
+      setName(fullName);
+
+
+    } catch (error) {
+      console.error("Error fetching user data:", error);
     }
-}, [activeItem]);
+  };
+
+  useEffect(() => {
+    fetchUserData();
+    const intervalId = setInterval(() => {
+      fetchUserData();
+    }, 500);
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
+
+  const updateURL = (item) => {
+    const englishURL = urlMapping[item] || item.toLowerCase().replace(/\s/g, '-');
+    const newURL = `/user/${englishURL}`;
+    window.history.pushState(null, '', newURL);
+  };
+
+  useEffect(() => {
+    if (activeItem) {
+      updateURL(activeItem);
+    }
+  }, [activeItem]);
 
   const handleMenuItemClick = (item) => {
     if (item.hasSubItems) {
@@ -88,8 +115,14 @@ useEffect(() => {
         <div className="col-3">
           <div className="sidebar">
             <div className="profile">
-              <div className="profile-pic">C</div>
-              <span className="username">cnglp273</span>
+              <div className="profile-pic">
+                {profileImage ? (
+                  <img src={profileImage} alt="Profile" style={{ width: "100%", height: "auto" }} />
+                ) : (
+                  <img src={aboutImage5} alt="Profile" style={{ width: "100%", height: "auto" }} />
+                )}
+              </div>
+              <span className="username">{name}</span>
               <button className="edit-profile" onClick={handleEditProfileClick}>
                 Sửa Hồ Sơ
               </button>
@@ -125,7 +158,7 @@ useEffect(() => {
             </div>
           </div>
         </div>
-        <div className="col-8 content-box">{renderContent()}</div>
+        <div className="col-8 content-box mb-3">{renderContent()}</div>
       </div>
       <Footer />
     </>

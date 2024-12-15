@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
-import Cookies from "js-cookie";
+import axios from "axios";
 import { Table, TableBody, TableCell, TableContainer, TableRow } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faReceipt, faTruck, faBoxOpen, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
@@ -24,27 +24,24 @@ const HistoryOrderDetail = () => {
   const [orderDate, setOrderDate] = useState("");
   const [voucherPrice, setVoucherPrice] = useState("");
   const [cancelReason, setCancelReason] = useState("");
-
+  const [images, setImages] = useState([]);
+  const [total, setTotal] = useState("");
   useEffect(() => {
-    const accountId = Cookies.get("accountId");
-    if (!accountId) {
-      navigate(`/authentication/sign-in`);
-      return;
-    }
     if (orderId) {
-      fetch(`http://localhost:8080/api/history-order/${orderId}`)
-        .then((response) => {
+      const fetchOrderDetails = async () => {
+        try {
+          const response = await fetch(`http://localhost:8080/api/history-order/${orderId}`);
           if (!response.ok) {
             throw new Error("Network response was not ok");
           }
-          return response.json();
-        })
-        .then((data) => {
+
+          const data = await response.json();
           setOrderDetails(data);
+
           if (data.length > 0) {
             const fee = data[0].shippingFee;
-
             setShippingFee(fee);
+
             const orderStatus = data[0].statusName;
             setStatus(orderStatus);
 
@@ -58,34 +55,57 @@ const HistoryOrderDetail = () => {
               ? format(new Date(orderDate), "HH:mm dd-MM-yyyy")
               : "Date not available";
             setOrderDate(formattedOrderDate);
+
             setVoucherPrice(data[0].voucher);
             setCancelReason(data[0].reason);
             setFullNameAdd(data[0].name);
+              setTotal(data[0].total);
+            // Fetch additional image data for each product
+            const imageRequests = data.map((product) =>
+              axios
+                .get(
+                  `http://localhost:3000/api/public/webShopDetail/product-detail/${product.productId}`
+                )
+                .then((res) => ({ productId: product.productId, data: res.data }))
+            );
+
+            const imagesData = await Promise.all(imageRequests);
+            const imagesMap = imagesData.reduce((acc, { productId, data }) => {
+              acc[productId] = data;
+              return acc;
+            }, {});
+
+            setImages(imagesMap);
           }
+
           setLoading(false);
-        })
-        .catch((error) => {
+        } catch (error) {
           console.error("Error fetching order details:", error);
           setError("Order not found");
           setLoading(false);
-        });
+        }
+      };
+
+      fetchOrderDetails();
     }
   }, [orderId]);
 
   if (error) {
     return <div>{error}</div>;
   }
-
   const subtotalList = orderDetails.map((item) => item.productPrice * item.productQuantity);
   const totalSubtotal = subtotalList.reduce((total, subtotal) => total + subtotal, 0);
 
-  const discountRate = voucherPrice ? voucherPrice / 100 : 0;
-  const discountedSubtotal = totalSubtotal * (1 - discountRate);
+  // Áp dụng giảm giá trực tiếp từ voucher (giảm tối đa không vượt quá totalSubtotal)
+  const diccount = voucherPrice ? Math.min(voucherPrice, totalSubtotal) : 0;
 
+  // Tổng tiền sau khi áp dụng giảm giá
+  const discountedSubtotal = totalSubtotal - diccount;
+
+  // Tổng tiền cuối cùng (bao gồm phí vận chuyển)
   const finalTotal = discountedSubtotal + shippingFee;
 
-  const diccount = (totalSubtotal * voucherPrice) / 100;
-
+  // Định dạng số tiền giảm giá và tổng tiền cuối cùng
   const formattedDiscountedTotal = new Intl.NumberFormat("vi-VN", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 3,
@@ -95,6 +115,12 @@ const HistoryOrderDetail = () => {
     minimumFractionDigits: 0,
     maximumFractionDigits: 3,
   }).format(finalTotal);
+
+  console.log({
+    totalSubtotal,
+    diccount: formattedDiscountedTotal,
+    finalTotal: formattedFinalTotal,
+  });
 
   const goBack = () => {
     navigate(`/History`);
@@ -199,12 +225,12 @@ const HistoryOrderDetail = () => {
                   >
                     Trở lại
                   </h5>
-                  {(status === "Đã hủy" ) && (
+                  {(status === "Đã hủy") && (
                     <span style={{ marginLeft: "auto", fontSize: "15px", color: "#6c757d" }}>
                       Yêu cầu vào: {orderDate}
                     </span>
                   )}
-                  {status !== "Đã hủy"  && (
+                  {status !== "Đã hủy" && (
                     <span style={{ marginLeft: "auto", fontSize: "18px", color: "#ed4600c9" }}>
                       {status}
                     </span>
@@ -316,64 +342,61 @@ const HistoryOrderDetail = () => {
                   }}
                 />
 
-                {orderDetails.map((item, index) => (
-                  <Box
-                    display="flex"
-                    alignItems="center"
-                    style={{ marginBottom: "25px", marginTop: "-15px" }}
-                    key={index}
-                  >
-                    <img
-                      src={item.productImage}
-                      alt="Product"
-                      style={{ width: "100px", marginRight: "16px" }}
-                    />
-                    <Box>
-                      <Typography variant="h6" gutterBottom>
-                        {item.productName}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary" style={{ color: "black" }}>
-                        Phân loại hàng: {item.size}, {item.color}
-                      </Typography>
-                      <Box display="flex" justifyContent="space-between">
-                        <Typography
-                          variant="body2"
-                          color="textSecondary"
-                          style={{ color: "black" }}
-                        >
-                          Số lượng: {item.productQuantity}
+                {orderDetails.map((item, index) => {
+                  // Find the matching image based on productId and colorId
+                  const matchingImage = images[item.productId]?.find(
+                    (image) => image.colorsDTO?.id === item.colorId
+                  );
+
+                  return (
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      style={{ marginBottom: "25px", marginTop: "-15px" }}
+                      key={index}
+                    >
+                      {matchingImage && (
+                        <img
+                          src={matchingImage.imageDTOResponse[0]?.url}
+                          alt="Product"
+                          style={{ width: "80px", marginRight: "16px", height: "110px"}}
+                        />
+                      )}
+                      <Box>
+                        <Typography variant="h6" gutterBottom>
+                          {item.productName}
                         </Typography>
-                        <Typography
-                          variant="body2"
-                          color="textSecondary"
-                          style={{
-                            color: "#ee4d2d",
-                            fontSize: "16px",
-                            position: "relative",
-                            display: "inline-block",
-                            marginLeft: "710px",
-                          }}
-                        >
-                          <span
+                        <Typography variant="body2" color="textSecondary" style={{ color: "black" }}>
+                          Phân loại hàng: {item.size !== "Không có" && (
+                            <>
+                              {item.size || "Chưa chọn kích thước"},
+                            </>
+                          )} {item.color}
+                        </Typography>
+                        <Box display="flex" justifyContent="space-between">
+                          <Typography variant="body2" color="textSecondary" style={{ color: "black" }}>
+                            Số lượng: {item.productQuantity}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="textSecondary"
                             style={{
-                              textDecoration: "underline",
-                              fontSize: "10px",
-                              fontWeight: "normal",
-                              transform: "translateY(-3px)", // Adjust the value as needed
+                              color: "#ee4d2d",
+                              fontSize: "16px",
+                              position: "relative",
                               display: "inline-block",
-                              color: "red",
+                              marginLeft: "710px",
                             }}
                           >
-                            đ
-                          </span>
-                          <span style={{ marginLeft: "2px" }}>
-                            {new Intl.NumberFormat("vi-VN").format(item.productPrice)}
-                          </span>
-                        </Typography>
+                            <span style={{ marginLeft: "2px" }}>
+                              {new Intl.NumberFormat("vi-VN").format(item.productPrice)}đ
+                            </span>
+                          </Typography>
+                        </Box>
                       </Box>
                     </Box>
-                  </Box>
-                ))}
+                  );
+                })}
 
                 <section
                   style={{
@@ -410,19 +433,8 @@ const HistoryOrderDetail = () => {
                                 position: "relative",
                               }}
                             >
-                              <span
-                                style={{
-                                  textDecoration: "underline",
-                                  fontSize: "10px",
-                                  fontWeight: "normal",
-                                  transform: "translateY(-3px)", // Adjust the value as needed
-                                  display: "inline-block",
-                                }}
-                              >
-                                đ
-                              </span>
                               <span style={{ marginLeft: "2px" }}>
-                                {new Intl.NumberFormat("vi-VN").format(totalSubtotal)}
+                                {new Intl.NumberFormat("vi-VN").format(totalSubtotal)}đ
                               </span>
                             </TableCell>
                           </TableRow>
@@ -445,19 +457,8 @@ const HistoryOrderDetail = () => {
                                 position: "relative",
                               }}
                             >
-                              <span
-                                style={{
-                                  textDecoration: "underline",
-                                  fontSize: "10px",
-                                  fontWeight: "normal",
-                                  transform: "translateY(-3px)", // Adjust the value as needed
-                                  display: "inline-block",
-                                }}
-                              >
-                                đ
-                              </span>
                               <span style={{ marginLeft: "2px" }}>
-                                {new Intl.NumberFormat("vi-VN").format(shippingFee)}
+                                {new Intl.NumberFormat("vi-VN").format(shippingFee)}đ
                               </span>
                             </TableCell>
                           </TableRow>
@@ -481,21 +482,10 @@ const HistoryOrderDetail = () => {
                                   position: "relative",
                                 }}
                               >
-                                <span
-                                  style={{
-                                    textDecoration: "underline",
-                                    fontSize: "10px",
-                                    fontWeight: "normal",
-                                    transform: "translateY(-3px)", // Adjust the value as needed
-                                    display: "inline-block",
-                                  }}
-                                >
-                                  đ
-                                </span>
                                 <span style={{ marginLeft: "2px" }}>
                                   {new Intl.NumberFormat("vi-VN", { minimumFractionDigits: 3 })
                                     .format(formattedDiscountedTotal)
-                                    .replace(/,/g, ".")}
+                                    .replace(/,/g, ".")}đ
                                 </span>
                               </TableCell>
                             </TableRow>
@@ -519,21 +509,8 @@ const HistoryOrderDetail = () => {
                                 position: "relative",
                               }}
                             >
-                              <span
-                                style={{
-                                  textDecoration: "underline",
-                                  fontSize: "10px",
-                                  fontWeight: "normal",
-                                  transform: "translateY(-3px)", // Adjust the value as needed
-                                  display: "inline-block",
-                                }}
-                              >
-                                đ
-                              </span>
                               <span style={{ marginLeft: "2px" }}>
-                                {new Intl.NumberFormat("vi-VN", { minimumFractionDigits: 3 })
-                                  .format(formattedFinalTotal)
-                                  .replace(/,/g, ".")}
+                              {new Intl.NumberFormat("vi-VN").format(total)}đ
                               </span>
                             </TableCell>
                           </TableRow>
@@ -580,7 +557,7 @@ const HistoryOrderDetail = () => {
                     </TableContainer>
                   </>
                 )}
-                {(status === "Đã hủy" ) && (
+                {(status === "Đã hủy") && (
                   <>
                     <TableContainer
                       component={Paper}

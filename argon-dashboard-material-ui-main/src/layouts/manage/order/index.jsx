@@ -20,31 +20,41 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
-import Button from '@mui/material/Button'
-
+import './style.css';
+import logo from "components/client/assets/images/logo.png";
 
 function Order() {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [statuses, setStatuses] = useState([]);
-  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [shippingFee, setShippingFee] = useState(0);
+  const [voucherPrice, setVoucherPrice] = useState("");
+  const [numberPhone, setNumberPhone] = useState("");
+  const [nameOrder, setNameOrder] = useState("");
+  const [fullAddress, setFullAddress] = useState("");
+  const [orderDate, setOrderDate] = useState("");
+  const [searchCriteria, setSearchCriteria] = useState({
+    status: "all",
+    endDate: "",
+    phoneNumber: "",
+  });
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get("http://localhost:3000/api/order");
         if (response.data && response.data.orders) {
-          console.log(response.data);
+
           const orders = response.data.orders.map(order => ({
             ...order,
-            orderDate: order.orderDate ? format(new Date(order.orderDate), "dd-MM-yyyy") : "Date not available",
-            amount : new Intl.NumberFormat("vi-VN", {
-              style: "currency",
-              currency: "VND",
-            }).format(order.amount),
-            
+            orderDate: order.orderDate
+              ? format(new Date(order.orderDate), "dd-MM-yyyy")
+              : "Date not available",
+            amount: `${new Intl.NumberFormat("vi-VN").format(order.amount)}đ`, // Thêm "đ" vào sau số tiền
           }));
+
           setOrders(orders);
           setFilteredOrders(orders);
         }
@@ -57,24 +67,29 @@ function Order() {
     };
 
     fetchData();
+    const intervalId = setInterval(() => {
+      fetchData();
+    }, 3000);
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
 
-  const handleSearch = (event) => {
-    event.preventDefault();
 
-    const statusSlug = event.target.status.value; 
-    const endDateInput = event.target.endDate.value
-      ? new Date(event.target.endDate.value)
-      : null;
-    const phoneNumber = event.target.phoneNumber.value;
+  const handleSearchChange = (e) => {
+    const { name, value } = e.target;
+    setSearchCriteria((prev) => ({ ...prev, [name]: value }));
+  };
+
+  useEffect(() => {
+    const { status, endDate, phoneNumber } = searchCriteria;
 
     const filteredOrders = orders.filter((order) => {
       const orderDate = new Date(order.orderDate);
 
-      // Match the slug with order.slug
-      const isStatusMatch = statusSlug === "all" ? true : order.slug === statusSlug;
+      const isStatusMatch = status === "all" ? true : order.slug === status;
 
-      const isDateMatch = endDateInput ? orderDate <= endDateInput : true;
+      const isDateMatch = endDate ? orderDate <= new Date(endDate) : true;
 
       const isPhoneMatch = phoneNumber
         ? order.numberPhone.includes(phoneNumber)
@@ -84,7 +99,8 @@ function Order() {
     });
 
     setFilteredOrders(filteredOrders);
-  };
+  }, [searchCriteria, orders]);
+
   const handleRowClick = async (params, event) => {
     // Kiểm tra nếu cột được bấm không phải là "status"
     if (params.field !== "status") {
@@ -92,13 +108,19 @@ function Order() {
       try {
         const response = await axios.get(`http://localhost:3000/api/orderdetails/${orderId}`);
         setSelectedOrder(response.data);
+        const fee = response.data[0].shippingPrice;
+        setShippingFee(fee);
+        setVoucherPrice(response.data[0].voucherDiscount);
+        setNumberPhone(response.data[0].numberPhone)
+        setFullAddress(response.data[0].fullNameAddress)
+        setNameOrder(response.data[0].nameOrder)
+        setOrderDate(format(new Date(response.data[0].orderDate), "dd-MM-yyyy"))
         setShowDetailsModal(true);
       } catch (error) {
         console.error("Error fetching order details", error);
       }
     }
   };
-
 
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(
@@ -111,10 +133,10 @@ function Order() {
         "Pay Method": order.payMethod,
         "Pay Status": order.payStatus,
         "Shipping Fee": order.shippingFree,
-      "Amount": new Intl.NumberFormat("vi-VN", {
-  style: "currency",
-  currency: "VND",
-}).format(order.amount),
+        "Amount": new Intl.NumberFormat("vi-VN", {
+          style: "currency",
+          currency: "VND",
+        }).format(order.amount),
 
 
         Status:
@@ -135,19 +157,14 @@ function Order() {
     saveAs(blob, "orders_summary.xlsx");
   };
 
-  const handleReset = () => {
-    setFilteredOrders(orders);
-    setPaginationModel({ page: 0, pageSize: 5 });
-  };
-
   const columns = [
-    { field: "fullNameAddress", headerName: "Full Name", flex: 1 },
-    { field: "orderDate", headerName: "Order Date", flex: 1 },
-    { field: "numberPhone", headerName: "Phone Number", flex: 1 },
-    { field: "amount", headerName: "Amount", flex: 1 },
+    { field: "fullName", headerName: "Tên người đặt", flex: 1 },
+    { field: "orderDate", headerName: "Ngày đặt", flex: 1 },
+    { field: "numberPhone", headerName: "Số điện thoại", flex: 1 },
+    { field: "amount", headerName: "Tổng tiền", flex: 1 },
     {
       field: "status",
-      headerName: "Status",
+      headerName: "Trạng thại đơn hàng",
       flex: 1,
       renderCell: (params) => {
         const order = params.row;
@@ -173,13 +190,22 @@ function Order() {
             </span>
             {currentStatus !== 'hoan-thanh' && currentStatus !== 'da-giao' && (
               <>
-                {currentStatus !== 'da-huy' && (
+                {currentStatus !== 'da-huy' && currentStatus !== 'tra-hang' && (
                   <ArgonButton
                     size="small"
                     color="primary"
                     onClick={() => handleNextStatus(order.id, currentStatus, getNextStatus)}
                   >
                     {statuses.find(status => status.slug === nextStatus)?.status || 'Unknown'}
+                  </ArgonButton>
+                )}
+                {currentStatus === 'tra-hang' && (
+                  <ArgonButton
+                    size="small"
+                    color="primary"
+                    onClick={() => handleStatusChange(order.id, 'da-huy')}
+                  >
+                    Xác nhận
                   </ArgonButton>
                 )}
                 {['dang-xu-ly'].includes(currentStatus) && (
@@ -198,8 +224,28 @@ function Order() {
         );
       },
     }
-
   ];
+
+  const handleStatusChange = async (orderId, newStatusSlug) => {
+    try {
+      await axios.put(`http://localhost:3000/api/order/${orderId}`, { slug: newStatusSlug });
+
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          order.id === orderId ? { ...order, slug: newStatusSlug } : order
+        )
+      );
+
+      setFilteredOrders(prevFilteredOrders =>
+        prevFilteredOrders.map(order =>
+          order.id === orderId ? { ...order, slug: newStatusSlug } : order
+        )
+      );
+    } catch (error) {
+      console.error("There was an error updating the status!", error);
+    }
+  };
+
 
   const handleNextStatus = async (orderId, currentStatus, getNextStatus) => {
     const nextStatusSlug = getNextStatus(currentStatus);
@@ -227,8 +273,8 @@ function Order() {
       <ArgonBox py={3}>
         <ArgonBox mb={3}>
           <Card>
-            <ArgonBox component="form" role="form" onSubmit={handleSearch} p={3}>
-              <ArgonTypography variant="h6">Search Orders</ArgonTypography>
+            <ArgonBox component="form" role="form" p={3}>
+              <ArgonTypography variant="h6">Tìm kiếm order</ArgonTypography>
               <ArgonBox
                 display="flex"
                 flexDirection="row"
@@ -237,8 +283,13 @@ function Order() {
                 mt={2}
               >
                 <ArgonBox mb={3} mx={3} width="100%" sm={6} md={4}>
-                  <select name="status" defaultValue="all" size="large" className="form-select">
-                    <option value="" disabled>Select Status</option>
+                  <select
+                    name="status"
+                    defaultValue="all"
+                    className="form-select"
+                    onChange={handleSearchChange}
+                  >
+                    <option value="" disabled>Chọn trạng thái</option>
                     <option value="all">All</option>
                     {statuses.map((status) => (
                       <option key={status.slug} value={status.slug}>
@@ -249,123 +300,273 @@ function Order() {
                 </ArgonBox>
 
                 <ArgonBox mb={3} mx={3} width="100%" sm={6} md={4}>
-                  <ArgonInput name="endDate" type="date" placeholder="Select End Date" size="large" />
+                  <ArgonInput
+                    name="endDate"
+                    type="date"
+                    placeholder="Select End Date"
+                    onChange={handleSearchChange}
+                  />
                 </ArgonBox>
-
                 <ArgonBox mb={3} mx={3} width="100%" sm={6} md={4}>
-                  <ArgonInput name="phoneNumber" type="text" placeholder="Enter Phone Number" size="large" />
+                  <ArgonInput
+                    name="phoneNumber"
+                    type="text"
+                    placeholder="Nhập số điện thoại"
+                    onChange={handleSearchChange}
+                  />
                 </ArgonBox>
-
-                <ArgonBox
-                  mb={3}
-                  mx={3}
-                  width="100%"
-                  sm={12}
-                  md={4}
-                  display="flex"
-                  flexDirection="row"
-                  justifyContent="space-between"
+                <ArgonButton
+                  type="button"
+                  onClick={exportToExcel}
+                  color="success"
+                  style={{ marginTop: "-24px" }}
                 >
-                  <ArgonButton type="submit" color="primary">
-                    Search
-                  </ArgonButton>
-                  <ArgonButton type="button" onClick={handleReset} color="secondary">
-                    Reset
-                  </ArgonButton>
-                  <ArgonButton type="button" onClick={exportToExcel} color="success">
-                    Export
-                  </ArgonButton>
-                </ArgonBox>
+                  Xuất
+                </ArgonButton>
               </ArgonBox>
             </ArgonBox>
           </Card>
         </ArgonBox>
         <ArgonBox>
-        <Paper style={{ height: 420, width: "100%" }}>
-          <DataGrid
-            onCellClick={handleRowClick}
-            rows={filteredOrders}
-            columns={columns}
-            pageSize={5}
-            pageSizeOptions={[5, 10, 20]} 
-            checkboxSelection
-            disableSelectionOnClick
-            sx={{
-              "& .MuiDataGrid-footerContainer": {
-                  justifyContent: "space-between", // Center-align the footer content
-              },
-              "& .MuiTablePagination-selectLabel": {
-                  marginRight: 0, // Adjusts the right margin for the label
-              },
-              "& .MuiTablePagination-root": {
-                  width: "400px", // Adjusts the total pagination width
-              },
-              "& .MuiInputBase-root": {
+          <Paper style={{ height: 420, width: "100%" }}>
+            <DataGrid
+              onCellClick={handleRowClick}
+              rows={filteredOrders}
+              columns={columns}
+              pageSize={5}
+              pageSizeOptions={[5, 10, 20]}
+              disableSelectionOnClick
+              sx={{
+                "& .MuiDataGrid-footerContainer": {
+                  justifyContent: "space-between",
+                },
+                "& .MuiTablePagination-selectLabel": {
+                  marginRight: 0,
+                },
+                "& .MuiTablePagination-root": {
+                  width: "400px",
+                },
+                "& .MuiInputBase-root": {
                   maxWidth: "60px",
-                  marginTop: "-10px", // Điều chỉnh giá trị này để đẩy nó lên trên
-              },
-              "& .MuiTablePagination-actions": {
+                  marginTop: "-10px",
+                },
+                "& .MuiTablePagination-actions": {
                   display: "flex",
                   alignItems: "center",
-              },
-              "& .MuiSelect-select": {
-                  paddingRight: "24px", // Adjust padding for dropdown
-              },
-              border: 0,
-          }}
-      />
-        </Paper>
+                },
+                "& .MuiSelect-select": {
+                  paddingRight: "24px",
+                },
+                border: 0,
+              }}
+            />
+          </Paper>
         </ArgonBox>
       </ArgonBox>
 
-
       <Dialog
-  open={showDetailsModal}
-  onClose={() => setShowDetailsModal(false)}
-  aria-labelledby="order-details-dialog"
-  fullWidth
-  maxWidth="sm"
->
-  <DialogTitle id="order-details-dialog">Order Details</DialogTitle>
-  <DialogContent dividers>
-    {selectedOrder ? (
-      <ul style={{ listStyleType: 'none', padding: 0 }}>
-        {selectedOrder.map(detail => (
-          <li key={detail.id} style={{ padding: '10px 0', borderBottom: '1px solid #ddd' }}>
-            <div>
-              <strong>Product ID:</strong> {detail.productDetailId}
+        open={showDetailsModal}
+        onClose={() => setShowDetailsModal(false)}
+        aria-labelledby="order-details-dialog"
+        fullWidth
+        maxWidth="sm"
+      >
+        <div>
+          <DialogTitle
+            style={{
+              display: "flex",
+              alignItems: "center",
+              fontSize: "14px",
+              fontWeight: "bold",
+              borderBottom: "1px solid #ccc",
+              paddingBottom: "10px",
+              marginBottom: "10px",
+            }}
+          >
+            <img
+              src={logo}
+              alt="logo"
+              style={{
+                maxWidth: "230px",
+                maxHeight: "100px",
+                marginRight: "15px",
+              }}
+            />
+            <div style={{ lineHeight: "1.5" }}>
+              <p style={{ margin: 0, fontSize: "16px", fontWeight: "bold" }}>
+                HASAGIFASHION
+              </p>
+              <p style={{ margin: 0, fontSize: "14px", fontWeight: "normal" }}>
+                ĐC: 49 Đ. 3 Tháng 2, Xuân Khánh, Ninh Kiều, Cần Thơ, Việt Nam
+              </p>
+              <p style={{ margin: 0, fontSize: "14px", fontWeight: "normal" }}>
+                ĐT: 0123 456 789
+              </p>
             </div>
-            <div>
-              <strong>Quantity:</strong> {detail.quantity}
+          </DialogTitle>
+          <div
+            id="order-details-dialog"
+            style={{
+              textAlign: "center",
+              fontWeight: "bold",
+              fontSize: "20px",
+              marginTop: "10px",
+            }}
+          >
+            Hóa đơn thanh toán
+          </div>
+        </div>
+
+        <DialogContent dividers>
+          {selectedOrder ? (
+            <div style={{ fontFamily: "Arial, sans-serif", fontSize: "14px" }}>
+              <div
+                style={{
+                  flex: "1",
+                  padding: "10px",
+                  border: "1px solid #ddd",
+                  borderRadius: "8px",
+                  backgroundColor: "#f9f9f9",
+                }}
+              >
+                <h3
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: "bold",
+                    margin: "0 0 10px 0",
+                    borderBottom: "1px solid #ddd",
+                    paddingBottom: "5px",
+                  }}
+                >
+                  Thông tin người đặt
+                </h3>
+                <p style={{ margin: "5px 0" }}>
+                  <strong>Tên khách hàng:</strong>  {nameOrder}
+                </p>
+                <p style={{ margin: "5px 0" }}>
+                  <strong>Địa chỉ giao hàng:</strong> {fullAddress}
+                </p>
+                <p style={{ margin: "5px 0" }}>
+                  <strong>Số điện thoại:</strong> {numberPhone}
+                </p>
+                <p style={{ margin: "5px 0" }}>
+                  <strong>Ngày đặt hàng:</strong> {orderDate}
+                </p>
+              </div>
+
+              <br />
+
+              <div style={{ marginBottom: "20px" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed", textAlign: "left" }}>
+                  <thead>
+                    <tr style={{ backgroundColor: "#f8f8f8", borderBottom: "2px solid #ddd" }}>
+                      <th style={{ padding: "10px", fontWeight: "bold" }}>Tên sản phẩm</th>
+                      <th style={{ padding: "10px", fontWeight: "bold", textAlign: "center" }}>Số lượng</th>
+                      <th style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>Giá sản phẩm</th>
+                      <th style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>Tổng tiền</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedOrder.map((detail, index) => (
+                      <tr key={index} style={{ borderBottom: "1px solid #ddd" }}>
+                        <td style={{ padding: "10px" }}>{detail.productName}</td>
+                        <td style={{ padding: "10px", textAlign: "center" }}>{detail.quantity}</td>
+                        <td style={{ padding: "10px", textAlign: "right" }}>
+                          {new Intl.NumberFormat("vi-VN").format(detail.price)}đ
+                        </td>
+                        <td style={{ padding: "10px", textAlign: "right" }}>
+                          {new Intl.NumberFormat("vi-VN").format(detail.price * detail.quantity)}đ
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr style={{ backgroundColor: "#f8f8f8", borderTop: "2px solid #ddd" }}>
+                      <td colSpan="3" style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>
+                        Tổng số tiền
+                      </td>
+                      <td style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>
+                        {new Intl.NumberFormat("vi-VN").format(
+                          selectedOrder.reduce((sum, detail) => sum + (detail.price) * detail.quantity, 0)
+                        )}đ
+                      </td>
+                    </tr>
+                    {voucherPrice !== 0 && (
+                      <tr style={{ backgroundColor: "#f8f8f8", borderTop: "2px solid #ddd" }}>
+                        <td colSpan="3" style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>
+                          Giảm giá
+                        </td>
+                        <td style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>
+                          -{new Intl.NumberFormat("vi-VN").format(
+                            selectedOrder.reduce((sum, detail) => sum + (detail.price) * detail.quantity, 0) * voucherPrice / 100
+                          )}đ
+                        </td>
+                      </tr>
+                    )}
+                    <tr style={{ backgroundColor: "#f8f8f8", borderTop: "2px solid #ddd" }}>
+                      <td colSpan="3" style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>
+                        Phí vận chuyển
+                      </td>
+                      <td style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>
+                        {new Intl.NumberFormat("vi-VN").format(shippingFee)}đ
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+
+              </div>
+              <div style={{ textAlign: "right", marginTop: "10px" }}>
+                <strong>Thành tiền: </strong>
+                {new Intl.NumberFormat("vi-VN").format(
+                  selectedOrder.reduce((sum, detail) => sum + (detail.price) * detail.quantity, 0) + shippingFee
+                )}đ
+              </div>
+              <div style={{ textAlign: "center", marginBottom: "10px" }}>
+                <p style={{ margin: 0, fontSize: "14px" }}>
+                  Xin cảm ơn quý khách và xin hẹn gặp lại
+                </p>
+              </div>
+
+
             </div>
-            <div>
-              <strong>Price:</strong> ${detail.price.toFixed(2)}
-            </div>
-            <div>
-              <strong>Name:</strong> {detail.nameOrder}
-            </div>
-            <div>
-              <strong>Size:</strong> {detail.sizeName}
-            </div>
-            <div>
-              <strong>Color:</strong> {detail.colorName}
-            </div>
-            <div>
-              <strong>Status:</strong> {detail.statusName}
-            </div>
-          </li>
-        ))}
-      </ul>
-    ) : (
-      <p>Loading...</p>
-    )}
-  </DialogContent>
-  <DialogActions>
-    <Button variant="contained" onClick={() => setShowDetailsModal(false)} color="black">
-      Close
-    </Button>
-  </DialogActions>
-</Dialog>
+          ) : (
+            <p>Loading...</p>
+          )}
+        </DialogContent>
+        <DialogActions style={{ padding: "10px" }}>
+          <button
+            className="hide-on-print"
+            style={{
+              padding: "6px 12px",
+              backgroundColor: "#1976d2",
+              color: "#fff",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              marginRight: "10px",
+            }}
+            onClick={() => setShowDetailsModal(false)}
+          >
+            Đóng
+          </button>
+          <button
+            className="hide-on-print"
+            style={{
+              padding: "6px 12px",
+              backgroundColor: "#1976d2",
+              color: "#fff",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
+            onClick={() => window.print()}
+          >
+            Xuất hóa đơn
+          </button>
+        </DialogActions>
+
+      </Dialog>
+
     </DashboardLayout>
   );
 }

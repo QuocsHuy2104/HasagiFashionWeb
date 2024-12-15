@@ -191,9 +191,9 @@ function ProductDetail() {
             );
 
             const responses = await Promise.all(savePromises);
-            toast.success("Product detail create successfully!");
+            toast.success("Thêm sản phẩm chi tiết thành công!");
             updateQuantityProduct();
-            updatePrice()
+            updatePriceProduct()
             refreshData()
             setFormData({
                 id: '',
@@ -260,22 +260,22 @@ function ProductDetail() {
                                         </ArgonBox>
 
                                         <ArgonBox display="flex" justifyContent='space-evenly' mb={1}>
-                                            <ArgonBox width='75px'>
-                                                <ArgonTypography variant="button">Danh Mục</ArgonTypography>
+                                            <ArgonBox width='80px'>
+                                                <ArgonTypography variant="button">Danh Mục:</ArgonTypography>
                                             </ArgonBox>
 
                                             <ArgonBox>
-                                                <ArgonTypography variant="caption">{product.categoryDTOResp.name}</ArgonTypography>
+                                                <ArgonTypography variant="caption">{product.categoryDTOResponse.name}</ArgonTypography>
                                             </ArgonBox>
                                         </ArgonBox>
 
                                         <ArgonBox display="flex" justifyContent='space-evenly'>
-                                            <ArgonBox width='75px'>
-                                                <ArgonTypography variant="button">Thương Hiệu</ArgonTypography>
+                                            <ArgonBox width='100px'>
+                                                <ArgonTypography variant="button">Thương Hiệu:</ArgonTypography>
                                             </ArgonBox>
 
                                             <ArgonBox>
-                                                <ArgonTypography variant="caption">{product.trademarkDTOResp.name}</ArgonTypography>
+                                                <ArgonTypography variant="caption">{product.brandDTOResponse.name}</ArgonTypography>
                                             </ArgonBox>
                                         </ArgonBox>
 
@@ -343,13 +343,14 @@ function ProductDetail() {
                                                 borderWidth: '0.5px',
                                                 borderStyle: 'solid',
                                             }}
-                                            startAdornment={
-                                                <InputAdornment position="start">
-                                                    <b style={{ fontSize: '25px' }}>$</b>
+                                            endAdornment={ // Chuyển từ startAdornment sang endAdornment
+                                                <InputAdornment position="end">
+                                                    <b style={{ fontSize: '25px' }}>đ</b>
                                                 </InputAdornment>
                                             }
                                         />
                                     </ArgonBox>
+
 
                                     <ArgonBox display="flex" flexDirection="column" gap={3} mb={3}>
                                         <ArgonInput
@@ -367,9 +368,9 @@ function ProductDetail() {
                                                 borderWidth: '0.5px',
                                                 borderStyle: 'solid',
                                             }}
-                                            startAdornment={
-                                                <InputAdornment position="start">
-                                                    <b style={{ fontSize: '25px' }}>$</b>
+                                            endAdornment={
+                                                <InputAdornment position="endend">
+                                                    <b style={{ fontSize: '25px' }}>đ</b>
                                                 </InputAdornment>
                                             }
                                         />
@@ -451,7 +452,7 @@ function ProductDetail() {
 
                                 <ArgonBox mx={{ xs: 1, sm: 2, md: 3 }} mb={3} width={720}>
                                     <ArgonButton type="submit" size="large" color="dark" variant='gradient'>
-                                        {formData.id ? "Update" : "Save"}
+                                        {formData.id ? "Cập nhật" : "Thêm"}
                                     </ArgonButton>
                                 </ArgonBox>
                             </ArgonBox>
