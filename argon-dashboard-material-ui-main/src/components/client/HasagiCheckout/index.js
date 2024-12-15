@@ -757,6 +757,34 @@ const Checkout = () => {
               Áp dụng
             </button>
           </div>
+          <div style={{ textAlign: "right" }}>
+            <Button
+              variant="contained"
+              color="warning"
+              onClick={handleClickOpen}
+              style={{
+                border: "none",
+                boxShadow: "none",
+                padding: "8px 16px",
+                marginRight: "0", // Đặt lại margin nếu cần
+                color: "rgba(244, 79, 30, 0.99)",
+                textDecoration: "none",
+                transition: "all 0.3s",
+                fontSize: "1rem",
+                marginTop: "-25px", 
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.textDecoration = "underline";
+                e.target.style.color = "blue";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.textDecoration = "underline";
+                e.target.style.color = "rgba(244, 79, 30, 0.99)";
+              }}
+            >
+              Áp dụng mã giảm giá
+            </Button>
+          </div>
 
           {/* Address Section */}
           {address ? (
@@ -847,31 +875,6 @@ const Checkout = () => {
             }}
           >
             <h2 style={{ margin: 0 }}>Chi tiết đơn hàng</h2>
-            <Button
-              variant="contained"
-              color="warning"
-              onClick={handleClickOpen}
-              style={{
-                border: "none",
-                boxShadow: "none",
-                padding: "8px 16px",
-                marginRight: "-20px",
-                color: "rgba(244, 79, 30, 0.99)",
-                textDecoration: "none",
-                transition: "all 0.3s",
-                fontSize: "1rem",
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.textDecoration = "underline";
-                e.target.style.color = "blue";
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.textDecoration = "none";
-                e.target.style.color = "rgba(244, 79, 30, 0.99)";
-              }}
-            >
-              Áp dụng mã giảm giá
-            </Button>
           </div>
           <Dialog open={open} onClose={handleClose}>
             <DialogTitle
