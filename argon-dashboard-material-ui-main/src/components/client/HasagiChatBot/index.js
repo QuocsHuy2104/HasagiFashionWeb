@@ -75,7 +75,7 @@ function Gemini() {
             const brands = await getBrandData();
             const products = await getProductData();
             const vouchers = await getVoucherData();
-    
+
             // Kiểm tra trùng lặp câu hỏi
             const lastQuestion = chatHistory[chatHistory.length - 1]?.text;
             if (lastQuestion && lastQuestion === question) {
@@ -86,12 +86,12 @@ function Gemini() {
                 setLoading(false);
                 return;
             }
-    
+
             // Kiểm tra các từ khóa trong câu hỏi
             const keywords = ['sản phẩm', 'phiếu giảm giá', 'danh mục', 'thương hiệu', 'chi tiết sản phẩm'];
             let shouldSuggest = false;
             let keywordCounts = {};  // Đảm bảo khai báo và sử dụng keywordCounts
-    
+
             // Đếm số lần xuất hiện từ khóa trong câu hỏi
             keywords.forEach(keyword => {
                 if (question.toLowerCase().includes(keyword)) {
@@ -101,13 +101,13 @@ function Gemini() {
                     }
                 }
             });
-    
+
             // Xác định câu chào
             let greeting = "Chào bạn! Tôi có thể giúp gì cho bạn hôm nay?";
             if (question.toLowerCase().includes("xin chào") || question.toLowerCase().includes("chào")) {
                 greeting = "Chào bạn! Có câu hỏi nào tôi có thể giúp bạn không?";
             }
-    
+
             // Xây dựng prompt cho AI
             const prompt = `
             Bạn là trợ lý ảo của shop Hasagi. Dưới đây là dữ liệu nội bộ của shop, bạn chỉ được sử dụng các thông tin này để trả lời câu hỏi.
@@ -137,31 +137,31 @@ function Gemini() {
         
             Chào hỏi: ${greeting}
             `;
-    
+
             const API_KEY = 'AIzaSyCrDIwFVBDHE1ZDBDuzjPUClS6KicbLa7o';
             const response = await axios.post(
                 `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`,
                 { contents: [{ parts: [{ text: prompt }] }] }
             );
-    
+
             const aiAnswer =
                 response.data.candidates?.[0]?.content?.parts?.[0]?.text ||
                 "Xin lỗi, tôi không thể xử lý câu hỏi của bạn ngay bây giờ. Vui lòng thử lại sau.";
-    
+
             let finalAnswer = aiAnswer;
             if (shouldSuggest) {
                 finalAnswer += "\n\nCó vẻ như bạn đang tìm kiếm thông tin về một số sản phẩm hoặc chính sách. Bạn có thể truy cập <a href='/shop'>trang sản phẩm</a> của chúng tôi để tìm kiếm thêm chi tiết.";
             }
-    
+
             // Chuyển đổi URL trong câu trả lời thành thẻ <a> HTML
             finalAnswer = convertTextToLinks(finalAnswer);
-    
+
             // Cập nhật lịch sử trò chuyện
             setChatHistory((prevHistory) => [
                 ...prevHistory,
                 { type: "ai", text: finalAnswer }
             ]);
-    
+
             let currentIndex = 0;
             const interval = setInterval(() => {
                 setChatHistory((prevHistory) => {
@@ -170,12 +170,12 @@ function Gemini() {
                     return updatedHistory;
                 });
                 currentIndex++;
-    
+
                 if (currentIndex >= finalAnswer.length) {
                     clearInterval(interval);
                 }
             }, 10);
-    
+
         } catch (error) {
             console.error("Lỗi:", error);
             setChatHistory((prevHistory) => [
@@ -186,7 +186,7 @@ function Gemini() {
             setLoading(false);
         }
     };
-    
+
 
 
     const handleSubmit = async (e) => {
@@ -207,6 +207,14 @@ function Gemini() {
         }
     }, [chatHistory]);
 
+    useEffect(() => {
+        // Kiểm tra khi question thay đổi và tự động gửi
+        if (question.trim()) {
+            handleSubmit(new Event('submit'));
+        }
+    }, [question]); // Phụ thuộc vào question để gọi handleSubmit khi question thay đổi
+
+
     const convertTextToLinks = (text) => {
         const urlPattern = /https?:\/\/[^\s]+/g;
         return text.replace(urlPattern, (url) => `<a href="${url}" target="_blank" style="color: #1e90ff; text-decoration: none;">${url}</a>`);
@@ -222,8 +230,7 @@ function Gemini() {
 
         recognition.onresult = (event) => {
             const spokenText = event.results[0][0].transcript;
-            setQuestion(spokenText);
-            handleSubmit(new Event('submit'));
+            setQuestion(spokenText); // Cập nhật trạng thái question với văn bản nhận diện được
         };
 
         recognition.onerror = (event) => {
@@ -233,7 +240,6 @@ function Gemini() {
 
         recognition.start();
     };
-
 
     return (
         <div style={{
