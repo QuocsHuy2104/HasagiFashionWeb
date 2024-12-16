@@ -51,11 +51,13 @@ const RoleTable = ({ onEditClick }) => {
                 name={role.name}
             />
         ),
+      
     }));
 
     const roleTableData = {
         columns: [
             { name: "VaiTro", align: "left" },
+
         ],
         rows,
     };

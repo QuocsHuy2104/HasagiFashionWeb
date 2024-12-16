@@ -103,13 +103,10 @@ function ShopDetail() {
 
   const handleAddToCart = async () => {
     try {
-      // Kiểm tra nếu chưa chọn màu hoặc kích thước
-      if (!selectedColor || !selectedSize) {
-        toast.error("Vui lòng chọn màu và kích thước trước khi thêm vào giỏ hàng.");
-        return;
+      if (product.sizes.length === 0 && !selectedColor) {
+        setError("Vui lòng chọn màu");
+        return; // Dừng thực thi nếu không có size
       }
-
-      // Gọi API để thêm sản phẩm vào giỏ hàng
       const response = await cartService.addToCart({
         colorId: selectedColor,
         sizeId: selectedSize,
@@ -125,6 +122,20 @@ function ShopDetail() {
       setError(error.response?.data || "Đã có lỗi xảy ra. Vui lòng thử lại!");
     }
   };
+  const fetchPricePK = async (productId, colorId) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/public/webShopDetail/pricePK`, {
+        params: { productId, colorId },
+      });
+      const { price, quantity } = response.data;
+      setTotalPrice(price);
+      setQuantityPDT(quantity);
+    } catch (error) {
+      console.error("Error fetching price:", error);
+      toast.error("Đã xảy ra lỗi khi lấy giá sản phẩm. Vui lòng thử lại sau.");
+    }
+  };
+
 
   const fetchProductDetail = async () => {
     try {
@@ -137,7 +148,11 @@ function ShopDetail() {
       });
 
       const productData = response.data;
-      //console.log("Fetched Product Data:", productData);
+      if (productData.sizes.length === 0) {
+        if (selectedColor) {
+          fetchPricePK(productId, selectedColor);
+        }
+      }
       setSale(productData.sale);
       setProduct(productData);
       setMediaList(productData);
@@ -212,9 +227,8 @@ function ShopDetail() {
 
   const handleByNow = async () => {
     try {
-      // Kiểm tra nếu chưa chọn màu hoặc kích thước
-      if (!selectedColor || !selectedSize) {
-        toast.error("Vui lòng chọn màu và kích thước trước khi thêm vào giỏ hàng.");
+      if (product.sizes.length === 0 && !selectedColor) {
+        setError("Vui lòng chọn màu");
         return;
       }
 
@@ -233,7 +247,7 @@ function ShopDetail() {
         }
         localStorage.setItem(
           "checkedItems" + productId + selectedColor + selectedSize,
-          JSON.stringify([Number(checkedItems), selectedColor, selectedSize])
+          JSON.stringify([...checkedItems, { productId, selectedColor, selectedSize }])
         );
       }
 
@@ -301,7 +315,7 @@ function ShopDetail() {
           <FontAwesomeIcon
             key={`full-${index}`}
             icon={solidStar}
-            style={{ color: "orange", fontSize: "12px" }}
+            style={{ color: "orange", fontSize: "12px"}}
           />
         ))}
 
@@ -315,6 +329,7 @@ function ShopDetail() {
                 position: "absolute",
                 width: "100%",
                 height: "100%",
+                marginLeft: "-5px"
               }}
             />
             <div
@@ -323,6 +338,7 @@ function ShopDetail() {
                 width: "100%",
                 height: "100%",
                 clipPath: `inset(0 ${100 - partialStar * 100}% 0 0)`,
+                marginLeft: "-5px"
               }}
             >
               <FontAwesomeIcon
@@ -332,7 +348,7 @@ function ShopDetail() {
                   fontSize: "20px",
                   width: "100%",
                   height: "100%",
-                  marginBottom: "15px",
+                  marginBottom: "20px",
                 }}
               />
             </div>
@@ -1064,7 +1080,10 @@ function ShopDetail() {
                             marginRight: "1px",
                             boxShadow: "none",
                           }}
-                          disabled={!selectedColor || !selectedSize}
+                          disabled={
+                            (product.sizes.length > 0 && (!selectedColor || !selectedSize)) ||
+                            (product.sizes.length === 0 && !selectedColor)
+                          }
                         >
                           <i className="fa fa-minus"></i>
                         </button>
@@ -1106,7 +1125,10 @@ function ShopDetail() {
                           maxWidth: "100px",
                           top: "0.699px",
                         }}
-                        disabled={!selectedColor || !selectedSize}
+                        disabled={
+                          (product.sizes.length > 0 && (!selectedColor || !selectedSize)) ||
+                          (product.sizes.length === 0 && !selectedColor)
+                        }
                       />
                       <div className="input-group-btn">
                         <button
@@ -1118,7 +1140,10 @@ function ShopDetail() {
                             marginLeft: "1px",
                             boxShadow: "none",
                           }}
-                          disabled={!selectedColor || !selectedSize}
+                          disabled={
+                            (product.sizes.length > 0 && (!selectedColor || !selectedSize)) ||
+                            (product.sizes.length === 0 && !selectedColor)
+                          }
                         >
                           <i className="fa fa-plus"></i>
                         </button>

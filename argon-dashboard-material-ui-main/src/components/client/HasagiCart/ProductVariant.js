@@ -73,9 +73,15 @@ const ProductVariant = ({ onClose, cartDetailId, productId, colorId, sizeId }) =
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (selectedColor && selectedSize) {
+    if (selectedColor ) {
       try {
-        await CartService.getCartUpdate(cartDetailId, selectedColor, selectedSize, productId);
+        if (selectedSize) {
+          // Nếu có kích thước, gọi API với color và size
+          await CartService.getCartUpdate(cartDetailId, selectedColor, selectedSize, productId);
+      } else {
+          // Nếu không có kích thước, gọi API với chỉ color và sizeId = null
+          await CartService.getCartUpdatePK(cartDetailId, selectedColor, productId);
+      }
         const checkedItemsKey = `checkedItems${productId}${colorId}${sizeId}`;
         const newCheckedItemsKey = `checkedItems${productId}${selectedColor}${selectedSize}`;
         const checkedItems = JSON.parse(localStorage.getItem(checkedItemsKey)) || [];
@@ -88,7 +94,8 @@ const ProductVariant = ({ onClose, cartDetailId, productId, colorId, sizeId }) =
         }
         onClose();
       } catch (error) {
-        setError(error.response.data);
+        setError(error.message || "Failed to update product option");
+        console.error("Error during cart update:", error);
       }
     } else {
       setError("Please select both color and size before submitting");
@@ -187,6 +194,7 @@ const ProductVariant = ({ onClose, cartDetailId, productId, colorId, sizeId }) =
           );
         })}
       </div>
+      {sizeId && (
       <div className="variant-options">
         <div className="variant-header mt-2">
           <h4>Kích thước:</h4>
@@ -261,6 +269,7 @@ const ProductVariant = ({ onClose, cartDetailId, productId, colorId, sizeId }) =
           </div>
         )}
       </div>
+      )}
       {Error && <p style={{ fontSize: "14px", color: "red" }}>{Error.message}</p>}
       <div className="variant-footer">
         <button className="back-button" onClick={onClose} style={{ marginRight: "10px" }}>

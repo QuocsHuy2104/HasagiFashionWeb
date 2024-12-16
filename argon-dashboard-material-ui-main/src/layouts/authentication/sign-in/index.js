@@ -11,6 +11,7 @@ import ArgonButton from "components/ArgonButton";
 import FormHelperText from "@mui/material/FormHelperText";
 import IllustrationLayout from "layouts/authentication/components/IllustrationLayout";
 import LoginHooks from "./loginWithGG"; // Google OAuth2 Login Component
+import LogoutHooks from "./logoutHooks";
 
 const bgImage = "https://raw.githubusercontent.com/creativetimofficial/public-assets/master/argon-dashboard-pro/assets/img/signin-ill.jpg";
 
@@ -63,9 +64,7 @@ function Illustration() {
         const token = response.data.token;
 
         Cookies.set('user', token, { expires: expirationTime });
-        Cookies.set('accountId', response.data.accountId, { expires: expirationTime });
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
         navigate("/");
       }
     } catch (error) {
@@ -128,21 +127,10 @@ function Illustration() {
             </ArgonTypography>
           </ArgonBox>
         )}
-        <ArgonBox display="flex" justifyContent="space-between" alignItems="center">
-          <ArgonBox display="flex" alignItems="center">
-            <Switch checked={rememberMe} onChange={handleSetRememberMe} />
-            <ArgonTypography
-              variant="button"
-              fontWeight="regular"
-              onClick={handleSetRememberMe}
-              sx={{ cursor: "pointer", userSelect: "none" }}
-            >
-              &nbsp;&nbsp;Remember me
-            </ArgonTypography>
-          </ArgonBox>
+        <ArgonBox display="flex" justifyContent="start" alignItems="center">
           <ArgonTypography
             component={Link}
-            to="/forgot-password" 
+            to="/forgot-password"
             variant="button"
             fontWeight="regular"
             sx={{ cursor: "pointer", userSelect: "none" }}

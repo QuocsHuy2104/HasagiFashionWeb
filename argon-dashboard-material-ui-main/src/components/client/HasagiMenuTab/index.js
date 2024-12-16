@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import "./Profile.css";
 import ProfileServices from "../../../services/ProfileServices";
+import aboutImage5 from "layouts/assets/img/user.jpg";
 const MenuTab = ({
   activeItem,
   setActiveItem,
@@ -55,7 +56,7 @@ const MenuTab = ({
           {profileImage ? (
             <img src={profileImage} alt="Profile" style={{ width: "100%", height: "auto" }} />
           ) : (
-            <img src="default-avatar.png" alt="Profile" style={{ width: "100%", height: "auto" }} />
+            <img src={aboutImage5} alt="Profile" style={{ width: "100%", height: "auto" }} />
           )}
         </div>
 

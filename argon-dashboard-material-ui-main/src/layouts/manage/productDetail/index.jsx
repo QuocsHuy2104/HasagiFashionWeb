@@ -153,7 +153,7 @@ function ProductDetail() {
         }
     }
 
-    const updatePrice = async () => {
+    const updatePriceProduct = async () => {
         try {
             const resp = await ProductService.updatePrice(product.id);
         } catch (e) {
@@ -191,9 +191,9 @@ function ProductDetail() {
             );
 
             const responses = await Promise.all(savePromises);
-            toast.success("Product detail create successfully!");
+            toast.success("Thêm sản phẩm chi tiết thành công!");
             updateQuantityProduct();
-            updatePrice()
+            updatePriceProduct()
             refreshData()
             setFormData({
                 id: '',
@@ -206,10 +206,19 @@ function ProductDetail() {
             setSelectedColor([]);
         } catch (e) {
             console.error("Error saving product details:", e);
+
+            // Use e.response?.data or e.message if available, otherwise show a default error message
             const errorMessage = e.response?.data || "An unexpected error occurred.";
+
             toast.error(errorMessage);
         }
     };
+
+    function formatPriceRange(range) {
+        const prices = range.split(" - ").map(price => parseInt(price).toLocaleString("vi-VN") + " đ");
+        return prices.length === 1 ? prices[0] : prices.join(" - ");
+    }
+
 
     return (
         <DashboardLayout>
@@ -244,13 +253,15 @@ function ProductDetail() {
                                             <ArgonTypography variant="h5">{product.name}</ArgonTypography>
                                         </ArgonBox>
 
-                                        <ArgonBox mb={2} >
-                                            <ArgonTypography variant="h5">{product.importPrice} VNĐ</ArgonTypography>
+                                        <ArgonBox mb={2}>
+                                            <ArgonTypography variant="h5">
+                                                {formatPriceRange(`${product.importPrice}`)}
+                                            </ArgonTypography>
                                         </ArgonBox>
 
                                         <ArgonBox display="flex" justifyContent='space-evenly' mb={1}>
-                                            <ArgonBox width='75px'>
-                                                <ArgonTypography variant="button">Category</ArgonTypography>
+                                            <ArgonBox width='80px'>
+                                                <ArgonTypography variant="button">Danh Mục:</ArgonTypography>
                                             </ArgonBox>
 
                                             <ArgonBox>
@@ -259,19 +270,23 @@ function ProductDetail() {
                                         </ArgonBox>
 
                                         <ArgonBox display="flex" justifyContent='space-evenly'>
-                                            <ArgonBox width='75px'>
-                                                <ArgonTypography variant="button">Brand</ArgonTypography>
+                                            <ArgonBox width='100px'>
+                                                <ArgonTypography variant="button">Thương Hiệu:</ArgonTypography>
                                             </ArgonBox>
+
                                             <ArgonBox>
                                                 <ArgonTypography variant="caption">{product.brandDTOResponse.name}</ArgonTypography>
                                             </ArgonBox>
                                         </ArgonBox>
+
                                     </ArgonBox>
                                 </Grid>
                             </Grid>
                         </ArgonBox>
+
                         <ArgonBox mx={7}>
                             <ArgonBox component="form" role="form" onSubmit={handleSubmit}>
+
                                 <ArgonBox
                                     display="flex"
                                     flexDirection="column"
@@ -284,10 +299,10 @@ function ProductDetail() {
                                 >
                                     <ArgonBox mx={2} mb={3}>
                                         <Typography variant="h6" component="h2" fontWeight="bold">
-                                            Pricing
+                                            Định giá
                                         </Typography>
                                         <Typography variant="body2" color="textSecondary">
-                                            Sale related inputs
+                                            Đầu vào liên quan đến giá
                                         </Typography>
                                     </ArgonBox>
 
@@ -295,7 +310,7 @@ function ProductDetail() {
                                     <ArgonBox mb={3}>
                                         <ArgonInput
                                             type="number"
-                                            placeholder={errors.quantity ? errors.quantity : "Quantity"}
+                                            placeholder={errors.quantity ? errors.quantity : "Vui lòng nhập số lượng"}
                                             name="quantity"
                                             size="large"
                                             fullWidth
@@ -315,7 +330,7 @@ function ProductDetail() {
                                     <ArgonBox display="flex" flexDirection="column" gap={3} mb={3}>
                                         <ArgonInput
                                             type="number"
-                                            placeholder={errors.price ? errors.price : "Purchase price"}
+                                            placeholder={errors.price ? errors.price : "Vui lòng nhập giá"}
                                             name="price"
                                             size="large"
                                             fullWidth
@@ -328,18 +343,19 @@ function ProductDetail() {
                                                 borderWidth: '0.5px',
                                                 borderStyle: 'solid',
                                             }}
-                                            startAdornment={
-                                                <InputAdornment position="start">
-                                                    <b style={{ fontSize: '25px' }}>$</b>
+                                            endAdornment={ // Chuyển từ startAdornment sang endAdornment
+                                                <InputAdornment position="end">
+                                                    <b style={{ fontSize: '25px' }}>đ</b>
                                                 </InputAdornment>
                                             }
                                         />
                                     </ArgonBox>
 
+
                                     <ArgonBox display="flex" flexDirection="column" gap={3} mb={3}>
                                         <ArgonInput
                                             type="number"
-                                            placeholder={errors.priceSize ? errors.priceSize : "Purchase price"}
+                                            placeholder={errors.priceSize ? errors.priceSize : "Vui lòng nhập giá kích thước"}
                                             name="priceSize"
                                             size="large"
                                             fullWidth
@@ -352,9 +368,9 @@ function ProductDetail() {
                                                 borderWidth: '0.5px',
                                                 borderStyle: 'solid',
                                             }}
-                                            startAdornment={
-                                                <InputAdornment position="start">
-                                                    <b style={{ fontSize: '25px' }}>$</b>
+                                            endAdornment={
+                                                <InputAdornment position="endend">
+                                                    <b style={{ fontSize: '25px' }}>đ</b>
                                                 </InputAdornment>
                                             }
                                         />
@@ -375,7 +391,7 @@ function ProductDetail() {
                                                 }));
                                             }}
                                             config={{
-                                                placeholder: errors.subDescription || "Description",
+                                                placeholder: errors.subDescription || "Mô tả chi tiết cho sản phẩm",
                                             }}
                                             onReady={(editor) => {
                                                 const editorElement = editor.ui.view.editable.element;
@@ -398,7 +414,7 @@ function ProductDetail() {
                                 >
                                     <ArgonBox mx={2} mb={3}>
                                         <Typography variant="h6" component="h2" fontWeight="bold">
-                                            Select Size and Color
+                                            Chọn kích thước và màu sắc
                                         </Typography>
                                     </ArgonBox>
 
@@ -416,7 +432,7 @@ function ProductDetail() {
                                         <ArgonBox width="100%" maxWidth={{ xs: '100%', sm: '48%' }}>
                                             <MultipleSelectCheckmarks
                                                 model={sizes}
-                                                nameTag={'Select Size'}
+                                                nameTag={'Kích Thước'}
                                                 onChange={hanleSelectSize}
                                                 selectedModel={selectedSize}
                                             />
@@ -426,7 +442,7 @@ function ProductDetail() {
                                         <ArgonBox width="100%" maxWidth={{ xs: '100%', sm: '48%' }}>
                                             <MultipleSelectCheckmarks
                                                 model={colors}
-                                                nameTag={'Select Color'}
+                                                nameTag={'Chọn màu sắc'}
                                                 onChange={handleSelectColor}
                                                 selectedModel={selectedColor}
                                             />
@@ -436,7 +452,7 @@ function ProductDetail() {
 
                                 <ArgonBox mx={{ xs: 1, sm: 2, md: 3 }} mb={3} width={720}>
                                     <ArgonButton type="submit" size="large" color="dark" variant='gradient'>
-                                        {formData.id ? "Update" : "Save"}
+                                        {formData.id ? "Cập nhật" : "Thêm"}
                                     </ArgonButton>
                                 </ArgonBox>
                             </ArgonBox>
@@ -468,7 +484,7 @@ function ProductDetail() {
                                         src="https://assets.minimals.cc/public/assets/icons/empty/ic-content.svg"
                                     />
                                     <ArgonTypography variant="h6" fontWeight="medium" color="secondary">
-                                        No Data
+                                        Không có dữ liệu
                                     </ArgonTypography>
                                 </ArgonBox>
                             )}
@@ -476,7 +492,7 @@ function ProductDetail() {
                     </Card>
                 </ArgonBox>
             </ArgonBox>
-            <ProductFormDialog open={dialogOpen} onClose={handleCloseDialog} colors={colors} sizes={sizes} initialData={selectedRow} productID={product.id} refreshData={refreshData} updateQuantity={updateQuantityProduct} updatePrice={updatePrice} />
+            <ProductFormDialog open={dialogOpen} onClose={handleCloseDialog} colors={colors} sizes={sizes} initialData={selectedRow} productID={product.id} refreshData={refreshData} updateQuantity={updateQuantityProduct} updatePrice={updatePriceProduct} />
             <ToastContainer />
         </DashboardLayout>
     );

@@ -64,7 +64,7 @@ function Role() {
     e.preventDefault();
 
     if (!validateForm()) {
-      return;
+      return; 
     }
 
     const data = new FormData();
@@ -115,9 +115,10 @@ function Role() {
       <ArgonBox>
         <ArgonBox mb={3}>
           <Card>
-            <ArgonBox display="flex" justifyContent="space-between" p={3}>
+          <ArgonBox display="flex" justifyContent="space-between" p={3}>
               <ArgonTypography variant="h6">Danh sách vai trò</ArgonTypography>
             </ArgonBox>
+
             <ArgonBox
               sx={{
                 "& .MuiTableRow-root:not(:last-child)": {

@@ -47,15 +47,12 @@ const ImageCarousel = () => {
                             >
                                 {mainBanner.imageUrls.map((imageUrl, imgIndex) => (
                                     <Carousel.Item key={`main-banner-${imgIndex}`}>
-                                        <div className="carousel-image-wrapper" style={styles.carouselImageWrapper}>
-                                            <img
-                                                className="d-block w-100"
-                                                style={styles.carouselImage}
-                                                src={imageUrl}
-                                                alt={`Main Banner Image ${imgIndex + 1}`}
-                                            />
-                                            <div className="buy-button" style={styles.buyButton}>Mua</div>
-                                        </div>
+                                        <img
+                                            className="d-block w-100"
+                                            style={styles.carouselImage}
+                                            src={imageUrl}
+                                            alt={`Main Banner Image ${imgIndex + 1}`}
+                                        />
                                     </Carousel.Item>
                                 ))}
                             </Carousel>
@@ -67,25 +64,24 @@ const ImageCarousel = () => {
                             <div key={banner.id} style={styles[`smallBanner${bannerIndex + 1}`]}>
                                 <Carousel
                                     interval={3000}
-                                    controls={false}
-                                    indicators={false}
+                                    controls={false}  // Tắt nút trái và phải
+                                    indicators={false} // Tắt các đường đánh dấu trang
                                 >
                                     {banner.imageUrls.map((imageUrl, imgIndex) => (
                                         <Carousel.Item key={`small-banner-${bannerIndex}-${imgIndex}`}>
-                                            <div className="carousel-image-wrapper" style={styles.carouselImageWrapper}>
-                                                <img
-                                                    className="d-block"
-                                                    style={styles.smallBannerImage}
-                                                    src={imageUrl}
-                                                    alt={`Small Banner ${bannerIndex + 1} Image ${imgIndex + 1}`}
-                                                />
-                                                <div className="buy-button" style={styles.buyButton}>Mua</div>
-                                            </div>
+                                            <img
+                                                className="d-block"
+                                                style={styles.smallBannerImage}
+                                                src={imageUrl}
+                                                alt={`Small Banner ${bannerIndex + 1} Image ${imgIndex + 1}`}
+                                            />
                                         </Carousel.Item>
                                     ))}
                                 </Carousel>
                             </div>
                         ))}
+
+
                     </div>
                 </div>
             </div>
@@ -104,16 +100,10 @@ const styles = {
         borderRadius: "10px",
         boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
     },
-    carouselImageWrapper: {
-        position: "relative",
-        height: "420px",  // Make sure wrapper covers full image height
-        overflow: "hidden", // Ensure that the button stays within the image bounds
-    },
     carouselImage: {
         height: "420px",
         objectFit: "cover",
         borderRadius: "10px",
-        width: "100%",
     },
     customPrevIcon: {
         fontSize: "2rem",
@@ -159,27 +149,6 @@ const styles = {
         height: "100%",
         width: "100%",
         objectFit: "contain",
-    },
-    buyButton: {
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)", // Center the button
-        padding: "10px 20px",
-        backgroundColor: "#FFD700", // Yellow color
-        color: "white",
-        fontSize: "16px",
-        fontWeight: "bold",
-        borderRadius: "5px",
-        opacity: 0,
-        transition: "opacity 0.3s ease-in-out",
-        cursor: "pointer",
-    },
-    carouselImageWrapperHover: {
-        position: "relative",
-        "&:hover .buy-button": {
-            opacity: 1,
-        }
     },
 };
 

@@ -6,7 +6,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
 import Box from '@mui/material/Box';
-import Swal from 'sweetalert2';
+
 
 const columns = [
     { field: 'name', headerName: 'Danh mục', width: 130 },
@@ -28,56 +28,14 @@ export default function DataTable({ categories, onEditClick, onDeleteClick }) {
         setSelectedRows(newSelectionModel);
     };
 
+
     const handleDelete = async () => {
         if (selectedRows.length > 0) {
-            const swalWithBootstrapButtons = Swal.mixin({
-                customClass: {
-                    confirmButton: "btn btn-success",
-                    cancelButton: "btn btn-danger ml-2",
-                },
-                buttonsStyling: false,
-            });
-
-            swalWithBootstrapButtons
-                .fire({
-                    title: "Bạn có chắc chắn?",
-                    text: "Muốn xóa các danh mục này không!",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonText: "Vâng, tôi muốn!",
-                    cancelButtonText: "Không!",
-                    reverseButtons: true,
-                    backdrop: 'rgba(0, 0, 0, 0)',
-                })
-                .then(async (result) => {
-                    if (result.isConfirmed) {
-                        try {
-                            await onDeleteClick(selectedRows);
-                            Swal.fire({
-                                title: "Đã xóa!",
-                                text: "Các danh mục đã được xóa thành công.",
-                                icon: "success",
-                                backdrop: 'rgba(0, 0, 0, 0)',
-                            });
-                            setSelectedRows([]); // Clear selection after deletion
-                        } catch (error) {
-                            console.error("Có lỗi xảy ra khi xóa!", error);
-                            Swal.fire({
-                                title: "Lỗi!",
-                                text: "Có lỗi xảy ra khi xóa các danh mục.",
-                                icon: "error",
-                                backdrop: 'rgba(0, 0, 0, 0)',
-                            });
-                        }
-                    } else if (result.dismiss === Swal.DismissReason.cancel) {
-                        Swal.fire({
-                            title: "Đã hủy",
-                            text: "Các danh mục không bị xóa.",
-                            icon: "error",
-                            backdrop: 'rgba(0, 0, 0, 0)',
-                        });
-                    }
-                });
+            try {
+                await onDeleteClick(selectedRows);
+            } catch (error) {
+                console.error("Có lỗi xảy ra khi xóa!", error);
+            }
         }
     };
 

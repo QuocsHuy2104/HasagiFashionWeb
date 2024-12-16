@@ -30,52 +30,11 @@ export default function DataTable({ brands, onEditClick, onDeleteClick }) {
 
     const handleDelete = async () => {
         if (selectedRows.length > 0) {
-            const swalWithBootstrapButtons = Swal.mixin({
-                customClass: {
-                    confirmButton: "btn btn-success",
-                    cancelButton: "btn btn-danger ml-2",
-                },
-                buttonsStyling: false,
-            });
-            swalWithBootstrapButtons
-                .fire({
-                    title: "Bạn có chắc chắn?",
-                    text: "Muốn xóa thương hiệu này không!",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonText: "Vâng, tôi muốn!",
-                    cancelButtonText: "Không!",
-                    reverseButtons: true,
-                    backdrop: 'rgba(0, 0, 0, 0) left top no-repeat',
-                })
-                .then(async (result) => {
-                    if (result.isConfirmed) {
-                        try {
-                            await onDeleteClick(selectedRows);
-                            Swal.fire({
-                                title: "Đã xóa!",
-                                text: "Thương hiệu đã được xóa thành công.",
-                                icon: "success",
-                                backdrop: 'rgba(0, 0, 0, 0)',
-                            });
-                        } catch (error) {
-                            console.error("Có lỗi xảy ra khi xóa!", error);
-                            Swal.fire({
-                                title: "Lỗi!",
-                                text: "Có lỗi xảy ra khi xóa thương hiệu.",
-                                icon: "error",
-                                backdrop: 'rgba(0, 0, 0, 0)',
-                            });
-                        }
-                    } else if (result.dismiss === Swal.DismissReason.cancel) {
-                        Swal.fire({
-                            title: "Đã hủy",
-                            text: "Thương hiệu không bị xóa.",
-                            icon: "error",
-                            backdrop: 'rgba(0, 0, 0, 0)',
-                        });
-                    }
-                });
+            try {
+                await onDeleteClick(selectedRows);
+            } catch (error) {
+                console.error("Có lỗi xảy ra khi xóa!", error);
+            }
         }
     };
 

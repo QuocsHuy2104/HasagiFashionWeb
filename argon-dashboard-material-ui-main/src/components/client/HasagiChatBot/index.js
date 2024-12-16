@@ -4,7 +4,6 @@ import CategoryService from '../../../services/CategoryServices';
 import BrandService from '../../../services/BrandServices';
 import ProductService from '../../../services/ProductServices';
 import VoucherService from '../../../services/VoucherServices';
-import ProductDetailService from '../../../services/ProductDetailServices';
 import { CircularProgress, IconButton, Box, Avatar } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import MicIcon from '@mui/icons-material/Mic';
@@ -47,10 +46,6 @@ function Gemini() {
         return response?.data || [];
     };
 
-    const getProductDetailData = async () => {
-        const response = await ProductDetailService.getAllProductDetailsUS();
-        return response?.data || [];
-    };
 
     const getVoucherData = async () => {
         const response = await VoucherService.getAllVouchersUS();
@@ -75,12 +70,12 @@ function Gemini() {
     const generateAIResponse = async (question) => {
         setLoading(true);
         try {
+            // Lấy dữ liệu từ các API
             const categories = await getCategoryData();
             const brands = await getBrandData();
             const products = await getProductData();
-            const productDetails = await getProductDetailData();
             const vouchers = await getVoucherData();
-
+    
             // Kiểm tra trùng lặp câu hỏi
             const lastQuestion = chatHistory[chatHistory.length - 1]?.text;
             if (lastQuestion && lastQuestion === question) {
@@ -91,11 +86,13 @@ function Gemini() {
                 setLoading(false);
                 return;
             }
-
+    
+            // Kiểm tra các từ khóa trong câu hỏi
             const keywords = ['sản phẩm', 'phiếu giảm giá', 'danh mục', 'thương hiệu', 'chi tiết sản phẩm'];
             let shouldSuggest = false;
             let keywordCounts = {};  // Đảm bảo khai báo và sử dụng keywordCounts
-
+    
+            // Đếm số lần xuất hiện từ khóa trong câu hỏi
             keywords.forEach(keyword => {
                 if (question.toLowerCase().includes(keyword)) {
                     keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
@@ -104,20 +101,21 @@ function Gemini() {
                     }
                 }
             });
-
+    
+            // Xác định câu chào
             let greeting = "Chào bạn! Tôi có thể giúp gì cho bạn hôm nay?";
             if (question.toLowerCase().includes("xin chào") || question.toLowerCase().includes("chào")) {
                 greeting = "Chào bạn! Có câu hỏi nào tôi có thể giúp bạn không?";
             }
-
+    
+            // Xây dựng prompt cho AI
             const prompt = `
             Bạn là trợ lý ảo của shop Hasagi. Dưới đây là dữ liệu nội bộ của shop, bạn chỉ được sử dụng các thông tin này để trả lời câu hỏi.
-    
+        
             Dữ liệu nội bộ:
             - **Danh mục sản phẩm**: ${JSON.stringify(categories)}.
             - **Thương hiệu**: ${JSON.stringify(brands)}.
             - **Sản phẩm**: ${JSON.stringify(products)}.
-            - **Chi tiết sản phẩm**: ${JSON.stringify(productDetails)}.
             - **Voucher**: ${JSON.stringify(vouchers)}.
             - **Điều khoản & chính sách**: 
                 - Giới thiệu: ${termsAndConditions.introduction}.
@@ -126,9 +124,9 @@ function Gemini() {
                 - Chính sách đổi trả: ${termsAndConditions.returnPolicy}.
                 - Chính sách bảo mật: ${termsAndConditions.privacyPolicy}.
                 - Liên hệ: Email: ${termsAndConditions.contact.email}, SĐT: ${termsAndConditions.contact.phone}, Địa chỉ: ${termsAndConditions.contact.address}.
-    
+        
             Câu hỏi: "${question}"
-    
+        
             Hướng dẫn trả lời:
             1. Chỉ sử dụng dữ liệu nội bộ để trả lời.
             2. Nếu câu hỏi không thuộc phạm vi dữ liệu, hãy xin lỗi khách hàng và yêu cầu họ đặt câu hỏi cụ thể hơn.
@@ -136,33 +134,34 @@ function Gemini() {
             4. Đối với các câu hỏi không rõ ràng, hãy gợi ý cách khách hàng có thể tìm kiếm thông tin từ shop.
             5. Trả lời bằng ngôn ngữ tiếng Việt.
             6. Hãy giữ phong cách giao tiếp thân thiện và tự nhiên, giống như một trợ lý ảo thân thiện.
-    
+        
             Chào hỏi: ${greeting}
             `;
-
-            const API_KEY = process.env.REACT_APP_API_KEY;
+    
+            const API_KEY = 'AIzaSyCrDIwFVBDHE1ZDBDuzjPUClS6KicbLa7o';
             const response = await axios.post(
                 `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`,
                 { contents: [{ parts: [{ text: prompt }] }] }
             );
-
+    
             const aiAnswer =
                 response.data.candidates?.[0]?.content?.parts?.[0]?.text ||
                 "Xin lỗi, tôi không thể xử lý câu hỏi của bạn ngay bây giờ. Vui lòng thử lại sau.";
-
+    
             let finalAnswer = aiAnswer;
             if (shouldSuggest) {
                 finalAnswer += "\n\nCó vẻ như bạn đang tìm kiếm thông tin về một số sản phẩm hoặc chính sách. Bạn có thể truy cập <a href='/shop'>trang sản phẩm</a> của chúng tôi để tìm kiếm thêm chi tiết.";
             }
-
+    
             // Chuyển đổi URL trong câu trả lời thành thẻ <a> HTML
             finalAnswer = convertTextToLinks(finalAnswer);
-
+    
+            // Cập nhật lịch sử trò chuyện
             setChatHistory((prevHistory) => [
                 ...prevHistory,
                 { type: "ai", text: finalAnswer }
             ]);
-
+    
             let currentIndex = 0;
             const interval = setInterval(() => {
                 setChatHistory((prevHistory) => {
@@ -171,12 +170,12 @@ function Gemini() {
                     return updatedHistory;
                 });
                 currentIndex++;
-
+    
                 if (currentIndex >= finalAnswer.length) {
                     clearInterval(interval);
                 }
             }, 10);
-
+    
         } catch (error) {
             console.error("Lỗi:", error);
             setChatHistory((prevHistory) => [
@@ -187,22 +186,19 @@ function Gemini() {
             setLoading(false);
         }
     };
+    
 
 
-
-    const handleSubmit = async (e, directQuestion = null) => {
-        if (e) e.preventDefault(); // Chỉ gọi preventDefault khi e tồn tại.
-        const userQuestion = directQuestion || question;
-        if (!userQuestion.trim()) return;
-
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!question.trim()) return;
         setChatHistory(prevHistory => [
             ...prevHistory,
-            { type: 'user', text: userQuestion }
+            { type: 'user', text: question }
         ]);
         setQuestion('');
-        await generateAIResponse(userQuestion);
+        await generateAIResponse(question);
     };
-
 
     useEffect(() => {
         // Tự động cuộn xuống khi chatHistory thay đổi
@@ -227,9 +223,7 @@ function Gemini() {
         recognition.onresult = (event) => {
             const spokenText = event.results[0][0].transcript;
             setQuestion(spokenText);
-
-            // Gọi handleSubmit với câu hỏi trực tiếp
-            handleSubmit(null, spokenText);
+            handleSubmit(new Event('submit'));
         };
 
         recognition.onerror = (event) => {

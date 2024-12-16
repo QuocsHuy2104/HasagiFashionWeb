@@ -151,7 +151,6 @@ const Checkout = () => {
     }
   };
 
-
   const fetchShipFee = async () => {
     const XuanKhanhDistrictID = 1572;
     try {
@@ -181,7 +180,7 @@ const Checkout = () => {
   };
 
   useEffect(() => {
-    if (address && address.districtCode) {
+    if (address && address.districtCode && address.wardCode) {
       fetchShipFee();
     }
   }, [address]);
@@ -758,6 +757,34 @@ const Checkout = () => {
               Áp dụng
             </button>
           </div>
+          <div style={{ textAlign: "right" }}>
+            <Button
+              variant="contained"
+              color="warning"
+              onClick={handleClickOpen}
+              style={{
+                border: "none",
+                boxShadow: "none",
+                padding: "8px 16px",
+                marginRight: "0", // Đặt lại margin nếu cần
+                color: "rgba(244, 79, 30, 0.99)",
+                textDecoration: "none",
+                transition: "all 0.3s",
+                fontSize: "1rem",
+                marginTop: "-25px", 
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.textDecoration = "underline";
+                e.target.style.color = "blue";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.textDecoration = "underline";
+                e.target.style.color = "rgba(244, 79, 30, 0.99)";
+              }}
+            >
+              Áp dụng mã giảm giá
+            </Button>
+          </div>
 
           {/* Address Section */}
           {address ? (
@@ -817,7 +844,11 @@ const Checkout = () => {
                       {item.name}
                     </h3>
                     <p style={{ fontSize: "12px", margin: "5px 0", color: "#555" }}>
-                      {item.color} , {item.size}
+                      {item.color}  {item.size !== "Không có" && (
+                        <>
+                          , {item.size || "Chưa chọn kích thước"}
+                        </>
+                      )}
                     </p>
                     <p>
                       <span style={styles.price}>
@@ -844,31 +875,6 @@ const Checkout = () => {
             }}
           >
             <h2 style={{ margin: 0 }}>Chi tiết đơn hàng</h2>
-            <Button
-              variant="contained"
-              color="warning"
-              onClick={handleClickOpen}
-              style={{
-                border: "none",
-                boxShadow: "none",
-                padding: "8px 16px",
-                marginRight: "-20px",
-                color: "rgba(244, 79, 30, 0.99)",
-                textDecoration: "none",
-                transition: "all 0.3s",
-                fontSize: "1rem",
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.textDecoration = "underline";
-                e.target.style.color = "blue";
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.textDecoration = "none";
-                e.target.style.color = "rgba(244, 79, 30, 0.99)";
-              }}
-            >
-              Áp dụng mã giảm giá
-            </Button>
           </div>
           <Dialog open={open} onClose={handleClose}>
             <DialogTitle

@@ -14,6 +14,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { storage } from "../../../config/firebase-config";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import Swal from 'sweetalert2';
 
 
 function Category() {
@@ -180,15 +181,57 @@ function Category() {
   const handleDeleteClick = async (selectedRows) => {
     if (selectedRows.length === 0) return;
 
-    for (const id of selectedRows) {
-      try {
-        await CategoryService.deleteCategory(id);
-      } catch (error) {
-        console.error(`${id}`, error);
+    // Hiển thị thông báo xác nhận trước khi xóa
+    const result = await Swal.fire({
+      title: 'Bạn có chắc chắn?',
+      text: `Bạn muốn xóa ${selectedRows.length} danh mục này!`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Đồng ý',
+      cancelButtonText: 'Đóng',
+      backdrop: 'rgba(0, 0, 0, 0)', // Backdrop cho hộp xác nhận
+
+    });
+
+    if (result.isConfirmed) {
+      let hasError = false;
+
+      // Xóa từng danh mục đã chọn
+      for (const id of selectedRows) {
+        try {
+          await CategoryService.deleteCategory(id);
+        } catch (error) {
+          hasError = true;
+          console.error(`Error deleting category with ID ${id}`, error);
+        }
+      }
+
+      fetchData(); // Tải lại dữ liệu sau khi hoàn tất
+
+      // Hiển thị thông báo tổng kết với backdrop
+      if (hasError) {
+        Swal.fire({
+          title: 'Xóa thất bại!',
+          text: 'Không thể xóa danh mục này!',
+          icon: 'info',
+          backdrop: 'rgba(0, 0, 0, 0)', // Backdrop cho thông báo thất bại
+        });
+        resetForm();
+      } else {
+        Swal.fire({
+          title: 'Xóa thành công!',
+          text: `Danh mục đã được xóa thành công.`,
+          icon: 'success',
+          backdrop: 'rgba(0, 0, 0, 0)', // Backdrop cho thông báo thành công
+        });
+        resetForm();
       }
     }
-    fetchData();
   };
+
+
 
   return (
     <DashboardLayout>

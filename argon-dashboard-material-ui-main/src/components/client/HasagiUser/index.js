@@ -5,13 +5,15 @@ import axios from "axios"; // Thêm thư viện axios để thực hiện gọi 
 import ProfileServices from "../../../services/ProfileServices";
 import { storage } from "../../../config/firebase-config";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import Swal from "sweetalert2";
+import aboutImage5 from "layouts/assets/img/user.jpg";
 function User() {
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("cdcdcdc@gmail.com");
   const [phone, setPhone] = useState("");
   const [profileImage, setProfileImage] = useState(null); // Dùng để lưu URL tạm thời của ảnh đã chọn
-  const [profileImageFile, setProfileImageFile] = useState(null); 
+  const [profileImageFile, setProfileImageFile] = useState(null);
 
   // State for handling modals
   const [showEmailModal, setShowEmailModal] = useState(false);
@@ -33,11 +35,11 @@ function User() {
 
       // Lấy dữ liệu từ response
       const { email, username, fullName, avatar, numberPhone } = response;
-   
+
       setName(fullName); // Full name thay cho name
       setEmail(email);
       setPhone(numberPhone); // Number phone thay cho phone
-      setProfileImage(avatar); // Avatar thay cho profileImage
+      setProfileImage(null); // Avatar thay cho profileImage
       setUsername(username); // Thêm cập nhật username nếu cần thiết
 
       // Debug dữ liệu
@@ -60,21 +62,25 @@ function User() {
         alert("Vui lòng chọn tệp có dung lượng tối đa 1 MB.");
         return;
       }
-  
+
       const validFormats = [".jpeg", ".jpg", ".png"];
       const fileExtension = file.name
         .slice(((file.name.lastIndexOf(".") - 1) >>> 0) + 2)
         .toLowerCase();
-  
+
       if (validFormats.includes(`.${fileExtension}`)) {
-        setProfileImage(URL.createObjectURL(file)); 
+        setProfileImage(URL.createObjectURL(file));
         setProfileImageFile(file);
+
+        // Reset the input field after successful update
+        event.target.value = '';
       } else {
         alert("Vui lòng chọn tệp có định dạng .JPEG hoặc .PNG.");
       }
     }
   };
-  
+
+
   const handleSave = async () => {
     try {
       let profileImageUrl = null;
@@ -91,8 +97,13 @@ function User() {
             null, // Không cần xử lý quá trình thay đổi trạng thái
             (error) => reject(error), // Xử lý lỗi
             async () => {
-              profileImageUrl = await getDownloadURL(uploadTask.snapshot.ref); // Lấy URL ảnh
-              resolve();
+              try {
+                // Get the download URL correctly from the uploadTask snapshot
+                profileImageUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                resolve();
+              } catch (error) {
+                reject(error);
+              }
             }
           );
         });
@@ -109,12 +120,47 @@ function User() {
 
       await ProfileServices.changeProfile(userData);
       console.log("Profile saved:", userData);
-      alert("Cập nhật thông tin thành công.");
+
+      // Thay thế alert bằng Swal
+      Swal.fire({
+        position: "center",
+        icon: "success",
+        title: "Cập nhật thành công.",
+        showConfirmButton: false,
+        timer: 1500,
+        didOpen: () => {
+          document.body.style.overflowY = "auto";
+          document.body.style.padding = "0";
+        },
+        willClose: () => {
+          document.body.style.overflowY = "auto";
+          document.body.style.padding = "0";
+        },
+      });
+      setProfileImage(null);
     } catch (error) {
       console.error("Error saving user data:", error);
-      alert("Cập nhật thông tin thất bại.");
+
+      // Thay thế alert bằng Swal
+      Swal.fire({
+        position: "center",
+        icon: "error",
+        title: "Cập nhật thất bại.",
+        showConfirmButton: false,
+        timer: 1500,
+        didOpen: () => {
+          document.body.style.overflowY = "auto";
+          document.body.style.padding = "0";
+        },
+        willClose: () => {
+          document.body.style.overflowY = "auto";
+          document.body.style.padding = "0";
+        },
+      });
     }
   };
+
+
 
   const isValidEmail = (email) => {
     const regex = /^[^\s@]+@gmail\.com$/;
@@ -163,7 +209,7 @@ function User() {
             <div className="form-row mt-3">
               <label className="form-label">Tên đăng nhập</label>
               <input
-              readOnly
+                readOnly
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -272,28 +318,27 @@ function User() {
         </div>
 
         <div className="col-4 profile-picture-section">
-          <div className="profile-picture mb-3">
+          <div className="profile-picture mb-3" style={{ width: '150px', height: '150px', borderRadius: '50%', overflow: 'hidden' }}>
             {profileImage ? (
               <img
                 src={profileImage}
                 alt="Profile"
-                style={{ width: "100%", height: "auto" }}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             ) : (
-              // Nếu không có ảnh, có thể hiển thị ảnh mặc định hoặc không hiển thị gì
               <img
-                src="default-avatar.png" // Sử dụng ảnh mặc định nếu không có ảnh
+                src={aboutImage5}
                 alt="Profile"
-                style={{ width: "100%", height: "auto" }}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
               />
             )}
           </div>
 
           <input
             type="file"
-            accept=".jpeg,.jpg,.png" // Chỉ cho phép định dạng .JPEG và .PNG
-            style={{ display: "none" }} // Ẩn input file
-            onChange={handleImageChange} // Khi người dùng chọn ảnh
+            accept=".jpeg,.jpg,.png"
+            style={{ display: "none" }}
+            onChange={handleImageChange}
             id="file-input"
           />
           <label htmlFor="file-input" className="select-image-btn" style={{ cursor: "pointer" }}>

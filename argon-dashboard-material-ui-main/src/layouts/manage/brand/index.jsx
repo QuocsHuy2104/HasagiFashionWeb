@@ -14,6 +14,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { storage } from "../../../config/firebase-config";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import Swal from 'sweetalert2';
 
 
 function Brand() {
@@ -59,7 +60,7 @@ function Brand() {
 
     if (!formData.name.trim()) {
       newErrors.name = true;
-      toast.warn("Vui lòng nhập tên Danh mục!!!");
+      toast.warn("Vui lòng nhập tên thương hiệu!!!");
     } else if (
       brands.some(
         (brand) =>
@@ -68,12 +69,12 @@ function Brand() {
       )
     ) {
       newErrors.name = true;
-      toast.error("Tên tDanh mục đã tồn tại. Vui lòng nhập tên khác!");
+      toast.error("Tên tthương hiệu đã tồn tại. Vui lòng nhập tên khác!");
     }
 
     if (!formData.image) {
       newErrors.image = true;
-      toast.warn("Vui lòng chọn ảnh Danh mục!!!");
+      toast.warn("Vui lòng chọn ảnh thương hiệu!!!");
     }
 
     setErrors(newErrors);
@@ -174,18 +175,56 @@ function Brand() {
     setFormData(brand);
     setErrors({});
   };
-
   const handleDeleteClick = async (selectedRows) => {
     if (selectedRows.length === 0) return;
 
-    for (const id of selectedRows) {
-      try {
-        await BrandsService.deleteBrand(id);
-      } catch (error) {
-        console.error(`${id}`, error);
+    // Hiển thị thông báo xác nhận trước khi xóa
+    const result = await Swal.fire({
+      title: 'Bạn có chắc chắn?',
+      text: `Bạn muốn xóa ${selectedRows.length} thương hiệu này!`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Đồng ý',
+      cancelButtonText: 'Đóng',
+      backdrop: 'rgba(0, 0, 0, 0)', // Backdrop cho hộp xác nhận
+    });
+
+    if (result.isConfirmed) {
+      let hasError = false;
+
+      // Xóa từng thương hiệu đã chọn
+      for (const id of selectedRows) {
+        try {
+          await BrandsService.deleteBrand(id);
+        } catch (error) {
+          hasError = true;
+          console.error(`Error deleting brand with ID ${id}`, error);
+        }
+      }
+
+      fetchData(); // Tải lại dữ liệu sau khi hoàn tất
+
+      // Hiển thị thông báo tổng kết với backdrop
+      if (hasError) {
+        Swal.fire({
+          title: 'Xóa thất bại!',
+          text: 'Không thể xóa thương hiệu này!',
+          icon: 'info',
+          backdrop: 'rgba(0, 0, 0, 0)',
+        });
+        resetForm();
+      } else {
+        Swal.fire({
+          title: 'Xóa thành công!',
+          text: `Thương hiệu đã được xóa thành công.`,
+          icon: 'success',
+          backdrop: 'rgba(0, 0, 0, 0)', // Backdrop cho thông báo thành công
+        });
+        resetForm();
       }
     }
-    fetchData();
   };
 
 

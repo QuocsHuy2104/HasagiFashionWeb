@@ -153,6 +153,8 @@ function Account() {
         roleId: [],
         permissionNames: [],
       });
+
+      toast.success('Thêm nhân viên thành công')
     } catch (error) {
       console.error("Error saving account:", error);
     }
@@ -353,7 +355,7 @@ function Account() {
                           value={searchTerm}
                           onChange={handleSearchChange}
                           fullWidth
-                          placeholder="Search here..."
+                          placeholder="Tìm kiếm"
                         />
                       </ArgonBox>
                     </Grid>

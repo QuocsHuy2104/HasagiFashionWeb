@@ -36,6 +36,10 @@ import NotFoundPage from "components/client/Hasagi404";
 import Voucher from "layouts/manage/voucher";
 import ChatBot from "components/client/HasagiChatBot";
 import QA from "components/client/HasagiQ&A";
+import BaoMat from "components/client/HasagiBaoMat";
+import DoiTra from "components/client/HasagiDoiTra";
+import DieuKhoan from "components/client/HasagiDieuKhoan";
+import OrderSummary from "layouts/billed"
 const routes = [
   {
     type: "route",
@@ -63,9 +67,9 @@ const routes = [
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
     component: <SignUp />,
   },
-  { type: "title", title: "Trang tài khoản", key: "account-pages" },
+  //{ type: "title", title: "Trang tài khoản", key: "account-pages" },
   {
-    type: "route",
+    //type: "route",
     name: "Profile",
     key: "profile",
     route: "/profile",
@@ -337,6 +341,38 @@ const routes = [
     route: "/not-found",
     component: <NotFoundPage />,
     showInSidenav: true,
+  }, {
+    // type: "route", 
+    name: "BaoMat",
+    key: "BaoMat",
+    route: "/BaoMat",
+    icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
+    component: <BaoMat />,
+    showInSidenav: true,
+  },
+  {
+    // type: "route", 
+    name: "DoiTra",
+    key: "DoiTra",
+    route: "/DoiTra",
+    icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
+    component: <DoiTra />,
+    showInSidenav: true,
+  },
+  {
+    // type: "route", 
+    name: "DieuKhoan",
+    key: "DieuKhoan",
+    route: "/DieuKhoan",
+    icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
+    component: <DieuKhoan />,
+    showInSidenav: true,
+  },
+  {
+    name: "OrderSummary",
+    key: "OrderSummary",
+    route: "/OrderSummary",
+    component: <OrderSummary />,
   },
 ];
 

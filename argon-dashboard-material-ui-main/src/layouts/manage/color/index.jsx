@@ -11,6 +11,7 @@ import Footer from "../../../examples/Footer";
 import ColorsService from "../../../services/ColorServices";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Swal from 'sweetalert2';
 
 function Color() {
     const [formData, setFormData] = useState({
@@ -55,7 +56,7 @@ function Color() {
         } else if (isColorNameDuplicate(formData.name)) {
             newErrors.name = true;
             toast.warn("Tên màu đã tồn tại!!!");
-          }
+        }
 
         setErrors(newErrors);
         return isValid;
@@ -64,8 +65,8 @@ function Color() {
     const isColorNameDuplicate = (colorName) => {
         const existingColorNames = colors.map((color) => color.name.trim().toLowerCase());
         return existingColorNames.includes(colorName.trim().toLowerCase());
-      };
-      
+    };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -74,8 +75,8 @@ function Color() {
         }
 
         if (isColorNameDuplicate(formData.name)) {
-            return; 
-          }
+            return;
+        }
 
         const data = { name: formData.name };
 
@@ -110,20 +111,56 @@ function Color() {
         });
     };
 
+
     const handleDeleteClick = async (selectedRows) => {
         if (selectedRows.length === 0) return;
 
-        for (const id of selectedRows) {
-            try {
-                await ColorsService.deleteColor(id);
-                toast.success(`Color with ID ${id} deleted successfully`);
-            } catch (error) {
-                console.error(`Error deleting color with ID ${id}`, error);
-                toast.error(`Error deleting color with ID ${id}`);
+        const result = await Swal.fire({
+            title: 'Bạn có chắc chắn?',
+            text: `Muốn xóa ${selectedRows.length} màu này không!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Đóng',
+            backdrop: 'rgba(0, 0, 0, 0)', // Backdrop cho hộp xác nhận
+        });
+
+        if (result.isConfirmed) {
+            let hasError = false;
+
+            for (const id of selectedRows) {
+                try {
+                    await ColorsService.deleteColor(id);
+                } catch (error) {
+                    hasError = true;
+                    console.error(`Error deleting color with ID ${id}`, error);
+                }
+            }
+
+            fetchData(); // Tải lại dữ liệu sau khi hoàn tất
+
+            // Hiển thị thông báo tổng kết với backdrop
+            if (hasError) {
+                Swal.fire({
+                    title: 'Xóa thất bại!',
+                    text: 'Không thể xóa màu này!!!',
+                    icon: 'info',
+                    backdrop: 'rgba(0, 0, 0, 0)',
+                });
+            } else {
+                Swal.fire({
+                    title: 'Xóa thành công!',
+                    text: 'Đã xóa màu thành công',
+                    icon: 'success',
+                    backdrop: 'rgba(0, 0, 0, 0)',
+                });
             }
         }
-        fetchData();
     };
+
+
 
     return (
         <DashboardLayout>
@@ -143,16 +180,16 @@ function Color() {
                         >
                             <ArgonBox mx={3}>
                                 <ArgonBox mb={3} position="relative">
-                                <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Tên màu</p>
+                                    <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Tên màu</p>
                                     <ArgonInput
                                         type="text"
                                         placeholder="Nhập tên màu sắc"
                                         size="large"
-                                        name="name"  
+                                        name="name"
                                         fullWidth
-                                        value={formData.name}  
+                                        value={formData.name}
                                         onChange={handleChange}
-                                        error={!!errors.name}  
+                                        error={!!errors.name}
                                     />
                                     {errors.name && (
                                         <ArgonTypography variant="caption" color="error">
@@ -161,8 +198,12 @@ function Color() {
                                     )}
                                 </ArgonBox>
                                 <ArgonBox mb={3}>
-                                    <ArgonButton type="submit" size="large" color="info" fullWidth={true}>
-                                        {formData.id ? "Cập nhật" : "Lưu"}
+                                    <ArgonButton
+                                        type="submit"
+                                        size="large"
+                                        color="info"
+                                        sx={{ minWidth: 100, padding: '8px 16px' }}>
+                                        {formData.id ? "Cập nhật" : "Thêm"}
                                     </ArgonButton>
                                 </ArgonBox>
                             </ArgonBox>

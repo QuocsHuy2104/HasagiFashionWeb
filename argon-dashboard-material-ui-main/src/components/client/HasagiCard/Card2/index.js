@@ -53,7 +53,6 @@ function HasagiCard2({ image, name, id, price }) {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'start',
-                alignItems: 'center',
                 height: '100%',
                 position: 'relative',
                 overflow: 'hidden'
@@ -90,20 +89,19 @@ function HasagiCard2({ image, name, id, price }) {
                     />
                 </ArgonBox>
 
-                <ArgonTypography
-                    variant="h5"
-                    color="text"
-                    mt={2}
-                    textAlign='center'
-                    style={{
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        width: '100%',
-                    }}
-                >
-                    {name}
-                </ArgonTypography>
+                 <ArgonTypography
+                   variant="h5"
+                   color="text"
+                   mt={2}
+                   textAlign="left" // Căn trái tên sản phẩm
+                   style={{    
+                       whiteSpace: "nowrap",
+                       overflow: "hidden",
+                       textOverflow: "ellipsis",
+                   }}
+               >
+                   {name}
+               </ArgonTypography>
 
 
                 {/* Price */}
@@ -121,7 +119,7 @@ function HasagiCard2({ image, name, id, price }) {
             {/* Hover Icons */}
             {hover && (
                 <>
-                    <SearchOutlinedIcon
+                    {/* <SearchOutlinedIcon
                         onClick={handleOpenPopup}
                         sx={{
                             width: '1.7em',
@@ -134,9 +132,9 @@ function HasagiCard2({ image, name, id, price }) {
                             borderRadius: '12px',
                             cursor: 'pointer'
                         }}
-                    />
+                    /> */}
 
-                    <ShoppingCartIcon
+                    {/* <ShoppingCartIcon
                         sx={{
                             width: '1.7em',
                             height: '1.7em',
@@ -148,7 +146,7 @@ function HasagiCard2({ image, name, id, price }) {
                             borderRadius: '12px',
                             cursor: 'pointer'
                         }}
-                    />
+                    /> */}
                 </>
             )}
 

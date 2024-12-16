@@ -25,16 +25,10 @@ const Cart = () => {
   const [selectAll, setSelectAll] = useState(false);
   const [showBackupModal, setShowBackupModal] = useState(false);
   const [images, setImages] = useState([]);
-  const [checkedItems, setCheckedItems] = useState([]);
   const navigate = useNavigate();
 
   const fetchCartItems = async () => {
-    const accountId = Cookies.get("accountId");
 
-    if (!accountId) {
-      navigate(`/authentication/sign-in`);
-      return;
-    }
     try {
       const [cartResponse, addressResponse] = await Promise.all([
         CartService.getCart(),
@@ -118,8 +112,8 @@ const Cart = () => {
           inputValue === ""
             ? ""
             : inputValue === "0"
-              ? item.quantity
-              : parseInt(inputValue, 10) || item.quantity + change;
+            ? item.quantity
+            : parseInt(inputValue, 10) || item.quantity + change;
 
         if (newQuantity === 0) {
           Swal.fire({
@@ -278,7 +272,6 @@ const Cart = () => {
       setShowBackupModal(true);
     } else {
       navigate(`/Checkout?id=${address}`);
-      toast.success("Chuyển đến trang thanh toán.");
     }
   };
 
@@ -286,7 +279,6 @@ const Cart = () => {
     setShowBackupModal(false);
     if (accountExists) {
       navigate(`/Checkout?id=${address}`);
-      toast.success("Chuyển đến trang thanh toán.");
     }
   };
 
@@ -448,7 +440,6 @@ const Cart = () => {
                       scope="col"
                       style={{ width: "5%", textAlign: "center", padding: "10px", border: "none" }}
                     >
-
                     </th>
                     <th
                       scope="col"
@@ -603,7 +594,11 @@ const Cart = () => {
                               <span>
                                 {item.color || "Chưa chọn màu"}
                               </span>
-                              , {item.size || "Chưa chọn kích thước"}
+                              {item.size !== "Không có" && (
+                                <>
+                                  , <span>{item.size || "Chưa chọn kích thước"}</span>
+                                </>
+                              )}
                             </div>
                           </button>
 
@@ -696,15 +691,15 @@ const Cart = () => {
                                 }
                               }}
                               onBlur={(e) => {
-                                const inputValue = e.target.value.trim();
+                                const inputValue = e.target.value.trim(); 
                                 if (inputValue === "") {
-                                  handleQuantityChange(item.cartdetailid, 0, "1");
+                                  handleQuantityChange(item.cartdetailid, 0, "1"); 
                                 } else {
-                                  handleQuantityChange(item.cartdetailid, 0, inputValue);
+                                  handleQuantityChange(item.cartdetailid, 0, inputValue); 
                                 }
                               }}
                               style={{
-                                width: "60px",
+                                width: "60px", 
                                 height: "30px",
                                 margin: "0 5px",
                                 boxShadow: "none",
@@ -734,10 +729,10 @@ const Cart = () => {
                         </td>
 
                         <td className="align-middle" style={{ border: "none" }}>
-                          <span style={{ marginLeft: "1px" }}>
+                        <span style={{ marginLeft: "1px" }}>
                             {item.quantity !== ""
                               ? new Intl.NumberFormat("vi-VN").format(item.price * item.quantity)
-                              : new Intl.NumberFormat("vi-VN").format(item.price)}
+                              : new Intl.NumberFormat("vi-VN").format(item.price)}đ
                           </span>
                         </td>
                         <td className="align-middle" style={{ border: "none" }}>
@@ -757,18 +752,18 @@ const Cart = () => {
             )}
             {cartItems.length > 0 && (
               <div className="d-flex align-items-center justify-content-between w-100 py-2">
-                <div className="d-flex align-items-center" style={{ marginLeft: "15px" }}>
+                <div className="d-flex align-items-center" style={{ marginLeft: "30px" }}>
                   <input
                     type="checkbox"
                     checked={selectAll}
                     onChange={handleSelectAllChange}
-                    style={{ transform: "scale(1.5)", marginBottom: "0" }}
+                    style={{ transform: "scale(1.5)", marginBottom: "0", marginLeft: "-4px" }}
                   />
                   <label
                     style={{
                       marginLeft: "12px",
-                      marginTop: "2px",
-                      fontSize: "16px", // Sửa từ 'frontSize' thành 'fontSize'
+                      marginTop: "3px",
+                      fontSize: "17px", // Sửa từ 'frontSize' thành 'fontSize'
                     }}
                   >
                     Chọn Tất Cả ({countSelectedItems()})
@@ -782,7 +777,7 @@ const Cart = () => {
                       fontSize: "16px",
                       fontWeight: "normal",
                       marginLeft: "10px",
-                      marginTop: "2px",
+                      marginTop: "3px",
                       padding: "5px 10px",
                       backgroundColor: "white",
                       cursor: "pointer",
@@ -816,7 +811,6 @@ const Cart = () => {
                   </button>
                 </div>
               </div>
-
             )}
           </div>
         </div>
