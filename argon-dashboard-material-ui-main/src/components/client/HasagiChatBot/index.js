@@ -16,6 +16,7 @@ function Gemini() {
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [hasGreeted, setHasGreeted] = useState(false);
     const chatContainerRef = useRef(null);
+    const [isVoiceInput, setIsVoiceInput] = useState(false);
 
     useEffect(() => {
         if (isChatOpen && !hasGreeted) {
@@ -201,20 +202,11 @@ function Gemini() {
     };
 
     useEffect(() => {
-        // Tự động cuộn xuống khi chatHistory thay đổi
-        if (chatContainerRef.current) {
-            chatContainerRef.current.scrollIntoView({ behavior: "smooth" });
-        }
-    }, [chatHistory]);
-
-    useEffect(() => {
-        // Kiểm tra khi question thay đổi và tự động gửi
-        if (question.trim()) {
+        if (question.trim() && isVoiceInput) {
             handleSubmit(new Event('submit'));
+            setIsVoiceInput(false); 
         }
-    }, [question]); // Phụ thuộc vào question để gọi handleSubmit khi question thay đổi
-
-
+    }, [question, isVoiceInput]); 
     const convertTextToLinks = (text) => {
         const urlPattern = /https?:\/\/[^\s]+/g;
         return text.replace(urlPattern, (url) => `<a href="${url}" target="_blank" style="color: #1e90ff; text-decoration: none;">${url}</a>`);
@@ -230,7 +222,8 @@ function Gemini() {
 
         recognition.onresult = (event) => {
             const spokenText = event.results[0][0].transcript;
-            setQuestion(spokenText); // Cập nhật trạng thái question với văn bản nhận diện được
+            setQuestion(spokenText); 
+            setIsVoiceInput(true); 
         };
 
         recognition.onerror = (event) => {
@@ -240,7 +233,6 @@ function Gemini() {
 
         recognition.start();
     };
-
     return (
         <div style={{
             position: 'fixed',
