@@ -1,12 +1,6 @@
 import React from "react";
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
-import MuiLink from "@mui/material/Link";
-import { FaFacebookF, FaTwitter, FaYoutube, FaLinkedinIn, FaTiktok } from 'react-icons/fa';
-import { Container } from "@mui/material";
-import ArgonInput from "components/ArgonInput";
-import ArgonButton from "components/ArgonButton";
-
 const Coupon = () => {
     return (
         <>

@@ -15,6 +15,7 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { DataGrid } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
+import Modal from "react-bootstrap/Modal";
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -45,6 +46,7 @@ function Order() {
       try {
         const response = await axios.get("http://localhost:3000/api/order");
         if (response.data && response.data.orders) {
+
           const orders = response.data.orders.map(order => ({
             ...order,
             orderDate: order.orderDate
@@ -97,7 +99,7 @@ function Order() {
     });
 
     setFilteredOrders(filteredOrders);
-  }, [searchCriteria, orders]); // Re-run filter whenever criteria or orders change
+  }, [searchCriteria, orders]);
 
   const handleRowClick = async (params, event) => {
     // Kiểm tra nếu cột được bấm không phải là "status"
@@ -222,10 +224,7 @@ function Order() {
         );
       },
     }
-
   ];
-
-
 
   const handleStatusChange = async (orderId, newStatusSlug) => {
     try {
@@ -275,7 +274,7 @@ function Order() {
         <ArgonBox mb={3}>
           <Card>
             <ArgonBox component="form" role="form" p={3}>
-              <ArgonTypography variant="h6">Tìm kiếm đơn hàng</ArgonTypography>
+              <ArgonTypography variant="h6">Tìm kiếm order</ArgonTypography>
               <ArgonBox
                 display="flex"
                 flexDirection="row"
@@ -322,7 +321,7 @@ function Order() {
                   color="success"
                   style={{ marginTop: "-24px" }}
                 >
-                  Xuất Excel
+                  Xuất
                 </ArgonButton>
               </ArgonBox>
             </ArgonBox>
@@ -473,10 +472,10 @@ function Order() {
                         <td style={{ padding: "10px" }}>{detail.productName}</td>
                         <td style={{ padding: "10px", textAlign: "center" }}>{detail.quantity}</td>
                         <td style={{ padding: "10px", textAlign: "right" }}>
-                          {new Intl.NumberFormat("vi-VN").format(detail.price + detail.priceSize)}đ
+                          {new Intl.NumberFormat("vi-VN").format(detail.price)}đ
                         </td>
                         <td style={{ padding: "10px", textAlign: "right" }}>
-                          {new Intl.NumberFormat("vi-VN").format((detail.price + detail.priceSize) * detail.quantity)}đ
+                          {new Intl.NumberFormat("vi-VN").format(detail.price * detail.quantity)}đ
                         </td>
                       </tr>
                     ))}
@@ -488,7 +487,7 @@ function Order() {
                       </td>
                       <td style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>
                         {new Intl.NumberFormat("vi-VN").format(
-                          selectedOrder.reduce((sum, detail) => sum + (detail.price + detail.priceSize) * detail.quantity, 0)
+                          selectedOrder.reduce((sum, detail) => sum + (detail.price) * detail.quantity, 0)
                         )}đ
                       </td>
                     </tr>
@@ -499,7 +498,7 @@ function Order() {
                         </td>
                         <td style={{ padding: "10px", fontWeight: "bold", textAlign: "right" }}>
                           -{new Intl.NumberFormat("vi-VN").format(
-                            selectedOrder.reduce((sum, detail) => sum + (detail.price + detail.priceSize) * detail.quantity, 0) * voucherPrice / 100
+                            selectedOrder.reduce((sum, detail) => sum + (detail.price) * detail.quantity, 0) * voucherPrice / 100
                           )}đ
                         </td>
                       </tr>
@@ -519,7 +518,7 @@ function Order() {
               <div style={{ textAlign: "right", marginTop: "10px" }}>
                 <strong>Thành tiền: </strong>
                 {new Intl.NumberFormat("vi-VN").format(
-                  selectedOrder.reduce((sum, detail) => sum + (detail.price + detail.priceSize) * detail.quantity, 0) + shippingFee
+                  selectedOrder.reduce((sum, detail) => sum + (detail.price) * detail.quantity, 0) + shippingFee
                 )}đ
               </div>
               <div style={{ textAlign: "center", marginBottom: "10px" }}>

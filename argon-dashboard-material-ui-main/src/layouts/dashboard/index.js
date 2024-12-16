@@ -43,25 +43,42 @@ import salesTableData from "layouts/dashboard/data/salesTableData";
 import categoriesListData from "layouts/dashboard/data/categoriesListData";
 import { useEffect, useState } from "react";
 import RevenueService from "services/RevenueServices";
+import PolarChart from "examples/Charts/PolarChart";
 
 function Default() {
   const { size } = typography;
   const chartData = gradientLineChartData();
   const [today, setToday] = useState(0);
+  const [order, setOrder] = useState(0);
   const [thisMonth, setThisMonth] = useState(0);
-  const [yesterday, setYesterday] = useState(0);
+  const [yesterday, setPercentChange] = useState(0);
+  const [dataPolar, setPolar] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [res, res2, res3] = await Promise.all([
+        const [res, res2, res3, res4, res5] = await Promise.all([
           RevenueService.getToday(),
           RevenueService.getThisMonth(),
           RevenueService.getYesterday(),
+          RevenueService.getOrderToday(),
+          RevenueService.getLessThan(),
         ]);
         setToday(res.data);
         setThisMonth(res2.data);
-        setYesterday(res3.data);
+        setPercentChange(res3.data);
+        setOrder(res4.data);
+        setPolar({
+          labels: res5.data.map((item) => item.name),
+          data: res5.data.map((item) => item.importQuantity),
+        });
+        console.log(dataPolar)
+        if (res3.data > 0) {
+          const change = ((res.data - res3.data) / res3.data) * 100;
+          setPercentChange(change.toFixed(2)); // Giữ 2 chữ số thập phân
+        } else {
+          setPercentChange(0); // Tránh chia cho 0
+        }
       } catch (err) {
         console.error("Error fetching revenue data:", err);
       }
@@ -80,7 +97,11 @@ function Default() {
               title="Doanh thu hôm nay"
               count={`${today.toLocaleString()} đ`}
               icon={{ color: "info", component: <i className="ni ni-money-coins" /> }}
-              percentage={{ color: "success", count: "+55%", text: "kể từ hôm qua" }}
+              percentage={{
+                color: yesterday > 0 ? "success" : "error", 
+                count: `${yesterday}%`,
+                text: "kể từ hôm qua",
+              }}
             />
           </Grid>
           <Grid item xs={12} md={6} lg={3}>
@@ -88,28 +109,36 @@ function Default() {
               title="Doanh thu tháng"
               count={`${thisMonth.toLocaleString()} đ`}
               icon={{ color: "info", component: <i className="ni ni-money-coins" /> }}
-              percentage={{ color: "success", count: "+55%", text: "kể từ hôm qua" }}
+              percentage={{
+                color: yesterday > 0 ? "success" : "error", 
+                count: `${yesterday}%`,
+                text: "kể từ hôm qua",
+              }}
             />
           </Grid>
           <Grid item xs={12} md={6} lg={3}>
             <DetailedStatisticsCard
-              title="new clients"
-              count="+3,462"
-              icon={{ color: "success", component: <i className="ni ni-paper-diploma" /> }}
-              percentage={{ color: "error", count: "-2%", text: "since last quarter" }}
+              title="Đơn hàng hôm nay"
+              count={order}
+              icon={{ color: "warning", component: <i className="ni ni-cart" /> }}
+              percentage={{
+                color: yesterday > 0 ? "success" : "error", 
+                count: `${yesterday}%`,
+                text: "kể từ hôm qua",
+              }}
             />
           </Grid>
-          <Grid item xs={12} md={6} lg={3}>
+          {/* <Grid item xs={12} md={6} lg={3}>
             <DetailedStatisticsCard
               title="sales"
               count="$103,430"
               icon={{ color: "warning", component: <i className="ni ni-cart" /> }}
               percentage={{ color: "success", count: "+5%", text: "than last month" }}
             />
-          </Grid>
+          </Grid> */}
         </Grid>
         <Grid container spacing={3} mb={3}>
-          <Grid item xs={12} lg={7}>
+          <Grid item xs={12} lg={8}>
             <GradientLineChart
               title="Thống kê doanh thu"
               description={
@@ -131,21 +160,31 @@ function Default() {
                   </ArgonTypography>
                 </ArgonBox>
               }
-              chart={chartData} // Truyền đúng dữ liệu biểu đồ vào prop chart
+              chart={chartData}
             />
           </Grid>
-          <Grid item xs={12} lg={5}>
-            <Slider />
+          <Grid item xs={12} lg={4} >
+            <PolarChart
+              title="Sản phẩm sắp hết"
+              chart={{
+                labels: dataPolar.labels || [], // Gán nhãn
+                datasets: {
+                  label: "Sản phẩm sắp hết",
+                  data: dataPolar.data || [],
+                  backgroundColors: ["info", "primary", "dark", "secondary", "success", "warning", "error", "light"],
+                },
+              }}
+            />
           </Grid>
         </Grid>
-        <Grid container spacing={3}>
+        {/* <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
             <SalesTable title="Sales by Country" rows={salesTableData} />
           </Grid>
           <Grid item xs={12} md={4}>
             <CategoriesList title="categories" categories={categoriesListData} />
           </Grid>
-        </Grid>
+        </Grid> */}
       </ArgonBox>
       <Footer />
     </DashboardLayout>

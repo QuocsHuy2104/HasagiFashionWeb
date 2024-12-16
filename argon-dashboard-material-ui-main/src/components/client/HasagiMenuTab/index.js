@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import "./Profile.css";
-
+import ProfileServices from "../../../services/ProfileServices";
+import aboutImage5 from "layouts/assets/img/user.jpg";
 const MenuTab = ({
   activeItem,
   setActiveItem,
@@ -20,12 +21,46 @@ const MenuTab = ({
       setExpandedItem(item.parent || null);
     }
   };
+  const [profileImage, setProfileImage] = useState(null);
+  const [name, setName] = useState("");
+  const fetchUserData = async () => {
+    try {
+      const response = await ProfileServices.getProfile();
+      const { avatar, fullName } = response;
+
+
+      setProfileImage(avatar);
+      setName(fullName);
+
+
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData();
+    const intervalId = setInterval(() => {
+      fetchUserData();
+    }, 500);
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
+
 
   return (
     <div className="sidebar">
       <div className="profile">
-        <div className="profile-pic">C</div>
-        <span className="username">cnglp273</span>
+        <div className="profile-pic">
+          {profileImage ? (
+            <img src={profileImage} alt="Profile" style={{ width: "100%", height: "auto" }} />
+          ) : (
+            <img src={aboutImage5} alt="Profile" style={{ width: "100%", height: "auto" }} />
+          )}
+        </div>
+
+        <span className="username">{name}</span>
         <button className="edit-profile" onClick={onEditProfileClick}>
           Sửa Hồ Sơ
         </button>
@@ -34,9 +69,8 @@ const MenuTab = ({
         {menuItems.map((item) => (
           <React.Fragment key={item.name}>
             <p
-              className={`menu-item ${
-                activeItem === item.name && !item.hasSubItems ? "active" : ""
-              }`}
+              className={`menu-item ${activeItem === item.name && !item.hasSubItems ? "active" : ""
+                }`}
               onClick={() => handleMenuItemClick(item)}
             >
               {item.name} {item.isNew && <span className="new">New</span>}
@@ -48,9 +82,8 @@ const MenuTab = ({
                   .map((subItem) => (
                     <p
                       key={subItem.name}
-                      className={`menu-item ${
-                        activeItem === subItem.name ? "active sub-item" : "sub-item"
-                      }`}
+                      className={`menu-item ${activeItem === subItem.name ? "active sub-item" : "sub-item"
+                        }`}
                       onClick={() => handleMenuItemClick(subItem)}
                     >
                       {subItem.name}

@@ -7,6 +7,7 @@ const ProductDetailService = {
     updateDetail: (id, data) => apiClient.put(`/admin/product-detail/${id}`, data),
     getById: id => apiClient.get(`/admin/product-detail/${id}`),
     delete: id => apiClient.delete(`/admin/product-detail/${id}`),
+    getAllProductDetailsUS: () => apiClient.get('/user/product-detail'),
 }
 
 

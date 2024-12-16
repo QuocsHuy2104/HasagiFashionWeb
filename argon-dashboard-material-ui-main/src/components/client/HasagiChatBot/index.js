@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import CategoryService from '../../../services/CategoryServices';
 import BrandService from '../../../services/BrandServices';
 import ProductService from '../../../services/ProductServices';
 import VoucherService from '../../../services/VoucherServices';
-import ProductDetailService from '../../../services/ProductDetailServices';
 import { CircularProgress, IconButton, Box, Avatar } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import MicIcon from '@mui/icons-material/Mic';
@@ -16,6 +15,7 @@ function Gemini() {
     const [isListening, setIsListening] = useState(false);
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [hasGreeted, setHasGreeted] = useState(false);
+    const chatContainerRef = useRef(null);
 
     useEffect(() => {
         if (isChatOpen && !hasGreeted) {
@@ -32,42 +32,26 @@ function Gemini() {
     }, [isChatOpen, hasGreeted]);
 
     const getCategoryData = async () => {
-        const response = await CategoryService.getAllCategories();
+        const response = await CategoryService.getAllCategoriesUS();
         return response?.data || [];
     };
 
     const getBrandData = async () => {
-        const response = await BrandService.getAllBrands();
+        const response = await BrandService.getAllBrandsUS();
         return response?.data || [];
     };
 
     const getProductData = async () => {
-        const response = await ProductService.getAllProducts();
+        const response = await ProductService.getAllProductsUS();
         return response?.data || [];
     };
 
-    const getProductDetailData = async () => {
-        const response = await ProductDetailService.getAllProductDetails();
-        return response?.data || [];
-    };
 
     const getVoucherData = async () => {
-        const response = await VoucherService.getAllVouchers();
+        const response = await VoucherService.getAllVouchersUS();
         return response?.data || [];
     };
 
-    const detectLanguage = (text) => {
-        return /[\u00C0-\u024F]/.test(text) ? 'vi' : 'en';
-    };
-
-    const isGreeting = (text) => {
-        const greetings = [
-            { en: ["hi", "hello", "hey"], vi: ["chào bạn", "xin chào", "alo"] },
-        ];
-        const lang = detectLanguage(text);
-        const keywords = greetings.find((g) => g[lang]);
-        return keywords && keywords[lang].some((word) => text.toLowerCase().includes(word));
-    };
 
     const termsAndConditions = {
         introduction: "Các điều khoản áp dụng khi mua sắm tại shop Hasagi.",
@@ -86,74 +70,123 @@ function Gemini() {
     const generateAIResponse = async (question) => {
         setLoading(true);
         try {
-            const language = detectLanguage(question);
-
-            const keywords = ["điều khoản", "chính sách", "đổi trả", "bảo mật", "liên hệ"];
-            const matchedKeyword = keywords.find((keyword) => question.toLowerCase().includes(keyword));
-            if (matchedKeyword) {
-                let response = "";
-                switch (matchedKeyword) {
-                    case "điều khoản":
-                        response = termsAndConditions.introduction;
-                        break;
-                    case "chính sách":
-                        response = `Chính sách của shop: ${termsAndConditions.orderPolicy}. ${termsAndConditions.paymentPolicy}`;
-                        break;
-                    case "đổi trả":
-                        response = termsAndConditions.returnPolicy;
-                        break;
-                    case "bảo mật":
-                        response = termsAndConditions.privacyPolicy;
-                        break;
-                    case "liên hệ":
-                        response = `Thông tin liên hệ: Email - ${termsAndConditions.contact.email}, SĐT - ${termsAndConditions.contact.phone}, Địa chỉ - ${termsAndConditions.contact.address}`;
-                        break;
-                    default:
-                        response = "Xin lỗi, tôi không hiểu câu hỏi của bạn.";
-                }
+            // Lấy dữ liệu từ các API
+            const categories = await getCategoryData();
+            const brands = await getBrandData();
+            const products = await getProductData();
+            const vouchers = await getVoucherData();
+    
+            // Kiểm tra trùng lặp câu hỏi
+            const lastQuestion = chatHistory[chatHistory.length - 1]?.text;
+            if (lastQuestion && lastQuestion === question) {
                 setChatHistory((prevHistory) => [
                     ...prevHistory,
-                    { type: 'ai', text: response },
+                    { type: "ai", text: "Bạn vừa hỏi câu này rồi. Cần hỗ trợ gì thêm không?" }
                 ]);
                 setLoading(false);
                 return;
             }
-
-            const categories = await getCategoryData();
-            const brands = await getBrandData();
-            const products = await getProductData();
-            const productDetails = await getProductDetailData();
-            const vouchers = await getVoucherData();
-
-            const prompt = `\nCurrent Question: ${question}
-            \nData (when available):
-            \nCategories: ${JSON.stringify(categories.slice(0, 5))}
-            \nBrands: ${JSON.stringify(brands.slice(0, 5))}
-            \nProducts: ${JSON.stringify(products.slice(0, 5))}
-            \nProductDetails: ${JSON.stringify(productDetails.slice(0, 5))} 
-            \nVouchers: ${JSON.stringify(vouchers.slice(0, 5))}
-            \nTerms and Conditions: ${JSON.stringify(termsAndConditions)}
-            \nAnswer in ${language === 'vi' ? 'Vietnamese' : 'English'}.`;
-
-            const API_KEY = process.env.REACT_APP_API_KEY;
+    
+            // Kiểm tra các từ khóa trong câu hỏi
+            const keywords = ['sản phẩm', 'phiếu giảm giá', 'danh mục', 'thương hiệu', 'chi tiết sản phẩm'];
+            let shouldSuggest = false;
+            let keywordCounts = {};  // Đảm bảo khai báo và sử dụng keywordCounts
+    
+            // Đếm số lần xuất hiện từ khóa trong câu hỏi
+            keywords.forEach(keyword => {
+                if (question.toLowerCase().includes(keyword)) {
+                    keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
+                    if (keywordCounts[keyword] > 3) {
+                        shouldSuggest = true;
+                    }
+                }
+            });
+    
+            // Xác định câu chào
+            let greeting = "Chào bạn! Tôi có thể giúp gì cho bạn hôm nay?";
+            if (question.toLowerCase().includes("xin chào") || question.toLowerCase().includes("chào")) {
+                greeting = "Chào bạn! Có câu hỏi nào tôi có thể giúp bạn không?";
+            }
+    
+            // Xây dựng prompt cho AI
+            const prompt = `
+            Bạn là trợ lý ảo của shop Hasagi. Dưới đây là dữ liệu nội bộ của shop, bạn chỉ được sử dụng các thông tin này để trả lời câu hỏi.
+        
+            Dữ liệu nội bộ:
+            - **Danh mục sản phẩm**: ${JSON.stringify(categories)}.
+            - **Thương hiệu**: ${JSON.stringify(brands)}.
+            - **Sản phẩm**: ${JSON.stringify(products)}.
+            - **Voucher**: ${JSON.stringify(vouchers)}.
+            - **Điều khoản & chính sách**: 
+                - Giới thiệu: ${termsAndConditions.introduction}.
+                - Chính sách đặt hàng: ${termsAndConditions.orderPolicy}.
+                - Chính sách thanh toán: ${termsAndConditions.paymentPolicy}.
+                - Chính sách đổi trả: ${termsAndConditions.returnPolicy}.
+                - Chính sách bảo mật: ${termsAndConditions.privacyPolicy}.
+                - Liên hệ: Email: ${termsAndConditions.contact.email}, SĐT: ${termsAndConditions.contact.phone}, Địa chỉ: ${termsAndConditions.contact.address}.
+        
+            Câu hỏi: "${question}"
+        
+            Hướng dẫn trả lời:
+            1. Chỉ sử dụng dữ liệu nội bộ để trả lời.
+            2. Nếu câu hỏi không thuộc phạm vi dữ liệu, hãy xin lỗi khách hàng và yêu cầu họ đặt câu hỏi cụ thể hơn.
+            3. Nếu câu hỏi liên quan đến chính sách, danh mục, thương hiệu, sản phẩm hoặc voucher, hãy cung cấp thông tin chính xác từ dữ liệu.
+            4. Đối với các câu hỏi không rõ ràng, hãy gợi ý cách khách hàng có thể tìm kiếm thông tin từ shop.
+            5. Trả lời bằng ngôn ngữ tiếng Việt.
+            6. Hãy giữ phong cách giao tiếp thân thiện và tự nhiên, giống như một trợ lý ảo thân thiện.
+        
+            Chào hỏi: ${greeting}
+            `;
+    
+            const API_KEY = 'AIzaSyCrDIwFVBDHE1ZDBDuzjPUClS6KicbLa7o';
             const response = await axios.post(
                 `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`,
-                {
-                    contents: [{ parts: [{ text: prompt }] }]
-                }
+                { contents: [{ parts: [{ text: prompt }] }] }
             );
-
-            const aiAnswer = response.data.candidates?.[0]?.content?.parts?.[0]?.text || "Không có phản hồi từ AI.";
+    
+            const aiAnswer =
+                response.data.candidates?.[0]?.content?.parts?.[0]?.text ||
+                "Xin lỗi, tôi không thể xử lý câu hỏi của bạn ngay bây giờ. Vui lòng thử lại sau.";
+    
+            let finalAnswer = aiAnswer;
+            if (shouldSuggest) {
+                finalAnswer += "\n\nCó vẻ như bạn đang tìm kiếm thông tin về một số sản phẩm hoặc chính sách. Bạn có thể truy cập <a href='/shop'>trang sản phẩm</a> của chúng tôi để tìm kiếm thêm chi tiết.";
+            }
+    
+            // Chuyển đổi URL trong câu trả lời thành thẻ <a> HTML
+            finalAnswer = convertTextToLinks(finalAnswer);
+    
+            // Cập nhật lịch sử trò chuyện
             setChatHistory((prevHistory) => [
                 ...prevHistory,
-                { type: 'ai', text: aiAnswer },
+                { type: "ai", text: finalAnswer }
             ]);
+    
+            let currentIndex = 0;
+            const interval = setInterval(() => {
+                setChatHistory((prevHistory) => {
+                    const updatedHistory = [...prevHistory];
+                    updatedHistory[updatedHistory.length - 1].text = finalAnswer.slice(0, currentIndex + 1);
+                    return updatedHistory;
+                });
+                currentIndex++;
+    
+                if (currentIndex >= finalAnswer.length) {
+                    clearInterval(interval);
+                }
+            }, 10);
+    
         } catch (error) {
-            console.error('Lỗi:', error);
+            console.error("Lỗi:", error);
+            setChatHistory((prevHistory) => [
+                ...prevHistory,
+                { type: "ai", text: "Xin lỗi, tôi gặp lỗi khi xử lý yêu cầu của bạn. Vui lòng thử lại sau." },
+            ]);
         } finally {
             setLoading(false);
         }
     };
+    
 
 
     const handleSubmit = async (e) => {
@@ -165,9 +198,19 @@ function Gemini() {
         ]);
         setQuestion('');
         await generateAIResponse(question);
-
     };
 
+    useEffect(() => {
+        // Tự động cuộn xuống khi chatHistory thay đổi
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [chatHistory]);
+
+    const convertTextToLinks = (text) => {
+        const urlPattern = /https?:\/\/[^\s]+/g;
+        return text.replace(urlPattern, (url) => `<a href="${url}" target="_blank" style="color: #1e90ff; text-decoration: none;">${url}</a>`);
+    };
 
     const startVoiceRecognition = () => {
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
@@ -180,6 +223,7 @@ function Gemini() {
         recognition.onresult = (event) => {
             const spokenText = event.results[0][0].transcript;
             setQuestion(spokenText);
+            handleSubmit(new Event('submit'));
         };
 
         recognition.onerror = (event) => {
@@ -189,6 +233,7 @@ function Gemini() {
 
         recognition.start();
     };
+
 
     return (
         <div style={{
@@ -212,14 +257,6 @@ function Gemini() {
                     transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                 }}
                 onClick={() => setIsChatOpen(!isChatOpen)}
-                onMouseEnter={(e) => {
-                    e.target.style.transform = 'scale(1.1)';
-                    e.target.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.3)';
-                }}
-                onMouseLeave={(e) => {
-                    e.target.style.transform = 'scale(1)';
-                    e.target.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
-                }}
             >
                 <Avatar
                     alt="Logo"
@@ -227,7 +264,6 @@ function Gemini() {
                     sx={{ width: 40, height: 40 }}
                 />
             </div>
-
 
             {isChatOpen && (
                 <div style={{
@@ -320,11 +356,10 @@ function Gemini() {
                                     wordBreak: 'break-word',
                                     textAlign: 'left',
                                     display: 'inline-block',
-                                }}>
-                                    {msg.text}
-                                </div>
+                                }} dangerouslySetInnerHTML={{ __html: convertTextToLinks(msg.text) }} />
                             </div>
                         ))}
+                        <div ref={chatContainerRef} /> {/* Thêm ref để cuộn tự động */}
                     </Box>
 
                     <form onSubmit={handleSubmit} style={{ display: 'flex', alignItems: 'center' }}>
@@ -344,7 +379,6 @@ function Gemini() {
                                 boxSizing: 'border-box',
                             }}
                         />
-
                         <IconButton onClick={startVoiceRecognition} color={isListening ? "secondary" : "primary"}>
                             <MicIcon />
                         </IconButton>

@@ -15,7 +15,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ImageService from 'services/ImageServices';
 import AddIcon from '@mui/icons-material/Add';
 import ImageUploader from "./uploadImage";
-import { toast} from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
@@ -148,7 +148,7 @@ export default function DataGridDemo({ items, onEdit, onDelete }) {
         {
             field: 'imgList',
             headerName: 'Hình ảnh',
-            width: 200,
+            width: 250,
             renderCell: (params) => (
                 <Box
                     sx={{
@@ -188,28 +188,12 @@ export default function DataGridDemo({ items, onEdit, onDelete }) {
         { field: 'quantity', headerName: 'Số lượng', width: 150, editable: true },
         { field: 'price', headerName: 'Giá sản phẩm', width: 150, editable: true },
         { field: 'priceSize', headerName: 'Giá size', width: 150, editable: true },
-        { field: 'colorsDTO', headerName: 'Color', sortable: false },
-        { field: 'sizesDTOResponse', headerName: 'Size', sortable: false },
-        {
-            field: 'createDate',
-            headerName: 'Ngày thêm',
-            type: 'dateTime',
-            width: 180,
-            editable: false,
-            valueFormatter: ({ value }) =>
-                value
-                    ? new Date(value).toLocaleDateString('vi-VN', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                    })
-                    : 'N/A',
-        },
-        { field: 'createBy', headerName: 'Người thêm', sortable: false, width: 160 },
+        { field: 'colorsDTO', headerName: 'Màu sắc', sortable: false },
+        { field: 'sizesDTOResponse', headerName: 'Kích cỡ', sortable: false },
         {
             field: 'actions',
             type: 'actions',
-            headerName: 'Actions',
+            headerName: 'Thao tác',
             width: 100,
             getActions: (params) => {
                 const isOpen = Boolean(anchorEl[params.id]);

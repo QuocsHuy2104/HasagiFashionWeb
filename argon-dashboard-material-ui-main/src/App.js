@@ -112,21 +112,25 @@ export default function App() {
 
   const filteredRoutes = routes.filter(route => route.showInSidenav !== false);
 
-  const shouldShowSidenav = 
-    pathname !== "/feature-section" 
-    && pathname !== "/ShopDetail" 
-    && pathname !== "/Shop" 
-    && pathname !== "/Cart" 
-    && pathname !== "/Contact" 
-    && pathname !== "/Checkout" 
-    && pathname !== "/Backup" 
+  const shouldShowSidenav =
+    pathname !== "/feature-section"
+    && pathname !== "/ShopDetail"
+    && pathname !== "/Shop"
+    && pathname !== "/Cart"
+    && pathname !== "/Contact"
+    && pathname !== "/Checkout"
+    && pathname !== "/Backup"
     && pathname !== "/Favorite"
     && pathname !== "/Complete"
     && pathname !== "/History"
-    && pathname !== "/profile" 
-    && pathname !== "/chatBot" 
-    && pathname !== "/Q&A" 
-    && pathname !== "/About" 
+    && pathname !== "/profile"
+    && pathname !== "/chatBot"
+    && pathname !== "/Q&A"
+    && pathname !== "/About"
+    && pathname !== "/BaoMat"
+    && pathname !== "/DoiTra"
+    && pathname !== "/DieuKhoan"
+    && pathname !== "/OrderSummary"
     // && pathname !== "/not-Found"
     && !pathname.startsWith("/history-order/");
 

@@ -3,24 +3,24 @@ import Card from "@mui/material/Card";
 import MuiLink from "@mui/material/Link";
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useState } from "react";
 import ProductPopup from "components/client/HasagiPopup";
+
 function formatPrice(price) {
     if (!price || typeof price !== "string") {
-        return "N/A"; // Handle missing or invalid price
+        return "N/A"; 
     }
     try {
         const parts = price.trim().split("-").map(part =>
-            Number(part.trim().replace(/\s/g, "")) // Remove spaces inside the price range
+            Number(part.trim().replace(/\s/g, "")) 
         );
 
         if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-            return `${parts[0].toLocaleString("vi-VN")} đ - ${parts[1].toLocaleString("vi-VN")} đ`;
+            return `${parts[0].toLocaleString("vi-VN")}đ - ${parts[1].toLocaleString("vi-VN")}đ`;
         } else if (parts.length === 1 && !isNaN(parts[0])) {
-            return `${parts[0].toLocaleString("vi-VN")} đ`;
+            return `${parts[0].toLocaleString("vi-VN")}đ`;
         } else {
             return "N/A";
         }
@@ -53,7 +53,6 @@ function HasagiCard2({ image, name, id, price }) {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'start',
-                alignItems: 'center',
                 height: '100%',
                 position: 'relative',
                 overflow: 'hidden'
@@ -90,20 +89,19 @@ function HasagiCard2({ image, name, id, price }) {
                     />
                 </ArgonBox>
 
-                <ArgonTypography
-                    variant="h5"
-                    color="text"
-                    mt={2}
-                    textAlign='center'
-                    style={{
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        width: '100%',
-                    }}
-                >
-                    {name}
-                </ArgonTypography>
+                 <ArgonTypography
+                   variant="h5"
+                   color="text"
+                   mt={2}
+                   textAlign="left" // Căn trái tên sản phẩm
+                   style={{    
+                       whiteSpace: "nowrap",
+                       overflow: "hidden",
+                       textOverflow: "ellipsis",
+                   }}
+               >
+                   {name}
+               </ArgonTypography>
 
 
                 {/* Price */}
@@ -121,7 +119,7 @@ function HasagiCard2({ image, name, id, price }) {
             {/* Hover Icons */}
             {hover && (
                 <>
-                    <SearchOutlinedIcon
+                    {/* <SearchOutlinedIcon
                         onClick={handleOpenPopup}
                         sx={{
                             width: '1.7em',
@@ -134,9 +132,9 @@ function HasagiCard2({ image, name, id, price }) {
                             borderRadius: '12px',
                             cursor: 'pointer'
                         }}
-                    />
+                    /> */}
 
-                    <ShoppingCartIcon
+                    {/* <ShoppingCartIcon
                         sx={{
                             width: '1.7em',
                             height: '1.7em',
@@ -148,7 +146,7 @@ function HasagiCard2({ image, name, id, price }) {
                             borderRadius: '12px',
                             cursor: 'pointer'
                         }}
-                    />
+                    /> */}
                 </>
             )}
 

@@ -39,6 +39,9 @@ function Review() {
             try {
                 const response = await ReviewsService.getAllReviewsAD();
                 setReviews(response.data || []);
+                response.data.forEach((review) => {
+                    console.log(review.productId); // Log the productId of each review
+                });
             } catch (err) {
                 console.log(err);
             }
@@ -48,31 +51,26 @@ function Review() {
             try {
                 const response = await ReviewFilesService.getAllFileReviews();
                 setReviewFiles(response.data);
-
             } catch (err) {
                 console.log(err);
             }
         };
+
         fetchReviewData();
         fetchReviewFileData();
     }, []);
 
     const filterReviews = (reviews) => {
         return reviews.filter(review => {
-            // Lọc theo số sao
             if (filterStar && review.star !== parseInt(filterStar)) {
                 return false;
             }
-
-            // Lọc theo trạng thái (đã phản hồi hay chưa)
             if (filterStatus === 'Đã phản hồi' && !review.adminFeedback) {
                 return false;
             }
             if (filterStatus === 'Chưa phản hồi' && review.adminFeedback) {
                 return false;
             }
-
-            // Lọc theo ngày
             if (filterStartDate && new Date(review.createdAt) < new Date(filterStartDate)) {
                 return false;
             }
@@ -99,7 +97,6 @@ function Review() {
             });
         }
     };
-
 
     const validateForm = () => {
         const newErrors = { adminFeedBack: false };
@@ -279,51 +276,92 @@ function Review() {
                 </ArgonBox >
 
                 <ArgonBox mt={-1}>
-                    {filterReviews(reviews).map(review => {
-                        return (
-                            <Card key={review.id} style={{ marginBottom: '20px', padding: '20px', boxShadow: '0 3px 10px rgba(0, 0, 0, 0.1)', borderRadius: '10px' }}>
-                                <ArgonTypography variant="h5" style={{ marginBottom: '15px', fontWeight: 'bold', color: '#333' }}>Đánh giá chi tiết</ArgonTypography>
-                                <ArgonBox display="flex" gap="2px" flexWrap="wrap" >
-                                    {Array.from(new Set(reviewFiles.filter((file) => file.reviewId === review.id && file.videoUrl)
-                                        .map((file) => file.videoUrl)))
-                                        .map((videoUrl, index) => (
-                                            <ArgonBox key={index} style={{ position: 'relative' }}>
-                                                <video
-                                                    width="120"
-                                                    height="120"
-                                                    style={{
-                                                        borderRadius: '3px',
-                                                        cursor: 'pointer',
-                                                        objectFit: 'cover',
-                                                    }}
-                                                    onClick={() => handleOpen(videoUrl)}
-                                                >
-                                                    <source src={videoUrl} type="video/mp4" />
-                                                </video>
-                                                <div
-                                                    onClick={() => handleOpen(videoUrl)}
-                                                    style={{
-                                                        position: 'absolute',
-                                                        bottom: '55px',
-                                                        left: '45px',
-                                                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                                                        borderRadius: '50%',
-                                                        padding: '8px',
-                                                        cursor: 'pointer',
-                                                        width: '30px',
-                                                        height: '30px',
-                                                        display: 'flex',
-                                                        justifyContent: 'center',
-                                                        alignItems: 'center',
-                                                    }}
-                                                >
-                                                    <i className="fas fa-play" style={{ color: 'white', fontSize: '16px', }}></i>
-                                                </div>
-                                            </ArgonBox>
-                                        ))}
-                                    {reviewFiles.filter((file) => file.reviewId === review.id && file.imageUrl).map((file) => (
-                                        <ArgonBox key={file.id}>
-                                            {file.imageUrl && (
+                    {filterReviews(reviews).length === 0 ? (
+                        <Card
+                            style={{
+                                marginBottom: '20px',
+                                padding: '20px',
+                                boxShadow: '0 3px 10px rgba(0, 0, 0, 0.1)',
+                                borderRadius: '10px',
+                            }}
+                        >
+                            <ArgonTypography
+                                variant="h5"
+                                style={{ margin: '20px', fontWeight: 'bold', color: '#333' }}
+                            >
+                                Không có đánh giá
+                            </ArgonTypography>
+                        </Card>
+
+                    ) : (
+                        filterReviews(reviews).map((review) => (
+                            <Card
+                                key={review.id}
+                                style={{
+                                    marginBottom: '20px',
+                                    padding: '20px',
+                                    boxShadow: '0 3px 10px rgba(0, 0, 0, 0.1)',
+                                    borderRadius: '10px',
+                                }}
+                            >
+                                <ArgonTypography
+                                    variant="h5"
+                                    style={{ marginBottom: '15px', fontWeight: 'bold', color: '#333' }}
+                                >
+                                    Đánh giá chi tiết
+                                </ArgonTypography>
+
+                                {/* Media Section */}
+                                <ArgonBox display="flex" gap="2px" flexWrap="wrap">
+                                    {Array.from(
+                                        new Set(
+                                            reviewFiles
+                                                .filter((file) => file.reviewId === review.id && file.videoUrl)
+                                                .map((file) => file.videoUrl)
+                                        )
+                                    ).map((videoUrl, index) => (
+                                        <ArgonBox key={index} style={{ position: 'relative' }}>
+                                            <video
+                                                width="120"
+                                                height="120"
+                                                style={{
+                                                    borderRadius: '3px',
+                                                    cursor: 'pointer',
+                                                    objectFit: 'cover',
+                                                }}
+                                                onClick={() => handleOpen(videoUrl)}
+                                            >
+                                                <source src={videoUrl} type="video/mp4" />
+                                            </video>
+                                            <div
+                                                onClick={() => handleOpen(videoUrl)}
+                                                style={{
+                                                    position: 'absolute',
+                                                    bottom: '55px',
+                                                    left: '45px',
+                                                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                                    borderRadius: '50%',
+                                                    padding: '8px',
+                                                    cursor: 'pointer',
+                                                    width: '30px',
+                                                    height: '30px',
+                                                    display: 'flex',
+                                                    justifyContent: 'center',
+                                                    alignItems: 'center',
+                                                }}
+                                            >
+                                                <i
+                                                    className="fas fa-play"
+                                                    style={{ color: 'white', fontSize: '16px' }}
+                                                ></i>
+                                            </div>
+                                        </ArgonBox>
+                                    ))}
+
+                                    {reviewFiles
+                                        .filter((file) => file.reviewId === review.id && file.imageUrl)
+                                        .map((file) => (
+                                            <ArgonBox key={file.id}>
                                                 <img
                                                     src={file.imageUrl}
                                                     alt="Review"
@@ -336,107 +374,73 @@ function Review() {
                                                     }}
                                                     onClick={() => handleOpen(file.imageUrl)}
                                                 />
-                                            )}
-                                        </ArgonBox>
-                                    ))}
+                                            </ArgonBox>
+                                        ))}
                                 </ArgonBox>
-                                <ArgonBox display="flex" alignItems="center" style={{ marginBottom: '15px' }}>
-                                    <ArgonBox>
-                                        <ArgonTypography variant="body1"
-                                            style={{
-                                                fontSize: '16px',
-                                                color: '#555',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                            }}>
-                                            <strong style={{ marginRight: '5px' }}>Bình luận: </strong> {review.comment}
-                                        </ArgonTypography>
-                                        <ArgonTypography variant="body1"
-                                            style={{
-                                                fontSize: '16px',
-                                                color: '#555',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                            }}>
-                                            <strong style={{ marginRight: '5px' }}>Đánh giá: </strong> {renderStars(review.star)}
-                                        </ArgonTypography>
-                                        <ArgonTypography
-                                            variant="body1"
-                                            style={{
-                                                fontSize: '16px',
-                                                color: '#555',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                            }}
-                                        >
-                                            <strong style={{ marginRight: '5px' }}>Ngày đánh giá:</strong>{' '}
-                                            {formatDate(review.createdAt)}
-                                        </ArgonTypography>
 
+                                {/* Review Details */}
+                                <ArgonBox display="flex" flexDirection="column" style={{ marginBottom: '15px' }}>
+                                    {review.comment && (
                                         <ArgonTypography
                                             variant="body1"
-                                            style={{
-                                                fontSize: '16px',
-                                                color: '#555',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                            }}
+                                            style={{ fontSize: '16px', color: '#555' }}
                                         >
-                                            <strong>Trạng thái: </strong>&nbsp;
-                                            {review.adminFeedback ? (
-                                                <>
-                                                    <CheckCircle style={{ color: '#4caf50', marginRight: '5px' }} />
-                                                    Đã phản hồi
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Cancel style={{ color: '#f44336', marginRight: '5px' }} />
-                                                    Chưa phản hồi
-                                                </>
-                                            )}
+                                            <strong>Bình luận:</strong> {review.comment}
                                         </ArgonTypography>
-                                        <ArgonTypography
-                                            variant="body1"
-                                            style={{
-                                                fontSize: '16px',
-                                                color: '#555',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                            }}
-                                        >
-                                            {review.adminFeedback ? (
-                                                <>
-                                                    <strong style={{ marginRight: '5px' }}>Phản hồi: </strong>  {review.adminFeedback}
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <></>
-                                                </>
-                                            )}
+                                    )}
 
-                                        </ArgonTypography>
+                                    <ArgonTypography
+                                        variant="body1"
+                                        style={{ fontSize: '16px', color: '#555' }}
+                                    >
+                                        <strong>Đánh giá:</strong> {renderStars(review.star)}
+                                    </ArgonTypography>
+
+                                    <ArgonTypography
+                                        variant="body1"
+                                        style={{ fontSize: '16px', color: '#555' }}
+                                    >
+                                        <strong>Ngày đánh giá:</strong> {formatDate(review.createdAt)}
+                                    </ArgonTypography>
+
+                                    <ArgonTypography
+                                        variant="body1"
+                                        style={{ fontSize: '16px', color: '#555' }}
+                                    >
+                                        <strong>Trạng thái:</strong>{' '}
+                                        {review.adminFeedback ? (
+                                            <>
+                                                <CheckCircle style={{ color: '#4caf50', marginRight: '5px' }} />
+                                                Đã phản hồi
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Cancel style={{ color: '#f44336', marginRight: '5px' }} />
+                                                Chưa phản hồi
+                                            </>
+                                        )}
+                                    </ArgonTypography>
+
+                                    {review.adminFeedback && (
                                         <ArgonTypography
                                             variant="body1"
-                                            style={{
-                                                fontSize: '16px',
-                                                color: '#555',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                            }}
+                                            style={{ fontSize: '16px', color: '#555' }}
                                         >
-                                            {review.adminFeedback ? (
-                                                <>
-                                                    <strong style={{ marginRight: '5px' }}>Ngày phản hồi: </strong> {formatDate(review.feedbackDate)}
-
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <></>
-                                                </>
-                                            )}
+                                            <strong>Phản hồi:</strong> {review.adminFeedback}
                                         </ArgonTypography>
-                                    </ArgonBox>
+                                    )}
+
+                                    {review.adminFeedback && (
+                                        <ArgonTypography
+                                            variant="body1"
+                                            style={{ fontSize: '16px', color: '#555' }}
+                                        >
+                                            <strong>Ngày phản hồi:</strong> {formatDate(review.feedbackDate)}
+                                        </ArgonTypography>
+                                    )}
                                 </ArgonBox>
+
+                                {/* Feedback Button and Form */}
                                 <ArgonBox display="flex" justifyContent="flex-end" gap="10px">
                                     {!review.adminFeedback && (
                                         <ArgonButton
@@ -450,10 +454,15 @@ function Review() {
                                     )}
                                 </ArgonBox>
 
-
                                 {formData.id === review.id && (
                                     <form onSubmit={handleSubmit}>
-                                        <ArgonBox mb={-1} mt={5} display="flex" justifyContent="space-between" alignItems="center">
+                                        <ArgonBox
+                                            mb={-1}
+                                            mt={5}
+                                            display="flex"
+                                            justifyContent="space-between"
+                                            alignItems="center"
+                                        >
                                             <ArgonInput
                                                 name="adminFeedBack"
                                                 placeholder="Nhập phản hồi"
@@ -477,15 +486,13 @@ function Review() {
                                                 Bạn chưa nhập phản hồi
                                             </ArgonTypography>
                                         )}
-
                                     </form>
-
                                 )}
-
                             </Card>
-                        );
-                    })}
+                        ))
+                    )}
                 </ArgonBox>
+
                 <Modal open={open} onClose={handleClose}>
                     <Box sx={{
                         position: 'absolute',

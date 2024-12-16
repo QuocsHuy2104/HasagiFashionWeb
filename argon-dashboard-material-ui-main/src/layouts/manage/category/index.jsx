@@ -157,6 +157,7 @@ function Category() {
 
   const resetForm = () => {
     setFormData({
+      id: "",
       name: "",
       image: null,
     });
@@ -168,16 +169,18 @@ function Category() {
     setErrors({});
   };
 
-  const handleDeleteClick = async (id) => {
-    try {
-      await CategoryService.deleteCategory(id);
-      setCategories(categories.filter((category) => category.id !== id));
-      fetchData();
-    } catch (error) {
-      console.error("Error deleting category", error);
-    }
-  };
+  const handleDeleteClick = async (selectedRows) => {
+    if (selectedRows.length === 0) return;
 
+    for (const id of selectedRows) {
+      try {
+        await CategoryService.deleteCategory(id);
+      } catch (error) {
+        console.error(`${id}`, error);
+      }
+    }
+    fetchData();
+  };
 
   return (
     <DashboardLayout>
@@ -189,7 +192,6 @@ function Category() {
             <ArgonBox display="flex" justifyContent="space-between" p={3}>
               <ArgonTypography variant="h6">Quản lý Danh mục</ArgonTypography>
             </ArgonBox>
-
             <ArgonBox
               display="flex"
               flexDirection={{ xs: "column", md: "row" }}
@@ -273,11 +275,25 @@ function Category() {
                   )}
                 </ArgonBox>
 
-                <ArgonBox mb={3} sx={{ width: { xs: '100%', sm: '50%', md: '20%' } }}>
-                  <ArgonButton type="submit" size="large" color="info" fullWidth={true}>
+                <ArgonBox mb={3} width={720} display="flex" gap={1} justifyContent="flex-start">
+                  <ArgonButton
+                    type="submit"
+                    size="large"
+                    color="info"
+                    sx={{ minWidth: 100, padding: '8px 16px' }}
+                  >
                     {formData.id ? "Cập nhật" : "Thêm"}
                   </ArgonButton>
+                  <ArgonButton
+                    size="large"
+                    color="primary"
+                    sx={{ minWidth: 100, padding: '8px 16px' }}
+                    onClick={resetForm}
+                  >
+                    Làm mới
+                  </ArgonButton>
                 </ArgonBox>
+
               </ArgonBox>
             </ArgonBox>
           </Card>

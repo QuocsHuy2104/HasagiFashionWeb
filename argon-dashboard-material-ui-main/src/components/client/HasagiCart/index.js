@@ -14,6 +14,8 @@ import CartService from "../../../services/CartService";
 import AddressService from "../../../services/AddressServices";
 import ProductVariant from "./ProductVariant";
 import logo from "components/client/assets/images/logo1.png";
+import Swal from 'sweetalert2';
+
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -23,16 +25,10 @@ const Cart = () => {
   const [selectAll, setSelectAll] = useState(false);
   const [showBackupModal, setShowBackupModal] = useState(false);
   const [images, setImages] = useState([]);
-  const [checkedItems, setCheckedItems] = useState([]);
   const navigate = useNavigate();
 
   const fetchCartItems = async () => {
-    const accountId = Cookies.get("accountId");
 
-    if (!accountId) {
-      navigate(`/authentication/sign-in`);
-      return;
-    }
     try {
       const [cartResponse, addressResponse] = await Promise.all([
         CartService.getCart(),
@@ -70,7 +66,6 @@ const Cart = () => {
         const checked = isChecked
           ? checkedItems.includes(item.colorId) && checkedItems.includes(item.sizeId)
           : "";
-        console.log(`Product ID: ${item.productId}, Is Checked: ${isChecked}`);
         return {
           ...item,
           selected: checked,
@@ -94,27 +89,90 @@ const Cart = () => {
     window.onbeforeunload = handleBeforeUnload;
 
     return () => {
-      window.onbeforeunload = null; 
+      window.onbeforeunload = null;
     };
   }, []);
 
   const calculateSubtotal = () => {
     return cartItems
       .filter((item) => item.selected)
-      .reduce((total, item) => total + item.price * item.quantity, 0);
+      .reduce(
+        (total, item) =>
+          item.quantity > 0 ? total + item.price * item.quantity : total + item.price,
+        0
+      );
   };
-
   const subtotal = calculateSubtotal();
   const total = subtotal;
 
   const handleQuantityChange = async (itemId, change, inputValue = null) => {
     const updatedCartItems = cartItems.map((item) => {
       if (item.cartdetailid === itemId) {
-        // If inputValue is provided and is empty, set quantity to 1
         const newQuantity =
-          inputValue === "" ? 1 : inputValue ? parseInt(inputValue, 10) : item.quantity + change;
-        const finalQuantity = Math.min(Math.max(1, newQuantity), item.quantityDetail); // Ensure quantity is between 1 and available stock
-        return { ...item, quantity: finalQuantity };
+          inputValue === ""
+            ? ""
+            : inputValue === "0"
+            ? item.quantity
+            : parseInt(inputValue, 10) || item.quantity + change;
+
+        if (newQuantity === 0) {
+          Swal.fire({
+            title: "Bạn chắc chắn xóa sản phẩm này?",
+            text: "Bạn sẽ không thể hoàn tác điều này!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Vâng, xóa nó!",
+            scrollbarPadding: false,
+            didOpen: () => {
+              document.body.style.overflowY = "auto";
+              document.body.style.padding = "0";
+            },
+            willClose: () => {
+              document.body.style.overflowY = "auto";
+              document.body.style.padding = "0";
+            },
+          }).then(async (result) => {
+            if (result.isConfirmed) {
+              // Xóa sản phẩm khỏi giỏ hàng
+              const filteredCartItems = cartItems.filter((item) => item.cartdetailid !== itemId);
+              setCartItems(filteredCartItems);
+              try {
+                CartService.getRemove(itemId);
+                Swal.fire({
+                  title: "Xóa thành công!",
+                  text: "Sản phẩm đã được xóa.",
+                  icon: "success",
+                  scrollbarPadding: false,
+                  didOpen: () => {
+                    document.body.style.overflowY = "auto";
+                    document.body.style.padding = "0";
+                  },
+                  willClose: () => {
+                    document.body.style.overflowY = "auto";
+                    document.body.style.padding = "0";
+                  },
+                });
+              } catch (error) {
+                console.error("Error deleting item:", error);
+                Swal.fire({
+                  title: "Lỗi!",
+                  text: "Đã có sự cố khi xóa sản phẩm.",
+                  icon: "error",
+                });
+              }
+            }
+          });
+          return item;
+        }
+
+        // Đảm bảo số lượng nằm trong khoảng cho phép
+        if (newQuantity > 0) {
+          const finalQuantity = Math.min(Math.max(1, newQuantity), item.quantityDetail);
+          return { ...item, quantity: finalQuantity };
+        }
+        return { ...item, quantity: newQuantity };
       }
       return item;
     });
@@ -123,19 +181,29 @@ const Cart = () => {
 
     setCartItems(updatedCartItems);
 
-    try {
-      await axios.put(`http://localhost:3000/api/cart/update/${updatedItem.cartdetailid}`, null, {
-        params: { quantity: updatedItem.quantity },
-      });
-    } catch (error) {
-      console.error("Error updating quantity:", error);
+    if (updatedItem.quantity > 0) {
+      try {
+        await axios.put(`http://localhost:3000/api/cart/update/${updatedItem.cartdetailid}`, null, {
+          params: { quantity: updatedItem.quantity },
+        });
+      } catch (error) {
+        console.error("Error updating quantity:", error);
+      }
+    } else {
+      try {
+        await axios.put(`http://localhost:3000/api/cart/update/${updatedItem.cartdetailid}`, null, {
+          params: { quantity: 1 },
+        });
+      } catch (error) {
+        console.error("Error updating quantity:", error);
+      }
     }
   };
 
+
   const handleRemoveItem = async (itemId, productId, colorId, sizeId) => {
-    const accountId = Cookies.get("accountId");
     try {
-      await axios.delete(`http://localhost:3000/api/cart/remove/${itemId}?accountId=${accountId}`);
+      CartService.getRemove(itemId);
       setCartItems(cartItems.filter((item) => item.cartdetailid !== itemId));
       localStorage.removeItem("checkedItems" + productId + colorId + sizeId);
       toast.success("Xóa sản phẩm thành công.");
@@ -173,9 +241,9 @@ const Cart = () => {
       cartItems.map((item) =>
         item.productId === productId
           ? localStorage.setItem(
-              "checkedItems" + productId + colorId + sizeId,
-              JSON.stringify([Number(productId), item.colorId, item.sizeId])
-            )
+            "checkedItems" + productId + colorId + sizeId,
+            JSON.stringify([Number(productId), item.colorId, item.sizeId])
+          )
           : item
       );
     }
@@ -199,13 +267,11 @@ const Cart = () => {
       toast.warn("Vui lòng chọn sản phẩm để thanh toán.");
       return;
     }
-    console.log("Selected Items:", selectedItems);
     localStorage.setItem("cartItemsBackup", JSON.stringify(selectedItems));
     if (!accountExists) {
       setShowBackupModal(true);
     } else {
       navigate(`/Checkout?id=${address}`);
-      toast.success("Chuyển đến trang thanh toán.");
     }
   };
 
@@ -213,7 +279,6 @@ const Cart = () => {
     setShowBackupModal(false);
     if (accountExists) {
       navigate(`/Checkout?id=${address}`);
-      toast.success("Chuyển đến trang thanh toán.");
     }
   };
 
@@ -375,13 +440,6 @@ const Cart = () => {
                       scope="col"
                       style={{ width: "5%", textAlign: "center", padding: "10px", border: "none" }}
                     >
-                      <input
-                        type="checkbox"
-                        checked={selectAll}
-                        onChange={handleSelectAllChange}
-                        aria-label="Select All"
-                        style={{ transform: "scale(1.5)" }}
-                      />
                     </th>
                     <th
                       scope="col"
@@ -465,7 +523,7 @@ const Cart = () => {
                         </td>
                         <td
                           className="align-middle"
-                          style={{ textAlign: "left", paddingLeft: "20px", border: "none" }}
+                          style={{ textAlign: "left", paddingLeft: "10px", border: "none" }}
                         >
                           <Link
                             key={item.id}
@@ -533,10 +591,14 @@ const Cart = () => {
                                 textAlign: "left",
                               }}
                             >
-                              <span style={{ color: item.color || "black" }}>
+                              <span>
                                 {item.color || "Chưa chọn màu"}
                               </span>
-                              , {item.size || "Chưa chọn kích thước"}
+                              {item.size !== "Không có" && (
+                                <>
+                                  , <span>{item.size || "Chưa chọn kích thước"}</span>
+                                </>
+                              )}
                             </div>
                           </button>
 
@@ -592,7 +654,7 @@ const Cart = () => {
                           <div
                             className="input-group quantity mx-auto"
                             style={{
-                              width: "150px", // Adjust the container width to fit the new input size
+                              width: "150px",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "space-between",
@@ -611,7 +673,7 @@ const Cart = () => {
                                   justifyContent: "center",
                                   boxShadow: "none",
                                 }}
-                                disabled={item.quantity <= 1}
+                                disabled={item.quantity <= 0}
                               >
                                 <i className="fa fa-minus"></i>
                               </button>
@@ -621,17 +683,28 @@ const Cart = () => {
                               type="text"
                               className="form-control form-control-sm text-center"
                               value={item.quantity}
-                              onChange={(e) =>
-                                handleQuantityChange(item.cartdetailid, 0, e.target.value)
-                              } // Pass input value directly
+                              onChange={(e) => {
+                                // Chỉ cho phép nhập số và không cho phép nhập ký tự khác
+                                const value = e.target.value;
+                                if (/^\d*$/.test(value)) {
+                                  handleQuantityChange(item.cartdetailid, 0, value);
+                                }
+                              }}
+                              onBlur={(e) => {
+                                const inputValue = e.target.value.trim(); 
+                                if (inputValue === "") {
+                                  handleQuantityChange(item.cartdetailid, 0, "1"); 
+                                } else {
+                                  handleQuantityChange(item.cartdetailid, 0, inputValue); 
+                                }
+                              }}
                               style={{
-                                width: "60px", // Increase the width of the input field
+                                width: "60px", 
                                 height: "30px",
                                 margin: "0 5px",
                                 boxShadow: "none",
                                 border: "1px solid #888",
                               }}
-                              min="1" // Optional: You can add a minimum value for quantity
                             />
 
                             <div className="input-group-btn">
@@ -656,8 +729,10 @@ const Cart = () => {
                         </td>
 
                         <td className="align-middle" style={{ border: "none" }}>
-                          <span style={{ marginLeft: "1px" }}>
-                            {new Intl.NumberFormat("vi-VN").format(item.price * item.quantity)}đ
+                        <span style={{ marginLeft: "1px" }}>
+                            {item.quantity !== ""
+                              ? new Intl.NumberFormat("vi-VN").format(item.price * item.quantity)
+                              : new Intl.NumberFormat("vi-VN").format(item.price)}đ
                           </span>
                         </td>
                         <td className="align-middle" style={{ border: "none" }}>
@@ -682,21 +757,39 @@ const Cart = () => {
                     type="checkbox"
                     checked={selectAll}
                     onChange={handleSelectAllChange}
-                    style={{ transform: "scale(1.5)", marginBottom: "0" }}
+                    style={{ transform: "scale(1.5)", marginBottom: "0", marginLeft: "-4px" }}
                   />
-                  <label style={{ marginLeft: "5px", marginBottom: "0" }}>
+                  <label
+                    style={{
+                      marginLeft: "12px",
+                      marginTop: "3px",
+                      fontSize: "17px", // Sửa từ 'frontSize' thành 'fontSize'
+                    }}
+                  >
                     Chọn Tất Cả ({countSelectedItems()})
                   </label>
                   <button
                     onClick={handleDeleteSelected}
                     className="btn"
                     style={{
-                      backgroundColor: "transparent",
-                      border: "none",
+                      border: "0.1px solid gray",
                       color: "black",
-                      fontSize: "20px",
+                      fontSize: "16px",
                       fontWeight: "normal",
                       marginLeft: "10px",
+                      marginTop: "3px",
+                      padding: "5px 10px",
+                      backgroundColor: "white",
+                      cursor: "pointer",
+                      transition: "all 0.3s ease", // Hiệu ứng mượt
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = "lightgray";
+                      e.target.style.borderColor = "black";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = "white";
+                      e.target.style.borderColor = "gray";
                     }}
                   >
                     Xóa

@@ -6,7 +6,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
 import Box from '@mui/material/Box';
-import Swal from 'sweetalert2'; 
+import Swal from 'sweetalert2';
 
 const columns = [
     { field: 'name', headerName: 'Size', width: 130 },
@@ -85,29 +85,28 @@ export default function DataTable({ sizes, onEditClick, onDeleteClick }) {
                 columns={columns}
                 paginationModel={paginationModel}
                 onPaginationModelChange={setPaginationModel}
-                pageSizeOptions={[5, 10]}
                 checkboxSelection
                 onRowSelectionModelChange={handleSelectionModelChange}
                 sx={{
                     "& .MuiDataGrid-footerContainer": {
-                        justifyContent: "space-between", 
+                        justifyContent: "space-between",
                     },
                     "& .MuiTablePagination-selectLabel": {
                         marginRight: 0,
                     },
                     "& .MuiTablePagination-root": {
-                        width: "400px", 
+                        width: "400px",
                     },
                     "& .MuiInputBase-root": {
                         maxWidth: "60px",
-                        marginTop: "-10px", 
+                        marginTop: "-10px",
                     },
                     "& .MuiTablePagination-actions": {
                         display: "flex",
                         alignItems: "center",
                     },
                     "& .MuiSelect-select": {
-                        paddingRight: "24px", 
+                        paddingRight: "24px",
                     },
                     border: 0,
                 }}
@@ -116,10 +115,10 @@ export default function DataTable({ sizes, onEditClick, onDeleteClick }) {
             {selectedRows.length > 0 && (
                 <Box sx={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 1 }}>
                     <IconButton onClick={handleEdit} disabled={selectedRows.length !== 1}>
-                        <EditIcon color="dark" />
+                        <EditIcon category="dark" />
                     </IconButton>
                     <IconButton onClick={handleDelete}>
-                        <DeleteIcon color="dark" />
+                        <DeleteIcon category="dark" />
                     </IconButton>
                 </Box>
             )}
