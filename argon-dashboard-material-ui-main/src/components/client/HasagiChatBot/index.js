@@ -75,6 +75,7 @@ function Gemini() {
             const categories = (await getCategoryData()).map(c => ({ name: c.name }));
             const brands = (await getBrandData()).map(b => ({ name: b.name }));
             const products = (await getProductData()).map(p => ({
+                id: p.id,
                 name: p.name,
                 price: p.importPrice,
                 category: p.categoryDTOResponse?.name,
@@ -87,7 +88,6 @@ function Gemini() {
             console.log("Products:", products);
             console.log("Vouchers:", vouchers);
 
-
             // Kiểm tra trùng lặp câu hỏi
             const lastQuestion = chatHistory[chatHistory.length - 1]?.text;
             if (lastQuestion && lastQuestion === question) {
@@ -99,18 +99,12 @@ function Gemini() {
                 return;
             }
 
-            // Kiểm tra các từ khóa trong câu hỏi
-            const keywords = ['sản phẩm', 'phiếu giảm giá', 'danh mục', 'thương hiệu', 'chi tiết sản phẩm'];
-            let shouldSuggest = false;
-            let keywordCounts = {};
-            keywords.forEach(keyword => {
-                if (question.toLowerCase().includes(keyword)) {
-                    keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
-                    if (keywordCounts[keyword] > 3) {
-                        shouldSuggest = true;
-                    }
-                }
-            });
+            // Tìm kiếm sản phẩm trong câu hỏi
+            let productLink = '';
+            const foundProduct = products.find(p => question.toLowerCase().includes(p.name.toLowerCase()));
+            if (foundProduct) {
+                productLink = `\n\nBạn có thể xem chi tiết sản phẩm tại: http://localhost:3000/ShopDetail?id=${foundProduct.id}`;
+            }
 
             // Xác định câu chào
             let greeting = "Chào bạn! Tôi có thể giúp gì cho bạn hôm nay?";
@@ -158,11 +152,7 @@ function Gemini() {
                 response.data.candidates?.[0]?.content?.parts?.[0]?.text ||
                 "Xin lỗi, tôi không thể xử lý câu hỏi của bạn ngay bây giờ. Vui lòng thử lại sau.";
 
-            let finalAnswer = aiAnswer;
-            if (shouldSuggest) {
-                finalAnswer += "\n\nCó vẻ như bạn đang tìm kiếm thông tin về một số sản phẩm hoặc chính sách. Bạn có thể truy cập <a href='/shop'>trang sản phẩm</a> của chúng tôi để tìm kiếm thêm chi tiết.";
-            }
-            finalAnswer = convertTextToLinks(finalAnswer);
+            let finalAnswer = aiAnswer + productLink;  // Thêm đường link sản phẩm vào câu trả lời
 
             // Cập nhật lịch sử trò chuyện
             setChatHistory((prevHistory) => [
@@ -197,6 +187,7 @@ function Gemini() {
 
 
 
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!question.trim()) return;
@@ -218,10 +209,10 @@ function Gemini() {
     useEffect(() => {
         const timer = setTimeout(() => {
             chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 0); 
+        }, 0);
 
         return () => clearTimeout(timer);
-    }, [chatHistory]); 
+    }, [chatHistory]);
 
 
     const convertTextToLinks = (text) => {
