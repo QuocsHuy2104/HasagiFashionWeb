@@ -218,7 +218,7 @@ const Header = ({ onSearch }) => {
     try {
       const profileData = await ProfileServices.getProfile();
       setProfileImage(profileData.avatar);
-      setUsername(profileData.username || "");
+      setUsername(profileData.username || profileData.fullName);
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
@@ -363,7 +363,7 @@ const Header = ({ onSearch }) => {
                           transition: "color 0.3s ease",
                         }}
                       >
-                        Xin chào, {username}
+                        {username}
                       </span>
                     </>
                   )}

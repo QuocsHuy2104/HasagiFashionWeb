@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import "./User.css"; // Importing CSS file for styling
-import axios from "axios"; // Thêm thư viện axios để thực hiện gọi API
+import { toast, ToastContainer } from "react-toastify";
 import ProfileServices from "../../../services/ProfileServices";
 import { storage } from "../../../config/firebase-config";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import Swal from "sweetalert2";
 import aboutImage5 from "layouts/assets/img/user.jpg";
+
 function User() {
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
@@ -57,9 +58,9 @@ function User() {
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      const maxFileSize = 1 * 1024 * 1024; // 1 MB
+      const maxFileSize = 3 * 1024 * 1024;
       if (file.size > maxFileSize) {
-        alert("Vui lòng chọn tệp có dung lượng tối đa 1 MB.");
+        toast.error("Vui lòng chọn tệp có dung lượng tối đa 3 MB.");
         return;
       }
 
@@ -197,6 +198,8 @@ function User() {
   };
 
   return (
+    <>
+    <ToastContainer />
     <div className="user-profile-container">
       <div className="row p-3">
         <h5>Hồ Sơ Của Tôi</h5>
@@ -222,8 +225,6 @@ function User() {
                 }}
               />
             </div>
-            <p className="hint-text">Tên Đăng nhập chỉ có thể thay đổi một lần.</p>
-
             <div className="form-row mt-3">
               <label className="form-label">Tên</label>
               <input
@@ -346,7 +347,7 @@ function User() {
           </label>
 
           <p className="file-hint">
-            Dung lượng file tối đa 1 MB
+            Dung lượng file tối đa 3 MB
             <br />
             Định dạng: JPEG, PNG
           </p>
@@ -442,6 +443,7 @@ function User() {
         </Modal.Footer>
       </Modal>
     </div>
+    </>
   );
 }
 

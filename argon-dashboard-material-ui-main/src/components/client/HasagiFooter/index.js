@@ -56,7 +56,6 @@ const Footer = () => {
               <a className="text-light mb-2" href="/AboutAbout"><i className="fa fa-angle-right mr-2"></i>Giới thiệu</a>
               <a className="text-light mb-2" href="/ContactContact"><i className="fa fa-angle-right mr-2"></i>Liên hệ</a>
               <a className="text-light mb-2" href="Q&A"><i className="fa fa-angle-right mr-2"></i>Hỏi đáp</a>
-              <a className="text-light" href="Cart"><i className="fa fa-angle-right mr-2"></i>Giỏ hàng</a>
             </div>
           </div>
 
@@ -89,9 +88,6 @@ const Footer = () => {
               <a className="text-light mb-2" href="/authentication/sign-in"><i className="fa fa-angle-right mr-2"></i>Đăng nhập</a>
               <a className="text-light mb-2" href="/authentication/sign-upup"><i className="fa fa-angle-right mr-2"></i>Đăng kí</a>
               <a className="text-light mb-2" href="/forgot-password"><i className="fa fa-angle-right mr-2"></i>Quên mật khẩu</a>
-              <a className="text-light mb-2" href="/user/change-password"><i className="fa fa-angle-right mr-2"></i>Đổi mật khẩu</a>
-              <a className="text-light mb-2" href="/History"><i className="fa fa-angle-right mr-2"></i>Đơn hàng</a>
-              <a className="text-light" href="/profile"><i className="fa fa-angle-right mr-2"></i>Tài khoản của tôi</a>
             </div>
           </div>
 

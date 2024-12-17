@@ -1,4 +1,3 @@
-
 /**
 =========================================================
 * Argon Dashboard 2 MUI - v3.0.1
@@ -36,9 +35,8 @@ const gradientLineChartData = () => {
       try {
         const response = await RevenueService.getLast12Months();
         const apiData = response.data;
-        const labels = apiData.map(item => item.month).reverse();
-        const data = apiData.map(item => item.revenue).reverse();
-
+        const labels = apiData.map(item => item.month);
+        const data = apiData.map(item => item.revenue);
 
         setChartData({
           labels,

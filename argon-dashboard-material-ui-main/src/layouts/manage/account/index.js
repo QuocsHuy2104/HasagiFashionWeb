@@ -25,8 +25,9 @@ import RoleService from "../../../services/RoleServices";
 import AccountService from "../../../services/AccountServices";
 import PermissionService from "../../../services/PermissionServices";
 
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 function Account() {
   const generateRandomPassword = (length) => {
@@ -38,6 +39,7 @@ function Account() {
     }
     return password;
   };
+
 
   const [formData, setFormData] = useState({
     id: "",
@@ -160,6 +162,7 @@ function Account() {
     }
   };
 
+
   const { columns, rows } = AuthorsTableData({
     onEditClick: handleEditClick,
     accounts: accounts || [],
@@ -167,6 +170,8 @@ function Account() {
     searchTerm,
     selectedRoles,
   });
+
+
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -241,7 +246,7 @@ function Account() {
                 <ArgonBox mb={3} mx={3}>
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
-                    <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>EmailEmail</p>
+                    <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Email</p>
                       <ArgonInput
                         type="email"
                         placeholder="Nhập Email"
@@ -256,7 +261,7 @@ function Account() {
                     <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Thường trú</p>
                       <ArgonInput
                         type="text"
-                        placeholder="Nhập địa chỉ thườngường trú"
+                        placeholder="Nhập địa chỉ thường trú"
                         name="tabernacle"
                         size="large"
                         value={formData.tabernacle}

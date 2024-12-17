@@ -43,7 +43,14 @@ import salesTableData from "layouts/dashboard/data/salesTableData";
 import categoriesListData from "layouts/dashboard/data/categoriesListData";
 import { useEffect, useState } from "react";
 import RevenueService from "services/RevenueServices";
-import PolarChart from "examples/Charts/PolarChart";
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import { Card } from "@mui/material";
 
 function Default() {
   const { size } = typography;
@@ -53,7 +60,6 @@ function Default() {
   const [thisMonth, setThisMonth] = useState(0);
   const [yesterday, setPercentChange] = useState(0);
   const [dataPolar, setPolar] = useState([]);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -63,16 +69,13 @@ function Default() {
           RevenueService.getYesterday(),
           RevenueService.getOrderToday(),
           RevenueService.getLessThan(),
+
         ]);
         setToday(res.data);
         setThisMonth(res2.data);
         setPercentChange(res3.data);
         setOrder(res4.data);
-        setPolar({
-          labels: res5.data.map((item) => item.name),
-          data: res5.data.map((item) => item.importQuantity),
-        });
-        console.log(dataPolar)
+        setPolar(res5.data);
         if (res3.data > 0) {
           const change = ((res.data - res3.data) / res3.data) * 100;
           setPercentChange(change.toFixed(2)); // Giữ 2 chữ số thập phân
@@ -98,7 +101,7 @@ function Default() {
               count={`${today.toLocaleString()} đ`}
               icon={{ color: "info", component: <i className="ni ni-money-coins" /> }}
               percentage={{
-                color: yesterday > 0 ? "success" : "error", 
+                color: yesterday > 0 ? "success" : "error",
                 count: `${yesterday}%`,
                 text: "kể từ hôm qua",
               }}
@@ -109,11 +112,7 @@ function Default() {
               title="Doanh thu tháng"
               count={`${thisMonth.toLocaleString()} đ`}
               icon={{ color: "info", component: <i className="ni ni-money-coins" /> }}
-              percentage={{
-                color: yesterday > 0 ? "success" : "error", 
-                count: `${yesterday}%`,
-                text: "kể từ hôm qua",
-              }}
+              percentage={{ color: "success", count: "+55%", text: "kể từ hôm qua" }}
             />
           </Grid>
           <Grid item xs={12} md={6} lg={3}>
@@ -121,23 +120,45 @@ function Default() {
               title="Đơn hàng hôm nay"
               count={order}
               icon={{ color: "warning", component: <i className="ni ni-cart" /> }}
-              percentage={{
-                color: yesterday > 0 ? "success" : "error", 
-                count: `${yesterday}%`,
-                text: "kể từ hôm qua",
-              }}
+              percentage={{ color: "error", count: "-2%", text: "since last quarter" }}
             />
           </Grid>
-          {/* <Grid item xs={12} md={6} lg={3}>
+          <Grid item xs={12} md={6} lg={3}>
             <DetailedStatisticsCard
               title="sales"
               count="$103,430"
               icon={{ color: "warning", component: <i className="ni ni-cart" /> }}
               percentage={{ color: "success", count: "+5%", text: "than last month" }}
             />
-          </Grid> */}
+          </Grid>
         </Grid>
         <Grid container spacing={3} mb={3}>
+          <Grid item xs={12} lg={4}>
+            <Card sx={{ height: "100%" }}>
+              <TableContainer component={Paper}>
+                <Table aria-label="simple table">
+                  <TableHead sx={{ width :"100%"}}>
+                    <TableRow>
+                      <TableCell>Tên sản phẩm</TableCell>
+                      <TableCell align="right">Số lượng còn</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {dataPolar.map(pd => (
+                      <TableRow
+                        key={pd.name}
+                      >
+                        <TableCell scope="row">
+                          {pd.name}
+                        </TableCell>
+                        <TableCell align="right">{pd.importQuantity}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Card>
+          </Grid>
           <Grid item xs={12} lg={8}>
             <GradientLineChart
               title="Thống kê doanh thu"
@@ -163,28 +184,15 @@ function Default() {
               chart={chartData}
             />
           </Grid>
-          <Grid item xs={12} lg={4} >
-            <PolarChart
-              title="Sản phẩm sắp hết"
-              chart={{
-                labels: dataPolar.labels || [], // Gán nhãn
-                datasets: {
-                  label: "Sản phẩm sắp hết",
-                  data: dataPolar.data || [],
-                  backgroundColors: ["info", "primary", "dark", "secondary", "success", "warning", "error", "light"],
-                },
-              }}
-            />
-          </Grid>
         </Grid>
-        {/* <Grid container spacing={3}>
+        <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
             <SalesTable title="Sales by Country" rows={salesTableData} />
           </Grid>
           <Grid item xs={12} md={4}>
             <CategoriesList title="categories" categories={categoriesListData} />
           </Grid>
-        </Grid> */}
+        </Grid>
       </ArgonBox>
       <Footer />
     </DashboardLayout>

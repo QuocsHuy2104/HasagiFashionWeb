@@ -285,13 +285,22 @@ const Checkout = () => {
     }
 
     const addressDTO = {
-      fullNameAddress: address.fullNameAddress,
+      fullNameAddress: `${address.address}, ${getAddressNameById(
+        address.wardCode,
+        wards,
+        "ward"
+      )}, ${getAddressNameById(address.districtCode, districts, "district")}, ${getAddressNameById(
+        address.provinceID,
+        provinces,
+        "province"
+      )}`,
       numberPhone: address.numberPhone,
       address: address.address,
       provinceID: address.provinceID,
       districtCode: address.districtCode,
       wardCode: address.wardCode,
       fullName: address.fullName,
+      shippingFree: shipFee.total,
     };
 
     const cartDetailsDTO = selectedItems.map((item) => ({
@@ -380,13 +389,15 @@ const Checkout = () => {
             })),
             description: "Thanh toán",
             shippingFee: shipFee.total,
+            // shippingFee: 0,
           };
 
           try {
             const response = await PaymentService.PaymentMethods(customPaymentData);
-
             if (response) {
-              console.log("Payment URL:", response);
+              localStorage.setItem("address1", JSON.stringify(addressDTO));
+              localStorage.setItem("orderDetails1", JSON.stringify(cartDetailsDTO));
+              Cookies.set("addressId", address.id);
               window.location.href = response;
             } else {
               console.error("Payment URL is undefined");

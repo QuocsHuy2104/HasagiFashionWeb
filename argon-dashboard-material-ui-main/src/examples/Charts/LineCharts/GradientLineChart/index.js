@@ -45,20 +45,20 @@ function GradientLineChart({ title, description, height, chart }) {
   useEffect(() => {
     const chartDatasets = chart.datasets
       ? chart.datasets.map((dataset) => ({
-          ...dataset,
-          tension: 0.4,
-          pointRadius: 0,
-          borderWidth: 3,
-          borderColor: colors[dataset.color]
-            ? colors[dataset.color || "dark"].main
-            : colors.dark.main,
-          fill: true,
-          maxBarThickness: 6,
-          backgroundColor: gradientChartLine(
-            chartRef.current.children[0],
-            colors[dataset.color] ? colors[dataset.color || "dark"].main : colors.dark.main
-          ),
-        }))
+        ...dataset,
+        tension: 0.4,
+        pointRadius: 0,
+        borderWidth: 3,
+        borderColor: colors[dataset.color]
+          ? colors[dataset.color || "dark"].main
+          : colors.dark.main,
+        fill: true,
+        maxBarThickness: 6,
+        backgroundColor: gradientChartLine(
+          chartRef.current.children[0],
+          colors[dataset.color] ? colors[dataset.color || "dark"].main : colors.dark.main
+        ),
+      }))
       : [];
 
     setChartData(configs(chart.labels || [], chartDatasets));
@@ -91,7 +91,7 @@ function GradientLineChart({ title, description, height, chart }) {
     </ArgonBox>
   );
 
-  return title || description ? <Card>{renderChart}</Card> : renderChart;
+  return title || description ? <Card style={{ height: '100%' }}>{renderChart}</Card> : renderChart;
 }
 
 // Setting default values for the props of GradientLineChart

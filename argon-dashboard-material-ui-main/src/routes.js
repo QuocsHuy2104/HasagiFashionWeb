@@ -38,7 +38,8 @@ import QA from "components/client/HasagiQ&A";
 import BaoMat from "components/client/HasagiBaoMat";
 import DoiTra from "components/client/HasagiDoiTra";
 import DieuKhoan from "components/client/HasagiDieuKhoan";
-import OrderSummary from "layouts/billed"
+import OrderSummary from "layouts/billed";
+import UserInfo from "layouts/manage/user";
 const routes = [
   {
     type: "route",
@@ -87,11 +88,11 @@ const routes = [
   },
   {
     type: "route",
-    name: "Xem vai trò",
-    key: "role",
-    route: "/manage/role",
+    name: "Quản lý khách hàng",
+    key: "userInfo",
+    route: "/UserInfo",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
-    component: <Role />,
+    component: <UserInfo />,
   },
   {
     type: "route",

@@ -2,16 +2,13 @@ import { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import Cookies from 'js-cookie';
-// @mui material components
-import Switch from "@mui/material/Switch";
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
 import ArgonInput from "components/ArgonInput";
 import ArgonButton from "components/ArgonButton";
 import FormHelperText from "@mui/material/FormHelperText";
 import IllustrationLayout from "layouts/authentication/components/IllustrationLayout";
-import LoginHooks from "./loginWithGG"; // Google OAuth2 Login Component
-import LogoutHooks from "./logoutHooks";
+import LoginHooks from "./loginWithGG"; 
 
 const bgImage = "https://raw.githubusercontent.com/creativetimofficial/public-assets/master/argon-dashboard-pro/assets/img/signin-ill.jpg";
 
