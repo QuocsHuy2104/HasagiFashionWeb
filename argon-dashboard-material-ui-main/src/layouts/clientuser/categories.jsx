@@ -33,7 +33,7 @@ export default function ListCategories() {
                     {categories.map((category, index) => (
 
                         <Grid item xs={12 / 7} key={index}>
-                        <MuiLink href='/Shop'>
+                       <MuiLink href={`/Shop?id=${category.id}`} underline="none">
                             <Box
                                 sx={{
                                     textAlign: "center",

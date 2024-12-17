@@ -24,16 +24,6 @@ const Profile = () => {
     { name: "Đổi Mật Khẩu", parent: "Tài Khoản Của Tôi" },
   ];
 
-  const urlMapping = {
-    "Tài Khoản Của Tôi": "my-account",
-    "Đơn Mua": "purchase",
-    "Hồ Sơ": "profile",
-    "Địa Chỉ": "address",
-    "Đổi Mật Khẩu": "change-password",
-  };
-
-
-
   const [profileImage, setProfileImage] = useState(null);
   const [name, setName] = useState("");
   const fetchUserData = async () => {
@@ -60,18 +50,6 @@ const Profile = () => {
       clearInterval(intervalId);
     };
   }, []);
-
-  const updateURL = (item) => {
-    const englishURL = urlMapping[item] || item.toLowerCase().replace(/\s/g, '-');
-    const newURL = `/user/${englishURL}`;
-    window.history.pushState(null, '', newURL);
-  };
-
-  useEffect(() => {
-    if (activeItem) {
-      updateURL(activeItem);
-    }
-  }, [activeItem]);
 
   const handleMenuItemClick = (item) => {
     if (item.hasSubItems) {

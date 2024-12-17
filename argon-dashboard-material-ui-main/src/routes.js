@@ -23,7 +23,6 @@ import Shop from "components/client/HasagiShop";
 import Cart from "components/client/HasagiCart";
 import Contact from "components/client/HasagiContact";
 import Checkout from "components/client/HasagiCheckout";
-import Favorite from "components/client/HasagiFavorite";
 import SignIn from "layouts/authentication/sign-in";
 import SignUp from "layouts/authentication/sign-up";
 import Complete from "components/client/HasagiComplete";
@@ -79,7 +78,7 @@ const routes = [
   { type: "title", title: "Trang quản lý", key: "manage-pages" },
   {
     type: "route",
-    name: "Quản lý người dùng",
+    name: "Quản lý nhân viên",
     key: "account",
     route: "/manage/account",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -88,7 +87,7 @@ const routes = [
   },
   {
     type: "route",
-    name: "Quản lý vai trò",
+    name: "Xem vai trò",
     key: "role",
     route: "/manage/role",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
@@ -156,15 +155,6 @@ const routes = [
     route: "/feature-section",
     icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
     component: <FeatureSection />,
-    showInSidenav: true,
-  },
-  {
-    // type: "route",
-    name: "Favorite",
-    key: "Favorite",
-    route: "/Favorite",
-    icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-sound-wave" />,
-    component: <Favorite />,
     showInSidenav: true,
   },
 

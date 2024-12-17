@@ -13,6 +13,8 @@ import { Form } from 'react-bootstrap';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import ChatBot from "components/client/HasagiChatBot";
+
 function Shop() {
     const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -30,6 +32,21 @@ function Shop() {
     const handleSliderChange = (newValue) => {
         setValue(newValue);
     };
+
+    useEffect(() => {
+        // Lấy id từ URL
+        const url = new URL(window.location.href);
+        const shopId = url.searchParams.get("id");
+
+        // Nếu có shopId, tự động chọn checkbox tương ứng
+        if (shopId) {
+            setSelectedCategories([Number(shopId)]); // Chọn theo ID
+        } else {
+            setSelectedCategories([]); // Chọn "Tất cả" khi không có ID
+        }
+    }, []);
+
+
 
     const handleSearch = (term) => {
         setSearchTerm(term);
@@ -65,6 +82,7 @@ function Shop() {
     };
 
     useEffect(() => {
+
         const fetchProductsAndCategories = async () => {
             try {
                 const productResponse = await ProductService.getAllProductsUS();
@@ -84,6 +102,7 @@ function Shop() {
                     setCategories([]);
                     setBrands([]);
                 }
+
             } catch (error) {
                 console.error("Error fetching data:", error);
                 setProducts([]);
@@ -171,6 +190,14 @@ function Shop() {
         }
     };
 
+    const formatSoldCount = (count) => {
+        if (count >= 1000000) {
+            return (count / 1000000).toFixed(1) + 'M';
+        } else if (count >= 1000) {
+            return (count / 1000).toFixed(1) + 'K';
+        }
+        return count;
+    }
 
     return (
         <>
@@ -518,7 +545,7 @@ function Shop() {
                                             }}
                                         >
                                             <Link to={`/ShopDetail?id=${product.id}`} style={{ textDecoration: "none" }}>
-                                                <Card className="card-container" style={{ position: "relative" }}>
+                                                <Card className="card-container" style={{ borderRadius: "8px", display: "flex", flexDirection: "column", height: "100%" }}>
                                                     <div
                                                         className="image-container"
                                                         style={{
@@ -558,15 +585,14 @@ function Shop() {
                                                         )}
                                                     </div>
 
-                                                    <div className="card-content" style={{ padding: "10px" }}>
+                                                    <div style={{ padding: "10px" }}>
                                                         {/* Tên sản phẩm */}
                                                         <div
                                                             style={{
                                                                 fontSize: "15px",
                                                                 marginBottom: "5px",
-                                                                whiteSpace: "nowrap",
-                                                                overflow: "hidden",
-                                                                textOverflow: "ellipsis",
+                                                                whiteSpace: "normal",
+                                                                wordWrap: "break-word", 
                                                             }}
                                                         >
                                                             {product.name || "Product Name Goes Here"}
@@ -581,7 +607,13 @@ function Shop() {
                                                                             ? `${(product.minPrice * (1 - product.sale / 100)).toLocaleString()}đ`
                                                                             : ` ${(product.minPrice * (1 - product.sale / 100)).toLocaleString()}đ`}
                                                                     </span>
-                                                                    <span style={{ textDecoration: "line-through", color: "gray", marginLeft: "5px" }}>
+                                                                    <span
+                                                                        style={{
+                                                                            textDecoration: "line-through",
+                                                                            color: "gray",
+                                                                            marginLeft: "5px",
+                                                                        }}
+                                                                    >
                                                                         {new Intl.NumberFormat("vi-VN").format(product.minPrice)}đ
                                                                     </span>
                                                                 </>
@@ -592,10 +624,22 @@ function Shop() {
                                                             )}
                                                         </div>
 
-                                                        {/* Đánh giá sản phẩm */}
-                                                        <Typography variant="body2" style={{ fontWeight: "bold", marginTop: "10px" }}>
-                                                            ⭐ {calculateAverageStars(product.id)}
-                                                        </Typography>
+                                                        {/* Đánh giá sản phẩm và lượt bán */}
+                                                        <div
+                                                            style={{
+                                                                display: "flex",
+                                                                justifyContent: "space-between",
+                                                                alignItems: "center",
+                                                                marginTop: "10px",
+                                                            }}
+                                                        >
+                                                            <Typography variant="body2" style={{ fontWeight: "bold" }}>
+                                                                ⭐ {calculateAverageStars(product.id)}
+                                                            </Typography>
+                                                            <Typography variant="body2" style={{ fontWeight: "bold", fontSize: "13px" }}>
+                                                                Lượt bán: {formatSoldCount(product.sold)}
+                                                            </Typography>
+                                                        </div>
                                                     </div>
                                                 </Card>
                                             </Link>
@@ -603,8 +647,8 @@ function Shop() {
                                     ))}
                             </div>
 
-                            {currentProducts.length > 1 ? (
-                                <div className="col-12" style={{marginBottom: "20px"}}>
+                            {currentProducts.length > 0 ? (
+                                <div className="col-12" style={{ marginBottom: "20px" }}>
                                     <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
                                         <button
                                             disabled={currentPage === 1}
@@ -665,6 +709,7 @@ function Shop() {
                 </div >
             </div >
             <Footer />
+            <ChatBot />
         </>
     );
 }

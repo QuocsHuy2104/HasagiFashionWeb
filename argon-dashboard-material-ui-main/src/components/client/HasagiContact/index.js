@@ -15,29 +15,6 @@ const Contact = () => {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await fetch("https://formsubmit.co/hasagifashion@gmail.com", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        alert("Liên hệ đã được gửi thành công!");
-        setFormData({ name: "", email: "", message: "" });
-      } else {
-        alert("Đã xảy ra lỗi, vui lòng thử lại sau.");
-      }
-    } catch (error) {
-      console.error("Lỗi:", error);
-      alert("Không thể gửi liên hệ.");
-    }
-  };
   return (
     <>
       <HasagiNav />
@@ -73,7 +50,10 @@ const Contact = () => {
 
             {/* Contact Form */}
             <div className="col-lg-7">
-              <form onSubmit={handleSubmit}
+              <form  action="https://formsubmit.co/hasagifashion@gmail.com"
+                method="POST"
+                className="contact-form"
+
                 style={{
                   maxWidth: "600px",
                   margin: "0 auto",
@@ -146,7 +126,7 @@ const Contact = () => {
                 ></textarea>
                 <input type="hidden" name="_captcha" value="false" />
                 <input type="hidden" name="_subject" value="Liên hệ từ khách hàng Hasagi Fashion" />
-                <input type="hidden" name="_next" value="https://yourwebsite.com/thank-you" />
+                {/* <input type="hidden" name="_next" value="https://yourwebsite.com/thank-you" /> */}
                 <input type="hidden" name="_template" value="table" />
                 <ArgonButton
                   type="submit"

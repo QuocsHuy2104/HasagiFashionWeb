@@ -71,9 +71,9 @@ const Header = ({ onSearch }) => {
         setSearchTerm(transcript);
         onSearch(transcript);
 
-        const utterance = new SpeechSynthesisUtterance(transcript);
-        utterance.lang = "vi-VN";
-        window.speechSynthesis.speak(utterance);
+        // const utterance = new SpeechSynthesisUtterance(transcript);
+        // utterance.lang = "vi-VN";
+        // window.speechSynthesis.speak(utterance);
       };
 
       recognition.onerror = (event) => {
@@ -451,7 +451,7 @@ const Header = ({ onSearch }) => {
                         style={{
                           position: "absolute",
                           top: "100%",
-                          marginLeft: "-200%",
+                          marginLeft: "-230%",
                           transform: "translateX(-50%)",
                           marginTop: "10px",
                           padding: "10px 0",
@@ -469,7 +469,7 @@ const Header = ({ onSearch }) => {
                             content: '""',
                             position: "absolute",
                             top: "-14px",
-                            left: "78.55%",
+                            left: "81.55%",
                             transform: "translateX(-50%)",
                             width: "0px",
                             height: "0px",
@@ -506,7 +506,7 @@ const Header = ({ onSearch }) => {
                                       justifyContent: "space-between",
                                     }}
                                     onMouseEnter={(e) => {
-                                      e.currentTarget.style.backgroundColor = "#f0f0f0";
+e.currentTarget.style.backgroundColor = "#f0f0f0";
                                     }}
                                     onMouseLeave={(e) => {
                                       e.currentTarget.style.backgroundColor = "transparent";
@@ -561,7 +561,7 @@ const Header = ({ onSearch }) => {
                               })}
                             </>
                           ) : (
-                            <li className="text-center" style={{ padding: "20%" }}>
+<li className="text-center" style={{ padding: "20%" }}>
                               Giỏ hàng trống
                             </li>
                           )}
@@ -598,7 +598,7 @@ const Header = ({ onSearch }) => {
                                 fontWeight: "bold",
                                 padding: "8px",
                                 border: "none",
-                                borderRadius: "5px",
+                                borderRadius: "0px",
                                 cursor: "pointer",
                                 transition: "background-color 0.3s",
                                 marginLeft: "auto",

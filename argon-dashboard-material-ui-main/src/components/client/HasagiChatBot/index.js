@@ -16,6 +16,8 @@ function Gemini() {
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [hasGreeted, setHasGreeted] = useState(false);
     const chatContainerRef = useRef(null);
+    const [isVoiceInput, setIsVoiceInput] = useState(false);
+    const chatEndRef = useRef(null);
 
     useEffect(() => {
         if (isChatOpen && !hasGreeted) {
@@ -48,7 +50,7 @@ function Gemini() {
 
 
     const getVoucherData = async () => {
-        const response = await VoucherService.getAllVouchersUS();
+        const response = await VoucherService.getUnusedVouchersByAccountUS();
         return response?.data || [];
     };
 
@@ -70,12 +72,22 @@ function Gemini() {
     const generateAIResponse = async (question) => {
         setLoading(true);
         try {
-            // Lấy dữ liệu từ các API
-            const categories = await getCategoryData();
-            const brands = await getBrandData();
-            const products = await getProductData();
-            const vouchers = await getVoucherData();
-    
+            const categories = (await getCategoryData()).map(c => ({ name: c.name }));
+            const brands = (await getBrandData()).map(b => ({ name: b.name }));
+            const products = (await getProductData()).map(p => ({
+                name: p.name,
+                price: p.importPrice,
+                category: p.categoryDTOResponse?.name,
+                brand: p.brandDTOResponse?.name
+            }));
+            const vouchers = (await getVoucherData()).map(v => ({ code: v.code, discount: v.discountPercentage, minimumOrderValue: v.minimumOrderValue }));
+
+            console.log("Categories:", categories);
+            console.log("Brands:", brands);
+            console.log("Products:", products);
+            console.log("Vouchers:", vouchers);
+
+
             // Kiểm tra trùng lặp câu hỏi
             const lastQuestion = chatHistory[chatHistory.length - 1]?.text;
             if (lastQuestion && lastQuestion === question) {
@@ -86,13 +98,11 @@ function Gemini() {
                 setLoading(false);
                 return;
             }
-    
+
             // Kiểm tra các từ khóa trong câu hỏi
             const keywords = ['sản phẩm', 'phiếu giảm giá', 'danh mục', 'thương hiệu', 'chi tiết sản phẩm'];
             let shouldSuggest = false;
-            let keywordCounts = {};  // Đảm bảo khai báo và sử dụng keywordCounts
-    
-            // Đếm số lần xuất hiện từ khóa trong câu hỏi
+            let keywordCounts = {};
             keywords.forEach(keyword => {
                 if (question.toLowerCase().includes(keyword)) {
                     keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
@@ -101,13 +111,13 @@ function Gemini() {
                     }
                 }
             });
-    
+
             // Xác định câu chào
             let greeting = "Chào bạn! Tôi có thể giúp gì cho bạn hôm nay?";
             if (question.toLowerCase().includes("xin chào") || question.toLowerCase().includes("chào")) {
                 greeting = "Chào bạn! Có câu hỏi nào tôi có thể giúp bạn không?";
             }
-    
+
             // Xây dựng prompt cho AI
             const prompt = `
             Bạn là trợ lý ảo của shop Hasagi. Dưới đây là dữ liệu nội bộ của shop, bạn chỉ được sử dụng các thông tin này để trả lời câu hỏi.
@@ -116,7 +126,7 @@ function Gemini() {
             - **Danh mục sản phẩm**: ${JSON.stringify(categories)}.
             - **Thương hiệu**: ${JSON.stringify(brands)}.
             - **Sản phẩm**: ${JSON.stringify(products)}.
-            - **Voucher**: ${JSON.stringify(vouchers)}.
+            - **Phiếu giảm giá**: ${JSON.stringify(vouchers)}.
             - **Điều khoản & chính sách**: 
                 - Giới thiệu: ${termsAndConditions.introduction}.
                 - Chính sách đặt hàng: ${termsAndConditions.orderPolicy}.
@@ -137,31 +147,29 @@ function Gemini() {
         
             Chào hỏi: ${greeting}
             `;
-    
+
             const API_KEY = 'AIzaSyCrDIwFVBDHE1ZDBDuzjPUClS6KicbLa7o';
             const response = await axios.post(
                 `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`,
                 { contents: [{ parts: [{ text: prompt }] }] }
             );
-    
+
             const aiAnswer =
                 response.data.candidates?.[0]?.content?.parts?.[0]?.text ||
                 "Xin lỗi, tôi không thể xử lý câu hỏi của bạn ngay bây giờ. Vui lòng thử lại sau.";
-    
+
             let finalAnswer = aiAnswer;
             if (shouldSuggest) {
                 finalAnswer += "\n\nCó vẻ như bạn đang tìm kiếm thông tin về một số sản phẩm hoặc chính sách. Bạn có thể truy cập <a href='/shop'>trang sản phẩm</a> của chúng tôi để tìm kiếm thêm chi tiết.";
             }
-    
-            // Chuyển đổi URL trong câu trả lời thành thẻ <a> HTML
             finalAnswer = convertTextToLinks(finalAnswer);
-    
+
             // Cập nhật lịch sử trò chuyện
             setChatHistory((prevHistory) => [
                 ...prevHistory,
                 { type: "ai", text: finalAnswer }
             ]);
-    
+
             let currentIndex = 0;
             const interval = setInterval(() => {
                 setChatHistory((prevHistory) => {
@@ -170,12 +178,12 @@ function Gemini() {
                     return updatedHistory;
                 });
                 currentIndex++;
-    
+
                 if (currentIndex >= finalAnswer.length) {
                     clearInterval(interval);
                 }
             }, 10);
-    
+
         } catch (error) {
             console.error("Lỗi:", error);
             setChatHistory((prevHistory) => [
@@ -186,7 +194,7 @@ function Gemini() {
             setLoading(false);
         }
     };
-    
+
 
 
     const handleSubmit = async (e) => {
@@ -201,11 +209,20 @@ function Gemini() {
     };
 
     useEffect(() => {
-        // Tự động cuộn xuống khi chatHistory thay đổi
-        if (chatContainerRef.current) {
-            chatContainerRef.current.scrollIntoView({ behavior: "smooth" });
+        if (question.trim() && isVoiceInput) {
+            handleSubmit(new Event('submit'));
+            setIsVoiceInput(false);
         }
-    }, [chatHistory]);
+    }, [question, isVoiceInput]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 0); 
+
+        return () => clearTimeout(timer);
+    }, [chatHistory]); 
+
 
     const convertTextToLinks = (text) => {
         const urlPattern = /https?:\/\/[^\s]+/g;
@@ -223,7 +240,7 @@ function Gemini() {
         recognition.onresult = (event) => {
             const spokenText = event.results[0][0].transcript;
             setQuestion(spokenText);
-            handleSubmit(new Event('submit'));
+            setIsVoiceInput(true);
         };
 
         recognition.onerror = (event) => {
@@ -233,8 +250,6 @@ function Gemini() {
 
         recognition.start();
     };
-
-
     return (
         <div style={{
             position: 'fixed',
@@ -329,12 +344,13 @@ function Gemini() {
                         scrollBehavior: 'smooth',
                     }}>
                         {chatHistory.map((msg, index) => (
-                            <div key={index} style={{
+                            <div key={index} ref={chatEndRef} style={{
                                 textAlign: msg.type === 'user' ? 'right' : 'left',
                                 marginBottom: '15px',
                                 display: 'flex',
                                 alignItems: 'flex-start',
                                 justifyContent: msg.type === 'user' ? 'flex-end' : 'flex-start',
+
                             }}>
                                 {msg.type !== 'user' && (
                                     <Avatar

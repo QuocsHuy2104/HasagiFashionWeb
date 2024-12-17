@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar as solidStar } from "@fortawesome/free-solid-svg-icons";
 import { faStar as regularStar } from "@fortawesome/free-regular-svg-icons";
 import ReviewList from "../HasagiReview/reviewList";
+import useCartQuantity from "../HasagiQuantity";
 
 function ShopDetail() {
   const [product, setProduct] = useState(null);
@@ -40,8 +41,9 @@ function ShopDetail() {
   const [previousImage, setPreviousImage] = useState(); // Lưu lại hình ảnh trước khi hover
   const [previousCurrentMedia, setPreviousCurrentMedia] = useState(); // Lưu lại hình ảnh trước khi hover
   const [images, setImages] = useState([]);
+  const { totalQuantity, fetchTotalQuantity } = useCartQuantity();
 
-  const fetchReviews = async (productId) => {
+  const fetchReviews = async () => {
     try {
       const productReviews = await reviewsService.getReviewsByProduct(productId);
       if (Array.isArray(productReviews)) {
@@ -70,7 +72,7 @@ function ShopDetail() {
     const productId = query.get("id");
 
     if (productId) {
-      fetchReviews(productId);
+      fetchReviews();
     }
   }, [location]);
 
@@ -104,7 +106,7 @@ function ShopDetail() {
   const handleAddToCart = async () => {
     try {
       if (product.sizes.length === 0 && !selectedColor) {
-        setError("Vui lòng chọn màu");
+        setError("Vui lòng chọn màu!");
         return; // Dừng thực thi nếu không có size
       }
       const response = await cartService.addToCart({
@@ -115,6 +117,7 @@ function ShopDetail() {
       });
 
       if (response.status >= 200 && response.status < 300) {
+        fetchTotalQuantity(); 
         toast.success("Sản phẩm đã được thêm vào giỏ hàng thành công!");
       }
     } catch (error) {
@@ -135,7 +138,6 @@ function ShopDetail() {
       toast.error("Đã xảy ra lỗi khi lấy giá sản phẩm. Vui lòng thử lại sau.");
     }
   };
-
 
   const fetchProductDetail = async () => {
     try {
@@ -228,7 +230,7 @@ function ShopDetail() {
   const handleByNow = async () => {
     try {
       if (product.sizes.length === 0 && !selectedColor) {
-        setError("Vui lòng chọn màu");
+        setError("Vui lòng chọn màu!");
         return;
       }
 
@@ -241,13 +243,14 @@ function ShopDetail() {
 
       // Kiểm tra phản hồi từ server để quyết định hiển thị thông báo
       if (response.status >= 200 && response.status < 300) {
+        fetchTotalQuantity(); 
         const checkedItems = JSON.parse(localStorage.getItem("checkedItems")) || [];
         if (!checkedItems.includes(productId)) {
           checkedItems.push(productId);
         }
         localStorage.setItem(
           "checkedItems" + productId + selectedColor + selectedSize,
-          JSON.stringify([...checkedItems, { productId, selectedColor, selectedSize }])
+          JSON.stringify([Number(productId), selectedColor, selectedSize])
         );
       }
 
@@ -315,7 +318,7 @@ function ShopDetail() {
           <FontAwesomeIcon
             key={`full-${index}`}
             icon={solidStar}
-            style={{ color: "orange", fontSize: "12px"}}
+            style={{ color: "orange", fontSize: "12px" }}
           />
         ))}
 
@@ -329,7 +332,7 @@ function ShopDetail() {
                 position: "absolute",
                 width: "100%",
                 height: "100%",
-                marginLeft: "-5px"
+                marginLeft: "-5px",
               }}
             />
             <div
@@ -338,7 +341,7 @@ function ShopDetail() {
                 width: "100%",
                 height: "100%",
                 clipPath: `inset(0 ${100 - partialStar * 100}% 0 0)`,
-                marginLeft: "-5px"
+                marginLeft: "-5px",
               }}
             >
               <FontAwesomeIcon

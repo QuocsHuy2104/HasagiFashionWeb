@@ -22,7 +22,14 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import './style.css';
 import logo from "components/client/assets/images/logo.png";
-
+import {
+  Modal as MuiModal,
+  Button as MuiButton,
+  Box,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+} from "@mui/material";
 function Order() {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -40,7 +47,13 @@ function Order() {
     endDate: "",
     phoneNumber: "",
   });
-
+  const [cancelReason, setCancelReason] = useState("");
+  const [cancelOptions] = useState([
+    "Lỗi trong quá trình xử lý đơn hàng",
+    "Không thể giao hàng do địa chỉ không đúng hoặc không thể liên hệ",
+  ]);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [openCancelModal, setOpenCancelModal] = useState(false);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -82,24 +95,39 @@ function Order() {
   };
 
   useEffect(() => {
-    const { status, endDate, phoneNumber } = searchCriteria;
+    const { status, startDate, endDate, phoneNumber } = searchCriteria;
 
     const filteredOrders = orders.filter((order) => {
-      const orderDate = new Date(order.orderDate);
+      const orderDate = new Date(order.orderDate.split("-").reverse().join("-")); // Convert formatted date string to Date object
 
+      // Ensure the status is checked if it's not 'all'
       const isStatusMatch = status === "all" ? true : order.slug === status;
 
-      const isDateMatch = endDate ? orderDate <= new Date(endDate) : true;
+      // Check if startDate exists and filter accordingly
+      const isStartDateMatch = startDate ? orderDate >= new Date(startDate) : true;
 
+      // Check if endDate exists and filter accordingly
+      const isEndDateMatch = endDate ? orderDate <= new Date(endDate) : true;
+
+      // Check if the phone number matches (if entered)
       const isPhoneMatch = phoneNumber
         ? order.numberPhone.includes(phoneNumber)
         : true;
 
-      return isStatusMatch && isDateMatch && isPhoneMatch;
+      return isStatusMatch && isStartDateMatch && isEndDateMatch && isPhoneMatch;
     });
 
     setFilteredOrders(filteredOrders);
   }, [searchCriteria, orders]);
+
+
+
+  const handleOpenCancelModal = (orderId) => {
+    setSelectedOrderId(orderId);
+    setOpenCancelModal(true);
+  };
+
+
 
   const handleRowClick = async (params, event) => {
     // Kiểm tra nếu cột được bấm không phải là "status"
@@ -122,40 +150,7 @@ function Order() {
     }
   };
 
-  const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(
-      filteredOrders.map((order) => ({
-        "Order ID": order.id,
-        "Order Date": format(new Date(order.orderDate), "dd-MM-yyyy"),
-        "Full Name": order.fullName,
-        "Phone Number": order.numberPhone,
-        Address: order.fullNameAddress,
-        "Pay Method": order.payMethod,
-        "Pay Status": order.payStatus,
-        "Shipping Fee": order.shippingFree,
-        "Amount": new Intl.NumberFormat("vi-VN", {
-          style: "currency",
-          currency: "VND",
-        }).format(order.amount),
-
-
-        Status:
-          statuses.find((status) => status.slug === order.slug)?.status || "Unknown",
-      }))
-    );
-
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
-
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-    const blob = new Blob([excelBuffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
-    });
-    saveAs(blob, "orders_summary.xlsx");
-  };
+  
 
   const columns = [
     { field: "fullName", headerName: "Tên người đặt", flex: 1 },
@@ -212,12 +207,24 @@ function Order() {
                   <ArgonButton
                     size="small"
                     color="error"
-                    onClick={() => handleStatusChange(order.id, 'da-huy')}
+                    onClick={() => handleOpenCancelModal(order.id)}
                     style={{ marginLeft: '10px' }}
                   >
                     Hủy
                   </ArgonButton>
                 )}
+
+                {['dang-giao'].includes(currentStatus) && (
+                  <ArgonButton
+                    size="small"
+                    color="error"
+                    onClick={() => handleStatusChange(order.id, 'da-huy', 'Khách hàng không nghe máy điện thoại')}
+                    style={{ marginLeft: '10px' }}
+                  >
+                    Hủy
+                  </ArgonButton>
+                )}
+
               </>
             )}
           </div>
@@ -225,26 +232,34 @@ function Order() {
       },
     }
   ];
-
-  const handleStatusChange = async (orderId, newStatusSlug) => {
+  const handleStatusChange = async (orderId, newStatusSlug, reason) => {
     try {
-      await axios.put(`http://localhost:3000/api/order/${orderId}`, { slug: newStatusSlug });
+      // Gửi yêu cầu cập nhật trạng thái và lý do hủy
+      await axios.put(`http://localhost:3000/api/order/${orderId}`, {
+        slug: newStatusSlug,
+        reason
+      });
 
+      // Cập nhật lại danh sách đơn hàng trong UI
       setOrders(prevOrders =>
         prevOrders.map(order =>
-          order.id === orderId ? { ...order, slug: newStatusSlug } : order
+          order.id === orderId ? { ...order, slug: newStatusSlug, cancelReason: reason } : order
         )
       );
 
       setFilteredOrders(prevFilteredOrders =>
         prevFilteredOrders.map(order =>
-          order.id === orderId ? { ...order, slug: newStatusSlug } : order
+          order.id === orderId ? { ...order, slug: newStatusSlug, cancelReason: reason } : order
         )
       );
+
+      // Đóng modal sau khi xác nhận hủy
+      setOpenCancelModal(false);
     } catch (error) {
       console.error("There was an error updating the status!", error);
     }
   };
+
 
 
   const handleNextStatus = async (orderId, currentStatus, getNextStatus) => {
@@ -274,7 +289,7 @@ function Order() {
         <ArgonBox mb={3}>
           <Card>
             <ArgonBox component="form" role="form" p={3}>
-              <ArgonTypography variant="h6">Tìm kiếm order</ArgonTypography>
+              <ArgonTypography variant="h6">Tìm kiếm đơn hàng</ArgonTypography>
               <ArgonBox
                 display="flex"
                 flexDirection="row"
@@ -283,6 +298,7 @@ function Order() {
                 mt={2}
               >
                 <ArgonBox mb={3} mx={3} width="100%" sm={6} md={4}>
+                <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Trạng thái</p>
                   <select
                     name="status"
                     defaultValue="all"
@@ -290,7 +306,7 @@ function Order() {
                     onChange={handleSearchChange}
                   >
                     <option value="" disabled>Chọn trạng thái</option>
-                    <option value="all">All</option>
+                    <option value="all">Tất cả</option>
                     {statuses.map((status) => (
                       <option key={status.slug} value={status.slug}>
                         {status.status}
@@ -298,8 +314,18 @@ function Order() {
                     ))}
                   </select>
                 </ArgonBox>
+                <ArgonBox mb={3} mx={3} width="100%" sm={6} md={4}>
+                <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Từ ngày</p>
+                  <ArgonInput
+                    name="startDate"
+                    type="date"
+                    placeholder="Select Start Date"
+                    onChange={handleSearchChange}
+                  />
+                </ArgonBox>
 
                 <ArgonBox mb={3} mx={3} width="100%" sm={6} md={4}>
+                <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Đến ngày</p>
                   <ArgonInput
                     name="endDate"
                     type="date"
@@ -308,6 +334,7 @@ function Order() {
                   />
                 </ArgonBox>
                 <ArgonBox mb={3} mx={3} width="100%" sm={6} md={4}>
+                <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Số điện thoại</p>
                   <ArgonInput
                     name="phoneNumber"
                     type="text"
@@ -315,14 +342,6 @@ function Order() {
                     onChange={handleSearchChange}
                   />
                 </ArgonBox>
-                <ArgonButton
-                  type="button"
-                  onClick={exportToExcel}
-                  color="success"
-                  style={{ marginTop: "-24px" }}
-                >
-                  Xuất
-                </ArgonButton>
               </ArgonBox>
             </ArgonBox>
           </Card>
@@ -566,8 +585,41 @@ function Order() {
         </DialogActions>
 
       </Dialog>
+      <MuiModal open={openCancelModal} onClose={() => setOpenCancelModal(false)}>
+        <Box
+          p={3}
+          style={{
+            backgroundColor: "white",
+            width: "300px",
+            margin: "50px auto",
+            borderRadius: "8px",
+          }}
+        >
+          <ArgonTypography variant="h6">Chọn lý do hủy đơn hàng</ArgonTypography>
+          <RadioGroup
+            aria-label="cancel-reason"
+            value={cancelReason}
+            onChange={(e) => setCancelReason(e.target.value)}
+            style={{ marginTop: "15px" }}
+          >
+            {cancelOptions.map((option, index) => (
+              <FormControlLabel key={index} value={option} control={<Radio />} label={option} />
+            ))}
+          </RadioGroup>
+          <ArgonButton
+            variant="contained"
+            style={{ marginTop: "15px", backgroundColor: "red", color: "white" }}
+            onClick={() => handleStatusChange(selectedOrderId, 'da-huy', cancelReason)}
+            disabled={!cancelReason}
+          >
+            Xác nhận hủy
+          </ArgonButton>
+        </Box>
+      </MuiModal>
 
     </DashboardLayout>
+
+
   );
 }
 

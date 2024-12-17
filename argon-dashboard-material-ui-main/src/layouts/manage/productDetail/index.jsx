@@ -297,7 +297,7 @@ function ProductDetail() {
                                     border={"1px solid #ccc"}
                                     borderRadius="8px"
                                 >
-                                    <ArgonBox mx={2} mb={3}>
+                                    <ArgonBox mx={0} mb={3}>
                                         <Typography variant="h6" component="h2" fontWeight="bold">
                                             Định giá
                                         </Typography>
@@ -308,6 +308,7 @@ function ProductDetail() {
 
                                     {/* Quantity Input */}
                                     <ArgonBox mb={3}>
+                                    <p style={{ marginBottom: '-20px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Số lượng</p>
                                         <ArgonInput
                                             type="number"
                                             placeholder={errors.quantity ? errors.quantity : "Vui lòng nhập số lượng"}
@@ -328,6 +329,7 @@ function ProductDetail() {
 
 
                                     <ArgonBox display="flex" flexDirection="column" gap={3} mb={3}>
+                                    <p style={{ marginBottom: '-20px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Giá sản phẩm</p>
                                         <ArgonInput
                                             type="number"
                                             placeholder={errors.price ? errors.price : "Vui lòng nhập giá"}
@@ -353,6 +355,7 @@ function ProductDetail() {
 
 
                                     <ArgonBox display="flex" flexDirection="column" gap={3} mb={3}>
+                                    <p style={{ marginBottom: '-20px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Giá kích cỡ</p>
                                         <ArgonInput
                                             type="number"
                                             placeholder={errors.priceSize ? errors.priceSize : "Vui lòng nhập giá kích thước"}
@@ -380,6 +383,7 @@ function ProductDetail() {
 
                                 <ArgonBox mb={3} mx={{ xs: 1, sm: 2, md: 3 }}>
                                     <div className="custom-editor" style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #ccc', padding: '8px' }}>
+                                    <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Mô tả</p>
                                         <CKEditor
                                             editor={ClassicEditor}
                                             data={formData.subDescription}
@@ -412,7 +416,7 @@ function ProductDetail() {
                                     border={"1px solid #ccc"}
                                     borderRadius="8px"
                                 >
-                                    <ArgonBox mx={2} mb={3}>
+                                    <ArgonBox mx={0} mb={1}>
                                         <Typography variant="h6" component="h2" fontWeight="bold">
                                             Chọn kích thước và màu sắc
                                         </Typography>
@@ -432,7 +436,7 @@ function ProductDetail() {
                                         <ArgonBox width="100%" maxWidth={{ xs: '100%', sm: '48%' }}>
                                             <MultipleSelectCheckmarks
                                                 model={sizes}
-                                                nameTag={'Kích Thước'}
+                                                nameTag={'Chọn kích Thước'}
                                                 onChange={hanleSelectSize}
                                                 selectedModel={selectedSize}
                                             />

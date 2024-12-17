@@ -200,6 +200,7 @@ const AddressPage = () => {
       display: "block",
       gap: "5px",
       textAlign: "right",
+      marginTop: "20px"
     },
     actionLinks: {
       color: "#007bff",
@@ -328,10 +329,6 @@ const AddressPage = () => {
                 )}
 
                 <br />
-
-                {!address.status && (
-                  <button style={styles.setDefaultButton}>Thiết lập mặc định</button>
-                )}
               </div>
             </div>
           ))

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AiOutlinePlus, AiOutlineMinus } from 'react-icons/ai';
 import HasagiNav from "components/client/HasagiHeader";
 import Footer from "components/client/HasagiFooter";
+import ChatBot from "components/client/HasagiChatBot";
 
 const faqData = [
   {
@@ -178,6 +179,7 @@ const FAQAccordion = () => {
         </div>
       </div>
       <Footer />
+      <ChatBot />
     </>
   );
 };

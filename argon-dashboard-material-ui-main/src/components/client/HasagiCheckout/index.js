@@ -720,43 +720,6 @@ const Checkout = () => {
       </div>
       <div style={styles.container}>
         <div style={styles.cartDetails}>
-          {/* Coupon Code Section */}
-          <div style={styles.couponContainer}>
-            <input
-              type="text"
-              placeholder="Mã giảm giá"
-              style={styles.couponInput}
-              onChange={(e) => setSearchText(e.target.value)}
-            />
-            <button
-              style={styles.couponButton}
-              onClick={() => {
-                const voucher = vouchers.find(
-                  (v) => v.code.toLowerCase() === searchText.toLowerCase()
-                );
-                if (voucher) {
-                  if (totalAmount >= voucher.minimumOrderValue) {
-                    if (!usedVouchers.some((usedVoucher) => usedVoucher.id === voucher.id)) {
-                      handleApplyVoucher(voucher);
-                      setAppliedVoucherId(voucher.id);
-                    } else {
-                      toast.error("Mã giảm giá đã sử dụng.");
-                    }
-                  } else {
-                    toast.warn(
-                      `Giá trị hóa đơn tối thiểu để áp dụng voucher là ${voucher.minimumOrderValue
-                        .toFixed(0)
-                        .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}đ.`
-                    );
-                  }
-                } else {
-                  toast.error("Mã giảm giá không hợp lệ.");
-                }
-              }}
-            >
-              Áp dụng
-            </button>
-          </div>
           <div style={{ textAlign: "right" }}>
             <Button
               variant="contained"
@@ -766,24 +729,25 @@ const Checkout = () => {
                 border: "none",
                 boxShadow: "none",
                 padding: "8px 16px",
-                marginRight: "0", // Đặt lại margin nếu cần
+                marginRight: "0",
                 color: "rgba(244, 79, 30, 0.99)",
-                textDecoration: "none",
+                textDecoration: "underline",
                 transition: "all 0.3s",
                 fontSize: "1rem",
-                marginTop: "-25px", 
+                marginTop: "-25px"
               }}
               onMouseEnter={(e) => {
-                e.target.style.textDecoration = "underline";
-                e.target.style.color = "blue";
+                e.target.style.color = "blue",
+                  e.target.textDecorationColor = "blue"
               }}
               onMouseLeave={(e) => {
-                e.target.style.textDecoration = "underline";
-                e.target.style.color = "rgba(244, 79, 30, 0.99)";
+                e.target.style.color = "rgba(244, 79, 30, 0.99)",
+                  e.target.textDecorationColor = "rgba(244, 79, 30, 0.99)"
               }}
             >
               Áp dụng mã giảm giá
             </Button>
+
           </div>
 
           {/* Address Section */}

@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState }  from "react";
 import ArgonBox from 'components/ArgonBox'
-import Header from 'components/client/HasagiHeader';
 import Footer from 'components/client/HasagiFooter'
 import Policy from "./policy";
 import Voucher from "../../components/client/HasagiVorcher/index"
@@ -9,11 +8,25 @@ import FeaturedProducts from "./sanpham";
 import ChatBot from "components/client/HasagiChatBot";
 import ListCategories from './categories'
 import SaleProduct from "./saleProduct";
-
 const FeaturesAndAbout = () => {
+  const [isLoading, setIsLoading] = useState(true);
+
+  React.useEffect(() => {
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 700);
+  }, []);
+
   return (
     <>
-      <Header />
+      {isLoading && (
+        <div className="loader">
+          <div className="loader-inner">
+            <div className="circle"></div>
+          </div>
+        </div>
+      )}
+      {/* <Header /> */}
       <ArgonBox pt={10} px={20}>
         <ImageCarousel />
         <Policy />

@@ -19,7 +19,6 @@ import ArgonTypography from "components/ArgonTypography";
 import HistoryOrderService from "../../../services/HistoryOrderServices";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-import Footer from "components/client/HasagiFooter";
 import aboutImage from "layouts/assets/img/order.png";
 import axios from "axios";
 import Videocam from "@mui/icons-material/Videocam";
@@ -31,7 +30,7 @@ import StarBorderIcon from "@mui/icons-material/StarBorder";
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import reviewsService from "services/ReviewsServices";
 import Swal from "sweetalert2";
-import ReviewFilesService from '../../../services/ReviewFileServices';
+import ReviewFilesService from "../../../services/ReviewFileServices";
 import { storage } from "../../../config/firebase-config";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
@@ -62,7 +61,7 @@ const indexHistory = () => {
   const [comment, setComment] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage] = useState("");
-
+  const [isLoading, setIsLoading] = useState(true);
   const paperRef = useRef(null);
   const searchInputRef = useRef(null);
   const [stickyStyle, setStickyStyle] = useState({ position: "relative" });
@@ -85,6 +84,11 @@ const indexHistory = () => {
     "Tôi không còn nhu cầu sử dụng sản phẩm này nữa",
   ]);
 
+  React.useEffect(() => {
+    setTimeout(() => {
+        setIsLoading(false);
+    }, 700);
+}, []);
 
   useEffect(() => {
     if (location.state?.activeTab) {
@@ -96,7 +100,7 @@ const indexHistory = () => {
         const response = await HistoryOrderService.getHistory();
         const ordersData = response.data;
         setOrders(ordersData);
-        const allProducts = ordersData.flatMap(order => order.products || []);
+        const allProducts = ordersData.flatMap((order) => order.products || []);
 
         const imageRequests = allProducts.map((product) =>
           axios
@@ -127,7 +131,13 @@ const indexHistory = () => {
     };
   }, [location.state]);
 
-  const fetchHandleBuyNow = async (orderId) => {
+  const fetchHandleBuyNow = async (orderId, productId, colorId, sizeId) => {
+    const checkedItems =
+      JSON.parse(localStorage.getItem("checkedItems" + productId + colorId + sizeId)) || [];
+    localStorage.setItem(
+      "checkedItems" + productId + colorId + sizeId,
+      JSON.stringify([Number(productId), colorId, sizeId])
+    );
     HistoryOrderService.getBuyAgain(orderId);
     setTimeout(() => {
       navigate("/Cart");
@@ -139,13 +149,10 @@ const indexHistory = () => {
     setOpenCancelModal(true);
   };
 
-
   const handleOpenReturnModal = (orderId) => {
     setSelectedOrderId(orderId);
     setOpenReturnModal(true);
   };
-
-
 
   const handleCancelOrder = async () => {
     try {
@@ -184,28 +191,20 @@ const indexHistory = () => {
     }
   };
 
-
   const handleReturnOrder = async () => {
     try {
-      await axios.put(
-        `http://localhost:3000/api/history-order/${selectedOrderId}/return`,
-        null,
-        {
-          params: { reason: returnReason },
-        }
-      );
+      await axios.put(`http://localhost:3000/api/history-order/${selectedOrderId}/return`, null, {
+        params: { reason: returnReason },
+      });
       setOpenReturnModal(false);
       const response = await HistoryOrderService.getHistory();
 
       setOrders(response.data);
-
     } catch (error) {
       console.error("There was an error processing the return request!", error);
       alert("Không thể xử lý yêu cầu trả hàng. Vui lòng thử lại.");
     }
   };
-
-
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -255,7 +254,6 @@ const indexHistory = () => {
   const handleStarClick = (index) => {
     setStar(index + 1);
   };
-
 
   const indexOfLastProduct = currentPage * itemsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - itemsPerPage;
@@ -338,8 +336,7 @@ const indexHistory = () => {
 
       setTimeout(() => {
         swal.update({
-          title: "Thành công!",
-          html: "Đánh giá và thêm file review thành công!",
+          title: "Đánh giá thành công!",
           icon: "success",
           color: "black",
           showConfirmButton: true,
@@ -371,14 +368,12 @@ const indexHistory = () => {
     }
   };
 
-
   const handleImageChange = (e) => {
     const files = e.target.files;
     const newFiles = Array.from(files);
     const limitedFiles = newFiles.slice(0, 5 - imageFiles.length);
     setImageFiles([...imageFiles, ...limitedFiles]);
   };
-
 
   const paginate = (pageNumber) => {
     if (pageNumber > 0 && pageNumber <= totalPages) {
@@ -398,11 +393,10 @@ const indexHistory = () => {
     setImageFiles(updatedImages);
   };
 
-
   const resetVideoInput = () => {
     setVideoFile(null);
-    const inputFile = document.getElementById('video-upload');
-    inputFile.value = '';
+    const inputFile = document.getElementById("video-upload");
+    inputFile.value = "";
   };
 
   useEffect(() => {
@@ -475,6 +469,13 @@ const indexHistory = () => {
 
   return (
     <>
+     {isLoading && (
+                <div className="loader">
+                    <div className="loader-inner">
+                        <div className="circle"></div>
+                    </div>
+                </div>
+            )}
       <div>
         <ArgonBox style={{ marginLeft: "-1.22%", width: "102.44%", paddingBottom: "40px" }}>
           <Paper
@@ -501,8 +502,19 @@ const indexHistory = () => {
               className="d-flex justify-content-center"
               style={{ marginTop: searchStyle.position === "fixed" ? "80px" : "0px" }}
             >
-              <div style={{ display: "flex", alignItems: "center", backgroundColor: "#f0f0f0", borderRadius: "4px", padding: "0 10px", height: "45px", width: "100%" }}>
-                <i className="fas fa-search" style={{ color: "#888", marginRight: "10px" }}></i> {/* Icon tìm kiếm */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  backgroundColor: "#f0f0f0",
+                  borderRadius: "4px",
+                  padding: "0 10px",
+                  height: "45px",
+                  width: "100%",
+                }}
+              >
+                <i className="fas fa-search" style={{ color: "#888", marginRight: "10px" }}></i>{" "}
+                {/* Icon tìm kiếm */}
                 <input
                   ref={searchInputRef}
                   type="search"
@@ -627,7 +639,7 @@ const indexHistory = () => {
                                 display="flex"
                                 alignItems="center"
                                 key={index}
-                                style={{ marginBottom: "25px", marginTop: "-20px" }}
+                                style={{ marginBottom: "25px" }}
                               >
                                 {matchingImage && (
                                   <img
@@ -637,8 +649,17 @@ const indexHistory = () => {
                                   />
                                 )}
                                 <Box>
-                                  <Box display="flex" justifyContent="space-between">
-                                    <Typography variant="body2" gutterBottom>
+                                  <Box
+                                    display="flex"
+                                    justifyContent="space-between"
+                                    alignItems="center"
+                                    style={{ flexWrap: "wrap", gap: "8px" }}
+                                  >
+                                    <Typography
+                                      variant="body2"
+                                      gutterBottom
+                                      style={{ wordBreak: "break-word", flex: 1 }}
+                                    >
                                       {product.productName}
                                     </Typography>
                                     {order.statusSlug === "hoan-thanh" && product.canReview && (
@@ -646,29 +667,34 @@ const indexHistory = () => {
                                         variant="body2"
                                         color="textSecondary"
                                         onClick={() => handleReviewClick(product)}
-                                        style={{ marginLeft: "400px" }}
+                                        style={{ cursor: "pointer", textAlign: "right", whiteSpace: "nowrap" }}
                                         onMouseEnter={(e) => {
-                                          e.target.style.textDecoration = 'underline';
-                                          e.target.style.color = 'blue';
+                                          e.target.style.textDecoration = "underline";
+                                          e.target.style.color = "blue";
                                         }}
                                         onMouseLeave={(e) => {
-                                          e.target.style.textDecoration = 'none';
-                                          e.target.style.color = 'black';
+                                          e.target.style.textDecoration = "none";
+                                          e.target.style.color = "black";
                                         }}
                                       >
                                         Đánh giá
                                       </Typography>
                                     )}
                                   </Box>
+
                                   <Typography
                                     variant="body2"
                                     color="textSecondary"
                                     style={{ color: "black" }}
                                   >
-                                    Phân loại hàng: {product.color} {product.size !== "Không có" && (<>, {product.size} </>)}
+                                    Phân loại hàng: {product.color}{" "}
+                                    {product.size !== "Không có" && <>, {product.size} </>}
                                   </Typography>
                                   <Box display="flex" justifyContent="space-between">
-                                    <Typography variant="body2" style={{ color: "black", fontSize: "14px" }}>
+                                    <Typography
+                                      variant="body2"
+                                      style={{ color: "black", fontSize: "14px" }}
+                                    >
                                       Số lượng: {product.productQuantity}
                                     </Typography>
                                     <Typography
@@ -726,7 +752,7 @@ const indexHistory = () => {
                             position: "relative",
                             display: "inline-flex",
                             alignItems: "center",
-                            marginRight: "10px"
+                            marginRight: "10px",
                           }}
                         >
                           {new Intl.NumberFormat("vi-VN").format(order.amount)}đ
@@ -769,7 +795,16 @@ const indexHistory = () => {
                         ) : order.statusSlug === "da-huy" || order.statusSlug === "hoan-thanh" ? (
                           <MuiButton
                             variant="contained"
-                            onClick={() => fetchHandleBuyNow(order.id)}
+                            onClick={() => {
+                              order.products.map((product, index) => {
+                                fetchHandleBuyNow(
+                                  order.id,
+                                  product.productId,
+                                  product.colorId,
+                                  product.sizeId
+                                );
+                              });
+                            }}
                             style={{
                               marginRight: "10px",
                               backgroundColor: "#ee4d2d",
@@ -860,7 +895,6 @@ const indexHistory = () => {
                       <FiChevronRight style={{ fontSize: "20px" }} />
                     </button>
                   </Box>
-
                 </div>
               </Grid>
             )}
@@ -913,7 +947,7 @@ const indexHistory = () => {
             <RadioGroup
               aria-label="cancel-reason"
               value={returnReason}
-              onChange={(e) => setReturnReason(e.target.value)}  // Ensure this sets the value correctly
+              onChange={(e) => setReturnReason(e.target.value)} // Ensure this sets the value correctly
               style={{ marginTop: "15px" }}
             >
               {returnOptions.map((option, index) => (
@@ -933,7 +967,7 @@ const indexHistory = () => {
         </MuiModal>
 
         {selectedProduct && (
-          <BootstrapModal show={showReviewModal} size="lg" centered >
+          <BootstrapModal show={showReviewModal} size="lg" centered>
             <BootstrapModal.Body>
               <div
                 style={{
@@ -951,14 +985,14 @@ const indexHistory = () => {
               {selectedProduct && (
                 <>
                   <div style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
-                  {(() => {
+                    {(() => {
                       // Tìm hình ảnh khớp với productId và colorId
                       const matchingImage = images[selectedProduct.productId]?.find(
                         (image) => image.colorsDTO?.id === selectedProduct.colorId
-                      ); 
+                      );
                       return (
                         <img
-                        src={matchingImage.imageDTOResponse[0]?.url}
+                          src={matchingImage.imageDTOResponse[0]?.url}
                           alt={selectedProduct.productName || "Product Image"}
                           style={{
                             width: "80px",
@@ -990,31 +1024,33 @@ const indexHistory = () => {
                     </div>
                   </div>
                   <form onSubmit={handleSubmitAndAddReviewFile}>
-                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                      <label style={{ fontWeight: 'bold', marginRight: '50px', fontSize: '18px' }}>Chất lượng sản phẩm:</label>
-                      <div style={{ display: 'flex' }}>
+                    <div style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
+                      <label style={{ fontWeight: "bold", marginRight: "50px", fontSize: "18px" }}>
+                        Chất lượng sản phẩm:
+                      </label>
+                      <div style={{ display: "flex" }}>
                         {[...Array(5)].map((_, index) => (
                           <span
                             key={index}
                             onClick={() => handleStarClick(index)}
-                            style={{ cursor: 'pointer', marginRight: '20px' }}
+                            style={{ cursor: "pointer", marginRight: "20px" }}
                           >
                             {index < star ? (
-                              <StarIcon style={{ color: '#FFD700', transform: 'scale(2)' }} /> // Increase the scale size
+                              <StarIcon style={{ color: "#FFD700", transform: "scale(2)" }} /> // Increase the scale size
                             ) : (
-                              <StarBorderIcon style={{ color: '#FFD700', transform: 'scale(2)' }} />
+                              <StarBorderIcon style={{ color: "#FFD700", transform: "scale(2)" }} />
                             )}
                           </span>
                         ))}
                       </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
-                      <div style={{ marginRight: '5px' }}>
+                    <div style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}>
+                      <div style={{ marginRight: "5px" }}>
                         <input
                           type="file"
                           id="image-upload"
                           accept="image/*"
-                          style={{ display: 'none' }}
+                          style={{ display: "none" }}
                           onChange={handleImageChange}
                           multiple
                         />
@@ -1022,85 +1058,86 @@ const indexHistory = () => {
                           variant="outlined"
                           component="span"
                           style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            border: '1px solid #000',
-                            padding: '0',
-                            width: '100px',
-                            height: '100px',
-                            borderRadius: '8px',
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            border: "1px solid #000",
+                            padding: "0",
+                            width: "100px",
+                            height: "100px",
+                            borderRadius: "8px",
                           }}
-                          onClick={() => document.getElementById('image-upload').click()}
+                          onClick={() => document.getElementById("image-upload").click()}
                         >
-                          <PhotoCamera style={{ fontSize: '48px', color: 'black' }} /> {/* Tăng kích thước icon */}
+                          <PhotoCamera style={{ fontSize: "48px", color: "black" }} />{" "}
+                          {/* Tăng kích thước icon */}
                         </BootstrapButton>
                       </div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                      <div style={{ display: "flex", flexWrap: "wrap" }}>
                         {imageFiles.map((file, index) => (
-                          <div key={index} style={{ position: 'relative', marginRight: '3px' }}>
+                          <div key={index} style={{ position: "relative", marginRight: "3px" }}>
                             <img
                               src={URL.createObjectURL(file)} // Tạo URL tạm thời cho ảnh
                               alt={`Review ${index}`}
                               style={{
-                                width: '100px',
-                                height: '100px',
-                                borderRadius: '8px',
-                                objectFit: 'cover',
-                                marginRight: '3px'
+                                width: "100px",
+                                height: "100px",
+                                borderRadius: "8px",
+                                objectFit: "cover",
+                                marginRight: "3px",
                               }}
                             />
                             {/* Icon Close chỉ hiển thị khi có ảnh */}
                             <IconButton
                               style={{
-                                position: 'absolute',
-                                top: '2px',
-                                right: '5px',
-                                padding: '0',
-                                color: '#fff',
-                                fontSize: '15px',
-                                backgroundColor: '#B8B8B8',
+                                position: "absolute",
+                                top: "2px",
+                                right: "5px",
+                                padding: "0",
+                                color: "#fff",
+                                fontSize: "15px",
+                                backgroundColor: "#B8B8B8",
                               }}
                               onClick={() => handleRemoveImage(index)} // Xử lý xóa ảnh
                             >
-                              <CloseIcon style={{ fontSize: '16px' }} />
+                              <CloseIcon style={{ fontSize: "16px" }} />
                             </IconButton>
                           </div>
                         ))}
                       </div>
-                      <div style={{ marginLeft: '1px' }}>
+                      <div style={{ marginLeft: "1px" }}>
                         <input
                           type="file"
                           id="video-upload"
                           accept="video/*"
-                          style={{ display: 'none' }}
+                          style={{ display: "none" }}
                           onChange={handleVideoChange}
                         />
                         {videoFile ? (
-                          <div style={{ position: 'relative', marginTop: '10px' }}>
+                          <div style={{ position: "relative", marginTop: "10px" }}>
                             <video
                               controls
                               src={URL.createObjectURL(videoFile)}
                               style={{
-                                width: '100px',
-                                height: '100px',
-                                borderRadius: '8px',
-                                objectFit: 'cover',
+                                width: "100px",
+                                height: "100px",
+                                borderRadius: "8px",
+                                objectFit: "cover",
                               }}
                             />
                             <IconButton
                               style={{
-                                position: 'absolute',
-                                top: '2px',
-                                right: '2px',
-                                padding: '0',
-                                color: '#fff',
-                                fontSize: '15px',
-                                backgroundColor: '#B8B8B8',
+                                position: "absolute",
+                                top: "2px",
+                                right: "2px",
+                                padding: "0",
+                                color: "#fff",
+                                fontSize: "15px",
+                                backgroundColor: "#B8B8B8",
                               }}
                               onClick={resetVideoInput}
                             >
-                              <CloseIcon style={{ fontSize: '16px' }} />
+                              <CloseIcon style={{ fontSize: "16px" }} />
                             </IconButton>
                           </div>
                         ) : (
@@ -1108,18 +1145,18 @@ const indexHistory = () => {
                             variant="outlined"
                             component="span"
                             style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              border: '1px solid #000',
-                              padding: '0',
-                              width: '100px',
-                              height: '100px',
-                              borderRadius: '8px',
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              border: "1px solid #000",
+                              padding: "0",
+                              width: "100px",
+                              height: "100px",
+                              borderRadius: "8px",
                             }}
-                            onClick={() => document.getElementById('video-upload').click()} // Tự động mở cửa sổ chọn file
+                            onClick={() => document.getElementById("video-upload").click()} // Tự động mở cửa sổ chọn file
                           >
-                            <Videocam style={{ fontSize: '48px', color: 'black' }} />
+                            <Videocam style={{ fontSize: "48px", color: "black" }} />
                           </BootstrapButton>
                         )}
                       </div>
@@ -1127,40 +1164,40 @@ const indexHistory = () => {
                     <textarea
                       rows="4"
                       style={{
-                        width: '100%',
-                        padding: '10px',
-                        fontSize: '16px',
-                        borderRadius: '8px',
-                        marginBottom: '15px',
-                        border: '1px solid #888888',
-                        outline: 'none',
-                        boxSizing: 'border-box',
+                        width: "100%",
+                        padding: "10px",
+                        fontSize: "16px",
+                        borderRadius: "8px",
+                        marginBottom: "15px",
+                        border: "1px solid #888888",
+                        outline: "none",
+                        boxSizing: "border-box",
                       }}
                       placeholder="Nhập đánh giá của bạn"
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
                     />
-                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <div style={{ display: "flex", justifyContent: "flex-end" }}>
                       <BootstrapButton
                         type="submit"
                         variant="contained"
                         onClick={handleSubmitAndAddReviewFile}
                         style={{
-                          color: '#fff',
-                          backgroundColor: '#FFD700',
-                          borderColor: '#FFD700',
-                          padding: '10px 20px',
-                          fontWeight: 'bold',
-                          fontSize: '16px',
-                          borderRadius: '8px',
-                          boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-                          transition: 'background-color 0.3s ease',
+                          color: "#fff",
+                          backgroundColor: "#FFD700",
+                          borderColor: "#FFD700",
+                          padding: "10px 20px",
+                          fontWeight: "bold",
+                          fontSize: "16px",
+                          borderRadius: "8px",
+                          boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                          transition: "background-color 0.3s ease",
                         }}
                         onMouseOver={(e) => {
-                          e.target.style.backgroundColor = '#FFC107';
+                          e.target.style.backgroundColor = "#FFC107";
                         }}
                         onMouseOut={(e) => {
-                          e.target.style.backgroundColor = '#FFD700';
+                          e.target.style.backgroundColor = "#FFD700";
                         }}
                       >
                         Gửi đánh giá
@@ -1171,7 +1208,7 @@ const indexHistory = () => {
                       onClose={handleCloseSnackbar}
                       message={snackbarMessage}
                       autoHideDuration={6000}
-                      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                     />
                   </form>
                 </>

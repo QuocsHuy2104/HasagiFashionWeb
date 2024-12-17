@@ -36,54 +36,57 @@ const ImageCarousel = () => {
     return (
         <ArgonBox mt={5}>
             <div style={{ paddingTop: "0px" }}>
-                <div style={styles.mainContainer}>
-                    <div className="carousel-container" style={styles.carouselContainer}>
-                        {mainBanner && (
-                            <Carousel
-                                prevIcon={<span style={styles.customPrevIcon}>&lt;</span>}
-                                nextIcon={<span style={styles.customNextIcon}>&gt;</span>}
-                                fade
-                                interval={3000}
-                            >
-                                {mainBanner.imageUrls.map((imageUrl, imgIndex) => (
-                                    <Carousel.Item key={`main-banner-${imgIndex}`}>
-                                        <img
-                                            className="d-block w-100"
-                                            style={styles.carouselImage}
-                                            src={imageUrl}
-                                            alt={`Main Banner Image ${imgIndex + 1}`}
-                                        />
-                                    </Carousel.Item>
-                                ))}
-                            </Carousel>
-                        )}
-                    </div>
-
-                    <div style={styles.smallBannersContainer}>
-                        {smallBanners.map((banner, bannerIndex) => (
-                            <div key={banner.id} style={styles[`smallBanner${bannerIndex + 1}`]}>
+                <a href="/Shop">
+                    <div style={styles.mainContainer}>
+                        <div className="carousel-container" style={styles.carouselContainer}>
+                            {mainBanner && (
                                 <Carousel
+                                    prevIcon={<span style={styles.customPrevIcon}>&lt;</span>}
+                                    nextIcon={<span style={styles.customNextIcon}>&gt;</span>}
+                                    fade
                                     interval={3000}
-                                    controls={false}  // Tắt nút trái và phải
-                                    indicators={false} // Tắt các đường đánh dấu trang
                                 >
-                                    {banner.imageUrls.map((imageUrl, imgIndex) => (
-                                        <Carousel.Item key={`small-banner-${bannerIndex}-${imgIndex}`}>
+                                    {mainBanner.imageUrls.map((imageUrl, imgIndex) => (
+                                        <Carousel.Item key={`main-banner-${imgIndex}`}>
                                             <img
-                                                className="d-block"
-                                                style={styles.smallBannerImage}
+                                                className="d-block w-100"
+                                                style={styles.carouselImage}
                                                 src={imageUrl}
-                                                alt={`Small Banner ${bannerIndex + 1} Image ${imgIndex + 1}`}
+                                                alt={`Main Banner Image ${imgIndex + 1}`}
                                             />
                                         </Carousel.Item>
                                     ))}
                                 </Carousel>
-                            </div>
-                        ))}
+                            )}
+                        </div>
 
-
+                        <div style={styles.smallBannersContainer}>
+                            <a href="/Shop">
+                                {smallBanners.map((banner, bannerIndex) => (
+                                    <div key={banner.id} style={styles[`smallBanner${bannerIndex + 1}`]}>
+                                        <Carousel
+                                            interval={3000}
+                                            controls={false}  // Tắt nút trái và phải
+                                            indicators={false} // Tắt các đường đánh dấu trang
+                                        >
+                                            {banner.imageUrls.map((imageUrl, imgIndex) => (
+                                                <Carousel.Item key={`small-banner-${bannerIndex}-${imgIndex}`}>
+                                                    <img
+                                                        className="d-block"
+                                                        style={styles.smallBannerImage}
+                                                        src={imageUrl}
+                                                        alt={`Small Banner ${bannerIndex + 1} Image ${imgIndex + 1}`}
+                                                    />
+                                                </Carousel.Item>
+                                            ))}
+                                        </Carousel>
+                                    </div>
+                                ))}
+                            </a>
+                        </div>
                     </div>
-                </div>
+                </a>
+
             </div>
         </ArgonBox>
     );

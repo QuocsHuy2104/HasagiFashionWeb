@@ -73,15 +73,15 @@ const ProductVariant = ({ onClose, cartDetailId, productId, colorId, sizeId }) =
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (selectedColor ) {
+    if (selectedColor) {
       try {
         if (selectedSize) {
           // Nếu có kích thước, gọi API với color và size
           await CartService.getCartUpdate(cartDetailId, selectedColor, selectedSize, productId);
-      } else {
+        } else {
           // Nếu không có kích thước, gọi API với chỉ color và sizeId = null
           await CartService.getCartUpdatePK(cartDetailId, selectedColor, productId);
-      }
+        }
         const checkedItemsKey = `checkedItems${productId}${colorId}${sizeId}`;
         const newCheckedItemsKey = `checkedItems${productId}${selectedColor}${selectedSize}`;
         const checkedItems = JSON.parse(localStorage.getItem(checkedItemsKey)) || [];
@@ -94,8 +94,7 @@ const ProductVariant = ({ onClose, cartDetailId, productId, colorId, sizeId }) =
         }
         onClose();
       } catch (error) {
-        setError(error.message || "Failed to update product option");
-        console.error("Error during cart update:", error);
+        setError(error.response.data);
       }
     } else {
       setError("Please select both color and size before submitting");
@@ -195,80 +194,80 @@ const ProductVariant = ({ onClose, cartDetailId, productId, colorId, sizeId }) =
         })}
       </div>
       {sizeId && (
-      <div className="variant-options">
-        <div className="variant-header mt-2">
-          <h4>Kích thước:</h4>
-        </div>
-        {sizes.map((variant) => (
-          <div
-            key={variant.id}
-            style={{
-              display: "inline-block",
-            }}
-            onMouseEnter={(e) => {
-              if (!variant.check) {
-                setTooltip({
-                  message: `Kích thước ${variant.name} của màu ${colorName} đã hết, vui lòng chọn kích thước khác.`,
-                  x: e.pageX,
-                  y: e.pageY,
-                });
-              }
-            }}
-            onMouseMove={(e) => {
-              if (tooltip) {
-                setTooltip({
-                  ...tooltip,
-                  x: e.pageX,
-                  y: e.pageY,
-                });
-              }
-            }}
-            onMouseLeave={() => setTooltip(null)}
-          >
-            <button
+        <div className="variant-options">
+          <div className="variant-header mt-2">
+            <h4>Kích thước:</h4>
+          </div>
+          {sizes.map((variant) => (
+            <div
               key={variant.id}
-              className={`variant-button ${selectedSize === variant.id ? "selected" : ""} ${
-                !variant.check ? "disabled" : ""
-              }`}
-              onClick={() => {
-                if (variant.check) {
-                  setSelectedSize((prevSelected) => {
-                    const newSelectedSize = prevSelected === variant.id ? null : variant.id;
-                    prevSelected === variant.id ? setSizeName("") : setSizeName(variant.name);
-                    return newSelectedSize;
+              style={{
+                display: "inline-block",
+              }}
+              onMouseEnter={(e) => {
+                if (!variant.check) {
+                  setTooltip({
+                    message: `Kích thước ${variant.name} của màu ${colorName} đã hết, vui lòng chọn kích thước khác.`,
+                    x: e.pageX,
+                    y: e.pageY,
                   });
                 }
               }}
-              disabled={!variant.check}
+              onMouseMove={(e) => {
+                if (tooltip) {
+                  setTooltip({
+                    ...tooltip,
+                    x: e.pageX,
+                    y: e.pageY,
+                  });
+                }
+              }}
+              onMouseLeave={() => setTooltip(null)}
+            >
+              <button
+                key={variant.id}
+                className={`variant-button ${selectedSize === variant.id ? "selected" : ""} ${
+                  !variant.check ? "disabled" : ""
+                }`}
+                onClick={() => {
+                  if (variant.check) {
+                    setSelectedSize((prevSelected) => {
+                      const newSelectedSize = prevSelected === variant.id ? null : variant.id;
+                      prevSelected === variant.id ? setSizeName("") : setSizeName(variant.name);
+                      return newSelectedSize;
+                    });
+                  }
+                }}
+                disabled={!variant.check}
+                style={{
+                  cursor: !variant.check ? "not-allowed" : "pointer",
+                  opacity: !variant.check ? 0.5 : 1,
+                }}
+              >
+                {variant.name}
+              </button>
+            </div>
+          ))}
+          {tooltip && (
+            <div
               style={{
-                cursor: !variant.check ? "not-allowed" : "pointer",
-                opacity: !variant.check ? 0.5 : 1,
+                position: "fixed",
+                top: tooltip.y - 310,
+                left: tooltip.x - 600,
+                backgroundColor: "#333",
+                color: "#fff",
+                padding: "5px 10px",
+                borderRadius: "0px",
+                fontSize: "12px",
+                pointerEvents: "none",
+                whiteSpace: "nowrap",
+                zIndex: 1000,
               }}
             >
-              {variant.name}
-            </button>
-          </div>
-        ))}
-        {tooltip && (
-          <div
-            style={{
-              position: "fixed",
-              top: tooltip.y - 310,
-              left: tooltip.x - 600,
-              backgroundColor: "#333",
-              color: "#fff",
-              padding: "5px 10px",
-              borderRadius: "0px",
-              fontSize: "12px",
-              pointerEvents: "none",
-              whiteSpace: "nowrap",
-              zIndex: 1000,
-            }}
-          >
-            {tooltip.message}
-          </div>
-        )}
-      </div>
+              {tooltip.message}
+            </div>
+          )}
+        </div>
       )}
       {Error && <p style={{ fontSize: "14px", color: "red" }}>{Error.message}</p>}
       <div className="variant-footer">

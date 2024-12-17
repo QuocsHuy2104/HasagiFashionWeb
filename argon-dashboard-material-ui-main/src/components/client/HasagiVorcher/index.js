@@ -53,27 +53,49 @@ const Voucher = ({ voucher, onCopy }) => {
                 <ArgonBox sx={{ overflow: "hidden", textOverflow: "ellipsis" }}>
                     <ArgonBox
                         sx={{
-                            background: "linear-gradient(to right, #FFD700, #FFA500)",
-                            padding: "3px 8px",
-                            color: "#000",
-                            fontWeight: "bold",
-                            display: "inline-block",
-                            borderRadius: "8px",
-                            fontSize: "12px",
-                            marginBottom: "4px",
-                            whiteSpace: "nowrap",
+                            display: "flex", // Sử dụng flexbox
+                            alignItems: "center", // Căn giữa theo trục dọc
+                            justifyContent: "space-between", // Hoặc điều chỉnh theo nhu cầu
                         }}
                     >
-                        Phiếu giảm giá
+                        <ArgonBox
+                            sx={{
+                                background: "linear-gradient(to right, #FFD700, #FFA500)",
+                                padding: "3px 8px",
+                                color: "#000",
+                                fontWeight: "bold",
+                                display: "inline-block",
+                                borderRadius: "8px",
+                                fontSize: "12px",
+                                marginBottom: "0", // Xóa margin-bottom để căn thẳng hàng
+                                whiteSpace: "nowrap",
+                            }}
+                        >
+                            Phiếu giảm giá
+                        </ArgonBox>
+                        <ArgonBox
+                            sx={{
+                                textAlign: "right",
+                                flexShrink: 0,
+                            }}
+                        >
+                            <ArgonBox
+                                sx={{
+                                    fontSize: "20px",
+                                    fontWeight: "bold",
+                                    color: "#FF4500",
+                                    whiteSpace: "nowrap",
+                                }}
+                            >
+                                Giảm {voucher.discountPercentage}%
+                            </ArgonBox>
+                        </ArgonBox>
                     </ArgonBox>
                     <ArgonBox
                         sx={{
                             fontWeight: "bold",
                             fontSize: "14px",
                             color: "#FF4500",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
                         }}
                     >
                         Mã: {voucher.code}
@@ -83,9 +105,6 @@ const Voucher = ({ voucher, onCopy }) => {
                             fontSize: "12px",
                             color: "#333",
                             marginTop: "3px",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
                         }}
                     >
                         Giảm <strong>{voucher.discountPercentage}%</strong> khi hóa đơn từ {voucher.minimumOrderValue}đ, giảm tối đa {voucher.maxDiscount}
@@ -104,58 +123,7 @@ const Voucher = ({ voucher, onCopy }) => {
                     </ArgonBox>
                 </ArgonBox>
             </ArgonBox>
-            <ArgonBox sx={{ textAlign: "right", flexShrink: 0 }}>
-                <ArgonBox
-                    sx={{
-                        fontSize: "20px",
-                        fontWeight: "bold",
-                        color: "#FF4500",
-                        whiteSpace: "nowrap",
-                    }}
-                >
-                    Giảm {voucher.discountPercentage}%
-                </ArgonBox>
-                <ArgonButton
-                    sx={{
-                        backgroundColor: "#FF4500",
-                        background: "linear-gradient(to right, #FF7F50, #FF4500)",
-                        color: "#fff",
-                        fontWeight: "bold",
-                        marginTop: "8px",
-                        padding: "6px 12px",
-                        borderRadius: "6px",
-                        fontSize: "12px",
-                        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-                        whiteSpace: "nowrap",
-                        "&:hover": {
-                            background: "linear-gradient(to right, #FF4500, #FF6347)",
-                        },
-                    }}
-                    onClick={() => {
-                        onCopy(voucher.code);
-                        Swal.fire({
-                            position: "top-center",
-                            icon: "success",
-                            title: "Đã sao chép mã!",
-                            showConfirmButton: false,
-                            timer: 1500,
-                            reverseButtons: true,
-                            scrollbarPadding: false,
-                            didOpen: () => {
-                                document.body.style.overflowY = "auto";
-                                document.body.style.padding = "0";
-                            },
-                            willClose: () => {
-                                document.body.style.overflowY = "auto";
-                                document.body.style.padding = "0";
-                            },
-                        });
-                    }}
-                >
-                    Sao chép mã
-                </ArgonButton>
 
-            </ArgonBox>
         </ArgonBox>
     );
 };
@@ -222,24 +190,16 @@ const VoucherList = () => {
     const [vouchers, setVouchers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [usedVouchers, setUsedVouchers] = useState([]);
-    const accountId = Cookies.get('accountId');
-    const [openSnackbar, setOpenSnackbar] = useState(false);
-    const [copyMessage, setCopyMessage] = useState("");
-
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const voucherRequests = [VoucherService.getAllVouchers()];
-                if (accountId) {
-                    voucherRequests.push(VoucherService.getUsedVouchersByAccount(accountId));
-                }
+                const voucherRequests = [VoucherService.getUnusedVouchersByAccountUS()];
 
-                const [voucherResponse, usedVoucherResponse] = await Promise.all(voucherRequests);
+                const [voucherResponse, unusedVoucherResponse] = await Promise.all(voucherRequests);
                 const activeVouchers = voucherResponse.data.filter(voucher => voucher.isActive);
-
                 setVouchers(activeVouchers);
-                setUsedVouchers(usedVoucherResponse ? usedVoucherResponse.data : []);
+                setUsedVouchers(unusedVoucherResponse ? unusedVoucherResponse.data : []);
             } catch (error) {
                 console.error("Error fetching voucher data:", error);
             } finally {
@@ -248,7 +208,8 @@ const VoucherList = () => {
         };
 
         fetchData();
-    }, [accountId]);
+    }, []);
+
 
 
 
@@ -289,15 +250,6 @@ const VoucherList = () => {
         ],
     };
 
-    const copyToClipboard = (code) => {
-        navigator.clipboard
-            .writeText(code)
-            .catch((err) => {
-                console.error("Lỗi sao chép:", err);
-                setCopyMessage("Không thể sao chép mã.");
-                setOpenSnackbar(true);
-            });
-    };
 
     if (loading) {
         return <CircularProgress />;
@@ -308,11 +260,11 @@ const VoucherList = () => {
             <div style={{ position: "relative" }}>
                 <Slider {...sliderSettings} className="pb-3 pt-4">
                     {availableVouchers.length === 0 ? (
-                        <Typography variant="h6">Không có voucher nào.</Typography>
+                        <></>
                     ) : (
                         availableVouchers.map(voucher => (
                             <div key={voucher.id}>
-                                <Voucher voucher={voucher} onCopy={copyToClipboard} />
+                                <Voucher voucher={voucher} />
 
                             </div>
                         ))
@@ -320,25 +272,6 @@ const VoucherList = () => {
                 </Slider>
             </div>
 
-
-            <Snackbar
-                open={openSnackbar}
-                autoHideDuration={3000}
-                onClose={() => setOpenSnackbar(false)}
-                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-            >
-                <SnackbarContent
-                    message={copyMessage}
-                    sx={{
-                        backgroundColor: "black",
-                        color: "#fff",
-                        fontWeight: "bold",
-                        borderRadius: "8px",
-                        padding: "8px 16px",
-                        textAlign: "center",
-                    }}
-                />
-            </Snackbar>
         </>
     );
 };

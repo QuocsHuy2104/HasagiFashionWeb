@@ -331,14 +331,14 @@ function Product() {
                 <ArgonBox mb={5}>
                     <Card>
                         <ArgonBox display="flex" justifyContent="s  pace-between" p={3}>
-                            <ArgonTypography variant="h6">Quản lý sản phẩm</ArgonTypography>
+                            <ArgonTypography variant="h6" >Quản lý sản phẩm</ArgonTypography>
                         </ArgonBox>
                         <ArgonBox mx={7}>
                             <ArgonBox component="form" role="form" onSubmit={handleSubmit}>
                                 <ArgonBox>
-
                                     <ArgonBox mb={3} mx={{ xs: 1, sm: 2, md: 3 }} display="flex" gap={2}>
-                                        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
+                                        <div style={{ display: 'flex', fontWeight: 'bold', marginBottom: '15px', flexDirection: 'column' }}>
+                                            <p style={{ marginBottom: '10px', fontSize: '14px', color: '#333' }}>Chọn ảnh sản phẩm</p>
                                             <div style={{ marginRight: '5px' }}>
                                                 {!formData.image ? (
                                                     <>
@@ -369,7 +369,6 @@ function Product() {
                                                         >
                                                             <PhotoCamera style={{ color: 'black', width: '50px' }} />
                                                         </ArgonButton>
-
                                                     </>
                                                 ) : (
                                                     <div style={{ position: 'relative' }}>
@@ -394,7 +393,6 @@ function Product() {
                                                                 color: '#fff',
                                                                 fontSize: '15px',
                                                                 backgroundColor: '#B8B8B8',
-
                                                             }}
                                                             onClick={handleRemoveImage}
                                                         >
@@ -406,69 +404,74 @@ function Product() {
                                         </div>
 
 
-                                        <div style={{ marginLeft: '1px' }}>
-                                            <input
-                                                type="file"
-                                                id="video-upload"
-                                                accept="video/*"
-                                                style={{ display: 'none' }}
-                                                onChange={handleVideoChange}
-                                            />
-                                            {formData.video ? (
-                                                <div style={{ position: 'relative' }}>
-                                                    {formData.video && (
-                                                        <video
-                                                            controls
-                                                            src={formData.video instanceof File ? URL.createObjectURL(formData.video) : formData.video} // Check if it's a file or URL
+
+                                        <div style={{ display: 'flex', fontWeight: 'bold', marginBottom: '15px', flexDirection: 'column' }}>
+                                            <p style={{ marginBottom: '10px', fontSize: '14px', color: '#333' }}>Chọn video sản phẩm</p>
+                                            <div style={{ marginLeft: '1px' }}>
+                                                <input
+                                                    type="file"
+                                                    id="video-upload"
+                                                    accept="video/*"
+                                                    style={{ display: 'none' }}
+                                                    onChange={handleVideoChange}
+                                                />
+                                                {formData.video ? (
+                                                    <div style={{ position: 'relative' }}>
+                                                        {formData.video && (
+                                                            <video
+                                                                controls
+                                                                src={formData.video instanceof File ? URL.createObjectURL(formData.video) : formData.video} // Check if it's a file or URL
+                                                                style={{
+                                                                    width: '200px',
+                                                                    height: '200px',
+                                                                    borderRadius: '8px',
+                                                                    objectFit: 'cover',
+                                                                }}
+                                                            />
+                                                        )}
+                                                        <IconButton
                                                             style={{
-                                                                width: '200px',
-                                                                height: '200px',
-                                                                borderRadius: '8px',
-                                                                objectFit: 'cover',
+                                                                position: 'absolute',
+                                                                top: '2px',
+                                                                right: '2px',
+                                                                padding: '0',
+                                                                color: '#fff',
+                                                                fontSize: '15px',
+                                                                backgroundColor: '#B8B8B8',
                                                             }}
-                                                        />
-                                                    )}
-                                                    <IconButton
+                                                            onClick={resetVideoInput}
+                                                        >
+                                                            <CloseIcon style={{ fontSize: '16px' }} />
+                                                        </IconButton>
+                                                    </div>
+                                                ) : (
+                                                    <ArgonButton
+                                                        variant="outlined"
+                                                        component="span"
                                                         style={{
-                                                            position: 'absolute',
-                                                            top: '2px',
-                                                            right: '2px',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            border: '1px solid #B8B8B8',
                                                             padding: '0',
-                                                            color: '#fff',
-                                                            fontSize: '15px',
-                                                            backgroundColor: '#B8B8B8',
+                                                            width: '200px',
+                                                            height: '200px',
+                                                            borderRadius: '8px',
                                                         }}
-                                                        onClick={resetVideoInput}
+                                                        onClick={() => document.getElementById('video-upload').click()}
                                                     >
-                                                        <CloseIcon style={{ fontSize: '16px' }} />
-                                                    </IconButton>
-                                                </div>
-                                            ) : (
-                                                <ArgonButton
-                                                    variant="outlined"
-                                                    component="span"
-                                                    style={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        border: '1px solid #B8B8B8',
-                                                        padding: '0',
-                                                        width: '200px',
-                                                        height: '200px',
-                                                        borderRadius: '8px',
-                                                    }}
-                                                    onClick={() => document.getElementById('video-upload').click()}
-                                                >
-                                                    <Videocam style={{ fontSize: '80px', color: 'black' }} />
-                                                </ArgonButton>
-                                            )}
+                                                        <Videocam style={{ fontSize: '80px', color: 'black' }} />
+                                                    </ArgonButton>
+                                                )}
+                                            </div>
                                         </div>
                                     </ArgonBox>
 
                                     <ArgonBox mb={3} mx={{ xs: 1, sm: 2, md: 3 }}>
+                                        <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Tên sản phẩm</p>
                                         <ArgonInput
                                             type="text"
-                                            placeholder={errors.name ? errors.name : "Tên sản phẩm"}
+                                            placeholder="Nhập tên sản phẩm"
                                             name="name"
                                             size="large"
                                             value={formData.name}
@@ -483,8 +486,9 @@ function Product() {
                                     </ArgonBox>
 
                                     <ArgonBox mb={3} mx={{ xs: 1, sm: 2, md: 3 }}>
+                                        <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Mô tả sản phẩm</p>
                                         <ArgonInput
-                                            placeholder={errors.description ? errors.description : "Mô tả..."}
+                                            placeholder="Nhập mô tả..."
                                             multiline
                                             rows={5}
                                             name="description"
@@ -528,7 +532,7 @@ function Product() {
                                                 onChange={handleChange}
                                                 value={formData.brandId}
                                                 options={[
-                                                    { value: "", label: errors.brandId ? errors.brandId : "Thương hiệu" },
+                                                    { value: "", label: "Thương hiệu" },
                                                     ...brands.map(brand => ({ value: brand.id, label: brand.name }))
                                                 ]}
                                                 style={{
@@ -549,7 +553,7 @@ function Product() {
                                                 onChange={handleChange}
                                                 value={formData.categoryId}
                                                 options={[
-                                                    { value: "", label: errors.categoryId ? errors.categoryId : "Danh mục" },
+                                                    { value: "", label: "Danh mục" },
                                                     ...categories.map(category => ({ value: category.id, label: category.name }))
                                                 ]}
                                                 style={{
@@ -614,22 +618,19 @@ function Product() {
                                             type="submit"
                                             size="large"
                                             color="info"
-                                            sx={{ minWidth: 100, padding: '8px 16px' }} 
+                                            sx={{ minWidth: 100, padding: '8px 16px' }}
                                         >
                                             {formData.id ? "Cập nhật" : "Thêm"}
                                         </ArgonButton>
                                         <ArgonButton
                                             size="large"
                                             color="primary"
-                                            sx={{ minWidth: 100, padding: '8px 16px' }} 
+                                            sx={{ minWidth: 100, padding: '8px 16px' }}
                                             onClick={resetForm}
                                         >
                                             Làm mới
                                         </ArgonButton>
                                     </ArgonBox>
-
-
-
                                 </ArgonBox>
                             </ArgonBox>
                         </ArgonBox>
@@ -745,9 +746,11 @@ function Product() {
                                 </ArgonBox>
                             </ArgonBox>
                         </Card>
+
                     </ArgonBox>
                 </ArgonBox>
             </ArgonBox >
+
             <Footer />
         </DashboardLayout >
     );

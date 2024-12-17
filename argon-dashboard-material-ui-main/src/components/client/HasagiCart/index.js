@@ -5,7 +5,6 @@ import { FaTimes } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Backup from "components/client/HasagiBackup";
-import Cookies from "js-cookie";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Link } from "react-router-dom";
@@ -14,8 +13,7 @@ import CartService from "../../../services/CartService";
 import AddressService from "../../../services/AddressServices";
 import ProductVariant from "./ProductVariant";
 import logo from "components/client/assets/images/logo1.png";
-import Swal from 'sweetalert2';
-
+import Swal from "sweetalert2";
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -28,7 +26,6 @@ const Cart = () => {
   const navigate = useNavigate();
 
   const fetchCartItems = async () => {
-
     try {
       const [cartResponse, addressResponse] = await Promise.all([
         CartService.getCart(),
@@ -105,7 +102,14 @@ const Cart = () => {
   const subtotal = calculateSubtotal();
   const total = subtotal;
 
-  const handleQuantityChange = async (itemId, change, inputValue = null) => {
+  const handleQuantityChange = async (
+    itemId,
+    change,
+    inputValue = null,
+    productId,
+    colorId,
+    sizeId
+  ) => {
     const updatedCartItems = cartItems.map((item) => {
       if (item.cartdetailid === itemId) {
         const newQuantity =
@@ -140,6 +144,7 @@ const Cart = () => {
               setCartItems(filteredCartItems);
               try {
                 CartService.getRemove(itemId);
+                localStorage.removeItem("checkedItems" + productId + colorId + sizeId);
                 Swal.fire({
                   title: "Xóa thành công!",
                   text: "Sản phẩm đã được xóa.",
@@ -200,13 +205,12 @@ const Cart = () => {
     }
   };
 
-
   const handleRemoveItem = async (itemId, productId, colorId, sizeId) => {
     try {
       CartService.getRemove(itemId);
       setCartItems(cartItems.filter((item) => item.cartdetailid !== itemId));
       localStorage.removeItem("checkedItems" + productId + colorId + sizeId);
-      toast.success("Xóa sản phẩm thành công.");
+      toast.success("Sản phẩm đã đượcđược xóa khỏi giỏ hàng!");
     } catch (error) {
       console.error("Error removing item:", error);
       toast.error("Error removing item.");
@@ -241,9 +245,9 @@ const Cart = () => {
       cartItems.map((item) =>
         item.productId === productId
           ? localStorage.setItem(
-            "checkedItems" + productId + colorId + sizeId,
-            JSON.stringify([Number(productId), item.colorId, item.sizeId])
-          )
+              "checkedItems" + productId + colorId + sizeId,
+              JSON.stringify([Number(productId), item.colorId, item.sizeId])
+            )
           : item
       );
     }
@@ -262,9 +266,10 @@ const Cart = () => {
   };
 
   const handleCheckout = () => {
+    localStorage.clear();
     const selectedItems = cartItems.filter((item) => item.selected);
     if (selectedItems.length === 0) {
-      toast.warn("Vui lòng chọn sản phẩm để thanh toán.");
+      toast.warn("Vui lòng chọn sản phẩm để thanh toán!");
       return;
     }
     localStorage.setItem("cartItemsBackup", JSON.stringify(selectedItems));
@@ -285,7 +290,7 @@ const Cart = () => {
   const handleDeleteSelected = async () => {
     const selectedIds = cartItems.filter((item) => item.selected).map((item) => item.cartdetailid);
     if (selectedIds.length === 0) {
-      toast.warn("Vui lòng chọn sản phẩm để xóa.");
+      toast.warn("Vui lòng chọn sản phẩm để xóa!");
       return;
     }
     try {
@@ -293,7 +298,7 @@ const Cart = () => {
       setCartItems(cartItems.filter((item) => !selectedIds.includes(item.cartdetailid)));
       setSelectAll(false);
       localStorage.clear();
-      toast.success("Xóa sản phẩm thành công.");
+      toast.success("Sản phẩm đã xóa khỏi giỏ hàng!");
     } catch (error) {
       console.error("Error deleting items:", error);
       toast.error("Có lỗi xảy ra khi xóa sản phẩm.");
@@ -439,8 +444,7 @@ const Cart = () => {
                     <th
                       scope="col"
                       style={{ width: "5%", textAlign: "center", padding: "10px", border: "none" }}
-                    >
-                    </th>
+                    ></th>
                     <th
                       scope="col"
                       style={{ width: "20%", textAlign: "left", padding: "10px", border: "none" }}
@@ -517,7 +521,14 @@ const Cart = () => {
                           <input
                             type="checkbox"
                             checked={item.selected}
-                            onChange={() => handleCheckboxChange(item.cartdetailid, item.productId)}
+                            onChange={() =>
+                              handleCheckboxChange(
+                                item.cartdetailid,
+                                item.productId,
+                                item.colorId,
+                                item.sizeId
+                              )
+                            }
                             style={{ transform: "scale(1.5)" }}
                           />
                         </td>
@@ -547,7 +558,6 @@ const Cart = () => {
                             )}
                             {item.name}
                           </Link>
-
                         </td>
                         <td
                           className="align-middle"
@@ -591,9 +601,7 @@ const Cart = () => {
                                 textAlign: "left",
                               }}
                             >
-                              <span>
-                                {item.color || "Chưa chọn màu"}
-                              </span>
+                              <span>{item.color || "Chưa chọn màu"}</span>
                               {item.size !== "Không có" && (
                                 <>
                                   , <span>{item.size || "Chưa chọn kích thước"}</span>
@@ -663,7 +671,16 @@ const Cart = () => {
                             <div className="input-group-btn">
                               <button
                                 className="btn btn-warning btn-minus"
-                                onClick={() => handleQuantityChange(item.cartdetailid, -1)}
+                                onClick={() =>
+                                  handleQuantityChange(
+                                    item.cartdetailid,
+                                    -1,
+                                    null,
+                                    item.productId,
+                                    item.colorId,
+                                    item.sizeId
+                                  )
+                                }
                                 aria-label={`Decrease quantity of ${item.name}`}
                                 style={{
                                   width: "30px",
@@ -691,15 +708,15 @@ const Cart = () => {
                                 }
                               }}
                               onBlur={(e) => {
-                                const inputValue = e.target.value.trim(); 
+                                const inputValue = e.target.value.trim();
                                 if (inputValue === "") {
-                                  handleQuantityChange(item.cartdetailid, 0, "1"); 
+                                  handleQuantityChange(item.cartdetailid, 0, "1");
                                 } else {
-                                  handleQuantityChange(item.cartdetailid, 0, inputValue); 
+                                  handleQuantityChange(item.cartdetailid, 0, inputValue);
                                 }
                               }}
                               style={{
-                                width: "60px", 
+                                width: "60px",
                                 height: "30px",
                                 margin: "0 5px",
                                 boxShadow: "none",
@@ -729,15 +746,23 @@ const Cart = () => {
                         </td>
 
                         <td className="align-middle" style={{ border: "none" }}>
-                        <span style={{ marginLeft: "1px" }}>
+                          <span style={{ marginLeft: "1px" }}>
                             {item.quantity !== ""
                               ? new Intl.NumberFormat("vi-VN").format(item.price * item.quantity)
-                              : new Intl.NumberFormat("vi-VN").format(item.price)}đ
+                              : new Intl.NumberFormat("vi-VN").format(item.price)}
+                            đ
                           </span>
                         </td>
                         <td className="align-middle" style={{ border: "none" }}>
                           <button
-                            onClick={() => handleRemoveItem(item.cartdetailid)}
+                            onClick={() =>
+                              handleRemoveItem(
+                                item.cartdetailid,
+                                item.productId,
+                                item.colorId,
+                                item.sizeId
+                              )
+                            }
                             className="btn btn-danger"
                             style={{ padding: "0.5rem 1rem" }}
                           >

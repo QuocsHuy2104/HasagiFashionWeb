@@ -15,6 +15,7 @@ import khang from "components/client/assets/images/z6040871339792_8cddf8dbc80eed
 import ky from "components/client/assets/images/z6040871339793_73f2b947d976e9bd1894389b0156b547.jpg"
 import day from "components/client/assets/images/z6040871339794_2fd8d508db0891331d5d0871273b74c8.jpg"
 import kiet from "components/client/assets/images/z6040871339795_a50e97d3599ecbae63774f2535abcaae.jpg"
+import ChatBot from "components/client/HasagiChatBot";
 const AboutShop = () => {
     return (
         <>
@@ -428,6 +429,7 @@ const AboutShop = () => {
                 </div>
             </div>
             <Footer />
+            <ChatBot />
         </>
     );
 };

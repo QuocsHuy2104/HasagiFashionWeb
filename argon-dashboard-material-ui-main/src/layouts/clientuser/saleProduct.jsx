@@ -122,7 +122,6 @@ export default function SaleProduct() {
                 justifyItems="center"
             >
                 {currentProducts
-                    .filter((product) => product.isActive)
                     .map((product, index) => (
                         <div
                             key={index}
