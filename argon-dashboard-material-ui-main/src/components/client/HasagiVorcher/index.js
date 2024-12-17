@@ -226,29 +226,25 @@ const VoucherList = () => {
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [copyMessage, setCopyMessage] = useState("");
 
-
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const voucherRequests = [VoucherService.getAllVouchers()];
-                if (accountId) {
-                    voucherRequests.push(VoucherService.getUsedVouchersByAccount(accountId));
-                }
+                const voucherRequests = [VoucherService.getUnusedVouchersByAccountUS()];
 
-                const [voucherResponse, usedVoucherResponse] = await Promise.all(voucherRequests);
+                const [voucherResponse, unusedVoucherResponse] = await Promise.all(voucherRequests);
                 const activeVouchers = voucherResponse.data.filter(voucher => voucher.isActive);
-
                 setVouchers(activeVouchers);
-                setUsedVouchers(usedVoucherResponse ? usedVoucherResponse.data : []);
+                setUsedVouchers(unusedVoucherResponse ? unusedVoucherResponse.data : []);
             } catch (error) {
                 console.error("Error fetching voucher data:", error);
             } finally {
                 setLoading(false);
             }
         };
-
+    
         fetchData();
-    }, [accountId]);
+    }, []);  
+    
 
 
 

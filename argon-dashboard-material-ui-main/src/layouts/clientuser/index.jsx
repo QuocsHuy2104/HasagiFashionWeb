@@ -11,6 +11,8 @@ import ListCategories from './categories'
 import SaleProduct from "./saleProduct";
 
 const FeaturesAndAbout = () => {
+
+  
   return (
     <>
       <Header />

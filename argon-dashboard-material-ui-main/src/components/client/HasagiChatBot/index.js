@@ -49,7 +49,7 @@ function Gemini() {
 
 
     const getVoucherData = async () => {
-        const response = await VoucherService.getAllVouchersUS();
+        const response = await VoucherService.getUnusedVouchersByAccountUS();
         return response?.data || [];
     };
 
@@ -71,11 +71,21 @@ function Gemini() {
     const generateAIResponse = async (question) => {
         setLoading(true);
         try {
-            // Lấy dữ liệu từ các API
-            const categories = await getCategoryData();
-            const brands = await getBrandData();
-            const products = await getProductData();
-            const vouchers = await getVoucherData();
+            const categories = (await getCategoryData()).map(c => ({ name: c.name }));
+            const brands = (await getBrandData()).map(b => ({ name: b.name }));
+            const products = (await getProductData()).map(p => ({
+                name: p.name,
+                price: p.importPrice,
+                category: p.categoryDTOResponse?.name,
+                brand: p.brandDTOResponse?.name
+            }));
+            const vouchers = (await getVoucherData()).map(v => ({ code: v.code, discount: v.discountPercentage, minimumOrderValue: v.minimumOrderValue }));
+
+            console.log("Categories:", categories);
+            console.log("Brands:", brands);
+            console.log("Products:", products);
+            console.log("Vouchers:", vouchers);
+
 
             // Kiểm tra trùng lặp câu hỏi
             const lastQuestion = chatHistory[chatHistory.length - 1]?.text;
@@ -91,9 +101,7 @@ function Gemini() {
             // Kiểm tra các từ khóa trong câu hỏi
             const keywords = ['sản phẩm', 'phiếu giảm giá', 'danh mục', 'thương hiệu', 'chi tiết sản phẩm'];
             let shouldSuggest = false;
-            let keywordCounts = {};  // Đảm bảo khai báo và sử dụng keywordCounts
-
-            // Đếm số lần xuất hiện từ khóa trong câu hỏi
+            let keywordCounts = {};
             keywords.forEach(keyword => {
                 if (question.toLowerCase().includes(keyword)) {
                     keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
@@ -117,7 +125,7 @@ function Gemini() {
             - **Danh mục sản phẩm**: ${JSON.stringify(categories)}.
             - **Thương hiệu**: ${JSON.stringify(brands)}.
             - **Sản phẩm**: ${JSON.stringify(products)}.
-            - **Voucher**: ${JSON.stringify(vouchers)}.
+            - **Phiếu giảm giá**: ${JSON.stringify(vouchers)}.
             - **Điều khoản & chính sách**: 
                 - Giới thiệu: ${termsAndConditions.introduction}.
                 - Chính sách đặt hàng: ${termsAndConditions.orderPolicy}.
@@ -153,8 +161,6 @@ function Gemini() {
             if (shouldSuggest) {
                 finalAnswer += "\n\nCó vẻ như bạn đang tìm kiếm thông tin về một số sản phẩm hoặc chính sách. Bạn có thể truy cập <a href='/shop'>trang sản phẩm</a> của chúng tôi để tìm kiếm thêm chi tiết.";
             }
-
-            // Chuyển đổi URL trong câu trả lời thành thẻ <a> HTML
             finalAnswer = convertTextToLinks(finalAnswer);
 
             // Cập nhật lịch sử trò chuyện
@@ -204,9 +210,9 @@ function Gemini() {
     useEffect(() => {
         if (question.trim() && isVoiceInput) {
             handleSubmit(new Event('submit'));
-            setIsVoiceInput(false); 
+            setIsVoiceInput(false);
         }
-    }, [question, isVoiceInput]); 
+    }, [question, isVoiceInput]);
     const convertTextToLinks = (text) => {
         const urlPattern = /https?:\/\/[^\s]+/g;
         return text.replace(urlPattern, (url) => `<a href="${url}" target="_blank" style="color: #1e90ff; text-decoration: none;">${url}</a>`);
@@ -222,8 +228,8 @@ function Gemini() {
 
         recognition.onresult = (event) => {
             const spokenText = event.results[0][0].transcript;
-            setQuestion(spokenText); 
-            setIsVoiceInput(true); 
+            setQuestion(spokenText);
+            setIsVoiceInput(true);
         };
 
         recognition.onerror = (event) => {

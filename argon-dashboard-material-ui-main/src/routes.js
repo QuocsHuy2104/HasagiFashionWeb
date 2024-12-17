@@ -44,7 +44,7 @@ const routes = [
   {
     type: "route",
     name: "Thống kê",
-    key: "dashboard",
+    key: "Thống kê",
     route: "/dashboard",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-tv-2" />,
     component: <Dashboard />,

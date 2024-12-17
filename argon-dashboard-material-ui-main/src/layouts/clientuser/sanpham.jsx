@@ -16,6 +16,8 @@ function FeaturedProducts() {
     const itemsPerPage = 8; // Define items per page
     const [loading, setLoading] = useState(true);
     const [reviews, setReviews] = useState([]);
+    
+    
     useEffect(() => {
         const fetchProducts = async () => {
             try {
