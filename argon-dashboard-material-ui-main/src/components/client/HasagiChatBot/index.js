@@ -63,7 +63,7 @@ function Gemini() {
         privacyPolicy: "Cam kết bảo mật thông tin cá nhân khách hàng.",
         contact: {
             email: "hasagifashion@gmail.com",
-            phone: "0917465863",
+            phone: "0398 948675",
             address: "49 Đ. 3 Tháng 2, Xuân Khánh, Ninh Kiều, Cần Thơ, VietNam"
         }
     };

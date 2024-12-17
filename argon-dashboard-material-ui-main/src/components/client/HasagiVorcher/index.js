@@ -256,22 +256,21 @@ const VoucherList = () => {
     }
     return (
         <>
-
-            <div style={{ position: "relative" }}>
-                <Slider {...sliderSettings} className="pb-3 pt-4">
-                    {availableVouchers.length === 0 ? (
-                        <></>
-                    ) : (
-                        availableVouchers.map(voucher => (
-                            <div key={voucher.id}>
-                                <Voucher voucher={voucher} />
-
-                            </div>
-                        ))
-                    )}
-                </Slider>
-            </div>
-
+            <a href="/Shop">
+                <div style={{ position: "relative" }}>
+                    <Slider {...sliderSettings} className="pb-3 pt-4">
+                        {availableVouchers.length === 0 ? (
+                            <></>
+                        ) : (
+                            availableVouchers.map(voucher => (
+                                <div key={voucher.id}>
+                                    <Voucher voucher={voucher} />
+                                </div>
+                            ))
+                        )}
+                    </Slider>
+                </div>
+            </a>
         </>
     );
 };

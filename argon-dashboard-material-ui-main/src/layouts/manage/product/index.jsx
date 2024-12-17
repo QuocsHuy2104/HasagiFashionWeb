@@ -403,8 +403,6 @@ function Product() {
                                             </div>
                                         </div>
 
-
-
                                         <div style={{ display: 'flex', fontWeight: 'bold', marginBottom: '15px', flexDirection: 'column' }}>
                                             <p style={{ marginBottom: '10px', fontSize: '14px', color: '#333' }}>Chọn video sản phẩm</p>
                                             <div style={{ marginLeft: '1px' }}>

@@ -118,7 +118,7 @@ function Size() {
             cancelButtonColor: '#3085d6',
             confirmButtonText: 'Đồng ý',
             cancelButtonText: 'Đóng',
-            backdrop: 'rgba(0, 0, 0, 0)', // Backdrop cho hộp xác nhận
+            backdrop: 'rgba(0, 0, 0, 0)', 
         });
 
         if (result.isConfirmed) {
@@ -126,7 +126,7 @@ function Size() {
 
             for (const id of selectedRows) {
                 try {
-                    await sizesService.deletesize(id);
+                    await SizesService.deleteSize(id);
                 } catch (error) {
                     hasError = true;
                     console.error(`Error deleting size with ID ${id}`, error);

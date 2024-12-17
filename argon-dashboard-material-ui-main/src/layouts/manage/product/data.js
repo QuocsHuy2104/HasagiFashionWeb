@@ -7,10 +7,9 @@ import ArgonAvatar from "components/ArgonAvatar";
 import ArgonBadge from "components/ArgonBadge";
 import Switch from '@mui/material/Switch';
 import { toast } from "react-toastify";
-
 import ProductService from "services/ProductServices";
 
-function Product({ image, video, name, importprice }) {
+function Product({ image, video, name, importprice, sale }) {
     return (
         <ArgonBox display="flex" alignItems="center" px={1} py={0.5}>
             {image && (
@@ -26,6 +25,16 @@ function Product({ image, video, name, importprice }) {
                 </ArgonBox>
             )}
             <ArgonBox display="flex" flexDirection="column">
+                {/* Chỉ hiển thị giảm giá khi sale > 0 */}
+                {sale && (
+                    <ArgonTypography
+                        variant="button"
+                        style={{ color: "red" }} 
+                    >
+                        Giảm {sale}
+                    </ArgonTypography>
+                )}
+
                 <ArgonTypography variant="button" fontWeight="medium" color="textPrimary">
                     {name}
                 </ArgonTypography>
@@ -34,7 +43,6 @@ function Product({ image, video, name, importprice }) {
                 </ArgonTypography>
             </ArgonBox>
         </ArgonBox>
-
     );
 }
 
@@ -43,6 +51,7 @@ Product.propTypes = {
     image: PropTypes.string,
     video: PropTypes.string,
     importprice: PropTypes.number,
+    sale: PropTypes.number,
 };
 
 const ProductTable = ({ onEditClick, setSelectedProduct, searchKeyword, selectedCategory, selectedBrand }) => {
@@ -138,10 +147,12 @@ const ProductTable = ({ onEditClick, setSelectedProduct, searchKeyword, selected
             <Product
                 image={product.image ? product.image : null}
                 video={product.video ? product.video : null}
+                sale={product.sale ? `${product.sale}%` : null}
                 name={product.name || "Unknown Product"}
                 importprice={formatImportPrice(product.importPrice)}
             />
         ),
+
         SoLuong: (
             <ArgonTypography variant="caption" color="secondary" fontWeight="medium">
                 {product.importQuantity > 0 ? product.importQuantity || "N/A" : "0"}
