@@ -17,6 +17,7 @@ function Gemini() {
     const [hasGreeted, setHasGreeted] = useState(false);
     const chatContainerRef = useRef(null);
     const [isVoiceInput, setIsVoiceInput] = useState(false);
+    const chatEndRef = useRef(null);
 
     useEffect(() => {
         if (isChatOpen && !hasGreeted) {
@@ -213,6 +214,16 @@ function Gemini() {
             setIsVoiceInput(false);
         }
     }, [question, isVoiceInput]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 0); 
+
+        return () => clearTimeout(timer);
+    }, [chatHistory]); 
+
+
     const convertTextToLinks = (text) => {
         const urlPattern = /https?:\/\/[^\s]+/g;
         return text.replace(urlPattern, (url) => `<a href="${url}" target="_blank" style="color: #1e90ff; text-decoration: none;">${url}</a>`);
@@ -333,12 +344,13 @@ function Gemini() {
                         scrollBehavior: 'smooth',
                     }}>
                         {chatHistory.map((msg, index) => (
-                            <div key={index} style={{
+                            <div key={index} ref={chatEndRef} style={{
                                 textAlign: msg.type === 'user' ? 'right' : 'left',
                                 marginBottom: '15px',
                                 display: 'flex',
                                 alignItems: 'flex-start',
                                 justifyContent: msg.type === 'user' ? 'flex-end' : 'flex-start',
+
                             }}>
                                 {msg.type !== 'user' && (
                                     <Avatar
