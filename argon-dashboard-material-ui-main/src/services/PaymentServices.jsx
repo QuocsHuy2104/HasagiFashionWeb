@@ -12,15 +12,14 @@ const PaymentService = {
     },
     PaySuccess: async (params) => {
         try {
-            const response = await apiClient.get("payment/OrderSummary", {
-                params: params // Đảm bảo tham số được truyền vào đúng
-            });
+            const response = await apiClient.post("payment/OrderSummary", params); // Sử dụng POST và truyền params qua body
             return response.data;
         } catch (error) {
             console.error('Error in PaySuccess:', error);
-            throw error;
+            throw error; 
         }
     }
+
 
 };
 

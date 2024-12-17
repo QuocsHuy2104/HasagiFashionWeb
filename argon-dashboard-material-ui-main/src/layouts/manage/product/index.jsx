@@ -62,7 +62,7 @@ function Product() {
 
     const fetchCategories = async () => {
         try {
-            const response = await CategoryService.getAllCategories();
+            const response = await CategoriesService.getAllCategories();
             setCategories(response.data || []);
         } catch (error) {
             console.error("Error fetching categories:", error);
@@ -73,7 +73,6 @@ function Product() {
         try {
             const response = await BrandService.getAllBrands();
             setBrands(response.data || []);
-            console.error("Error fetching brands:", error);
         } catch (error) {
             console.error("Error fetching brand:", error);
         }
@@ -118,9 +117,6 @@ function Product() {
             }
         }
     };
-
-
-
 
     const handleRemoveImage = () => {
         setFormData((prevData) => ({
