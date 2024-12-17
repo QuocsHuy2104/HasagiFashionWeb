@@ -12,13 +12,6 @@ const History = () => {
   const [activeItem, setActiveItem] = useState("Đơn Mua");
   const [expandedItem, setExpandedItem] = useState(null);
 
-  useEffect(() => {
-    window.history.pushState(null, "", window.location.href);
-    window.onpopstate = () => {
-      window.history.pushState(null, "", window.location.href);
-    };
-  }, []);
-
   const menuItems = [
     { name: "Tài Khoản Của Tôi", hasSubItems: true },
     { name: "Đơn Mua" },
@@ -36,18 +29,6 @@ const History = () => {
     "Địa Chỉ": "address",
     "Đổi Mật Khẩu": "change-password",
 }; 
-
-const updateURL = (item) => {
-  const englishURL = urlMapping[item] || item.toLowerCase().replace(/\s/g, '-');
-  const newURL = `/user/${englishURL}`;
-  window.history.pushState(null, '', newURL);
-};
-
-useEffect(() => {
-    if (activeItem) {
-        updateURL(activeItem);
-    }
-}, [activeItem]);
 
   const handleEditProfileClick = () => {
     setExpandedItem("Tài Khoản Của Tôi");

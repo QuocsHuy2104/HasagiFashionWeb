@@ -201,6 +201,7 @@ function Review() {
                         >
                             {/* Lọc theo số sao */}
                             <ArgonBox width="22%">
+                            <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Số sao</p>
                                 <select
                                     style={{
                                         padding: "12px 16px",
@@ -215,7 +216,6 @@ function Review() {
                                     value={filterStar}
                                     onChange={(e) => setFilterStar(e.target.value)}
                                 >
-                                    <option value="">Chọn số sao</option>
                                     <option value="">Tất cả</option>
                                     {[1, 2, 3, 4, 5].map(star => (
                                         <option key={star} value={star}>
@@ -227,6 +227,7 @@ function Review() {
 
                             {/* Lọc theo trạng thái */}
                             <ArgonBox width="22%">
+                            <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Trạng thái</p>
                                 <select
                                     style={{
                                         padding: "12px 16px",
@@ -241,7 +242,6 @@ function Review() {
                                     value={filterStatus}
                                     onChange={(e) => setFilterStatus(e.target.value)}
                                 >
-                                    <option value="">Trạng thái</option>
                                     <option value="">Tất cả</option>
                                     <option value="Đã phản hồi">Đã phản hồi</option>
                                     <option value="Chưa phản hồi">Chưa phản hồi</option>
@@ -250,6 +250,7 @@ function Review() {
 
                             {/* Lọc theo ngày bắt đầu */}
                             <ArgonBox width="22%">
+                            <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Từ ngày</p>
                                 <ArgonInput
                                     type="date"
                                     placeholder="Ngày bắt đầu"
@@ -262,6 +263,7 @@ function Review() {
 
                             {/* Lọc theo ngày kết thúc */}
                             <ArgonBox width="22%">
+                            <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Đến ngày</p>
                                 <ArgonInput
                                     type="date"
                                     placeholder="Ngày kết thúc"
@@ -367,10 +369,9 @@ function Review() {
                                                     alt="Review"
                                                     style={{
                                                         width: '120px',
-                                                        height: '120px',
+                                                        height: '150px',
                                                         borderRadius: '3px',
                                                         cursor: 'pointer',
-                                                        objectFit: 'cover',
                                                     }}
                                                     onClick={() => handleOpen(file.imageUrl)}
                                                 />

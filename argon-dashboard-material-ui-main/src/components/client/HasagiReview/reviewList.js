@@ -285,10 +285,9 @@ const ReviewList = () => {
                                                                     alt="Review"
                                                                     style={{
                                                                         width: '130px',
-                                                                        height: '130px',
+                                                                        height: '150px',
                                                                         borderRadius: '3px',
                                                                         cursor: 'pointer',
-                                                                        objectFit: 'cover',
                                                                     }}
                                                                     onClick={() => handleOpen(file.imageUrl)}
                                                                 />
@@ -341,8 +340,9 @@ const ReviewList = () => {
                                                 top: '50%',
                                                 left: '50%',
                                                 transform: 'translate(-50%, -50%)',
-                                                borderRadius: '5px',
                                                 boxShadow: 24,
+                                                width: '60%',
+                                                maxWidth: '500px',
                                             }}>
                                                 {mediaUrl && mediaUrl.includes('firebasestorage.googleapis.com') ? (
                                                     mediaUrl.includes('.mp4') ? (
@@ -350,7 +350,7 @@ const ReviewList = () => {
                                                             <source src={mediaUrl} type="video/mp4" />
                                                         </video>
                                                     ) : (
-                                                        <img src={mediaUrl} alt="Review Media" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                                        <img src={mediaUrl} alt="Review Media" style={{ width: '100%', height: 'auto', objectFit: 'contain' }} />
                                                     )
                                                 ) : (
                                                     <p>No media available</p>

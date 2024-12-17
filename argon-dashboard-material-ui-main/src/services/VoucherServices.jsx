@@ -1,3 +1,4 @@
+
 import apiClient from "config/axiosConfig";
 
 const VoucherService = {
@@ -19,6 +20,8 @@ const VoucherService = {
     getUsedVouchersByAccount: (accountId) => apiClient.get(`/admin/coupon/${accountId}/used-vouchers`),
 
     getAllVouchersUS: () => apiClient.get("/user/coupon"),
+
+    getUnusedVouchersByAccountUS: () => apiClient.get(`/user/coupon/unused-vouchers`),
 };
 
 export default VoucherService;

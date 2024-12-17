@@ -9,7 +9,9 @@ import ArgonTypography from "../../../components/ArgonTypography";
 import DataTable from "./data";
 import Footer from "../../../examples/Footer";
 import SizesService from "../../../services/SizeServices";
-import { toast } from "react-toastify";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Swal from 'sweetalert2';
 
 function Size() {
     const [formData, setFormData] = useState({
@@ -46,14 +48,15 @@ function Size() {
     const validateForm = () => {
         let isValid = true;
         const newErrors = { name: false };
-
         if (!formData.name.trim()) {
-            newErrors.name = "Size name is required.";
+            newErrors.name = true;
+            toast.warn("Vui lòng nhập tên kích cỡ!!!");
             isValid = false;
         } else if (isSizeNameDuplicate(formData.name)) {
             newErrors.name = true;
-            toast.warn("Tên size đã tồn tại!!!");
+            toast.warn("Tên kích cỡ đã tồn tại!!!");
         }
+
 
         setErrors(newErrors);
         return isValid;
@@ -93,36 +96,68 @@ function Size() {
     const resetForm = () => {
         setFormData({
             id: "",
-            name: "",  // Thay đổi 'size' thành 'name'
+            name: "",
         });
-        setErrors({ name: false });  // Thay đổi 'size' thành 'name'
+        setErrors({ name: false });
     };
 
     const handleEditClick = (size) => {
-        setFormData({
-            id: size.id,
-            name: size.name,  // Thay đổi 'size' thành 'name'
-        });
+        setFormData(size);
+        setErrors({});
     };
 
-    // Handle deletion of selected rows
     const handleDeleteClick = async (selectedRows) => {
         if (selectedRows.length === 0) return;
 
-        for (const id of selectedRows) {
-            try {
-                await SizesService.deleteSize(id);
-                toast.success(`Size with ID ${id} deleted successfully`);
-            } catch (error) {
-                console.error(`Error deleting size with ID ${id}`, error);
-                toast.error(`Error deleting size with ID ${id}`);
+        const result = await Swal.fire({
+            title: 'Bạn có chắc chắn?',
+            text: `Muốn xóa ${selectedRows.length} kích cỡ này không!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Đóng',
+            backdrop: 'rgba(0, 0, 0, 0)', // Backdrop cho hộp xác nhận
+        });
+
+        if (result.isConfirmed) {
+            let hasError = false;
+
+            for (const id of selectedRows) {
+                try {
+                    await sizesService.deletesize(id);
+                } catch (error) {
+                    hasError = true;
+                    console.error(`Error deleting size with ID ${id}`, error);
+                }
+            }
+
+            fetchData(); // Tải lại dữ liệu sau khi hoàn tất
+
+            // Hiển thị thông báo tổng kết với backdrop
+            if (hasError) {
+                Swal.fire({
+                    title: 'Xóa thất bại!',
+                    text: 'Không thể xóa kích cỡ này!!!',
+                    icon: 'info',
+                    backdrop: 'rgba(0, 0, 0, 0)',
+                });
+            } else {
+                Swal.fire({
+                    title: 'Xóa thành công!',
+                    text: 'Đã xóa kích cỡ thành công',
+                    icon: 'success',
+                    backdrop: 'rgba(0, 0, 0, 0)',
+                });
             }
         }
-        fetchData(); // Refresh data after deletion
     };
+
 
     return (
         <DashboardLayout>
+            <ToastContainer />
             <DashboardNavbar />
             <ArgonBox py={3}>
                 <ArgonBox mb={3}>
@@ -138,9 +173,10 @@ function Size() {
                         >
                             <ArgonBox mx={3}>
                                 <ArgonBox mb={3} position="relative">
+                                    <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', size: '#333' }}>Tên kích cỡ</p>
                                     <ArgonInput
                                         type="text"
-                                        placeholder="Nhập size"
+                                        placeholder="Nhập tên kích cỡ"
                                         size="large"
                                         name="name"
                                         fullWidth
@@ -148,15 +184,14 @@ function Size() {
                                         onChange={handleChange}
                                         error={!!errors.name}
                                     />
-                                    {errors.name && (
-                                        <ArgonTypography variant="caption" color="error">
-                                            {errors.name}
-                                        </ArgonTypography>
-                                    )}
                                 </ArgonBox>
 
                                 <ArgonBox mb={3}>
-                                    <ArgonButton type="submit" size="large" color="info" fullWidth={true}>
+                                    <ArgonButton
+                                        type="submit"
+                                        size="large"
+                                        color="info"
+                                        sx={{ minWidth: 100, padding: '8px 16px' }}>
                                         {formData.id ? "Cập nhật" : "Thêm"}
                                     </ArgonButton>
                                 </ArgonBox>

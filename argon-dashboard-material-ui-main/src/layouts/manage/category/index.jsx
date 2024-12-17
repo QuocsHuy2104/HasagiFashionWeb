@@ -14,6 +14,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { storage } from "../../../config/firebase-config";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import Swal from 'sweetalert2';
 
 
 function Category() {
@@ -60,18 +61,26 @@ function Category() {
     if (!formData.name.trim()) {
       newErrors.name = true;
       toast.warn("Vui lòng nhập tên Danh mục!!!");
+    } else if (
+      categories.some(
+        (category) =>
+          category.name.trim().toLowerCase() === formData.name.trim().toLowerCase() &&
+          category.id !== formData.id
+      )
+    ) {
+      newErrors.name = true;
+      toast.error("Tên tDanh mục đã tồn tại. Vui lòng nhập tên khác!");
     }
+
     if (!formData.image) {
       newErrors.image = true;
       toast.warn("Vui lòng chọn ảnh Danh mục!!!");
     }
 
     setErrors(newErrors);
-    console.log("Form errors: ", newErrors);
 
     return !newErrors.name && !newErrors.image;
   };
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -172,15 +181,57 @@ function Category() {
   const handleDeleteClick = async (selectedRows) => {
     if (selectedRows.length === 0) return;
 
-    for (const id of selectedRows) {
-      try {
-        await CategoryService.deleteCategory(id);
-      } catch (error) {
-        console.error(`${id}`, error);
+    // Hiển thị thông báo xác nhận trước khi xóa
+    const result = await Swal.fire({
+      title: 'Bạn có chắc chắn?',
+      text: `Bạn muốn xóa ${selectedRows.length} danh mục này!`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Đồng ý',
+      cancelButtonText: 'Đóng',
+      backdrop: 'rgba(0, 0, 0, 0)', // Backdrop cho hộp xác nhận
+
+    });
+
+    if (result.isConfirmed) {
+      let hasError = false;
+
+      // Xóa từng danh mục đã chọn
+      for (const id of selectedRows) {
+        try {
+          await CategoryService.deleteCategory(id);
+        } catch (error) {
+          hasError = true;
+          console.error(`Error deleting category with ID ${id}`, error);
+        }
+      }
+
+      fetchData(); // Tải lại dữ liệu sau khi hoàn tất
+
+      // Hiển thị thông báo tổng kết với backdrop
+      if (hasError) {
+        Swal.fire({
+          title: 'Xóa thất bại!',
+          text: 'Không thể xóa danh mục này!',
+          icon: 'info',
+          backdrop: 'rgba(0, 0, 0, 0)', // Backdrop cho thông báo thất bại
+        });
+        resetForm();
+      } else {
+        Swal.fire({
+          title: 'Xóa thành công!',
+          text: `Danh mục đã được xóa thành công.`,
+          icon: 'success',
+          backdrop: 'rgba(0, 0, 0, 0)', // Backdrop cho thông báo thành công
+        });
+        resetForm();
       }
     }
-    fetchData();
   };
+
+
 
   return (
     <DashboardLayout>
@@ -202,6 +253,7 @@ function Category() {
               role="form"
               onSubmit={handleSubmit}
             >
+              {/* Box chứa ảnh */}
               <ArgonBox
                 mb={3}
                 mx={3}
@@ -214,12 +266,16 @@ function Category() {
                   display="flex"
                   justifyContent="center"
                   alignItems="center"
-                  width={{ xs: "100%", md: 300 }} // Responsive width for image box
+                  width={{ xs: "100%", md: 300 }}
                   height={300}
                   borderRadius="12px"
                   boxShadow="0 0 15px rgba(0,0,0,0.1)"
                   overflow="hidden"
                   mb={2}
+                  sx={{
+                    border: errors.image ? "0.5px solid red" : "2px solid transparent",
+                    transition: "border 0.3s",
+                  }}
                 >
                   <Image
                     src={
@@ -251,28 +307,39 @@ function Category() {
                 </ArgonButton>
               </ArgonBox>
 
+              {/* Box chứa input */}
               <ArgonBox
-                width={{ xs: "100%" }} // Responsive width for input box
+                width={{ xs: "100%" }}
                 display="flex"
                 flexDirection="column"
               >
                 <ArgonBox mb={3}>
                   <ArgonBox>
+                    <p
+                      style={{
+                        marginBottom: "8px",
+                        fontWeight: "bold",
+                        fontSize: "14px",
+                        color: "#333",
+                      }}
+                    >
+                      Tên danh mục
+                    </p>
                     <ArgonInput
                       type="text"
-                      placeholder="Tên Danh mục"
+                      placeholder="Nhập tên Danh mục"
                       size="large"
                       fullWidth
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
+                      sx={{
+                        border: errors.name ? "0.5px solid red" : "0.5px solid #ccc",
+                        borderRadius: "8px",
+                        transition: "border 0.3s",
+                      }}
                     />
                   </ArgonBox>
-                  {errors.name && (
-                    <ArgonTypography variant="caption" color="error">
-                      {errors.name}
-                    </ArgonTypography>
-                  )}
                 </ArgonBox>
 
                 <ArgonBox mb={3} width={720} display="flex" gap={1} justifyContent="flex-start">
@@ -280,23 +347,23 @@ function Category() {
                     type="submit"
                     size="large"
                     color="info"
-                    sx={{ minWidth: 100, padding: '8px 16px' }}
+                    sx={{ minWidth: 100, padding: "8px 16px" }}
                   >
                     {formData.id ? "Cập nhật" : "Thêm"}
                   </ArgonButton>
                   <ArgonButton
                     size="large"
                     color="primary"
-                    sx={{ minWidth: 100, padding: '8px 16px' }}
+                    sx={{ minWidth: 100, padding: "8px 16px" }}
                     onClick={resetForm}
                   >
                     Làm mới
                   </ArgonButton>
                 </ArgonBox>
-
               </ArgonBox>
             </ArgonBox>
           </Card>
+
         </ArgonBox>
       </ArgonBox>
 

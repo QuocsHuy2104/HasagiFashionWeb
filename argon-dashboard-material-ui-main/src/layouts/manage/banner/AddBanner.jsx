@@ -17,10 +17,12 @@ const AddBanner = ({ id, setBannerId }) => {
     const [images, setImages] = useState([]);
     const [previewUrls, setPreviewUrls] = useState([]);
     const [message, setMessage] = useState({ error: false, msg: "" });
+    const [isTouched, setIsTouched] = useState(false); // Trạng thái lưu khi người dùng đã bấm nút "Thêm"
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage({ error: false, msg: "" });
+        setIsTouched(true); // Đánh dấu là đã bấm nút "Thêm"
 
         if (title === "" || (images.length === 0 && previewUrls.length === 0)) {
             toast.warn("Vui lòng nhập đầy đủ thông tin!!!");
@@ -65,8 +67,6 @@ const AddBanner = ({ id, setBannerId }) => {
         }
     };
 
-
-
     const editHandler = useCallback(async () => {
         setMessage("");
         try {
@@ -81,13 +81,11 @@ const AddBanner = ({ id, setBannerId }) => {
         }
     }, [id]);
 
-
     useEffect(() => {
         if (id !== undefined && id !== "") {
             editHandler();
         }
     }, [id, editHandler]);
-
 
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
@@ -95,7 +93,6 @@ const AddBanner = ({ id, setBannerId }) => {
         const newPreviewUrls = files.map(file => URL.createObjectURL(file));
         setPreviewUrls(prevUrls => [...prevUrls, ...newPreviewUrls]);
     };
-
 
     const handleRemoveImage = async (index) => {
         try {
@@ -123,6 +120,7 @@ const AddBanner = ({ id, setBannerId }) => {
             setMessage({ error: true, msg: `Lỗi khi xóa ảnh: ${err.message}` });
         }
     };
+
     return (
         <div
             style={{
@@ -152,7 +150,9 @@ const AddBanner = ({ id, setBannerId }) => {
                 }}
             >
                 <ArgonBox className="mb-4">
-                    <Form.Label style={{ fontWeight: "bold", color: "#495057", fontSize: "1.2rem", width: "70px" }}>
+                    <Form.Label
+                        style={{ fontWeight: "bold", color: "#495057", fontSize: "1.2rem", width: "70px" }}
+                    >
                         Tiêu đề
                     </Form.Label>
                     <ArgonInput
@@ -162,7 +162,7 @@ const AddBanner = ({ id, setBannerId }) => {
                         onChange={(e) => setTitle(e.target.value)}
                         style={{
                             borderRadius: "8px",
-                            border: "1px solid #ced4da",
+                            border: isTouched && title === "" ? "1px solid red" : "1px solid #ced4da", // Viền đỏ nếu trường trống và đã bấm nút
                             padding: "1rem",
                             fontSize: "1rem",
                             backgroundColor: "#fff",
@@ -172,7 +172,9 @@ const AddBanner = ({ id, setBannerId }) => {
                 </ArgonBox>
 
                 <Form.Group className="mb-4">
-                    <Form.Label style={{ fontWeight: "bold", color: "#495057", fontSize: "1.2rem", width: "100px" }}>
+                    <Form.Label
+                        style={{ fontWeight: "bold", color: "#495057", fontSize: "1.2rem", width: "100px" }}
+                    >
                         Thêm ảnh
                     </Form.Label>
                     <div style={{ display: "flex", alignItems: "center" }}>
@@ -189,7 +191,7 @@ const AddBanner = ({ id, setBannerId }) => {
                                 padding: "0",
                                 marginRight: "1rem",
                                 backgroundColor: "#fff",
-                                border: "2px dashed #6c757d",
+                                border: isTouched && (images.length === 0 && previewUrls.length === 0) ? "2px dashed red" : "2px dashed #6c757d", // Viền đỏ nếu không có ảnh và đã bấm nút
                                 transition: "transform 0.2s",
                             }}
                             onClick={() => document.getElementById("fileInput").click()}
@@ -291,14 +293,13 @@ const AddBanner = ({ id, setBannerId }) => {
                     </ArgonButton>
                 </ArgonBox>
             </Form>
-
         </div>
     );
 };
 
 AddBanner.propTypes = {
     id: PropTypes.string,
-    setBannerId: PropTypes.func.isRequired,
+    setBannerId: PropTypes.func,
 };
 
 export default AddBanner;

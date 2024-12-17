@@ -216,9 +216,10 @@ function Account() {
                 <ArgonBox mb={3} mx={3}>
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
+                    <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Tên đăng nhập</p>
                       <ArgonInput
                         type="text"
-                        placeholder="Tên đăng nhập"
+                        placeholder=" Nhập ttên đăng nhập"
                         name="username"
                         size="large"
                         value={formData.username}
@@ -227,9 +228,10 @@ function Account() {
                       />
                     </Grid>
                     <Grid item xs={12} md={6}>
+                    <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Họ và tên</p>
                       <ArgonInput
                         type="text"
-                        placeholder="Họ và Tên"
+                        placeholder="Nhập và Tên"
                         name="fullName"
                         size="large"
                         value={formData.fullName}
@@ -244,9 +246,10 @@ function Account() {
                 <ArgonBox mb={3} mx={3}>
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
+                    <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>EmailEmail</p>
                       <ArgonInput
                         type="email"
-                        placeholder="Email"
+                        placeholder="Nhập Email"
                         name="email"
                         size="large"
                         value={formData.email}
@@ -255,9 +258,10 @@ function Account() {
                       />
                     </Grid>
                     <Grid item xs={12} md={6}>
+                    <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Thường trú</p>
                       <ArgonInput
                         type="text"
-                        placeholder="Thường Trú"
+                        placeholder="Nhập địa chỉ thườngường trú"
                         name="tabernacle"
                         size="large"
                         value={formData.tabernacle}
@@ -269,9 +273,10 @@ function Account() {
                 </ArgonBox>
 
                 <ArgonBox mb={3} mx={3}>
+                <p style={{ marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>Số điện thoại</p>
                   <ArgonInput
                     type="text"
-                    placeholder="Số điện thoại"
+                    placeholder="Nhập số điện thoại"
                     name="numberPhone"
                     size="large"
                     value={formData.numberPhone}

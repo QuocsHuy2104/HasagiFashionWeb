@@ -15,12 +15,6 @@ const useCartQuantity = () => {
 
     useEffect(() => {
         fetchTotalQuantity();
-        const intervalId = setInterval(() => {
-            fetchTotalQuantity();
-        }, 3000);
-        return () => {
-            clearInterval(intervalId);
-        };
     }, []);
 
     return { totalQuantity, fetchTotalQuantity };

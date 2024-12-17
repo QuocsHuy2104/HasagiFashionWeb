@@ -352,7 +352,7 @@ const HistoryOrderDetail = () => {
                     <Box
                       display="flex"
                       alignItems="center"
-                      style={{ marginBottom: "25px", marginTop: "-15px" }}
+                      style={{ marginBottom: "25px" }}
                       key={index}
                     >
                       {matchingImage && (
@@ -401,8 +401,6 @@ const HistoryOrderDetail = () => {
                 <section
                   style={{
                     borderTop: "2px dashed rgba(128, 128, 128, 0.4)",
-                    margin: "10px 0",
-                    marginTop: "-10px",
                   }}
                 />
                 {status !== "Đã hủy" && (

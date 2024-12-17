@@ -35,6 +35,7 @@ const HomeService = {
     buyQuickly: id => apiClient.post(`/web/small-cart/buy-quickly/${id}`)
 
 
+
 }
 
 export default HomeService;
